@@ -71,7 +71,7 @@ export function DashboardCharts({ pieData, lineData }: DashboardChartsProps) {
           </CardDescription>
         </CardHeader>
         <CardContent className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
             <AreaChart
               data={lineData}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -125,7 +125,7 @@ export function DashboardCharts({ pieData, lineData }: DashboardChartsProps) {
           ) : (
             <>
               <div className="h-[220px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <PieChart>
                     <Pie
                       data={pieData}
