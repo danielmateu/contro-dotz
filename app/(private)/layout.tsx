@@ -74,10 +74,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     ? (membership.households as any).name
     : null
 
-  // Redirigir si no tiene hogar y no está en la página de hogar
-  if (!hasHousehold && pathname !== '/household') {
-    redirect('/household')
-  }
+
 
   // Menú de navegación lateral
   const navItems = [

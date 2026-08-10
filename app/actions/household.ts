@@ -24,6 +24,7 @@ export async function createHouseholdAction(prevState: any, formData: FormData) 
   })
 
   if (error) {
+    console.error('DATABASE ERROR:', error)
     return { error: 'Error al crear el hogar. Por favor, inténtalo de nuevo.' }
   }
 
