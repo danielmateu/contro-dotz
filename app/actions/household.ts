@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { householdSchema, inviteSchema } from '@/lib/validations'
+import { sendInvitationEmail } from '@/lib/mail'
 
 /**
  * Crea un nuevo hogar y asocia al usuario como creador (owner)
@@ -74,6 +75,38 @@ export async function inviteUserAction(
     return {
       error:
         'Error al enviar la invitación. Asegúrate de tener permisos de propietario (owner) y que el hogar sea válido.',
+    }
+  }
+
+  // Cargar datos adicionales para el email (hogar e invitador)
+  const { data: household } = await supabase
+    .from('households')
+    .select('name')
+    .eq('id', householdId)
+    .single()
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('display_name, email')
+    .eq('id', user.id)
+    .single()
+
+  // Disparar correo de invitación con Resend si hay API Key configurada
+  if (process.env.RESEND_API_KEY) {
+    const householdName = household?.name || 'Control Dotz'
+    const inviterName =
+      profile?.display_name ||
+      profile?.email ||
+      user.email ||
+      'Un miembro de tu familia'
+    try {
+      await sendInvitationEmail(
+        email.toLowerCase().trim(),
+        householdName,
+        inviterName
+      )
+    } catch (mailError) {
+      console.error('Error al enviar email por Resend:', mailError)
     }
   }
 
