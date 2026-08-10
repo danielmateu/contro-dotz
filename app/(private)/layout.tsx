@@ -122,7 +122,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
       <Sidebar variant="sidebar" collapsible="icon">
         <SidebarHeader className="border-b border-sidebar-border/50 py-4 px-4">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <div className="flex items-center justify-center rounded-lg text-primary-foreground">
               <Home className="h-4 w-4" />
             </div>
             <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
