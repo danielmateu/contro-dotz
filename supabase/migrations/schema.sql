@@ -345,7 +345,7 @@ create policy "Los creadores y destinatarios pueden leer las invitaciones"
   on public.invitations for select
   using (
     invited_by = auth.uid() 
-    or email = (select email from public.profiles where id = auth.uid())
+    or lower(email) = (select lower(email) from public.profiles where id = auth.uid())
   );
 
 create policy "Los propietarios pueden crear invitaciones"
@@ -364,7 +364,7 @@ create policy "Los propietarios pueden cancelar invitaciones, y los destinatario
       select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
     )
     or (
-      email = (select email from public.profiles where id = auth.uid())
+      lower(email) = (select lower(email) from public.profiles where id = auth.uid())
       and status = 'pending'
     )
   );
