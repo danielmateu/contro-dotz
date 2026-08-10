@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { ExpenseFilters } from '@/components/expenses/expense-filters'
+import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { DeleteExpenseButton } from '@/components/expenses/delete-expense-button'
 import { formatCurrency, formatDate } from '@/lib/format'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -70,7 +71,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   let dbQuery = supabase
     .from('expenses')
     .select(
-      'id, amount, description, expense_date, payment_method, notes, created_by, categories(name, color, icon), profiles:created_by(display_name)'
+      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, categories(name, color, icon), profiles:created_by(display_name)'
     )
     .eq('household_id', membership.household_id)
 
@@ -118,13 +119,16 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
           </p>
         </div>
 
-        <Link
-          href="/expenses/new"
-          className={buttonVariants({ variant: 'default' })}
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Registrar Gasto
-        </Link>
+        <ExpenseDialog
+          householdId={membership.household_id}
+          categories={categories || []}
+          trigger={
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Registrar Gasto
+            </Button>
+          }
+        />
       </div>
 
       {/* Componente de Filtros */}
@@ -149,13 +153,16 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                 : 'Aún no se ha registrado ningún gasto en este hogar. ¡Empieza añadiendo tu primer gasto familiar!'}
             </p>
             {!startDate && !endDate && !categoryId && !memberId && (
-              <Link
-                href="/expenses/new"
-                className={buttonVariants({ variant: 'default', className: 'mt-6' })}
-              >
-                <Plus className="mr-2 h-4 w-4" />
-                Registrar primer gasto
-              </Link>
+              <ExpenseDialog
+                householdId={membership.household_id}
+                categories={categories || []}
+                trigger={
+                  <Button className="mt-6">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Registrar primer gasto
+                  </Button>
+                }
+              />
             )}
           </CardContent>
         </Card>
@@ -244,18 +251,28 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                     {/* Acciones */}
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-1">
-                        <Link
-                          href={`/expenses/${expense.id}/edit`}
-                          className={buttonVariants({
-                            variant: 'ghost',
-                            size: 'icon',
-                            className:
-                              'text-muted-foreground hover:text-primary hover:bg-primary/10 h-8 w-8',
-                          })}
-                          aria-label={`Editar gasto: ${expense.description}`}
-                        >
-                          <Edit2 className="h-4 w-4" />
-                        </Link>
+                        <ExpenseDialog
+                          categories={categories || []}
+                          expense={{
+                            id: expense.id,
+                            amount: Number(expense.amount),
+                            category_id: expense.category_id,
+                            description: expense.description,
+                            expense_date: expense.expense_date,
+                            payment_method: expense.payment_method,
+                            notes: expense.notes,
+                          }}
+                          trigger={
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-muted-foreground hover:text-primary hover:bg-primary/10 h-8 w-8"
+                              aria-label={`Editar gasto: ${expense.description}`}
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
                         <DeleteExpenseButton
                           expenseId={expense.id}
                           description={expense.description}

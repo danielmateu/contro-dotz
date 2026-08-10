@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
+import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { formatCurrency } from '@/lib/format'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -40,6 +41,13 @@ export default async function DashboardPage() {
     .maybeSingle()
 
   if (!membership) redirect('/household')
+
+  // Cargar categorías para el formulario de registro de gastos
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name')
+    .eq('household_id', membership.household_id)
+    .order('name')
 
   // Obtener fechas del mes actual y mes anterior
   const now = new Date()
@@ -205,13 +213,16 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/expenses/new"
-            className={buttonVariants({ variant: 'default' })}
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Registrar Gasto
-          </Link>
+          <ExpenseDialog
+            householdId={membership.household_id}
+            categories={categories || []}
+            trigger={
+              <Button>
+                <Plus className="mr-2 h-4 w-4" />
+                Registrar Gasto
+              </Button>
+            }
+          />
         </div>
       </div>
 
