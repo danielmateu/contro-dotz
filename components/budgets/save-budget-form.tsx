@@ -4,6 +4,13 @@ import { useActionState, useEffect, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Save } from 'lucide-react'
 
@@ -79,22 +86,18 @@ export function SaveBudgetForm({
           <Label htmlFor="category_id" className="text-xs">
             Categoría
           </Label>
-          <select
-            id="category_id"
-            name="category_id"
-            required
-            defaultValue=""
-            className="flex h-9 w-full rounded-md border border-input bg-muted/40 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <option value="" disabled>
-              -- Selecciona categoría --
-            </option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+          <Select name="category_id" defaultValue="">
+            <SelectTrigger id="category_id" className="w-full bg-muted/40 h-9">
+              <SelectValue placeholder="-- Selecciona categoría --" />
+            </SelectTrigger>
+            <SelectContent>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Límite Importe */}

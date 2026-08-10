@@ -5,6 +5,13 @@ import { inviteUserAction } from '@/app/actions/household'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle2, MailPlus } from 'lucide-react'
 
@@ -65,15 +72,15 @@ export function InviteMemberForm({ householdId }: InviteMemberFormProps) {
 
           <div className="space-y-1">
             <Label htmlFor="role">Rol familiar</Label>
-            <select
-              id="role"
-              name="role"
-              required
-              className="flex h-9 w-full rounded-md border border-input bg-muted/50 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              <option value="member">Miembro (member)</option>
-              <option value="owner">Propietario (owner)</option>
-            </select>
+            <Select name="role" defaultValue="member">
+              <SelectTrigger id="role" className="w-full bg-muted/50 h-9">
+                <SelectValue placeholder="-- Selecciona rol --" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="member">Miembro (member)</SelectItem>
+                <SelectItem value="owner">Propietario (owner)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 

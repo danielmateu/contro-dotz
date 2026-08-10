@@ -16,6 +16,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Check, Save } from 'lucide-react'
 import { PAYMENT_METHODS } from '@/lib/validations'
@@ -132,22 +139,18 @@ export function ExpenseDialog({
             {/* Categoría */}
             <div className="space-y-1">
               <Label htmlFor="category_id">Categoría</Label>
-              <select
-                id="category_id"
-                name="category_id"
-                required
-                defaultValue={expense?.category_id || ''}
-                className="flex h-9 w-full rounded-md border border-input bg-muted/50 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
-              >
-                <option value="" disabled>
-                  -- Selecciona una categoría --
-                </option>
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
-              </select>
+              <Select name="category_id" defaultValue={expense?.category_id || ''}>
+                <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
+                  <SelectValue placeholder="-- Selecciona una categoría --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Concepto / Descripción */}
@@ -180,19 +183,18 @@ export function ExpenseDialog({
             {/* Método de pago */}
             <div className="space-y-1">
               <Label htmlFor="payment_method">Método de pago</Label>
-              <select
-                id="payment_method"
-                name="payment_method"
-                required
-                defaultValue={expense?.payment_method || 'Tarjeta'}
-                className="flex h-9 w-full rounded-md border border-input bg-muted/50 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 text-foreground"
-              >
-                {PAYMENT_METHODS.map((method) => (
-                  <option key={method} value={method}>
-                    {method}
-                  </option>
-                ))}
-              </select>
+              <Select name="payment_method" defaultValue={expense?.payment_method || 'Tarjeta'}>
+                <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
+                  <SelectValue placeholder="-- Selecciona método de pago --" />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((method) => (
+                    <SelectItem key={method} value={method}>
+                      {method}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Notas */}
