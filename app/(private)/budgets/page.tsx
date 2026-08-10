@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SaveBudgetForm } from '@/components/budgets/save-budget-form'
+import { MonthSelector } from '@/components/budgets/month-selector'
 import { DeleteBudgetButton } from '@/components/budgets/delete-budget-button'
 import { formatCurrency } from '@/lib/format'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -105,16 +106,7 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
         </div>
 
         {/* Selector de mes interactivo */}
-        <form className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <input
-            type="month"
-            name="month"
-            defaultValue={month}
-            onChange={(e) => e.target.form?.submit()}
-            className="flex h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </form>
+        <MonthSelector defaultMonth={month} />
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
