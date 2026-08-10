@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signInAction } from '@/app/actions/auth'
@@ -23,6 +23,20 @@ const initialState = {
 }
 
 export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-svh flex items-center justify-center bg-slate-900 text-slate-400">
+          <div className="text-sm animate-pulse">Cargando...</div>
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
+  )
+}
+
+function LoginForm() {
   const [state, formAction, pending] = useActionState(signInAction, initialState)
   const searchParams = useSearchParams()
   const errorParam = searchParams.get('error')
