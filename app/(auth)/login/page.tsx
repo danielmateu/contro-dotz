@@ -142,7 +142,7 @@ function LoginForm() {
                   href="/register"
                   className="font-bold text-primary hover:underline"
                 >
-                  Regístrate ahora
+                  Regístrate ahora!
                 </Link>
               </div>
             </CardFooter>
