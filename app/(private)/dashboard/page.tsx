@@ -266,12 +266,12 @@ export default async function DashboardPage() {
   // Últimos 5 gastos del mes
   const latestExpenses = currentExpenses
     ? [...currentExpenses]
-        .sort(
-          (a, b) =>
-            new Date(b.expense_date).getTime() -
-            new Date(a.expense_date).getTime()
-        )
-        .slice(0, 5)
+      .sort(
+        (a, b) =>
+          new Date(b.expense_date).getTime() -
+          new Date(a.expense_date).getTime()
+      )
+      .slice(0, 5)
     : []
 
   return (
@@ -290,12 +290,6 @@ export default async function DashboardPage() {
           <ExpenseDialog
             householdId={membership.household_id}
             categories={categories || []}
-            trigger={
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Registrar Gasto
-              </Button>
-            }
           />
         </div>
       </div>
@@ -497,7 +491,7 @@ export default async function DashboardPage() {
                   const LucideIconComp = category?.icon
                     ? ((Icons as any)[category.icon] as LucideIcon)
                     : null
-                  
+
                   return (
                     <div
                       key={idx}

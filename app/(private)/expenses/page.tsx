@@ -120,12 +120,6 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         <ExpenseDialog
           householdId={membership.household_id}
           categories={categories || []}
-          trigger={
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Registrar Gasto
-            </Button>
-          }
         />
       </div>
 
@@ -154,12 +148,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
               <ExpenseDialog
                 householdId={membership.household_id}
                 categories={categories || []}
-                trigger={
-                  <Button className="mt-6">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Registrar primer gasto
-                  </Button>
-                }
+                className="mt-6"
               />
             )}
           </CardContent>

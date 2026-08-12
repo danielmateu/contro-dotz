@@ -35,6 +35,10 @@ import { __iconNode as ClockData } from 'lucide-react/dist/esm/icons/clock.mjs'
 import { __iconNode as CheckData } from 'lucide-react/dist/esm/icons/check.mjs'
 // @ts-ignore
 import { __iconNode as AlertCircleData } from 'lucide-react/dist/esm/icons/circle-alert.mjs'
+// @ts-ignore
+import { __iconNode as PlusData } from 'lucide-react/dist/esm/icons/plus.mjs'
+// @ts-ignore
+import { __iconNode as SaveData } from 'lucide-react/dist/esm/icons/save.mjs'
 import { PAYMENT_METHODS } from '@/lib/validations'
 
 interface Category {
@@ -54,7 +58,9 @@ interface ExpenseDialogProps {
     payment_method: string
     notes?: string | null
   } // Requerido para editar
-  trigger: React.ReactElement
+  trigger?: React.ReactElement
+  className?: string
+  size?: 'default' | 'sm' | 'lg' | 'icon'
 }
 
 type FormState = {
@@ -69,8 +75,12 @@ export function ExpenseDialog({
   categories,
   expense,
   trigger,
+  className,
+  size,
 }: ExpenseDialogProps) {
   const [open, setOpen] = useState(false)
+  const [triggerHovered, setTriggerHovered] = useState(false)
+  const [saveHovered, setSaveHovered] = useState(false)
 
   // Obtener fecha formateada por defecto en formato YYYY-MM-DD
   const defaultDate = expense?.expense_date
@@ -95,7 +105,8 @@ export function ExpenseDialog({
     ? updateExpenseAction.bind(null, expense.id)
     : createExpenseAction.bind(null, householdId!)
 
-  const [state, formAction, pending] = useActionState(action, initialState)
+  const [formState, setFormState] = useState<FormState>(initialState)
+  const [isSavingExpense, setIsSavingExpense] = useState(false)
 
   // Sincronizar estados cuando el modal se abre o cambia el gasto
   useEffect(() => {
@@ -108,18 +119,44 @@ export function ExpenseDialog({
       setNotes(expense?.notes || '')
       setScanError('')
       setScanSuccess(false)
+      setFormState({})
     }
   }, [open, expense, defaultDate])
 
   // Cerrar el modal cuando la acción se ejecuta con éxito
   useEffect(() => {
-    if (state?.success) {
+    if (formState?.success) {
       const timer = setTimeout(() => {
         setOpen(false)
       }, 500)
       return () => clearTimeout(timer)
     }
-  }, [state])
+  }, [formState])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    setIsSavingExpense(true)
+    const startTime = Date.now()
+
+    try {
+      // Llamar la acción de servidor pasándole el estado previo como requiere su firma
+      const res = await action(formState, formData)
+
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, 850 - elapsed)
+      if (remaining > 0) {
+        await new Promise((resolve) => setTimeout(resolve, remaining))
+      }
+
+      setFormState(res || {})
+    } catch (err) {
+      console.error('Error saving expense:', err)
+      setFormState({ error: 'Error al guardar el gasto. Inténtalo de nuevo.' })
+    } finally {
+      setIsSavingExpense(false)
+    }
+  }
 
   // Handler para subir e iniciar el análisis del ticket
   const handleReceiptScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,9 +220,25 @@ export function ExpenseDialog({
     reader.readAsDataURL(file)
   }
 
+  const defaultTriggerButton = (
+    <Button
+      size={size}
+      className={className}
+      onMouseEnter={() => setTriggerHovered(true)}
+      onMouseLeave={() => setTriggerHovered(false)}
+    >
+      <MorphIcon
+        icon={triggerHovered ? SparklesData : PlusData}
+        spring="snappy"
+        className="mr-2 h-4 w-4"
+      />
+      {expense ? 'Editar Gasto' : 'Registrar Gasto'}
+    </Button>
+  )
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={trigger} />
+      <DialogTrigger render={trigger || defaultTriggerButton} />
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -208,7 +261,7 @@ export function ExpenseDialog({
               className="hidden"
               id="receipt-upload"
               onChange={handleReceiptScan}
-              disabled={isScanning || pending}
+              disabled={isScanning || isSavingExpense}
             />
             <Button
               type="button"
@@ -221,7 +274,7 @@ export function ExpenseDialog({
                   : 'border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400'
               }`}
               onClick={() => document.getElementById('receipt-upload')?.click()}
-              disabled={isScanning || pending}
+              disabled={isScanning || isSavingExpense}
             >
               <MorphIcon
                 icon={isScanning ? ClockData : scanSuccess ? CheckData : scanError ? AlertCircleData : SparklesData}
@@ -253,21 +306,21 @@ export function ExpenseDialog({
           </div>
         )}
 
-        <form action={formAction}>
+        <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-2 text-left">
-            {state?.error && (
+            {formState?.error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Error de validación</AlertTitle>
-                <AlertDescription>{state.error}</AlertDescription>
+                <AlertDescription>{formState.error}</AlertDescription>
               </Alert>
             )}
 
-            {state?.success && (
+            {formState?.success && (
               <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                 <Check className="h-4 w-4 text-emerald-500" />
                 <AlertTitle>Éxito</AlertTitle>
-                <AlertDescription>{state.success}</AlertDescription>
+                <AlertDescription>{formState.success}</AlertDescription>
               </Alert>
             )}
 
@@ -384,10 +437,19 @@ export function ExpenseDialog({
           </div>
 
           <DialogFooter className="pt-4">
-            <DialogClose render={<Button variant="outline" type="button" disabled={isScanning || pending}>Cancelar</Button>} />
-            <Button type="submit" disabled={isScanning || pending}>
-              <Save className="mr-2 h-4 w-4" />
-              {pending ? 'Guardando...' : 'Guardar Gasto'}
+            <DialogClose render={<Button variant="outline" type="button" disabled={isScanning || isSavingExpense}>Cancelar</Button>} />
+            <Button
+              type="submit"
+              disabled={isScanning || isSavingExpense}
+              onMouseEnter={() => setSaveHovered(true)}
+              onMouseLeave={() => setSaveHovered(false)}
+            >
+              <MorphIcon
+                icon={isSavingExpense ? ClockData : saveHovered ? CheckData : SaveData}
+                spring="snappy"
+                className={`mr-2 h-4 w-4 ${isSavingExpense ? 'animate-spin' : ''}`}
+              />
+              {isSavingExpense ? 'Guardando...' : 'Guardar Gasto'}
             </Button>
           </DialogFooter>
         </form>
