@@ -143,12 +143,12 @@ export default async function HouseholdPage() {
                     >
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-foreground">
-                          {(inv.households as any).name}
+                          {(inv.households as any)?.name || 'Hogar Invitado'}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           Invitado por:{' '}
                           <span className="font-medium">
-                            {(inv.profiles as any).display_name}
+                            {(inv.profiles as any)?.display_name || 'Alguien'}
                           </span>
                         </p>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1">

@@ -233,20 +233,31 @@ alter table public.budgets enable row level security;
 alter table public.invitations enable row level security;
 
 -- Políticas para profiles
-create policy "Los usuarios pueden ver su propio perfil y perfiles del mismo hogar"
+create policy "Los usuarios pueden ver su propio perfil y perfiles relacionados"
   on public.profiles for select
-  using (id = auth.uid() or id in (
-    select user_id from public.household_members where household_id in (select public.get_user_households())
-  ));
+  using (
+    id = auth.uid() 
+    or id in (
+      select user_id from public.household_members where household_id in (select public.get_user_households())
+    )
+    or id in (
+      select invited_by from public.invitations where lower(email) = (select lower(email) from public.profiles where id = auth.uid())
+    )
+  );
 
 create policy "Los usuarios pueden actualizar su propio perfil"
   on public.profiles for update
   using (id = auth.uid());
 
 -- Políticas para households
-create policy "Los miembros pueden leer su hogar"
+create policy "Los miembros e invitados pueden leer su hogar"
   on public.households for select
-  using (id in (select public.get_user_households()));
+  using (
+    id in (select public.get_user_households())
+    or id in (
+      select household_id from public.invitations where lower(email) = (select lower(email) from public.profiles where id = auth.uid())
+    )
+  );
 
 create policy "Los propietarios pueden editar su hogar"
   on public.households for update
