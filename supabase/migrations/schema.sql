@@ -82,9 +82,10 @@ create table public.invitations (
   invited_by uuid references public.profiles on delete cascade not null,
   status text check (status in ('pending', 'accepted', 'rejected')) not null default 'pending',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
-  unique(household_id, email, status)
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+create unique index idx_invitations_household_email_pending on public.invitations (household_id, email) where status = 'pending';
 
 -- ==========================================
 -- ÍNDICES (Optimización de consultas)
@@ -147,6 +148,12 @@ create trigger on_auth_user_created
 create or replace function public.get_user_households()
 returns setof uuid as $$
   select household_id from public.household_members where user_id = auth.uid();
+$$ language sql security definer stable;
+
+-- Función para obtener los hogares de los cuales el usuario activo es propietario (owner)
+create or replace function public.get_user_owned_households()
+returns setof uuid as $$
+  select household_id from public.household_members where user_id = auth.uid() and role = 'owner';
 $$ language sql security definer stable;
 
 -- Función segura para crear un hogar y establecer la membresía del creador como owner en una sola transacción
@@ -241,7 +248,7 @@ create policy "Los usuarios pueden ver su propio perfil y perfiles relacionados"
       select user_id from public.household_members where household_id in (select public.get_user_households())
     )
     or id in (
-      select invited_by from public.invitations where lower(email) = (select lower(email) from public.profiles where id = auth.uid())
+      select invited_by from public.invitations where lower(email) = lower(auth.jwt()->>'email')
     )
   );
 
@@ -255,21 +262,17 @@ create policy "Los miembros e invitados pueden leer su hogar"
   using (
     id in (select public.get_user_households())
     or id in (
-      select household_id from public.invitations where lower(email) = (select lower(email) from public.profiles where id = auth.uid())
+      select household_id from public.invitations where lower(email) = lower(auth.jwt()->>'email')
     )
   );
 
 create policy "Los propietarios pueden editar su hogar"
   on public.households for update
-  using (id in (
-    select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-  ));
+  using (id in (select public.get_user_owned_households()));
 
 create policy "Los propietarios pueden eliminar su hogar"
   on public.households for delete
-  using (id in (
-    select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-  ));
+  using (id in (select public.get_user_owned_households()));
 
 -- Políticas para household_members
 create policy "Los miembros pueden leer la lista de miembros de su hogar"
@@ -278,22 +281,16 @@ create policy "Los miembros pueden leer la lista de miembros de su hogar"
 
 create policy "Los propietarios pueden añadir miembros al hogar"
   on public.household_members for insert
-  with check (household_id in (
-    select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-  ));
+  with check (household_id in (select public.get_user_owned_households()));
 
 create policy "Los propietarios pueden cambiar roles de miembros"
   on public.household_members for update
-  using (household_id in (
-    select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-  ));
+  using (household_id in (select public.get_user_owned_households()));
 
 create policy "Los propietarios pueden eliminar miembros, y los miembros pueden salir del hogar"
   on public.household_members for delete
   using (
-    household_id in (
-      select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-    ) or user_id = auth.uid()
+    household_id in (select public.get_user_owned_households()) or user_id = auth.uid()
   );
 
 -- Políticas para categories
@@ -356,34 +353,33 @@ create policy "Los creadores y destinatarios pueden leer las invitaciones"
   on public.invitations for select
   using (
     invited_by = auth.uid() 
-    or lower(email) = (select lower(email) from public.profiles where id = auth.uid())
+    or lower(email) = lower(auth.jwt()->>'email')
   );
 
 create policy "Los propietarios pueden crear invitaciones"
   on public.invitations for insert
   with check (
-    household_id in (
-      select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-    )
+    household_id in (select public.get_user_owned_households())
     and invited_by = auth.uid()
   );
 
 create policy "Los propietarios pueden cancelar invitaciones, y los destinatarios pueden aceptarlas/rechazarlas"
   on public.invitations for update
   using (
-    household_id in (
-      select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-    )
+    household_id in (select public.get_user_owned_households())
     or (
-      lower(email) = (select lower(email) from public.profiles where id = auth.uid())
+      lower(email) = lower(auth.jwt()->>'email')
       and status = 'pending'
+    )
+  )
+  with check (
+    household_id in (select public.get_user_owned_households())
+    or (
+      lower(email) = lower(auth.jwt()->>'email')
+      and status in ('accepted', 'rejected')
     )
   );
 
 create policy "Los propietarios pueden eliminar invitaciones"
   on public.invitations for delete
-  using (
-    household_id in (
-      select household_id from public.household_members where user_id = auth.uid() and role = 'owner'
-    )
-  );
+  using (household_id in (select public.get_user_owned_households()));

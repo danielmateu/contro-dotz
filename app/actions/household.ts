@@ -126,6 +126,7 @@ export async function acceptInvitationAction(invitationId: string) {
     .eq('id', invitationId)
 
   if (error) {
+    console.error('ACCEPT INVITATION DB ERROR:', error)
     return { error: 'Error al aceptar la invitación.' }
   }
 
