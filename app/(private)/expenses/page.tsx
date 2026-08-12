@@ -54,20 +54,20 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   if (!membership) redirect('/household')
 
-  // Cargar categorías para filtros
-  const { data: categories } = await supabase
+  // 1. Preparar consulta de categorías
+  const categoriesPromise = supabase
     .from('categories')
     .select('id, name')
     .eq('household_id', membership.household_id)
     .order('name')
 
-  // Cargar miembros del hogar para filtros
-  const { data: members } = await supabase
+  // 2. Preparar consulta de miembros del hogar
+  const membersPromise = supabase
     .from('household_members')
     .select('user_id, profiles(display_name)')
     .eq('household_id', membership.household_id)
 
-  // Consulta de gastos
+  // 3. Preparar consulta de gastos con filtros y ordenación
   let dbQuery = supabase
     .from('expenses')
     .select(
@@ -75,21 +75,11 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
     )
     .eq('household_id', membership.household_id)
 
-  // Aplicar filtros
-  if (startDate) {
-    dbQuery = dbQuery.gte('expense_date', startDate)
-  }
-  if (endDate) {
-    dbQuery = dbQuery.lte('expense_date', endDate)
-  }
-  if (categoryId) {
-    dbQuery = dbQuery.eq('category_id', categoryId)
-  }
-  if (memberId) {
-    dbQuery = dbQuery.eq('created_by', memberId)
-  }
+  if (startDate) dbQuery = dbQuery.gte('expense_date', startDate)
+  if (endDate) dbQuery = dbQuery.lte('expense_date', endDate)
+  if (categoryId) dbQuery = dbQuery.eq('category_id', categoryId)
+  if (memberId) dbQuery = dbQuery.eq('created_by', memberId)
 
-  // Aplicar ordenación
   if (sortBy === 'date_asc') {
     dbQuery = dbQuery
       .order('expense_date', { ascending: true })
@@ -99,13 +89,21 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   } else if (sortBy === 'amount_asc') {
     dbQuery = dbQuery.order('amount', { ascending: true })
   } else {
-    // Default: date_desc
     dbQuery = dbQuery
       .order('expense_date', { ascending: false })
       .order('created_at', { ascending: false })
   }
 
-  const { data: expenses } = await dbQuery
+  // Ejecutar las tres consultas de forma concurrente
+  const [categoriesRes, membersRes, expensesRes] = await Promise.all([
+    categoriesPromise,
+    membersPromise,
+    dbQuery
+  ])
+
+  const categories = categoriesRes.data
+  const members = membersRes.data
+  const expenses = expensesRes.data
 
   return (
     <div className="space-y-6">

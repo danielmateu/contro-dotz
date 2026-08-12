@@ -129,7 +129,7 @@ export function SettleDebtDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="payer">Miembro que paga (Deudor)</Label>
-              <Select value={payerId} onValueChange={(val) => setPayerId(val || '')} disabled={isPending}>
+              <Select value={payerId} onValueChange={(val) => setPayerId(val || '')} disabled={isPending} items={membersList.map((m) => ({ value: m.user_id, label: m.profiles?.display_name || m.profiles?.email.split('@')[0] || 'Miembro' }))}>
                 <SelectTrigger id="payer" className="bg-muted/50 focus:bg-background">
                   <SelectValue placeholder="Selecciona quién paga..." />
                 </SelectTrigger>
@@ -145,7 +145,7 @@ export function SettleDebtDialog({
 
             <div className="grid gap-2">
               <Label htmlFor="receiver">Miembro que recibe (Acreedor)</Label>
-              <Select value={receiverId} onValueChange={(val) => setReceiverId(val || '')} disabled={isPending}>
+              <Select value={receiverId} onValueChange={(val) => setReceiverId(val || '')} disabled={isPending} items={membersList.map((m) => ({ value: m.user_id, label: m.profiles?.display_name || m.profiles?.email.split('@')[0] || 'Miembro' }))}>
                 <SelectTrigger id="receiver" className="bg-muted/50 focus:bg-background">
                   <SelectValue placeholder="Selecciona quién recibe..." />
                 </SelectTrigger>

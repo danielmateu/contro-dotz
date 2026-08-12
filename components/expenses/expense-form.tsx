@@ -106,7 +106,7 @@ export function ExpenseForm({
           {/* Categoría */}
           <div className="space-y-1">
             <Label htmlFor="category_id">Categoría</Label>
-            <Select name="category_id" defaultValue={initialData?.category_id || ''}>
+            <Select name="category_id" defaultValue={initialData?.category_id || ''} items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}>
               <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
                 <SelectValue placeholder="-- Selecciona una categoría --" />
               </SelectTrigger>
@@ -150,7 +150,7 @@ export function ExpenseForm({
           {/* Método de pago */}
           <div className="space-y-1">
             <Label htmlFor="payment_method">Método de pago</Label>
-            <Select name="payment_method" defaultValue={initialData?.payment_method || 'Tarjeta'}>
+            <Select name="payment_method" defaultValue={initialData?.payment_method || 'Tarjeta'} items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}>
               <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
                 <SelectValue placeholder="-- Selecciona método de pago --" />
               </SelectTrigger>

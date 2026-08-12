@@ -42,13 +42,6 @@ export default async function DashboardPage() {
 
   if (!membership) redirect('/household')
 
-  // Cargar categorías para el formulario de registro de gastos
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('id, name')
-    .eq('household_id', membership.household_id)
-    .order('name')
-
   // Obtener fechas del mes actual y mes anterior
   const now = new Date()
   const currentYear = now.getFullYear()
@@ -71,36 +64,49 @@ export default async function DashboardPage() {
   const prevStartDate = `${prevMonthStr}-01`
   const prevEndDate = `${prevMonthStr}-${prevLastDay.toString().padStart(2, '0')}`
 
-  // 1. Cargar gastos del mes actual
-  const { data: currentExpenses } = await supabase
-    .from('expenses')
-    .select(
-      'id, amount, description, expense_date, category_id, created_by, categories(name, color, icon), profiles:created_by(display_name)'
-    )
-    .eq('household_id', membership.household_id)
-    .gte('expense_date', currentStartDate)
-    .lte('expense_date', currentEndDate)
+  // Cargar todos los datos requeridos para el Dashboard en paralelo
+  const [
+    categoriesRes,
+    currentExpensesRes,
+    prevExpensesRes,
+    currentBudgetsRes,
+    householdMembersRes
+  ] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('id, name')
+      .eq('household_id', membership.household_id)
+      .order('name'),
+    supabase
+      .from('expenses')
+      .select(
+        'id, amount, description, expense_date, category_id, created_by, categories(name, color, icon), profiles:created_by(display_name)'
+      )
+      .eq('household_id', membership.household_id)
+      .gte('expense_date', currentStartDate)
+      .lte('expense_date', currentEndDate),
+    supabase
+      .from('expenses')
+      .select('amount')
+      .eq('household_id', membership.household_id)
+      .gte('expense_date', prevStartDate)
+      .lte('expense_date', prevEndDate),
+    supabase
+      .from('budgets')
+      .select('id, amount, category_id, categories(name, color, icon)')
+      .eq('household_id', membership.household_id)
+      .eq('month', currentMonthStr),
+    supabase
+      .from('household_members')
+      .select('user_id, profiles(display_name, email)')
+      .eq('household_id', membership.household_id)
+  ])
 
-  // 2. Cargar gastos del mes anterior
-  const { data: prevExpenses } = await supabase
-    .from('expenses')
-    .select('amount')
-    .eq('household_id', membership.household_id)
-    .gte('expense_date', prevStartDate)
-    .lte('expense_date', prevEndDate)
-
-  // 3. Cargar presupuestos mensuales
-  const { data: currentBudgets } = await supabase
-    .from('budgets')
-    .select('id, amount, category_id, categories(name, color, icon)')
-    .eq('household_id', membership.household_id)
-    .eq('month', currentMonthStr)
-
-  // 4. Cargar miembros del mismo hogar para cálculo de aportaciones acumuladas
-  const { data: householdMembers } = await supabase
-    .from('household_members')
-    .select('user_id, profiles(display_name, email)')
-    .eq('household_id', membership.household_id)
+  const categories = categoriesRes.data
+  const currentExpenses = currentExpensesRes.data
+  const prevExpenses = prevExpensesRes.data
+  const currentBudgets = currentBudgetsRes.data
+  const householdMembers = householdMembersRes.data
 
   const membersList = householdMembers || []
   const memberNames = membersList.map(m => {

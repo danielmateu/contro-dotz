@@ -53,27 +53,29 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
   const lastDay = new Date(year, monthNum, 0).getDate()
   const endDate = `${month}-${lastDay.toString().padStart(2, '0')}`
 
-  // Cargar presupuestos del mes
-  const { data: budgets } = await supabase
-    .from('budgets')
-    .select('id, amount, category_id, categories(name, color, icon)')
-    .eq('household_id', membership.household_id)
-    .eq('month', month)
+  // Cargar presupuestos, categorías y gastos del mes en paralelo
+  const [budgetsRes, categoriesRes, expensesRes] = await Promise.all([
+    supabase
+      .from('budgets')
+      .select('id, amount, category_id, categories(name, color, icon)')
+      .eq('household_id', membership.household_id)
+      .eq('month', month),
+    supabase
+      .from('categories')
+      .select('id, name')
+      .eq('household_id', membership.household_id)
+      .order('name'),
+    supabase
+      .from('expenses')
+      .select('amount, category_id')
+      .eq('household_id', membership.household_id)
+      .gte('expense_date', `${month}-01`)
+      .lte('expense_date', endDate)
+  ])
 
-  // Cargar categorías
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('id, name')
-    .eq('household_id', membership.household_id)
-    .order('name')
-
-  // Cargar gastos del mes
-  const { data: expenses } = await supabase
-    .from('expenses')
-    .select('amount, category_id')
-    .eq('household_id', membership.household_id)
-    .gte('expense_date', `${month}-01`)
-    .lte('expense_date', endDate)
+  const budgets = budgetsRes.data
+  const categories = categoriesRes.data
+  const expenses = expensesRes.data
 
   // Calcular total gastado por categoría
   const categorySpentMap: Record<string, number> = {}

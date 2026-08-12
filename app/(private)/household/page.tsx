@@ -41,22 +41,24 @@ export default async function HouseholdPage() {
     redirect('/login')
   }
 
-  // Cargar email del perfil actual para cruzar invitaciones
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('email')
-    .eq('id', user.id)
-    .single()
+  // Cargar email de perfil y membresía de hogar en paralelo
+  const [profileRes, membershipRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('email')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('household_members')
+      .select('id, household_id, role, households(name, created_at)')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+  ])
 
+  const profile = profileRes.data
+  const membership = membershipRes.data
   const userEmail = profile?.email || ''
-
-  // Cargar membresía
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('id, household_id, role, households(name, created_at)')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
 
   const hasHousehold = !!membership
   const householdName = membership?.households
@@ -74,39 +76,32 @@ export default async function HouseholdPage() {
   let settlementsList: any[] = []
 
   if (hasHousehold) {
-    // Cargar miembros del mismo hogar
-    const { data: members } = await supabase
-      .from('household_members')
-      .select('id, role, user_id, profiles(display_name, email)')
-      .eq('household_id', membership.household_id)
+    // Cargar miembros, invitaciones enviadas, gastos y liquidaciones en paralelo
+    const [membersRes, sentRes, expensesRes, settlementsRes] = await Promise.all([
+      supabase
+        .from('household_members')
+        .select('id, role, user_id, profiles(display_name, email)')
+        .eq('household_id', membership.household_id),
+      supabase
+        .from('invitations')
+        .select('id, email, role, status, created_at')
+        .eq('household_id', membership.household_id)
+        .eq('status', 'pending'),
+      supabase
+        .from('expenses')
+        .select('created_by, amount')
+        .eq('household_id', membership.household_id),
+      supabase
+        .from('settlements')
+        .select('id, payer_id, receiver_id, amount, settled_at')
+        .eq('household_id', membership.household_id)
+        .order('settled_at', { ascending: false })
+    ])
 
-    membersList = members || []
-
-    // Cargar invitaciones enviadas pendientes
-    const { data: sent } = await supabase
-      .from('invitations')
-      .select('id, email, role, status, created_at')
-      .eq('household_id', membership.household_id)
-      .eq('status', 'pending')
-
-    sentInvitations = sent || []
-
-    // Cargar gastos para calcular balances
-    const { data: expensesData } = await supabase
-      .from('expenses')
-      .select('created_by, amount')
-      .eq('household_id', membership.household_id)
-
-    const expensesList = expensesData || []
-
-    // Cargar liquidaciones
-    const { data: settlementsData } = await supabase
-      .from('settlements')
-      .select('id, payer_id, receiver_id, amount, settled_at')
-      .eq('household_id', membership.household_id)
-      .order('settled_at', { ascending: false })
-
-    settlementsList = settlementsData || []
+    membersList = membersRes.data || []
+    sentInvitations = sentRes.data || []
+    const expensesList = expensesRes.data || []
+    settlementsList = settlementsRes.data || []
 
     // Calcular balances y deudas
     balances = calculateBalances(membersList, expensesList, settlementsList)
@@ -199,7 +194,7 @@ export default async function HouseholdPage() {
         // VISTA: USUARIO CON HOGAR (TABS)
         // ==========================================
         <Tabs defaultValue="members" className="w-full space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-[400px] bg-muted/60 p-1 rounded-xl">
+          <TabsList className="grid w-full grid-cols-2 max-w-100 bg-transparent p-1 rounded-xl">
             <TabsTrigger value="members" className="flex items-center gap-2 rounded-lg py-2">
               <Users2 className="h-4 w-4" />
               Miembros y Familia
@@ -282,7 +277,7 @@ export default async function HouseholdPage() {
                               <TableCell className="text-right">
                                 {/* Mostrar acciones de eliminar miembro o salir */}
                                 {(membership.role === 'owner' && !isCurrentUser) ||
-                                (isCurrentUser && membership.role === 'member') ? (
+                                  (isCurrentUser && membership.role === 'member') ? (
                                   <MemberActions
                                     memberId={member.id}
                                     householdId={membership.household_id}

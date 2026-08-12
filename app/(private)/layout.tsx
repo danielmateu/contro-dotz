@@ -56,20 +56,23 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     redirect('/login')
   }
 
-  // Cargar perfil
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('display_name, email')
-    .eq('id', user.id)
-    .single()
+  // Cargar perfil y membresía de hogar en paralelo
+  const [profileResult, membershipResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('display_name, email')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('household_members')
+      .select('household_id, role, households(name)')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle()
+  ])
 
-  // Cargar membresía de hogar
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id, role, households(name)')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  const profile = profileResult.data
+  const membership = membershipResult.data
 
   const hasHousehold = !!membership
   const householdName = membership?.households

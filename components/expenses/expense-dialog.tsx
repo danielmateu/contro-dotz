@@ -262,6 +262,7 @@ export function ExpenseDialog({
                 value={categoryId}
                 onValueChange={(val) => setCategoryId(val || '')}
                 disabled={isScanning}
+                items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
               >
                 <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
                   <SelectValue placeholder="-- Selecciona una categoría --" />
@@ -315,6 +316,7 @@ export function ExpenseDialog({
                 value={paymentMethod}
                 onValueChange={(val) => setPaymentMethod(val || 'Tarjeta')}
                 disabled={isScanning}
+                items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}
               >
                 <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
                   <SelectValue placeholder="-- Selecciona método de pago --" />

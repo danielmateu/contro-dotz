@@ -72,7 +72,7 @@ export function InviteMemberForm({ householdId }: InviteMemberFormProps) {
 
           <div className="space-y-1">
             <Label htmlFor="role">Rol familiar</Label>
-            <Select name="role" defaultValue="member">
+            <Select name="role" defaultValue="member" items={[{ value: 'member', label: 'Miembro (member)' }, { value: 'owner', label: 'Propietario (owner)' }]}>
               <SelectTrigger id="role" className="w-full bg-muted/50 h-9">
                 <SelectValue placeholder="-- Selecciona rol --" />
               </SelectTrigger>
