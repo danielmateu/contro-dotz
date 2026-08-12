@@ -139,3 +139,30 @@ export const budgetSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}$/, { message: 'El formato de mes debe ser YYYY-MM.' }),
 })
+
+// Esquema de Liquidación (Pago de saldo)
+export const settlementSchema = z.object({
+  payer_id: z.string().uuid({ message: 'Selecciona un deudor válido.' }),
+  receiver_id: z.string().uuid({ message: 'Selecciona un acreedor válido.' }),
+  amount: z
+    .string()
+    .min(1, { message: 'El importe de la liquidación es requerido.' })
+    .refine(
+      (val) => {
+        const num = parseFloat(val.replace(',', '.'))
+        return !isNaN(num) && num > 0
+      },
+      { message: 'El importe debe ser un número positivo.' }
+    )
+    .refine(
+      (val) => {
+        const numStr = val.replace(',', '.')
+        const parts = numStr.split('.')
+        return parts.length < 2 || parts[1].length <= 2;
+      },
+      { message: 'El importe no puede tener más de dos decimales.' }
+    ),
+}).refine(data => data.payer_id !== data.receiver_id, {
+  message: 'El deudor y el acreedor no pueden ser la misma persona.',
+  path: ['receiver_id'],
+})

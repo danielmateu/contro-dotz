@@ -383,3 +383,42 @@ create policy "Los propietarios pueden cancelar invitaciones, y los destinatario
 create policy "Los propietarios pueden eliminar invitaciones"
   on public.invitations for delete
   using (household_id in (select public.get_user_owned_households()));
+
+-- ==========================================
+-- 8. TABLA: settlements (liquidación de deudas entre miembros)
+-- ==========================================
+create table public.settlements (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid references public.households on delete cascade not null,
+  payer_id uuid references public.profiles on delete cascade not null,
+  receiver_id uuid references public.profiles on delete cascade not null,
+  amount numeric(12,2) not null check (amount > 0),
+  settled_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  check (payer_id <> receiver_id)
+);
+
+create index idx_settlements_household_id on public.settlements(household_id);
+
+-- Habilitar RLS en settlements
+alter table public.settlements enable row level security;
+
+-- Trigger de actualización de timestamp para settlements
+create trigger tr_settlements_updated_at before update on public.settlements for each row execute procedure public.update_updated_at_column();
+
+-- Políticas de RLS para settlements
+create policy "Los miembros pueden leer las liquidaciones de su hogar"
+  on public.settlements for select
+  using (household_id in (select public.get_user_households()));
+
+create policy "Los miembros pueden registrar liquidaciones en su hogar"
+  on public.settlements for insert
+  with check (
+    household_id in (select public.get_user_households())
+    and (auth.uid() = payer_id or auth.uid() = receiver_id)
+  );
+
+create policy "Los miembros pueden eliminar liquidaciones de su hogar"
+  on public.settlements for delete
+  using (household_id in (select public.get_user_households()));

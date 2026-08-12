@@ -21,9 +21,13 @@ import {
   Shield,
   Hourglass,
   Calendar,
+  Coins,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { calculateBalances, calculateDebts } from '@/lib/finance-utils'
+import { SettlementsTabContent } from '@/components/household/settlements-tab-content'
 
 export default async function HouseholdPage() {
   const supabase = await createClient()
@@ -65,6 +69,9 @@ export default async function HouseholdPage() {
   let membersList: any[] = []
   let sentInvitations: any[] = []
   let receivedInvitations: any[] = []
+  let balances: any[] = []
+  let debts: any[] = []
+  let settlementsList: any[] = []
 
   if (hasHousehold) {
     // Cargar miembros del mismo hogar
@@ -83,6 +90,27 @@ export default async function HouseholdPage() {
       .eq('status', 'pending')
 
     sentInvitations = sent || []
+
+    // Cargar gastos para calcular balances
+    const { data: expensesData } = await supabase
+      .from('expenses')
+      .select('created_by, amount')
+      .eq('household_id', membership.household_id)
+
+    const expensesList = expensesData || []
+
+    // Cargar liquidaciones
+    const { data: settlementsData } = await supabase
+      .from('settlements')
+      .select('id, payer_id, receiver_id, amount, settled_at')
+      .eq('household_id', membership.household_id)
+      .order('settled_at', { ascending: false })
+
+    settlementsList = settlementsData || []
+
+    // Calcular balances y deudas
+    balances = calculateBalances(membersList, expensesList, settlementsList)
+    debts = calculateDebts(balances)
   } else {
     // Cargar invitaciones recibidas pendientes
     const { data: received } = await supabase
@@ -168,174 +196,199 @@ export default async function HouseholdPage() {
         </div>
       ) : (
         // ==========================================
-        // VISTA: USUARIO CON HOGAR
+        // VISTA: USUARIO CON HOGAR (TABS)
         // ==========================================
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Lista de miembros */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card className="border-slate-200/50 shadow-md">
-              <CardHeader className="flex flex-row items-center justify-between pb-4">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Users2 className="h-5 w-5 text-primary" />
-                    Miembros de {householdName}
-                  </CardTitle>
-                  {householdCreatedAt && (
-                    <CardDescription className="flex items-center gap-1.5 mt-0.5">
-                      <Calendar className="h-3.5 w-3.5" />
-                      Creado el{' '}
-                      {format(
-                        new Date(householdCreatedAt),
-                        "d 'de' MMMM, yyyy",
-                        { locale: es }
+        <Tabs defaultValue="members" className="w-full space-y-6">
+          <TabsList className="grid w-full grid-cols-2 max-w-[400px] bg-muted/60 p-1 rounded-xl">
+            <TabsTrigger value="members" className="flex items-center gap-2 rounded-lg py-2">
+              <Users2 className="h-4 w-4" />
+              Miembros y Familia
+            </TabsTrigger>
+            <TabsTrigger value="settlements" className="flex items-center gap-2 rounded-lg py-2">
+              <Coins className="h-4 w-4" />
+              Saldos y Cuentas
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="members" className="space-y-6 outline-none">
+            <div className="grid gap-6 lg:grid-cols-3">
+              {/* Lista de miembros */}
+              <div className="lg:col-span-2 space-y-6">
+                <Card className="border-slate-200/50 shadow-md">
+                  <CardHeader className="flex flex-row items-center justify-between pb-4">
+                    <div className="space-y-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Users2 className="h-5 w-5 text-primary" />
+                        Miembros de {householdName}
+                      </CardTitle>
+                      {householdCreatedAt && (
+                        <CardDescription className="flex items-center gap-1.5 mt-0.5">
+                          <Calendar className="h-3.5 w-3.5" />
+                          Creado el{' '}
+                          {format(
+                            new Date(householdCreatedAt),
+                            "d 'de' MMMM, yyyy",
+                            { locale: es }
+                          )}
+                        </CardDescription>
                       )}
-                    </CardDescription>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className="px-0 sm:px-6">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nombre</TableHead>
-                      <TableHead>Email</TableHead>
-                      <TableHead>Rol</TableHead>
-                      <TableHead className="w-16 text-right"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {membersList.map((member) => {
-                      const isCurrentUser = member.user_id === user.id
-                      const memberDisplayName =
-                        member.profiles?.display_name || 'Miembro'
-                      const memberEmail =
-                        member.profiles?.email || 'Desconocido'
-                      return (
-                        <TableRow key={member.id}>
-                          <TableCell className="font-medium">
-                            {memberDisplayName}{' '}
-                            {isCurrentUser && (
-                              <span className="text-xs text-muted-foreground font-normal">
-                                (Tú)
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {memberEmail}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              variant={
-                                member.role === 'owner' ? 'default' : 'secondary'
-                              }
-                              className="gap-1"
-                            >
-                              {member.role === 'owner' && (
-                                <Shield className="h-3 w-3" />
-                              )}
-                              {member.role === 'owner'
-                                ? 'Propietario'
-                                : 'Miembro'}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-right">
-                            {/* Mostrar acciones de eliminar miembro o salir */}
-                            {(membership.role === 'owner' && !isCurrentUser) ||
-                            (isCurrentUser && membership.role === 'member') ? (
-                              <MemberActions
-                                memberId={member.id}
-                                householdId={membership.household_id}
-                                isSelf={isCurrentUser}
-                                memberName={memberDisplayName}
-                              />
-                            ) : null}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    })}
-                  </TableBody>
-                </Table>
-              </CardContent>
-            </Card>
-
-            {/* Invitaciones enviadas (solo para owners) */}
-            {membership.role === 'owner' && (
-              <Card className="border-slate-200/50 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <Hourglass className="h-5 w-5 text-amber-500 animate-pulse" />
-                    Invitaciones Enviadas Pendientes
-                  </CardTitle>
-                  <CardDescription>
-                    Invitaciones pendientes de aceptar por los destinatarios.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {sentInvitations.length === 0 ? (
-                    <p className="text-sm text-muted-foreground text-center py-4">
-                      No hay invitaciones enviadas pendientes.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {sentInvitations.map((inv) => (
-                        <div
-                          key={inv.id}
-                          className="flex items-center justify-between p-3 border rounded-xl bg-muted/20"
-                        >
-                          <div>
-                            <p className="text-sm font-semibold">{inv.email}</p>
-                            <p className="text-xs text-muted-foreground mt-0.5">
-                              Rol asignado:{' '}
-                              {inv.role === 'owner' ? 'Propietario' : 'Miembro'}
-                            </p>
-                          </div>
-                          <Badge variant="outline" className="text-amber-600 bg-amber-50 dark:bg-amber-950/20">
-                            Pendiente
-                          </Badge>
-                        </div>
-                      ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
+                  </CardHeader>
+                  <CardContent className="px-0 sm:px-6">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Nombre</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Rol</TableHead>
+                          <TableHead className="w-16 text-right"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {membersList.map((member) => {
+                          const isCurrentUser = member.user_id === user.id
+                          const memberDisplayName =
+                            member.profiles?.display_name || 'Miembro'
+                          const memberEmail =
+                            member.profiles?.email || 'Desconocido'
+                          return (
+                            <TableRow key={member.id}>
+                              <TableCell className="font-medium">
+                                {memberDisplayName}{' '}
+                                {isCurrentUser && (
+                                  <span className="text-xs text-muted-foreground font-normal">
+                                    (Tú)
+                                  </span>
+                                )}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">
+                                {memberEmail}
+                              </TableCell>
+                              <TableCell>
+                                <Badge
+                                  variant={
+                                    member.role === 'owner' ? 'default' : 'secondary'
+                                  }
+                                  className="gap-1"
+                                >
+                                  {member.role === 'owner' && (
+                                    <Shield className="h-3 w-3" />
+                                  )}
+                                  {member.role === 'owner'
+                                    ? 'Propietario'
+                                    : 'Miembro'}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right">
+                                {/* Mostrar acciones de eliminar miembro o salir */}
+                                {(membership.role === 'owner' && !isCurrentUser) ||
+                                (isCurrentUser && membership.role === 'member') ? (
+                                  <MemberActions
+                                    memberId={member.id}
+                                    householdId={membership.household_id}
+                                    isSelf={isCurrentUser}
+                                    memberName={memberDisplayName}
+                                  />
+                                ) : null}
+                              </TableCell>
+                            </TableRow>
+                          )
+                        })}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
 
-          {/* Formulario de invitar (solo para owners) */}
-          <div className="space-y-6">
-            {membership.role === 'owner' ? (
-              <Card className="border-slate-200/50 shadow-md">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center gap-2">
-                    <UserPlus className="h-5 w-5 text-primary" />
-                    Añadir Familiares
-                  </CardTitle>
-                  <CardDescription>
-                    Envía una invitación por correo a los miembros que deseas sumar.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <InviteMemberForm householdId={membership.household_id} />
-                </CardContent>
-              </Card>
-            ) : (
-              // Mensaje informativo para miembros no propietarios
-              <Card className="border-slate-200/50 shadow-md bg-muted/20">
-                <CardHeader>
-                  <CardTitle className="text-sm flex items-center gap-2">
-                    <Shield className="h-4 w-4 text-muted-foreground" />
-                    Miembro del hogar
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-sm text-muted-foreground">
-                  Solo el propietario del hogar puede gestionar las invitaciones y
-                  miembros adicionales. Si necesitas invitar a alguien, pídeselo al
-                  propietario.
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
+                {/* Invitaciones enviadas (solo para owners) */}
+                {membership.role === 'owner' && (
+                  <Card className="border-slate-200/50 shadow-md">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Hourglass className="h-5 w-5 text-amber-500 animate-pulse" />
+                        Invitaciones Enviadas Pendientes
+                      </CardTitle>
+                      <CardDescription>
+                        Invitaciones pendientes de aceptar por los destinatarios.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {sentInvitations.length === 0 ? (
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No hay invitaciones enviadas pendientes.
+                        </p>
+                      ) : (
+                        <div className="space-y-3">
+                          {sentInvitations.map((inv) => (
+                            <div
+                              key={inv.id}
+                              className="flex items-center justify-between p-3 border rounded-xl bg-muted/20"
+                            >
+                              <div>
+                                <p className="text-sm font-semibold">{inv.email}</p>
+                                <p className="text-xs text-muted-foreground mt-0.5">
+                                  Rol asignado:{' '}
+                                  {inv.role === 'owner' ? 'Propietario' : 'Miembro'}
+                                </p>
+                              </div>
+                              <Badge variant="outline" className="text-amber-600 bg-amber-50 dark:bg-amber-950/20">
+                                Pendiente
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Formulario de invitar (solo para owners) */}
+              <div className="space-y-6">
+                {membership.role === 'owner' ? (
+                  <Card className="border-slate-200/50 shadow-md">
+                    <CardHeader>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <UserPlus className="h-5 w-5 text-primary" />
+                        Añadir Familiares
+                      </CardTitle>
+                      <CardDescription>
+                        Envía una invitación por correo a los miembros que deseas sumar.
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <InviteMemberForm householdId={membership.household_id} />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  // {-- Mensaje informativo para miembros no propietarios --}
+                  <Card className="border-slate-200/50 shadow-md bg-muted/20">
+                    <CardHeader>
+                      <CardTitle className="text-sm flex items-center gap-2">
+                        <Shield className="h-4 w-4 text-muted-foreground" />
+                        Miembro del hogar
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-sm text-muted-foreground">
+                      Solo el propietario del hogar puede gestionar las invitaciones y
+                      miembros adicionales. Si necesitas invitar a alguien, pídeselo al
+                      propietario.
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="settlements" className="outline-none">
+            <SettlementsTabContent
+              householdId={membership.household_id}
+              membersList={membersList}
+              balances={balances}
+              debts={debts}
+              settlementsList={settlementsList}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   )
