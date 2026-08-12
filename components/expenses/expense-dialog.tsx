@@ -26,6 +26,15 @@ import {
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Check, Save, Sparkles } from 'lucide-react'
+import { MorphIcon } from 'morphicons/react'
+// @ts-ignore
+import { __iconNode as SparklesData } from 'lucide-react/dist/esm/icons/sparkles.mjs'
+// @ts-ignore
+import { __iconNode as ClockData } from 'lucide-react/dist/esm/icons/clock.mjs'
+// @ts-ignore
+import { __iconNode as CheckData } from 'lucide-react/dist/esm/icons/check.mjs'
+// @ts-ignore
+import { __iconNode as AlertCircleData } from 'lucide-react/dist/esm/icons/circle-alert.mjs'
 import { PAYMENT_METHODS } from '@/lib/validations'
 
 interface Category {
@@ -79,6 +88,7 @@ export function ExpenseDialog({
   // Estados de escaneo IA
   const [isScanning, setIsScanning] = useState(false)
   const [scanError, setScanError] = useState('')
+  const [scanSuccess, setScanSuccess] = useState(false)
 
   // Decidir qué acción de servidor usar y enlazar sus argumentos
   const action = expense
@@ -97,6 +107,7 @@ export function ExpenseDialog({
       setPaymentMethod(expense?.payment_method || 'Tarjeta')
       setNotes(expense?.notes || '')
       setScanError('')
+      setScanSuccess(false)
     }
   }, [open, expense, defaultDate])
 
@@ -129,6 +140,7 @@ export function ExpenseDialog({
 
     setIsScanning(true)
     setScanError('')
+    setScanSuccess(false)
 
     const reader = new FileReader()
     reader.onloadend = async () => {
@@ -146,6 +158,7 @@ export function ExpenseDialog({
         if (res.error) {
           setScanError(res.error)
         } else {
+          setScanSuccess(true)
           if (res.amount) {
             setAmount(res.amount.replace('.', ','))
           }
@@ -200,12 +213,36 @@ export function ExpenseDialog({
             <Button
               type="button"
               variant="outline"
-              className="w-full border-dashed border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center gap-2 py-6 text-sm"
+              className={`w-full border-dashed flex items-center justify-center gap-2 py-6 text-sm transition-all duration-300 ${
+                scanSuccess
+                  ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
+                  : scanError
+                  ? 'border-rose-500 bg-rose-50/30 text-rose-600 dark:bg-rose-950/10'
+                  : 'border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400'
+              }`}
               onClick={() => document.getElementById('receipt-upload')?.click()}
               disabled={isScanning || pending}
             >
-              <Sparkles className={`h-4 w-4 text-emerald-500 ${isScanning ? 'animate-spin' : 'animate-pulse'}`} />
-              {isScanning ? 'Analizando ticket con IA...' : '📸 Rellenar subiendo ticket (IA)'}
+              <MorphIcon
+                icon={isScanning ? ClockData : scanSuccess ? CheckData : scanError ? AlertCircleData : SparklesData}
+                spring="snappy"
+                className={`h-4 w-4 ${
+                  isScanning
+                    ? 'text-emerald-500 animate-spin'
+                    : scanSuccess
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : scanError
+                    ? 'text-rose-500'
+                    : 'text-emerald-500 animate-pulse'
+                }`}
+              />
+              {isScanning
+                ? 'Analizando ticket con IA...'
+                : scanSuccess
+                ? '¡Ticket analizado con éxito!'
+                : scanError
+                ? 'Error al escanear. Reintentar'
+                : 'Rellenar subiendo ticket (IA)'}
             </Button>
             {scanError && (
               <Alert variant="destructive" className="mt-2 py-2">
