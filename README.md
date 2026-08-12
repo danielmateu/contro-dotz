@@ -51,6 +51,10 @@ RESEND_SENDER_EMAIL=mail@tudominio.es # Deja vacío o usa onboarding@resend.dev 
 
 # Site Configuration
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+
+# Gemini AI Configuration
+GEMINI_API_KEY=AS6262SV_SDF65096999120SDFSDFGADFGFGADFGASFH_fAK
+
 ```
 
 ---

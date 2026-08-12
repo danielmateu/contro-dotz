@@ -75,7 +75,7 @@ export default async function DashboardPage() {
   const { data: currentExpenses } = await supabase
     .from('expenses')
     .select(
-      'id, amount, description, expense_date, category_id, categories(name, color, icon), profiles:created_by(display_name)'
+      'id, amount, description, expense_date, category_id, created_by, categories(name, color, icon), profiles:created_by(display_name)'
     )
     .eq('household_id', membership.household_id)
     .gte('expense_date', currentStartDate)
@@ -95,6 +95,18 @@ export default async function DashboardPage() {
     .select('id, amount, category_id, categories(name, color, icon)')
     .eq('household_id', membership.household_id)
     .eq('month', currentMonthStr)
+
+  // 4. Cargar miembros del mismo hogar para cálculo de aportaciones acumuladas
+  const { data: householdMembers } = await supabase
+    .from('household_members')
+    .select('user_id, profiles(display_name, email)')
+    .eq('household_id', membership.household_id)
+
+  const membersList = householdMembers || []
+  const memberNames = membersList.map(m => {
+    const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+    return prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+  })
 
   // --- CÁLCULO DE KPIs ---
   // A. Total Gastado
@@ -151,7 +163,7 @@ export default async function DashboardPage() {
       value: parseFloat(d.value.toFixed(2)),
     }))
 
-  // Area chart: evolución diaria
+  // Area chart: evolución diaria acumulada
   const dailyMap: Record<number, number> = {}
   for (let d = 1; d <= currentLastDay; d++) {
     dailyMap[d] = 0
@@ -161,13 +173,69 @@ export default async function DashboardPage() {
     const day = dateVal.getDate()
     dailyMap[day] = (dailyMap[day] || 0) + Number(exp.amount)
   })
+
+  let lineCumulative = 0
   const lineChartData = Object.keys(dailyMap).map((dayKey) => {
     const day = parseInt(dayKey)
+    lineCumulative += dailyMap[day]
     return {
       day: `${day}`,
-      Gasto: parseFloat(dailyMap[day].toFixed(2)),
+      Gasto: parseFloat(lineCumulative.toFixed(2)),
     }
   })
+
+  // Gráfico de barras: Presupuesto vs Real
+  const categoriesMap = new Map<string, { id: string; name: string; color: string }>()
+  currentBudgets?.forEach(b => {
+    const cat = b.categories as any
+    if (b.category_id && cat) {
+      categoriesMap.set(b.category_id, { id: b.category_id, name: cat.name, color: cat.color })
+    }
+  })
+  currentExpenses?.forEach(exp => {
+    const cat = exp.categories as any
+    if (exp.category_id && cat) {
+      categoriesMap.set(exp.category_id, { id: exp.category_id, name: cat.name, color: cat.color })
+    }
+  })
+
+  const barChartData = Array.from(categoriesMap.values()).map(cat => {
+    const budget = currentBudgets?.find(b => b.category_id === cat.id)?.amount || 0
+    const spent = categorySpentMap[cat.id] || 0
+    return {
+      name: cat.name,
+      Presupuesto: Number(budget),
+      Gastado: Number(spent),
+      color: cat.color,
+    }
+  })
+
+  // Stacked Area: Evolución acumulada diaria por cada miembro
+  const runningTotal: Record<string, number> = {}
+  memberNames.forEach(name => {
+    runningTotal[name] = 0
+  })
+
+  const stackedChartData = []
+  for (let d = 1; d <= currentLastDay; d++) {
+    const dayExpenses = currentExpenses?.filter(exp => {
+      const dateVal = new Date(exp.expense_date)
+      return dateVal.getDate() === d
+    }) || []
+
+    dayExpenses.forEach(exp => {
+      const matchedMember = membersList.find(m => m.user_id === exp.created_by)
+      const prof = matchedMember ? (Array.isArray(matchedMember.profiles) ? matchedMember.profiles[0] : matchedMember.profiles) : null
+      const name = prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+      runningTotal[name] = (runningTotal[name] || 0) + Number(exp.amount)
+    })
+
+    const dataPoint: Record<string, any> = { day: `${d}` }
+    memberNames.forEach(name => {
+      dataPoint[name] = parseFloat((runningTotal[name] || 0).toFixed(2))
+    })
+    stackedChartData.push(dataPoint)
+  }
 
   // Presupuestos en alerta (>80%) o superados
   const budgetsAlert = currentBudgets
@@ -327,7 +395,13 @@ export default async function DashboardPage() {
       </div>
 
       {/* Gráficos del dashboard */}
-      <DashboardCharts pieData={pieChartData} lineData={lineChartData} />
+      <DashboardCharts
+        pieData={pieChartData}
+        lineData={lineChartData}
+        barData={barChartData}
+        stackedData={stackedChartData}
+        memberNames={memberNames}
+      />
 
       {/* Sección inferior de alertas y últimos gastos */}
       <div className="grid gap-6 lg:grid-cols-3">

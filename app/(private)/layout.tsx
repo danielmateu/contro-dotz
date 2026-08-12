@@ -6,6 +6,7 @@ import { signOutAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
+import { SidebarMenuItems } from '@/components/dashboard/sidebar-menu-items'
 import {
   Sidebar,
   SidebarContent,
@@ -43,6 +44,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') || ''
 
+
   const supabase = await createClient()
 
   // Obtener usuario autenticado
@@ -76,46 +78,6 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
 
 
 
-  // Menú de navegación lateral
-  const navItems = [
-    {
-      title: 'Dashboard',
-      url: '/dashboard',
-      icon: LayoutDashboard,
-      disabled: !hasHousehold,
-    },
-    {
-      title: 'Gastos',
-      url: '/expenses',
-      icon: Receipt,
-      disabled: !hasHousehold,
-    },
-    {
-      title: 'Categorías',
-      url: '/categories',
-      icon: Tags,
-      disabled: !hasHousehold,
-    },
-    {
-      title: 'Presupuestos',
-      url: '/budgets',
-      icon: PiggyBank,
-      disabled: !hasHousehold,
-    },
-    {
-      title: 'Hogar / Familia',
-      url: '/household',
-      icon: Users2,
-      disabled: false, // Siempre disponible para ver invitaciones o crear otro
-    },
-    {
-      title: 'Ajustes',
-      url: '/settings',
-      icon: Settings,
-      disabled: !hasHousehold,
-    },
-  ]
-
   return (
     <SidebarProvider>
       {/* Sidebar de la aplicación */}
@@ -144,32 +106,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
               Menú Principal
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenu>
-                {navItems.map((item) => {
-                  const isActive = pathname === item.url
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        tooltip={item.title}
-                        disabled={item.disabled}
-                        className={cn(
-                          'flex items-center gap-3',
-                          item.disabled ? 'pointer-events-none opacity-40' : ''
-                        )}
-                        render={
-                          <Link href={item.url}>
-                            <item.icon className="h-4 w-4" />
-                            <span className="group-data-[collapsible=icon]:hidden">
-                              {item.title}
-                            </span>
-                          </Link>
-                        }
-                      />
-                    </SidebarMenuItem>
-                  )
-                })}
-              </SidebarMenu>
+              <SidebarMenuItems hasHousehold={hasHousehold} />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
