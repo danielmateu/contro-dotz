@@ -2,6 +2,11 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
+
+export const metadata = {
+  title: 'Control Dotz - Control de Gastos Familiares',
+  description: 'La aplicación colaborativa y premium para gestionar los gastos del hogar, presupuestos mensuales y liquidar deudas familiares con facilidad y escáner de tickets con IA.',
+}
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import {
   ArrowRight,

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import Link from 'next/link'
 import { resetPasswordRequestAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
@@ -30,6 +30,10 @@ export default function ForgotPasswordPage() {
     resetPasswordRequestAction,
     initialState
   )
+
+  useEffect(() => {
+    document.title = 'Recuperar contraseña | Control Dotz'
+  }, [])
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">

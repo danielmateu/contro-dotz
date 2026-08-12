@@ -1,5 +1,14 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Presupuestos Mensuales',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 import { SaveBudgetForm } from '@/components/budgets/save-budget-form'
 import { MonthSelector } from '@/components/budgets/month-selector'
 import { DeleteBudgetButton } from '@/components/budgets/delete-budget-button'

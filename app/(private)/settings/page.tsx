@@ -1,5 +1,14 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Ajustes',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 import { ProfileNameForm } from '@/components/household/profile-name-form'
 import {
   Card,

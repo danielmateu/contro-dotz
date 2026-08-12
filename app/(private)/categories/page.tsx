@@ -1,5 +1,14 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Categorías',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 import { CategoryDialog } from '@/components/categories/category-dialog'
 import { DeleteCategoryButton } from '@/components/categories/delete-category-button'
 import { Button } from '@/components/ui/button'

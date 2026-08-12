@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useActionState, useEffect } from 'react'
 import Link from 'next/link'
 import { signUpAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
@@ -27,6 +27,10 @@ const initialState: FormState = {}
 
 export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(signUpAction, initialState)
+
+  useEffect(() => {
+    document.title = 'Crear cuenta gratis | Control Dotz'
+  }, [])
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">

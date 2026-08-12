@@ -42,6 +42,10 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const errorParam = searchParams.get('error')
 
+  useEffect(() => {
+    document.title = 'Iniciar sesión | Control Dotz'
+  }, [])
+
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">
       {/* Orbe de luz interactivo del ratón */}

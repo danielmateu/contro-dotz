@@ -1,5 +1,14 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Mi Hogar / Familia',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 import { CreateHouseholdForm } from '@/components/household/create-household-form'
 import { InviteMemberForm } from '@/components/household/invite-member-form'
 import { InvitationActions } from '@/components/household/invitation-actions'

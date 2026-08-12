@@ -1,6 +1,15 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Dashboard',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { formatCurrency } from '@/lib/format'

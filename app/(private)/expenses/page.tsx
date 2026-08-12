@@ -1,6 +1,15 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+
+export const metadata: Metadata = {
+  title: 'Gastos Diarios',
+  robots: {
+    index: false,
+    follow: false,
+  },
+}
 import { ExpenseFilters } from '@/components/expenses/expense-filters'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { DeleteExpenseButton } from '@/components/expenses/delete-expense-button'
