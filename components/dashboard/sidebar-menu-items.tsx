@@ -35,6 +35,10 @@ import { __iconNode as WrenchData } from 'lucide-react/dist/esm/icons/wrench.mjs
 import { __iconNode as MessageSquareData } from 'lucide-react/dist/esm/icons/message-square.mjs'
 // @ts-ignore
 import { __iconNode as MessagesSquareData } from 'lucide-react/dist/esm/icons/messages-square.mjs'
+// @ts-ignore
+import { __iconNode as ShoppingBasketData } from 'lucide-react/dist/esm/icons/shopping-basket.mjs'
+// @ts-ignore
+import { __iconNode as ShoppingCartData } from 'lucide-react/dist/esm/icons/shopping-cart.mjs'
 
 interface SidebarMenuItemsProps {
   hasHousehold: boolean
@@ -117,6 +121,13 @@ export function SidebarMenuItems({ hasHousehold, householdId, userId }: SidebarM
       url: '/chat',
       icon: MessageSquareData,
       activeIcon: MessagesSquareData,
+      disabled: !hasHousehold,
+    },
+    {
+      title: 'Lista Compra',
+      url: '/shopping',
+      icon: ShoppingBasketData,
+      activeIcon: ShoppingCartData,
       disabled: !hasHousehold,
     },
     {

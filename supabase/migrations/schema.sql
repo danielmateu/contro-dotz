@@ -534,3 +534,29 @@ create policy "Los creadores pueden borrar sus propios mensajes"
 -- Activar realtime para mensajes
 alter publication supabase_realtime add table public.messages;
 
+-- 9. TABLA: shopping_list (lista de la compra compartida)
+create table if not exists public.shopping_list (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid references public.households on delete cascade not null,
+  name text not null,
+  quantity text,
+  bought boolean default false not null,
+  created_by uuid references public.profiles on delete cascade not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Habilitar RLS en la lista de la compra
+alter table public.shopping_list enable row level security;
+
+-- Políticas de RLS para la lista de la compra
+create policy "Los miembros del hogar pueden leer la lista de la compra"
+  on public.shopping_list for select
+  using (household_id in (select public.get_user_households()));
+
+create policy "Los miembros del hogar pueden gestionar la lista de la compra"
+  on public.shopping_list for all
+  using (household_id in (select public.get_user_households()))
+  with check (household_id in (select public.get_user_households()) and created_by = auth.uid());
+
+-- Activar realtime para la lista de la compra
+alter publication supabase_realtime add table public.shopping_list;

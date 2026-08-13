@@ -82,8 +82,90 @@ export async function createExpenseAction(
     }
   }
 
+  // Enviar mensaje de notificación al chat familiar y comprobar alertas de presupuesto
+  try {
+    const { data: category } = await supabase
+      .from('categories')
+      .select('name')
+      .eq('id', category_id)
+      .single()
+    const categoryName = category?.name || 'Gasto'
+    const formattedAmount = numericAmount.toFixed(2)
+
+    // A. Insertar notificación de gasto en el chat
+    await supabase.from('messages').insert({
+      household_id: householdId,
+      created_by: user.id,
+      content: `📢 **Gasto registrado**: **${formattedAmount}€** en *${categoryName}* para "${description.trim()}"`,
+    })
+
+    // B. Comprobar alertas de presupuestos establecidos
+    const now = new Date()
+    const currentMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}`
+
+    const { data: budget } = await supabase
+      .from('budgets')
+      .select('amount')
+      .eq('household_id', householdId)
+      .eq('category_id', category_id)
+      .eq('month', currentMonthStr)
+      .maybeSingle()
+
+    if (budget && Number(budget.amount) > 0) {
+      const budgetAmount = Number(budget.amount)
+
+      const currentStartDate = `${currentMonthStr}-01`
+      const currentLastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+      const currentEndDate = `${currentMonthStr}-${currentLastDay
+        .toString()
+        .padStart(2, '0')}`
+
+      // Calcular el acumulado actual de gastos para la categoría en este mes
+      const { data: expenses } = await supabase
+        .from('expenses')
+        .select('amount')
+        .eq('household_id', householdId)
+        .eq('category_id', category_id)
+        .gte('expense_date', currentStartDate)
+        .lte('expense_date', currentEndDate)
+
+      const totalSpent = expenses?.reduce((sum, exp) => sum + Number(exp.amount), 0) || 0
+      const previousSpent = totalSpent - numericAmount
+
+      const previousPercent = (previousSpent / budgetAmount) * 100
+      const currentPercent = (totalSpent / budgetAmount) * 100
+
+      if (previousPercent < 100 && currentPercent >= 100) {
+        // Alerta de superado
+        await supabase.from('messages').insert({
+          household_id: householdId,
+          created_by: user.id,
+          content: `🚨 **Límite de presupuesto superado**: El presupuesto mensual para *${categoryName}* (${budgetAmount.toFixed(
+            2
+          )}€) ha sido superado. Total gastado: **${totalSpent.toFixed(2)}€**.`,
+        })
+      } else if (previousPercent < 80 && currentPercent >= 80) {
+        // Advertencia del 80%
+        await supabase.from('messages').insert({
+          household_id: householdId,
+          created_by: user.id,
+          content: `⚠️ **Presupuesto al límite (80%)**: Se ha consumido el **${currentPercent.toFixed(
+            0
+          )}%** del presupuesto mensual para *${categoryName}* (${budgetAmount.toFixed(
+            2
+          )}€). Total gastado: **${totalSpent.toFixed(2)}€**.`,
+        })
+      }
+    }
+  } catch (chatError) {
+    console.error('Error posting expense chat notification or budget alert:', chatError)
+  }
+
   revalidatePath('/expenses')
   revalidatePath('/dashboard')
+  revalidatePath('/chat')
   return { success: 'Gasto registrado con éxito.' }
 }
 

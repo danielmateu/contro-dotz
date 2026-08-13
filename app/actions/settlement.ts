@@ -48,8 +48,29 @@ export async function createSettlementAction(
     return { error: 'Error al registrar el pago de saldo en la base de datos.' }
   }
 
+  // Enviar mensaje de notificación al chat familiar
+  try {
+    const [payerProfileRes, receiverProfileRes] = await Promise.all([
+      supabase.from('profiles').select('display_name').eq('id', payer_id).single(),
+      supabase.from('profiles').select('display_name').eq('id', receiver_id).single(),
+    ])
+
+    const payerName = payerProfileRes.data?.display_name || 'Miembro'
+    const receiverName = receiverProfileRes.data?.display_name || 'Miembro'
+    const formattedAmount = numericAmount.toFixed(2)
+
+    await supabase.from('messages').insert({
+      household_id: householdId,
+      created_by: user.id,
+      content: `💸 **Liquidación registrada**: **${payerName}** ha pagado **${formattedAmount}€** a **${receiverName}**`,
+    })
+  } catch (chatError) {
+    console.error('Error posting settlement chat notification:', chatError)
+  }
+
   revalidatePath('/household')
   revalidatePath('/', 'layout')
+  revalidatePath('/chat')
   return { success: 'Pago de saldo registrado con éxito.' }
 }
 
