@@ -86,7 +86,7 @@ export function SaveBudgetForm({
           <Label htmlFor="category_id" className="text-xs">
             Categoría
           </Label>
-          <Select name="category_id" defaultValue="">
+          <Select name="category_id" defaultValue="" items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}>
             <SelectTrigger id="category_id" className="w-full bg-muted/40 h-9">
               <SelectValue placeholder="-- Selecciona categoría --" />
             </SelectTrigger>
