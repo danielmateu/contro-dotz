@@ -1,5 +1,4 @@
 import { redirect } from 'next/navigation'
-import { headers } from 'next/headers'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { signOutAction } from '@/app/actions/auth'
@@ -35,16 +34,15 @@ import {
   Menu,
 } from 'lucide-react'
 
+import { SidebarBrandLogo } from '@/components/dashboard/sidebar-brand-logo'
+import { ModeToggle } from '@/components/ui/mode-toggle'
+import { ActiveRouteName } from '@/components/dashboard/active-route-name'
+
 interface PrivateLayoutProps {
   children: React.ReactNode
 }
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
-  // Obtener x-pathname de las cabeceras
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') || ''
-
-
   const supabase = await createClient()
 
   // Obtener usuario autenticado
@@ -79,8 +77,6 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     ? (membership.households as any).name
     : null
 
-
-
   return (
     <SidebarProvider>
       {/* Sidebar de la aplicación */}
@@ -88,7 +84,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
         <SidebarHeader className="border-b border-sidebar-border/50 py-4 px-4">
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-center rounded-lg text-primary-foreground">
-              <Home className="h-4 w-4" />
+              <SidebarBrandLogo />
             </div>
             <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
               <span className="font-semibold leading-none text-foreground font-heading">
@@ -154,11 +150,10 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
         <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/50 backdrop-blur-md px-4 md:px-6">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
-            <Separator orientation="vertical" className="h-4" />
-            <span className="text-sm font-medium text-muted-foreground capitalize">
-              {pathname.replace('/', '').replace('-', ' ') || 'Inicio'}
-            </span>
+            {/* <Separator orientation="vertical" className="h-4" /> */}
+            <ActiveRouteName />
           </div>
+          <ModeToggle />
         </header>
 
         {/* Contenido Principal */}
