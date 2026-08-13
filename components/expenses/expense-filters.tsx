@@ -4,6 +4,13 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface Category {
   id: string
@@ -89,19 +96,23 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
           <Label htmlFor="filterCategory" className="text-xs">
             Categoría
           </Label>
-          <select
-            id="filterCategory"
+          <Select
             value={categoryId}
-            onChange={(e) => updateFilters('categoryId', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-muted/40 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            onValueChange={(val) => updateFilters('categoryId', val || '')}
+            items={[{ value: '', label: 'Todas las categorías' }, ...categories.map((cat) => ({ value: cat.id, label: cat.name }))]}
           >
-            <option value="">Todas las categorías</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="filterCategory" className="w-full bg-muted/40 h-9">
+              <SelectValue placeholder="Todas las categorías" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todas las categorías</SelectItem>
+              {categories.map((cat) => (
+                <SelectItem key={cat.id} value={cat.id}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Filtrar por Miembro */}
@@ -109,19 +120,23 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
           <Label htmlFor="filterMember" className="text-xs">
             Miembro
           </Label>
-          <select
-            id="filterMember"
+          <Select
             value={memberId}
-            onChange={(e) => updateFilters('memberId', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-muted/40 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            onValueChange={(val) => updateFilters('memberId', val || '')}
+            items={[{ value: '', label: 'Todos los miembros' }, ...members.map((mem) => ({ value: mem.user_id, label: mem.profiles?.display_name || 'Desconocido' }))]}
           >
-            <option value="">Todos los miembros</option>
-            {members.map((mem) => (
-              <option key={mem.user_id} value={mem.user_id}>
-                {mem.profiles?.display_name || 'Desconocido'}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger id="filterMember" className="w-full bg-muted/40 h-9">
+              <SelectValue placeholder="Todos los miembros" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Todos los miembros</SelectItem>
+              {members.map((mem) => (
+                <SelectItem key={mem.user_id} value={mem.user_id}>
+                  {mem.profiles?.display_name || 'Desconocido'}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Ordenación */}
@@ -129,17 +144,26 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
           <Label htmlFor="sortBy" className="text-xs">
             Ordenar por
           </Label>
-          <select
-            id="sortBy"
+          <Select
             value={sortBy}
-            onChange={(e) => updateFilters('sortBy', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-muted/40 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
+            onValueChange={(val) => updateFilters('sortBy', val || 'date_desc')}
+            items={[
+              { value: 'date_desc', label: 'Fecha (recientes primero)' },
+              { value: 'date_asc', label: 'Fecha (antiguos primero)' },
+              { value: 'amount_desc', label: 'Importe (mayor primero)' },
+              { value: 'amount_asc', label: 'Importe (menor primero)' },
+            ]}
           >
-            <option value="date_desc">Fecha (recientes primero)</option>
-            <option value="date_asc">Fecha (antiguos primero)</option>
-            <option value="amount_desc">Importe (mayor primero)</option>
-            <option value="amount_asc">Importe (menor primero)</option>
-          </select>
+            <SelectTrigger id="sortBy" className="w-full bg-muted/40 h-9">
+              <SelectValue placeholder="Ordenar por" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="date_desc">Fecha (recientes primero)</SelectItem>
+              <SelectItem value="date_asc">Fecha (antiguos primero)</SelectItem>
+              <SelectItem value="amount_desc">Importe (mayor primero)</SelectItem>
+              <SelectItem value="amount_asc">Importe (menor primero)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
