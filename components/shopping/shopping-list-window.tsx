@@ -98,6 +98,7 @@ export function ShoppingListWindow({
   const [expenseSuccess, setExpenseSuccess] = useState<string | null>(null)
   
   const [showBought, setShowBought] = useState(true)
+  const [isClearingBought, setIsClearingBought] = useState(false)
 
   const supabase = createClient()
 
@@ -205,6 +206,29 @@ export function ShoppingListWindow({
       setItems((prev) => prev.filter((i) => i.id !== itemId))
     } catch (err) {
       console.error('Error deleting shopping item:', err)
+    }
+  }
+
+  // Eliminar todos los artículos comprados
+  const handleCleanBoughtItems = async (e: React.MouseEvent) => {
+    e.stopPropagation() // Evitar colapso
+    if (boughtItems.length === 0 || isClearingBought) return
+
+    setIsClearingBought(true)
+    try {
+      const { error } = await supabase
+        .from('shopping_list')
+        .delete()
+        .eq('household_id', householdId)
+        .eq('bought', true)
+
+      if (error) throw error
+
+      setItems((prev) => prev.filter((i) => !i.bought))
+    } catch (err) {
+      console.error('Error clearing bought items:', err)
+    } finally {
+      setIsClearingBought(false)
     }
   }
 
@@ -435,9 +459,25 @@ export function ShoppingListWindow({
         {boughtItems.length > 0 && (
           <Card className="border-slate-200/50 shadow-sm opacity-80">
             <CardHeader className="py-3 flex flex-row items-center justify-between cursor-pointer" onClick={() => setShowBought(!showBought)}>
-              <CardTitle className="text-sm font-semibold text-muted-foreground">
-                Comprados recientemente ({boughtItems.length})
-              </CardTitle>
+              <div className="flex items-center gap-3">
+                <CardTitle className="text-sm font-semibold text-muted-foreground">
+                  Comprados recientemente ({boughtItems.length})
+                </CardTitle>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCleanBoughtItems}
+                  disabled={isClearingBought}
+                  className="h-6 text-[10px] text-rose-500 hover:text-rose-600 hover:bg-rose-50/50 dark:hover:bg-rose-950/20 px-2 rounded-md font-bold"
+                >
+                  {isClearingBought ? (
+                    <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                  ) : (
+                    <Trash2 className="h-3 w-3 mr-1" />
+                  )}
+                  Limpiar Comprados
+                </Button>
+              </div>
               <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground">
                 {showBought ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>

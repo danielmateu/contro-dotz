@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 }
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
+import { SendReportButton } from '@/components/household/send-report-button'
 import { formatCurrency } from '@/lib/format'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -297,6 +298,10 @@ export default async function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <SendReportButton
+            householdId={membership.household_id}
+            compact
+          />
           <ExpenseDialog
             householdId={membership.household_id}
             categories={categories || []}

@@ -8,9 +8,10 @@ import { Mail, Loader2, Check, AlertCircle } from 'lucide-react'
 
 interface SendReportButtonProps {
   householdId: string
+  compact?: boolean
 }
 
-export function SendReportButton({ householdId }: SendReportButtonProps) {
+export function SendReportButton({ householdId, compact }: SendReportButtonProps) {
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
 
@@ -41,8 +42,8 @@ export function SendReportButton({ householdId }: SendReportButtonProps) {
   }
 
   return (
-    <div className="space-y-4">
-      {status === 'success' && message && (
+    <div className={compact ? "relative" : "space-y-4"}>
+      {status === 'success' && message && !compact && (
         <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
           <Check className="h-4 w-4 text-emerald-500" />
           <AlertTitle>Éxito</AlertTitle>
@@ -50,7 +51,7 @@ export function SendReportButton({ householdId }: SendReportButtonProps) {
         </Alert>
       )}
 
-      {status === 'error' && message && (
+      {status === 'error' && message && !compact && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>Error al enviar</AlertTitle>
@@ -58,20 +59,46 @@ export function SendReportButton({ householdId }: SendReportButtonProps) {
         </Alert>
       )}
 
+      {/* Alerta flotante compacta si ocurre éxito/error en modo compacto */}
+      {compact && message && (
+        <div className={`absolute bottom-full right-0 mb-2 z-50 p-3.5 rounded-xl border shadow-lg text-xs w-64 leading-normal ${
+          status === 'success'
+            ? 'bg-emerald-50 border-emerald-500/30 text-emerald-700 dark:bg-emerald-950 dark:border-emerald-500/20 dark:text-emerald-400'
+            : 'bg-rose-50 border-rose-500/30 text-rose-700 dark:bg-rose-950 dark:border-rose-500/20 dark:text-rose-400'
+        }`}>
+          <div className="flex gap-2">
+            {status === 'success' ? (
+              <Check className="h-4 w-4 text-emerald-500 shrink-0" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-rose-500 shrink-0" />
+            )}
+            <div>
+              <p className="font-bold">{status === 'success' ? 'Éxito' : 'Error al enviar'}</p>
+              <p className="mt-0.5">{message}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Button
         onClick={handleSendReport}
         disabled={status === 'loading'}
-        className="w-full sm:w-auto"
+        variant={compact ? "outline" : "default"}
+        className={compact ? "h-9 px-3 rounded-xl border-slate-200/50 hover:bg-muted/50 dark:border-slate-800/50" : "w-full sm:w-auto"}
       >
         {status === 'loading' ? (
           <>
-            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            Enviando reportes...
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {!compact && <span className="ml-2">Enviando reportes...</span>}
           </>
         ) : (
           <>
-            <Mail className="h-4 w-4 mr-2" />
-            Enviar Informe Familiar por Email
+            <Mail className="h-4 w-4" />
+            {!compact ? (
+              <span className="ml-2">Enviar Informe Familiar por Email</span>
+            ) : (
+              <span className="ml-2 hidden sm:inline text-xs font-semibold">Enviar Informe</span>
+            )}
           </>
         )}
       </Button>
