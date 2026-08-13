@@ -15,6 +15,7 @@ import {
   Legend,
   BarChart,
   Bar,
+  Line,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -70,6 +71,36 @@ export function DashboardCharts({
   useEffect(() => {
     setIsMounted(true)
   }, [])
+
+  // 1. Obtener día actual y calcular promedio diario para proyección
+  const todayDate = new Date()
+  const currentDay = todayDate.getDate()
+
+  // Encontrar el gasto acumulado real al día de hoy
+  const todayDataPoint = lineData.find((d) => parseInt(d.day) === currentDay)
+  const todayCumulative = todayDataPoint
+    ? todayDataPoint.Gasto
+    : lineData[lineData.length - 1]?.Gasto || 0
+
+  const avgDaily = currentDay > 0 ? todayCumulative / currentDay : 0
+
+  const projectionData = lineData.map((d) => {
+    const dayNum = parseInt(d.day)
+    const isFuture = dayNum > currentDay
+
+    return {
+      day: d.day,
+      'Gasto Real': isFuture ? null : d.Gasto,
+      'Proyección': isFuture
+        ? parseFloat((todayCumulative + avgDaily * (dayNum - currentDay)).toFixed(2))
+        : d.Gasto,
+    }
+  })
+
+  const finalProjected = projectionData[projectionData.length - 1]?.['Proyección'] || 0
+  const totalBudget = barData.reduce((sum, item) => sum + item.Presupuesto, 0)
+  const budgetDiff = totalBudget - finalProjected
+  const isOverBudget = budgetDiff < 0
 
   if (!isMounted) {
     return (
@@ -149,7 +180,7 @@ export function DashboardCharts({
     if (active && payload && payload.length) {
       const data = payload[0].payload
       return (
-        <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-1">
+        <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-1.5">
           <p className="font-bold border-b pb-1 mb-1">Día {data.day}</p>
           {payload.map((item: any) => (
             <p key={item.name} className="flex justify-between gap-4">
@@ -166,27 +197,49 @@ export function DashboardCharts({
     return null
   }
 
+  // Tooltip personalizado para el gráfico de proyección
+  const CustomProjectionTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload
+      return (
+        <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-1.5">
+          <p className="font-bold border-b pb-1 mb-1 text-foreground">Día {data.day}</p>
+          {data['Gasto Real'] !== null && (
+            <p className="flex justify-between gap-4">
+              <span className="text-muted-foreground">Gasto Real:</span>
+              <span className="font-semibold text-primary">{formatCurrency(data['Gasto Real'])}</span>
+            </p>
+          )}
+          <p className="flex justify-between gap-4">
+            <span className="text-muted-foreground">Proyección:</span>
+            <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(data['Proyección'])}</span>
+          </p>
+        </div>
+      )
+    }
+    return null
+  }
+
   return (
     <Tabs defaultValue="overview" className="w-full space-y-6">
-      <TabsList className="grid w-full grid-cols-3 max-w-112.5 p-1 rounded-xl bg-transparent">
+      <TabsList className="grid w-full grid-cols-4 max-w-[550px] p-1 rounded-xl bg-transparent">
         <TabsTrigger value="overview" className="flex items-center gap-1.5 rounded-lg ">
-          {/* <LayoutDashboard className="h-3.5 w-3.5" /> */}
           Vista General
         </TabsTrigger>
         <TabsTrigger value="budgets" className="flex items-center gap-1.5 rounded-lg ">
-          {/* <Landmark className="h-3.5 w-3.5" /> */}
           Presupuesto vs Real
         </TabsTrigger>
         <TabsTrigger value="members" className="flex items-center gap-1.5 rounded-lg ">
-          {/* <Users2 className="h-3.5 w-3.5" /> */}
           Por Miembro
+        </TabsTrigger>
+        <TabsTrigger value="projection" className="flex items-center gap-1.5 rounded-lg ">
+          Proyección
         </TabsTrigger>
       </TabsList>
 
       {/* PESTAÑA 1: VISTA GENERAL (PIE + SIMPLE AREA) */}
       <TabsContent value="overview" className="outline-none">
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {/* Evolución diaria (Simple Area con Degradados) */}
           <Card className="border-slate-200/50 shadow-md md:col-span-2">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -197,7 +250,7 @@ export function DashboardCharts({
                 Historial del gasto familiar diario acumulado durante el mes actual.
               </CardDescription>
             </CardHeader>
-            <CardContent className="w-75">
+            <CardContent className="h-87.5">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart
                   data={lineData}
@@ -237,7 +290,6 @@ export function DashboardCharts({
             </CardContent>
           </Card>
 
-          {/* Distribución por Categoría (Pie Chart con Gaps y Bordes Redondeados) */}
           <Card className="border-slate-200/50 shadow-md md:col-span-2 lg:col-span-1">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -277,7 +329,6 @@ export function DashboardCharts({
                     </ResponsiveContainer>
                   </div>
 
-                  {/* Leyenda manual compacta */}
                   <div className="w-full grid grid-cols-2 gap-2 mt-2 max-h-17.5 overflow-y-auto pr-1">
                     {pieData.slice(0, 6).map((entry, index) => (
                       <div
@@ -299,7 +350,6 @@ export function DashboardCharts({
         </div>
       </TabsContent>
 
-      {/* PESTAÑA 2: COMPARATIVA DE PRESUPUESTOS (SIMPLE BAR CHART) */}
       <TabsContent value="budgets" className="outline-none">
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader>
@@ -356,7 +406,6 @@ export function DashboardCharts({
         </Card>
       </TabsContent>
 
-      {/* PESTAÑA 3: CUMULATIVO POR MIEMBRO (STACKED AREA CHART) */}
       <TabsContent value="members" className="outline-none">
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader>
@@ -410,6 +459,133 @@ export function DashboardCharts({
             )}
           </CardContent>
         </Card>
+      </TabsContent>
+
+      {/* PESTAÑA 4: PROYECCIÓN PREDICTIVA (AREA + LINE PROJECTION) */}
+      <TabsContent value="projection" className="outline-none">
+        <div className="grid gap-6 md:grid-cols-3">
+          <Card className="border-slate-200/50 shadow-md md:col-span-2">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-emerald-500" />
+                Proyección de Gastos del Mes
+              </CardTitle>
+              <CardDescription>
+                Proyección del gasto final estimado basándose en el ritmo diario acumulado hasta hoy.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="h-87.5">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                <AreaChart
+                  data={projectionData}
+                  margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                >
+                  <defs>
+                    <linearGradient id="colorGastoReal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
+                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                  <XAxis
+                    dataKey="day"
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-[10px] fill-muted-foreground font-medium"
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    className="text-[10px] fill-muted-foreground font-medium"
+                    tickFormatter={(val) => `${val}€`}
+                  />
+                  <Tooltip content={<CustomProjectionTooltip />} />
+                  <Legend verticalAlign="top" height={36} />
+                  <Area
+                    type="monotone"
+                    dataKey="Gasto Real"
+                    stroke="var(--primary)"
+                    strokeWidth={2}
+                    fillOpacity={1}
+                    fill="url(#colorGastoReal)"
+                    name="Gasto Real Acumulado"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="Proyección"
+                    stroke="#10b981"
+                    strokeWidth={2}
+                    strokeDasharray="5 5"
+                    dot={false}
+                    name="Proyección Estimada"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200/50 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Análisis Predictivo
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground">Promedio de gasto diario</span>
+                <p className="text-2xl font-extrabold text-foreground">
+                  {formatCurrency(avgDaily)}
+                  <span className="text-xs font-normal text-muted-foreground"> / día</span>
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground">Gasto real acumulado (Día {currentDay})</span>
+                <p className="text-2xl font-bold text-foreground">
+                  {formatCurrency(todayCumulative)}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-xs text-muted-foreground">Gasto final proyectado</span>
+                <p className="text-3xl font-extrabold text-primary">
+                  {formatCurrency(finalProjected)}
+                </p>
+              </div>
+
+              <div className="pt-4 border-t border-border/60">
+                {totalBudget > 0 ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between text-xs font-medium">
+                      <span className="text-muted-foreground">Presupuesto total del mes:</span>
+                      <span className="text-foreground font-semibold">{formatCurrency(totalBudget)}</span>
+                    </div>
+                    
+                    <div className={`p-3.5 rounded-xl border flex flex-col gap-1.5 ${
+                      isOverBudget
+                        ? 'bg-rose-50/50 border-rose-500/20 text-rose-700 dark:bg-rose-950/10 dark:border-rose-500/10 dark:text-rose-400'
+                        : 'bg-emerald-50/50 border-emerald-500/20 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-500/10 dark:text-emerald-400'
+                    }`}>
+                      <span className="text-xs font-bold uppercase tracking-wider">
+                        {isOverBudget ? '⚠️ Alerta de Desviación' : '✅ Proyección Saludable'}
+                      </span>
+                      <span className="text-xs leading-relaxed">
+                        {isOverBudget
+                          ? `A este ritmo, superaréis el presupuesto mensual por ${formatCurrency(Math.abs(budgetDiff))}. Considera reducir gastos no esenciales.`
+                          : `¡Excelente control! A este ritmo, terminaréis el mes ahorrando ${formatCurrency(budgetDiff)} respecto al presupuesto.`
+                        }
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">
+                    Establece presupuestos en la pestaña de presupuestos para comparar con la proyección.
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </TabsContent>
     </Tabs>
   )

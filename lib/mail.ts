@@ -62,3 +62,27 @@ export async function sendInvitationEmail(
 
   return data
 }
+
+/**
+ * Envía el informe financiero del hogar por correo electrónico
+ */
+export async function sendFinancialReportEmail(
+  to: string,
+  householdName: string,
+  reportHtml: string
+) {
+  const sender = process.env.RESEND_SENDER_EMAIL || 'onboarding@resend.dev'
+
+  const { data, error } = await resend.emails.send({
+    from: `Control Dotz <${sender}>`,
+    to,
+    subject: `📊 Resumen Financiero: Hogar "${householdName}"`,
+    html: reportHtml,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data
+}

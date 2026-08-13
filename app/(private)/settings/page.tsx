@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   },
 }
 import { ProfileNameForm } from '@/components/household/profile-name-form'
+import { SendReportButton } from '@/components/household/send-report-button'
 import {
   Card,
   CardContent,
@@ -33,12 +34,24 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  // Cargar perfil actual
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('display_name, email, avatar_url, status')
-    .eq('id', user.id)
-    .single()
+  // Cargar perfil actual y membresía del hogar en paralelo
+  const [profileRes, membershipRes] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('display_name, email, avatar_url, status')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('household_members')
+      .select('household_id')
+      .eq('user_id', user.id)
+      .limit(1)
+      .maybeSingle(),
+  ])
+
+  const profile = profileRes.data
+  const membership = membershipRes.data
+  const householdId = membership?.household_id || null
 
   const displayName = profile?.display_name || ''
   const email = profile?.email || ''
@@ -92,6 +105,21 @@ export default async function SettingsPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Reportes del Hogar (Opción C) */}
+      {householdId && (
+        <Card className="border-slate-200/50 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Reportes del Hogar</CardTitle>
+            <CardDescription>
+              Envía un reporte financiero detallado por email a todos los miembros de tu familia. El informe incluye desglose de gastos mensuales, límites de presupuestos consumidos y sugerencias de transferencias para liquidar saldos pendientes.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SendReportButton householdId={householdId} />
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }
