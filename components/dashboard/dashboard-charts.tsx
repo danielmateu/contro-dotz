@@ -74,10 +74,10 @@ export function DashboardCharts({
   if (!isMounted) {
     return (
       <div className="w-full space-y-6">
-        <div className="h-10 w-[350px] bg-muted/30 animate-pulse rounded-xl" />
+        <div className="h-10 w-87.5 bg-muted/30 animate-pulse rounded-xl" />
         <div className="grid gap-6 md:grid-cols-3">
-          <div className="h-[380px] md:col-span-2 bg-muted/10 animate-pulse rounded-2xl" />
-          <div className="h-[380px] bg-muted/10 animate-pulse rounded-2xl" />
+          <div className="h-95 md:col-span-2 bg-muted/10 animate-pulse rounded-2xl" />
+          <div className="h-95 bg-muted/10 animate-pulse rounded-2xl" />
         </div>
       </div>
     )
@@ -197,7 +197,7 @@ export function DashboardCharts({
                 Historial del gasto familiar diario acumulado durante el mes actual.
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-[300px]">
+            <CardContent className="w-75">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart
                   data={lineData}
@@ -250,12 +250,12 @@ export function DashboardCharts({
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center">
               {pieData.length === 0 ? (
-                <div className="h-[220px] flex items-center justify-center text-xs text-muted-foreground">
+                <div className="w-55 flex items-center justify-center text-xs text-muted-foreground">
                   Registra gastos para visualizar la distribución.
                 </div>
               ) : (
                 <>
-                  <div className="h-[220px] w-full">
+                  <div className="w-55">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                       <PieChart>
                         <Pie
@@ -278,7 +278,7 @@ export function DashboardCharts({
                   </div>
 
                   {/* Leyenda manual compacta */}
-                  <div className="w-full grid grid-cols-2 gap-2 mt-2 max-h-[70px] overflow-y-auto pr-1">
+                  <div className="w-full grid grid-cols-2 gap-2 mt-2 max-h-17.5 overflow-y-auto pr-1">
                     {pieData.slice(0, 6).map((entry, index) => (
                       <div
                         key={index}
@@ -311,7 +311,7 @@ export function DashboardCharts({
               Comparación visual de los presupuestos asignados frente al importe real consumido por categoría.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[350px]">
+          <CardContent className="h-87.5">
             {barData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                 No hay presupuestos ni gastos registrados este mes.
@@ -368,7 +368,7 @@ export function DashboardCharts({
               Evolución acumulada de los gastos del mes dividida por la aportación individual de cada miembro.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-[350px]">
+          <CardContent className="h-87.5">
             {memberNames.length === 0 || stackedData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                 No hay aportaciones de miembros registradas este mes.

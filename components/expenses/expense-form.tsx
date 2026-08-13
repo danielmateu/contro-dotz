@@ -175,14 +175,14 @@ export function ExpenseForm({
               name="notes"
               placeholder="Detalles adicionales..."
               defaultValue={initialData?.notes || ''}
-              className="bg-muted/50 focus:bg-background min-h-[80px]"
+              className="bg-muted/50 focus:bg-background min-h-20"
             />
           </div>
 
           {/* Ticket de compra */}
           <div className="space-y-1">
             <Label className="text-xs">Ticket de compra (opcional)</Label>
-            
+
             {initialData?.receipt_path && !deleteReceipt ? (
               <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-primary/20">
                 <Receipt className="h-4 w-4 text-primary shrink-0" />

@@ -299,36 +299,34 @@ export function ExpenseDialog({
             <Button
               type="button"
               variant="outline"
-              className={`w-full border-dashed flex items-center justify-center gap-2 py-6 text-sm transition-all duration-300 ${
-                scanSuccess
-                  ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
-                  : scanError
+              className={`w-full border-dashed flex items-center justify-center gap-2 py-6 text-sm transition-all duration-300 ${scanSuccess
+                ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
+                : scanError
                   ? 'border-rose-500 bg-rose-50/30 text-rose-600 dark:bg-rose-950/10'
                   : 'border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400'
-              }`}
+                }`}
               onClick={() => document.getElementById('receipt-upload')?.click()}
               disabled={isScanning || isSavingExpense}
             >
               <MorphIcon
                 icon={isScanning ? ClockData : scanSuccess ? CheckData : scanError ? AlertCircleData : SparklesData}
                 spring="snappy"
-                className={`h-4 w-4 ${
-                  isScanning
-                    ? 'text-emerald-500 animate-spin'
-                    : scanSuccess
+                className={`h-4 w-4 ${isScanning
+                  ? 'text-emerald-500 animate-spin'
+                  : scanSuccess
                     ? 'text-emerald-600 dark:text-emerald-400'
                     : scanError
-                    ? 'text-rose-500'
-                    : 'text-emerald-500 animate-pulse'
-                }`}
+                      ? 'text-rose-500'
+                      : 'text-emerald-500 animate-pulse'
+                  }`}
               />
               {isScanning
                 ? 'Analizando ticket con IA...'
                 : scanSuccess
-                ? '¡Ticket analizado con éxito!'
-                : scanError
-                ? 'Error al escanear. Reintentar'
-                : 'Rellenar subiendo ticket (IA)'}
+                  ? '¡Ticket analizado con éxito!'
+                  : scanError
+                    ? 'Error al escanear. Reintentar'
+                    : 'Rellenar subiendo ticket (IA)'}
             </Button>
             {scanError && (
               <Alert variant="destructive" className="mt-2 py-2">
@@ -464,14 +462,14 @@ export function ExpenseDialog({
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 disabled={isScanning}
-                className="bg-muted/50 focus:bg-background min-h-[80px]"
+                className="bg-muted/50 focus:bg-background min-h-20"
               />
             </div>
 
             {/* Ticket de compra */}
             <div className="space-y-1">
               <Label className="text-xs">Ticket de compra (opcional)</Label>
-              
+
               {selectedFile ? (
                 <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-emerald-500/20">
                   <Receipt className="h-4 w-4 text-emerald-500 shrink-0" />

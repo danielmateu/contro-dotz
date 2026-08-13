@@ -35,11 +35,11 @@ export default async function LandingPage() {
       <MouseGlow />
 
       {/* Background glow structures */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
-      
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+
       {/* Orbs de degradado difuminados estilo premium */}
-      <div className="absolute top-[10%] left-[-10%] w-[380px] h-[380px] rounded-full bg-violet-600/10 dark:bg-violet-600/20 blur-3xl pointer-events-none animate-pulse duration-5000"></div>
-      <div className="absolute top-[40%] right-[-10%] w-[380px] h-[380px] rounded-full bg-primary/10 dark:bg-primary/20 blur-3xl pointer-events-none animate-pulse duration-7000"></div>
+      <div className="absolute top-[10%] left-[-10%] w-96 h-96 rounded-full bg-violet-600/10 dark:bg-violet-600/20 blur-3xl pointer-events-none animate-pulse duration-5000"></div>
+      <div className="absolute top-[40%] right-[-10%] w-96 h-96 rounded-full bg-primary/10 dark:bg-primary/20 blur-3xl pointer-events-none animate-pulse duration-7000"></div>
 
       {/* Header */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-slate-200/20 dark:border-slate-800/30 backdrop-blur-xs">
@@ -78,7 +78,7 @@ export default async function LandingPage() {
           Moneda principal: Euros (€) • Zona Horaria: Europe/Madrid
         </div>
 
-        <h1 className="text-4xl sm:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.05] text-transparent bg-clip-text bg-gradient-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300">
+        <h1 className="text-4xl sm:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300">
           Controla tus gastos diarios en familia con total claridad
         </h1>
 
@@ -153,7 +153,7 @@ export default async function LandingPage() {
             {/* Transacciones Recientes del Mockup */}
             <div className="mt-4 border border-slate-200/50 dark:border-slate-800/50 bg-slate-500/5 rounded-2xl p-4 space-y-3.5">
               <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Gastos Recientes</div>
-              
+
               <div className="flex items-center justify-between text-xs hover:bg-muted/10 p-1 rounded-lg transition-colors">
                 <div className="flex items-center gap-3">
                   <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">

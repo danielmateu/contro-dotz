@@ -38,7 +38,7 @@ export default function RegisterPage() {
       <MouseGlow />
 
       {/* Background patterns */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[14px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
       <div className="w-full max-w-md relative z-10">
         <div className="mb-6 text-center">
@@ -146,7 +146,7 @@ export default function RegisterPage() {
 
             <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">
               {!state?.success && (
-                <Button type="submit" className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98]" disabled={pending}>
+                <Button type="submit" className="w-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98]" disabled={pending}>
                   {pending ? 'Registrando cuenta...' : 'Crear cuenta'}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>

@@ -48,7 +48,7 @@ export function MouseGlow() {
     >
       <div
         ref={glowRef}
-        className="absolute w-[350px] h-[350px] rounded-full bg-primary/10 dark:bg-primary/15 blur-3xl pointer-events-none will-change-transform"
+        className="absolute w-87.5 h-87.5 rounded-full bg-primary/10 dark:bg-primary/15 blur-3xl pointer-events-none will-change-transform"
         style={{
           left: 0,
           top: 0,

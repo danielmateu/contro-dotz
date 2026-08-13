@@ -209,7 +209,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                           )}
                         </span>
                         {expense.notes && (
-                          <span className="text-xs text-muted-foreground mt-0.5 max-w-[200px] truncate">
+                          <span className="text-xs text-muted-foreground mt-0.5 max-w-50 truncate">
                             {expense.notes}
                           </span>
                         )}
