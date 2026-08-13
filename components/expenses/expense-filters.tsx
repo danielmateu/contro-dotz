@@ -3,7 +3,7 @@
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
+import { Calendar as CalendarIcon, X } from 'lucide-react'
 import {
   Select,
   SelectContent,
@@ -11,6 +11,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover'
+import { Calendar } from '@/components/ui/calendar'
+import { cn } from '@/lib/utils'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
+import type { DateRange } from 'react-day-picker'
 
 interface Category {
   id: string
@@ -41,6 +51,37 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
   const memberId = searchParams.get('memberId') || ''
   const sortBy = searchParams.get('sortBy') || 'date_desc'
 
+  // Convertir strings de la URL a Date para el calendario
+  const calendarRange: DateRange | undefined = {
+    from: startDate ? new Date(startDate) : undefined,
+    to: endDate ? new Date(endDate) : undefined,
+  }
+
+  const handleRangeChange = (range: DateRange | undefined) => {
+    const params = new URLSearchParams(searchParams.toString())
+
+    if (range?.from) {
+      const yyyy = range.from.getFullYear()
+      const mm = String(range.from.getMonth() + 1).padStart(2, '0')
+      const dd = String(range.from.getDate()).padStart(2, '0')
+      params.set('startDate', `${yyyy}-${mm}-${dd}`)
+    } else {
+      params.delete('startDate')
+    }
+
+    if (range?.to) {
+      const yyyy = range.to.getFullYear()
+      const mm = String(range.to.getMonth() + 1).padStart(2, '0')
+      const dd = String(range.to.getDate()).padStart(2, '0')
+      params.set('endDate', `${yyyy}-${mm}-${dd}`)
+    } else {
+      params.delete('endDate')
+    }
+
+    params.delete('page')
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
   const updateFilters = (key: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString())
     if (value) {
@@ -62,33 +103,44 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
 
   return (
     <div className="p-4 border border-slate-200/50 rounded-2xl bg-background shadow-xs dark:border-slate-800/50 space-y-4">
-      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-5 items-end">
-        {/* Fecha Inicio */}
+      <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+        {/* Rango de Fechas */}
         <div className="space-y-1">
-          <Label htmlFor="startDate" className="text-xs">
-            Fecha Inicio
-          </Label>
-          <input
-            id="startDate"
-            type="date"
-            value={startDate}
-            onChange={(e) => updateFilters('startDate', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-muted/40 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </div>
-
-        {/* Fecha Fin */}
-        <div className="space-y-1">
-          <Label htmlFor="endDate" className="text-xs">
-            Fecha Fin
-          </Label>
-          <input
-            id="endDate"
-            type="date"
-            value={endDate}
-            onChange={(e) => updateFilters('endDate', e.target.value)}
-            className="flex h-9 w-full rounded-md border border-input bg-muted/40 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring"
-          />
+          <Label className="text-xs">Rango de Fechas</Label>
+          <Popover>
+            <PopoverTrigger render={
+              <Button
+                variant="outline"
+                className={cn(
+                  "w-full justify-start text-left font-normal bg-muted/40 border border-input rounded-md px-3 text-sm shadow-xs transition-colors focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-ring",
+                  (!startDate && !endDate) && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4 text-muted-foreground" />
+                {startDate ? (
+                  endDate ? (
+                    <span className="truncate">
+                      {format(new Date(startDate), "dd/MM/yyyy", { locale: es })} - {format(new Date(endDate), "dd/MM/yyyy", { locale: es })}
+                    </span>
+                  ) : (
+                    <span>
+                      {format(new Date(startDate), "dd/MM/yyyy", { locale: es })}
+                    </span>
+                  )
+                ) : (
+                  <span>Seleccionar fechas</span>
+                )}
+              </Button>
+            } />
+            <PopoverContent className="w-auto p-0" align="start">
+              <Calendar
+                mode="range"
+                selected={calendarRange}
+                onSelect={handleRangeChange}
+                locale={es}
+              />
+            </PopoverContent>
+          </Popover>
         </div>
 
         {/* Filtrar por Categoría */}
@@ -101,7 +153,7 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
             onValueChange={(val) => updateFilters('categoryId', val || '')}
             items={[{ value: '', label: 'Todas las categorías' }, ...categories.map((cat) => ({ value: cat.id, label: cat.name }))]}
           >
-            <SelectTrigger id="filterCategory" className="w-full bg-muted/40 h-9">
+            <SelectTrigger id="filterCategory" className="w-full bg-muted/40">
               <SelectValue placeholder="Todas las categorías" />
             </SelectTrigger>
             <SelectContent>
@@ -125,7 +177,7 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
             onValueChange={(val) => updateFilters('memberId', val || '')}
             items={[{ value: '', label: 'Todos los miembros' }, ...members.map((mem) => ({ value: mem.user_id, label: mem.profiles?.display_name || 'Desconocido' }))]}
           >
-            <SelectTrigger id="filterMember" className="w-full bg-muted/40 h-9">
+            <SelectTrigger id="filterMember" className="w-full bg-muted/40">
               <SelectValue placeholder="Todos los miembros" />
             </SelectTrigger>
             <SelectContent>
@@ -154,7 +206,7 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
               { value: 'amount_asc', label: 'Importe (menor primero)' },
             ]}
           >
-            <SelectTrigger id="sortBy" className="w-full bg-muted/40 h-9">
+            <SelectTrigger id="sortBy" className="w-full bg-muted/40">
               <SelectValue placeholder="Ordenar por" />
             </SelectTrigger>
             <SelectContent>
