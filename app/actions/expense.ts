@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { expenseSchema } from '@/lib/validations'
 
 /**
@@ -59,7 +58,7 @@ export async function createExpenseAction(
 
   revalidatePath('/expenses')
   revalidatePath('/dashboard')
-  redirect('/expenses')
+  return { success: 'Gasto registrado con éxito.' }
 }
 
 /**
@@ -111,7 +110,7 @@ export async function updateExpenseAction(
 
   revalidatePath('/expenses')
   revalidatePath('/dashboard')
-  redirect('/expenses')
+  return { success: 'Gasto actualizado con éxito.' }
 }
 
 /**
