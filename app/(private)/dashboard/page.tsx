@@ -17,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button, buttonVariants } from '@/components/ui/button'
 import { calculateDailyAverage, calculatePercentageChange } from '@/lib/finance-utils'
 import { Progress } from '@/components/ui/progress' // wait, we don't have shadcn progress but we can render a native div bar easily!
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   TrendingUp,
   TrendingDown,
@@ -89,7 +90,7 @@ export default async function DashboardPage() {
     supabase
       .from('expenses')
       .select(
-        'id, amount, description, expense_date, category_id, created_by, categories(name, color, icon), profiles:created_by(display_name)'
+        'id, amount, description, expense_date, category_id, created_by, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
       )
       .eq('household_id', membership.household_id)
       .gte('expense_date', currentStartDate)
@@ -107,7 +108,7 @@ export default async function DashboardPage() {
       .eq('month', currentMonthStr),
     supabase
       .from('household_members')
-      .select('user_id, profiles(display_name, email)')
+      .select('user_id, profiles(display_name, email, avatar_url, status)')
       .eq('household_id', membership.household_id)
   ])
 
@@ -527,7 +528,17 @@ export default async function DashboardPage() {
                           <span className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
                             <span>{category?.name}</span>
                             <span>•</span>
-                            <span>{creator?.display_name}</span>
+                            <span className="flex items-center gap-1">
+                              <Avatar className="h-3.5 w-3.5 border border-border/40">
+                                {creator?.avatar_url ? (
+                                  <AvatarImage src={creator.avatar_url} alt={creator.display_name || 'Miembro'} className="object-cover" />
+                                ) : null}
+                                <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-semibold">
+                                  {(creator?.display_name || 'M').substring(0, 1).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>{creator?.display_name}</span>
+                            </span>
                           </span>
                         </div>
                       </div>

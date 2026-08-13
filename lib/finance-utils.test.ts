@@ -55,9 +55,9 @@ describe('Saldos y Deudas', () => {
     const bob = balances.find((b: any) => b.user_id === 'userB')
     const charlie = balances.find((b: any) => b.user_id === 'userC')
 
-    expect(alice.balance).toBe(60) // +60
-    expect(bob.balance).toBe(-30) // -30
-    expect(charlie.balance).toBe(-30) // -30
+    expect(alice!.balance).toBe(60) // +60
+    expect(bob!.balance).toBe(-30) // -30
+    expect(charlie!.balance).toBe(-30) // -30
 
     const debts = calculateDebts(balances)
     expect(debts.length).toBe(2)
@@ -91,9 +91,9 @@ describe('Saldos y Deudas', () => {
     const bob = balances.find((b: any) => b.user_id === 'userB')
     const charlie = balances.find((b: any) => b.user_id === 'userC')
 
-    expect(alice.balance).toBe(40) // +40 (90 spent - 20 received - 30 fair)
-    expect(bob.balance).toBe(-10) // -10 (0 spent + 20 paid - 30 fair)
-    expect(charlie.balance).toBe(-30) // -30
+    expect(alice!.balance).toBe(40) // +40 (90 spent - 20 received - 30 fair)
+    expect(bob!.balance).toBe(-10) // -10 (0 spent + 20 paid - 30 fair)
+    expect(charlie!.balance).toBe(-30) // -30
 
     const debts = calculateDebts(balances)
     expect(debts.length).toBe(2)

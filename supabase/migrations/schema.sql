@@ -10,6 +10,8 @@ create table public.profiles (
   id uuid references auth.users on delete cascade primary key,
   email text not null,
   display_name text,
+  avatar_url text,
+  status text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -469,4 +471,66 @@ create policy "Miembros del hogar pueden borrar tickets"
       )
     )
   );
+
+-- Crear bucket de avatars si no existe y configurarlo como público
+insert into storage.buckets (id, name, public)
+values ('avatars', 'avatars', true)
+on conflict (id) do nothing;
+
+-- Políticas de RLS para el bucket de avatars
+create policy "Cualquiera puede leer avatars"
+  on storage.objects for select
+  using (bucket_id = 'avatars');
+
+create policy "Los usuarios pueden subir su propia imagen de perfil"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1]::uuid = auth.uid()
+  );
+
+create policy "Los usuarios pueden actualizar su propia imagen de perfil"
+  on storage.objects for update
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1]::uuid = auth.uid()
+  );
+
+create policy "Los usuarios pueden borrar su propia imagen de perfil"
+  on storage.objects for delete
+  using (
+    bucket_id = 'avatars'
+    and (storage.foldername(name))[1]::uuid = auth.uid()
+  );
+
+-- 8. TABLA: messages (mensajes del chat familiar)
+create table if not exists public.messages (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid references public.households on delete cascade not null,
+  created_by uuid references public.profiles on delete cascade not null,
+  content text not null,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Habilitar RLS en mensajes
+alter table public.messages enable row level security;
+
+-- Políticas de RLS para mensajes
+create policy "Los miembros del hogar pueden leer los mensajes"
+  on public.messages for select
+  using (household_id in (select public.get_user_households()));
+
+create policy "Los miembros del hogar pueden enviar mensajes"
+  on public.messages for insert
+  with check (
+    household_id in (select public.get_user_households())
+    and created_by = auth.uid()
+  );
+
+create policy "Los creadores pueden borrar sus propios mensajes"
+  on public.messages for delete
+  using (created_by = auth.uid());
+
+-- Activar realtime para mensajes
+alter publication supabase_realtime add table public.messages;
 

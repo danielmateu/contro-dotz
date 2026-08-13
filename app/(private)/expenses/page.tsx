@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
 import { Plus, Edit2, Receipt, Calendar, CreditCard, Tag } from 'lucide-react'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 interface ExpensesPageProps {
   searchParams: Promise<{
@@ -81,7 +82,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   let dbQuery = supabase
     .from('expenses')
     .select(
-      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name)'
+      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
     )
     .eq('household_id', membership.household_id)
 
@@ -243,7 +244,17 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
                     {/* Creador */}
                     <TableCell className="text-muted-foreground">
-                      {creator?.display_name || 'Desconocido'}
+                      <div className="flex items-center gap-2">
+                        <Avatar className="h-6 w-6 border border-border/40">
+                          {creator?.avatar_url ? (
+                            <AvatarImage src={creator.avatar_url} alt={creator.display_name || 'Miembro'} className="object-cover" />
+                          ) : null}
+                          <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-semibold">
+                            {(creator?.display_name || 'M').substring(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{creator?.display_name || 'Desconocido'}</span>
+                      </div>
                     </TableCell>
 
                     {/* Importe */}

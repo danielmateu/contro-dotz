@@ -37,6 +37,7 @@ import { es } from 'date-fns/locale'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { calculateBalances, calculateDebts } from '@/lib/finance-utils'
 import { SettlementsTabContent } from '@/components/household/settlements-tab-content'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 export default async function HouseholdPage() {
   const supabase = await createClient()
@@ -89,7 +90,7 @@ export default async function HouseholdPage() {
     const [membersRes, sentRes, expensesRes, settlementsRes] = await Promise.all([
       supabase
         .from('household_members')
-        .select('id, role, user_id, profiles(display_name, email)')
+        .select('id, role, user_id, profiles(display_name, email, avatar_url, status)')
         .eq('household_id', membership.household_id),
       supabase
         .from('invitations')
@@ -255,15 +256,37 @@ export default async function HouseholdPage() {
                             member.profiles?.display_name || 'Miembro'
                           const memberEmail =
                             member.profiles?.email || 'Desconocido'
+                          const memberAvatarUrl = member.profiles?.avatar_url
+                          const memberStatus = member.profiles?.status
+
                           return (
                             <TableRow key={member.id}>
                               <TableCell className="font-medium">
-                                {memberDisplayName}{' '}
-                                {isCurrentUser && (
-                                  <span className="text-xs text-muted-foreground font-normal">
-                                    (Tú)
-                                  </span>
-                                )}
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="h-8 w-8 border border-border/40">
+                                    {memberAvatarUrl ? (
+                                      <AvatarImage src={memberAvatarUrl} alt={memberDisplayName} className="object-cover" />
+                                    ) : null}
+                                    <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                                      {memberDisplayName.substring(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex flex-col">
+                                    <span className="flex items-center gap-1.5">
+                                      {memberDisplayName}
+                                      {isCurrentUser && (
+                                        <span className="text-xs text-muted-foreground font-normal">
+                                          (Tú)
+                                        </span>
+                                      )}
+                                    </span>
+                                    {memberStatus && (
+                                      <span className="text-[10px] text-muted-foreground italic font-normal mt-0.5">
+                                        {memberStatus}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
                               </TableCell>
                               <TableCell className="text-muted-foreground">
                                 {memberEmail}

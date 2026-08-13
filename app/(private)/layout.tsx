@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { SidebarMenuItems } from '@/components/dashboard/sidebar-menu-items'
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Sidebar,
   SidebarContent,
@@ -58,7 +59,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const [profileResult, membershipResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('display_name, email')
+      .select('display_name, email, avatar_url, status')
       .eq('id', user.id)
       .single(),
     supabase
@@ -73,6 +74,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const membership = membershipResult.data
 
   const hasHousehold = !!membership
+  const householdId = membership?.household_id || null
   const householdName = membership?.households
     ? (membership.households as any).name
     : null
@@ -105,7 +107,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
               Menú Principal
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenuItems hasHousehold={hasHousehold} />
+              <SidebarMenuItems hasHousehold={hasHousehold} householdId={householdId} userId={user.id} />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
@@ -113,16 +115,27 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
         <SidebarFooter className="border-t border-sidebar-border/50 p-4">
           {/* Perfil del usuario */}
           <div className="flex items-center gap-3 py-2 group-data-[collapsible=icon]:hidden">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-muted-foreground">
-              <User className="h-4 w-4" />
-            </div>
+            <Avatar className="h-9 w-9 border border-sidebar-border/40">
+              {profile?.avatar_url ? (
+                <AvatarImage src={profile.avatar_url} alt={profile.display_name || 'Usuario'} className="object-cover" />
+              ) : null}
+              <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
+                {(profile?.display_name || 'U').substring(0, 2).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex flex-col min-w-0 truncate">
-              <span className="text-sm font-medium text-foreground truncate">
+              <span className="text-sm font-semibold text-foreground truncate">
                 {profile?.display_name || 'Usuario'}
               </span>
-              <span className="text-xs text-muted-foreground truncate">
-                {profile?.email}
-              </span>
+              {profile?.status ? (
+                <span className="text-[10px] text-muted-foreground truncate italic">
+                  {profile.status}
+                </span>
+              ) : (
+                <span className="text-xs text-muted-foreground truncate">
+                  {profile?.email}
+                </span>
+              )}
             </div>
           </div>
 

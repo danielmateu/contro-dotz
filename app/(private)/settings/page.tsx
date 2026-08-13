@@ -36,12 +36,14 @@ export default async function SettingsPage() {
   // Cargar perfil actual
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, email')
+    .select('display_name, email, avatar_url, status')
     .eq('id', user.id)
     .single()
 
   const displayName = profile?.display_name || ''
   const email = profile?.email || ''
+  const avatarUrl = profile?.avatar_url || ''
+  const status = profile?.status || ''
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -81,8 +83,13 @@ export default async function SettingsPage() {
             </p>
           </div>
 
-          {/* Formulario de actualización de nombre */}
-          <ProfileNameForm initialName={displayName} />
+          {/* Formulario de actualización de nombre, avatar y estado */}
+          <ProfileNameForm
+            initialName={displayName}
+            initialAvatarUrl={avatarUrl}
+            initialStatus={status}
+            userId={user.id}
+          />
         </CardContent>
       </Card>
     </div>

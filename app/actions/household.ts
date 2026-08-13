@@ -182,6 +182,8 @@ export async function removeMemberAction(memberId: string, householdId: string) 
  */
 export async function updateProfileNameAction(prevState: any, formData: FormData) {
   const displayName = formData.get('displayName') as string
+  const avatarUrl = formData.get('avatarUrl') as string
+  const status = formData.get('status') as string
 
   if (!displayName || displayName.trim().length < 2) {
     return { error: 'El nombre debe tener al menos 2 caracteres.' }
@@ -195,13 +197,19 @@ export async function updateProfileNameAction(prevState: any, formData: FormData
 
   const { error } = await supabase
     .from('profiles')
-    .update({ display_name: displayName.trim() })
+    .update({
+      display_name: displayName.trim(),
+      avatar_url: avatarUrl ? avatarUrl.trim() : null,
+      status: status ? status.trim() : null,
+    })
     .eq('id', user.id)
 
   if (error) {
+    console.error('UPDATE PROFILE ERROR:', error)
     return { error: 'Error al actualizar el nombre de perfil.' }
   }
 
   revalidatePath('/settings')
+  revalidatePath('/', 'layout')
   return { success: 'Perfil actualizado con éxito.' }
 }
