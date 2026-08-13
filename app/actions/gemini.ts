@@ -121,3 +121,238 @@ Devuelve una respuesta estrictamente en formato JSON válido con la siguiente es
     return { error: 'Error inesperado al procesar el ticket de compra.' }
   }
 }
+
+/**
+ * Server Action para consultar a Gemini sobre las finanzas del hogar
+ */
+export async function askGeminiAction(
+  householdId: string,
+  userPrompt: string
+): Promise<any> {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    return {
+      error: 'Falta configurar la clave API de Gemini (GEMINI_API_KEY) en el servidor.',
+    }
+  }
+
+  // Importar de forma dinámica o normal para evitar problemas de ciclo o SSR
+  const { createClient } = await import('@/lib/supabase/server')
+  const { calculateBalances, calculateDebts } = await import('@/lib/finance-utils')
+
+  // 1. Obtener sesión del usuario y validar pertenencia al hogar
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  const { data: isMember } = await supabase
+    .from('household_members')
+    .select('id')
+    .eq('household_id', householdId)
+    .eq('user_id', user.id)
+    .limit(1)
+    .maybeSingle()
+
+  if (!isMember) {
+    return { error: 'No tienes acceso a este hogar.' }
+  }
+
+  try {
+    // 2. Cargar contexto financiero del mes actual en paralelo
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    const currentMonthNum = now.getMonth() + 1
+    const currentMonthStr = `${currentYear}-${currentMonthNum
+      .toString()
+      .padStart(2, '0')}`
+    const currentStartDate = `${currentMonthStr}-01`
+    const currentLastDay = new Date(currentYear, currentMonthNum, 0).getDate()
+    const currentEndDate = `${currentMonthStr}-${currentLastDay
+      .toString()
+      .padStart(2, '0')}`
+
+    const [
+      membersRes,
+      expensesRes,
+      budgetsRes,
+      settlementsRes,
+      allExpensesRes,
+    ] = await Promise.all([
+      // A. Miembros del hogar
+      supabase
+        .from('household_members')
+        .select('user_id, role, profiles(display_name, email)')
+        .eq('household_id', householdId),
+      // B. Gastos del mes actual
+      supabase
+        .from('expenses')
+        .select('amount, description, expense_date, created_by, categories(name)')
+        .eq('household_id', householdId)
+        .gte('expense_date', currentStartDate)
+        .lte('expense_date', currentEndDate),
+      // C. Presupuestos del mes actual
+      supabase
+        .from('budgets')
+        .select('amount, category_id, categories(name)')
+        .eq('household_id', householdId)
+        .eq('month', currentMonthStr),
+      // D. Liquidaciones registradas para el balance histórico
+      supabase
+        .from('settlements')
+        .select('payer_id, receiver_id, amount')
+        .eq('household_id', householdId),
+      // E. Todos los gastos históricos del hogar para el cálculo de balances
+      supabase
+        .from('expenses')
+        .select('created_by, amount')
+        .eq('household_id', householdId),
+    ])
+
+    const membersList = membersRes.data || []
+    const currentExpenses = expensesRes.data || []
+    const currentBudgets = budgetsRes.data || []
+    const settlementsList = settlementsRes.data || []
+    const allExpenses = allExpensesRes.data || []
+
+    // Formatear miembros y calcular balances
+    const formattedMembers = membersList.map((m) => {
+      const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+      return {
+        user_id: m.user_id,
+        profiles: {
+          display_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
+          email: prof?.email || '',
+        },
+      }
+    })
+
+    const exactBalances = calculateBalances(
+      formattedMembers,
+      allExpenses,
+      settlementsList
+    )
+    const exactDebts = calculateDebts(exactBalances)
+
+    // Agrupar gastos del mes actual por categoría
+    const categorySpentMap: Record<string, number> = {}
+    currentExpenses.forEach((exp) => {
+      const catName = (exp.categories as any)?.name || 'Otros'
+      categorySpentMap[catName] = (categorySpentMap[catName] || 0) + Number(exp.amount)
+    })
+
+    const budgetsContext = currentBudgets.map((b) => {
+      const catName = (b.categories as any)?.name || 'Categoría'
+      const limit = Number(b.amount)
+      const spent = categorySpentMap[catName] || 0
+      return {
+        categoria: catName,
+        limite: limit,
+        gastado: spent,
+        porcentaje_consumido: limit > 0 ? Math.round((spent / limit) * 100) : 0,
+      }
+    })
+
+    const expensesContext = currentExpenses.map((exp) => ({
+      fecha: exp.expense_date,
+      importe: Number(exp.amount),
+      categoria: (exp.categories as any)?.name || 'Otros',
+      concepto: exp.description,
+      registrado_por:
+        formattedMembers.find((m) => m.user_id === exp.created_by)?.profiles
+          ?.display_name || 'Desconocido',
+    }))
+
+    const balancesContext = exactBalances.map((b) => ({
+      nombre: b.name,
+      gastado_personalmente: b.spent,
+      balance_neto: b.balance,
+      estado:
+        b.balance > 0
+          ? `Se le debe ${b.balance}€`
+          : b.balance < 0
+            ? `Debe ${Math.abs(b.balance)}€`
+            : 'Al día',
+    }))
+
+    const debtsContext = exactDebts.map((d) => ({
+      debe_pagar: d.from_name,
+      a_favor_de: d.to_name,
+      importe: d.amount,
+    }))
+
+    const householdContext = {
+      mes_actual: currentMonthStr,
+      miembros: formattedMembers.map((m) => m.profiles?.display_name),
+      gastos_del_mes: expensesContext,
+      presupuestos_del_mes: budgetsContext,
+      balances_y_cuentas: {
+        saldos_netos: balancesContext,
+        transferencias_sugeridas: debtsContext,
+      },
+    }
+
+    // 3. Crear el prompt estructurado para Gemini
+    const systemPrompt = `Actúas como Gemini AI, el asistente financiero inteligente del hogar.
+Tu objetivo es ayudar a los miembros de la familia a entender sus gastos, balances y cuentas.
+Te facilito el contexto financiero del hogar actual en formato JSON para el mes de ${currentMonthStr}:
+${JSON.stringify(householdContext, null, 2)}
+
+Instrucciones para responder:
+- Responde a la consulta del usuario de forma familiar, cercana y muy concisa (no más de 3 párrafos).
+- Utiliza negritas en markdown para resaltar importes, nombres de personas o categorías.
+- No muestres código JSON en tu respuesta. Tradúcelo todo a un formato de texto amigable en español.
+- Si te preguntan sobre quién le debe a quién, fíjate en "transferencias_sugeridas" en el JSON, ya que están optimizadas matemáticamente.
+- Sé preciso con los datos del JSON. Si no tienes datos sobre lo que te preguntan, indícalo con amabilidad.
+- La pregunta del usuario fue: "${userPrompt.replace(/@gemini/gi, '').trim()}"`
+
+    // 4. Llamar a la API de Gemini
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: systemPrompt }],
+            },
+          ],
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('Gemini API HTTP Error:', errText)
+      throw new Error('Error al conectar con la API de Gemini')
+    }
+
+    const resJson = await response.json()
+    const botReply = resJson?.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!botReply) {
+      throw new Error('Respuesta de bot vacía')
+    }
+
+    // 5. Insertar la respuesta del bot en la tabla de mensajes
+    await supabase.from('messages').insert({
+      household_id: householdId,
+      created_by: null,
+      is_bot: true,
+      content: botReply.trim(),
+    })
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('askGeminiAction Error:', err)
+    return {
+      error:
+        'No he podido procesar tu solicitud con Gemini en este momento. Inténtalo de nuevo.',
+    }
+  }
+}
+

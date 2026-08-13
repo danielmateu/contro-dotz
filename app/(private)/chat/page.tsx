@@ -46,7 +46,7 @@ export default async function ChatPage() {
       .eq('household_id', householdId),
     supabase
       .from('messages')
-      .select('id, content, created_at, created_by')
+      .select('id, content, created_at, created_by, is_bot')
       .eq('household_id', householdId)
       .order('created_at', { ascending: true })
       .limit(50)

@@ -560,3 +560,30 @@ create policy "Los miembros del hogar pueden gestionar la lista de la compra"
 
 -- Activar realtime para la lista de la compra
 alter publication supabase_realtime add table public.shopping_list;
+
+-- 10. BOT GEMINI PROFILE & RLS
+insert into public.profiles (id, email, display_name, status, avatar_url)
+values (
+  '00000000-0000-0000-0000-000000000000',
+  'gemini@contro-dotz.ai',
+  'Gemini AI',
+  'Asistente Financiero 🤖',
+  'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&h=150&fit=crop'
+)
+on conflict (id) do nothing;
+
+-- Actualizar política RLS para permitir que todos los usuarios vean el perfil del bot
+drop policy if exists "Los usuarios pueden ver su propio perfil y perfiles relacionados" on public.profiles;
+
+create policy "Los usuarios pueden ver su propio perfil y perfiles relacionados"
+  on public.profiles for select
+  using (
+    id = auth.uid() 
+    or id in (
+      select user_id from public.household_members where household_id in (select public.get_user_households())
+    )
+    or id in (
+      select invited_by from public.invitations where lower(email) = lower(auth.jwt()->>'email')
+    )
+    or id = '00000000-0000-0000-0000-000000000000'
+  );

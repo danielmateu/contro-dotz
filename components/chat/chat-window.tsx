@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { askGeminiAction } from '@/app/actions/gemini'
 import {
   MessageGroup,
   Message,
@@ -28,7 +29,8 @@ interface ChatMessage {
   id: string
   content: string
   created_at: string
-  created_by: string
+  created_by: string | null
+  is_bot?: boolean
 }
 
 interface ChatWindowProps {
@@ -49,6 +51,7 @@ export function ChatWindow({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputMessage, setInputMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
+  const [isBotTyping, setIsBotTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -127,6 +130,18 @@ export function ChatWindow({
           if (prev.some((m) => m.id === createdMessage.id)) return prev
           return [...prev, createdMessage]
         })
+
+        // Invocar de fondo al bot Gemini si se le menciona en el mensaje
+        if (messageText.toLowerCase().includes('@gemini')) {
+          setIsBotTyping(true)
+          askGeminiAction(householdId, messageText)
+            .catch((err) => {
+              console.error('Error al consultar a Gemini:', err)
+            })
+            .finally(() => {
+              setIsBotTyping(false)
+            })
+        }
       }
     } catch (err: any) {
       console.error('Error al enviar el mensaje:', err)
@@ -138,7 +153,17 @@ export function ChatWindow({
   }
 
   // Ayudante para obtener datos de perfil de un miembro
-  const getMemberProfile = (senderId: string): Member => {
+  const getMemberProfile = (senderId: string | null, isBot?: boolean): Member => {
+    if (isBot || !senderId) {
+      return {
+        user_id: '',
+        role: 'member',
+        display_name: 'Gemini AI',
+        avatar_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&h=80&fit=crop',
+        status: 'Asistente Financiero 🤖',
+        email: 'gemini@contro-dotz.ai',
+      }
+    }
     const member = members.find((m) => m.user_id === senderId)
     return member || {
       user_id: senderId,
@@ -272,7 +297,7 @@ export function ChatWindow({
               <MessageGroup className="gap-4">
                 {groupedMessages[dateKey].map((msg) => {
                   const isMe = msg.created_by === userId
-                  const sender = getMemberProfile(msg.created_by)
+                  const sender = getMemberProfile(msg.created_by, msg.is_bot)
 
                   return (
                     <Message key={msg.id} align={isMe ? 'end' : 'start'} className="px-1">
@@ -322,6 +347,17 @@ export function ChatWindow({
             </div>
           ))
         )}
+
+        {/* Indicador de escritura del bot Gemini */}
+        {isBotTyping && (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground italic px-2 animate-pulse mt-2">
+            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+            <span className="ml-1 font-semibold text-primary">Gemini AI está analizando los datos del hogar... 🤖</span>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
