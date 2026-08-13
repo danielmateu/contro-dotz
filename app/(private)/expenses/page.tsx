@@ -13,6 +13,7 @@ export const metadata: Metadata = {
 import { ExpenseFilters } from '@/components/expenses/expense-filters'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { DeleteExpenseButton } from '@/components/expenses/delete-expense-button'
+import { ReceiptButton } from '@/components/expenses/receipt-button'
 import { formatCurrency, formatDate } from '@/lib/format'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
@@ -80,7 +81,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   let dbQuery = supabase
     .from('expenses')
     .select(
-      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, categories(name, color, icon), profiles:created_by(display_name)'
+      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name)'
     )
     .eq('household_id', membership.household_id)
 
@@ -103,12 +104,15 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       .order('created_at', { ascending: false })
   }
 
-  // Ejecutar las tres consultas de forma concurrente
   const [categoriesRes, membersRes, expensesRes] = await Promise.all([
     categoriesPromise,
     membersPromise,
     dbQuery
   ])
+
+  if (expensesRes.error) {
+    console.error('Error fetching expenses:', expensesRes.error)
+  }
 
   const categories = categoriesRes.data
   const members = membersRes.data
@@ -198,8 +202,11 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                     {/* Concepto / Notas */}
                     <TableCell>
                       <div className="flex flex-col">
-                        <span className="font-semibold text-foreground">
+                        <span className="font-semibold text-foreground flex items-center gap-1.5">
                           {expense.description}
+                          {expense.receipt_path && (
+                            <ReceiptButton receiptPath={expense.receipt_path} />
+                          )}
                         </span>
                         {expense.notes && (
                           <span className="text-xs text-muted-foreground mt-0.5 max-w-[200px] truncate">
@@ -257,6 +264,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                             expense_date: expense.expense_date,
                             payment_method: expense.payment_method,
                             notes: expense.notes,
+                            receipt_path: expense.receipt_path,
                           }}
                           trigger={
                             <Button

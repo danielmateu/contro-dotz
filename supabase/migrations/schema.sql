@@ -57,6 +57,7 @@ create table public.expenses (
   expense_date date not null,
   payment_method text check (payment_method in ('Efectivo', 'Tarjeta', 'Transferencia', 'Domiciliación', 'Bizum', 'Otro')) not null,
   notes text,
+  receipt_path text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -422,3 +423,50 @@ create policy "Los miembros pueden registrar liquidaciones en su hogar"
 create policy "Los miembros pueden eliminar liquidaciones de su hogar"
   on public.settlements for delete
   using (household_id in (select public.get_user_households()));
+
+-- ==========================================
+-- ALMACENAMIENTO (Supabase Storage)
+-- ==========================================
+
+-- Crear bucket de tickets si no existe
+insert into storage.buckets (id, name, public)
+values ('receipts', 'receipts', false)
+on conflict (id) do nothing;
+
+-- Asegurar RLS en storage.objects
+alter table storage.objects enable row level security;
+
+-- Políticas de RLS para el bucket de tickets
+create policy "Miembros del hogar pueden leer tickets"
+  on storage.objects for select
+  using (
+    bucket_id = 'receipts'
+    and (
+      (storage.foldername(name))[1]::uuid in (
+        select household_id from public.household_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Miembros del hogar pueden subir tickets"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'receipts'
+    and (
+      (storage.foldername(name))[1]::uuid in (
+        select household_id from public.household_members where user_id = auth.uid()
+      )
+    )
+  );
+
+create policy "Miembros del hogar pueden borrar tickets"
+  on storage.objects for delete
+  using (
+    bucket_id = 'receipts'
+    and (
+      (storage.foldername(name))[1]::uuid in (
+        select household_id from public.household_members where user_id = auth.uid()
+      )
+    )
+  );
+

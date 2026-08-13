@@ -34,7 +34,7 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
   // Cargar el gasto y validar que pertenece al mismo hogar
   const { data: expense } = await supabase
     .from('expenses')
-    .select('id, amount, category_id, description, expense_date, payment_method, notes, household_id')
+    .select('id, amount, category_id, description, expense_date, payment_method, notes, household_id, receipt_path')
     .eq('id', expenseId)
     .single()
 
@@ -65,6 +65,7 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
           expense_date: expense.expense_date,
           payment_method: expense.payment_method,
           notes: expense.notes,
+          receipt_path: expense.receipt_path,
         }}
       />
     </div>

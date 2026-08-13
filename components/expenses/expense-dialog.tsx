@@ -25,8 +25,9 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, Check, Save, Sparkles } from 'lucide-react'
+import { AlertCircle, Check, Save, Sparkles, Receipt, X } from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
+import { createClient } from '@/lib/supabase/client'
 // @ts-ignore
 import { __iconNode as SparklesData } from 'lucide-react/dist/esm/icons/sparkles.mjs'
 // @ts-ignore
@@ -57,6 +58,7 @@ interface ExpenseDialogProps {
     expense_date: string
     payment_method: string
     notes?: string | null
+    receipt_path?: string | null
   } // Requerido para editar
   trigger?: React.ReactElement
   className?: string
@@ -95,6 +97,9 @@ export function ExpenseDialog({
   const [paymentMethod, setPaymentMethod] = useState('Tarjeta')
   const [notes, setNotes] = useState('')
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [deleteReceipt, setDeleteReceipt] = useState(false)
+
   // Estados de escaneo IA
   const [isScanning, setIsScanning] = useState(false)
   const [scanError, setScanError] = useState('')
@@ -120,6 +125,8 @@ export function ExpenseDialog({
       setScanError('')
       setScanSuccess(false)
       setFormState({})
+      setSelectedFile(null)
+      setDeleteReceipt(false)
     }
   }, [open, expense, defaultDate])
 
@@ -133,9 +140,33 @@ export function ExpenseDialog({
     }
   }, [formState])
 
+  const handleViewReceipt = async () => {
+    if (!expense?.receipt_path) return
+    try {
+      const supabase = createClient()
+      const { data } = await supabase.storage
+        .from('receipts')
+        .createSignedUrl(expense.receipt_path, 300)
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank')
+      } else {
+        alert('No se pudo obtener el enlace del ticket.')
+      }
+    } catch (err) {
+      console.error(err)
+      alert('Error al abrir el ticket.')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    if (selectedFile) {
+      formData.append('receipt', selectedFile)
+    }
+    if (deleteReceipt) {
+      formData.append('delete_receipt', 'true')
+    }
     setIsSavingExpense(true)
     const startTime = Date.now()
 
@@ -178,6 +209,8 @@ export function ExpenseDialog({
     setIsScanning(true)
     setScanError('')
     setScanSuccess(false)
+    setSelectedFile(file)
+    setDeleteReceipt(false)
 
     const reader = new FileReader()
     reader.onloadend = async () => {
@@ -433,6 +466,62 @@ export function ExpenseDialog({
                 disabled={isScanning}
                 className="bg-muted/50 focus:bg-background min-h-[80px]"
               />
+            </div>
+
+            {/* Ticket de compra */}
+            <div className="space-y-1">
+              <Label className="text-xs">Ticket de compra (opcional)</Label>
+              
+              {selectedFile ? (
+                <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-emerald-500/20">
+                  <Receipt className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <span className="truncate flex-1 font-medium">{selectedFile.name}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    onClick={() => setSelectedFile(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : expense?.receipt_path && !deleteReceipt ? (
+                <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-primary/20">
+                  <Receipt className="h-4 w-4 text-primary shrink-0" />
+                  <span className="truncate flex-1 font-medium text-muted-foreground">Ticket guardado</span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-7 px-2 text-[10px]"
+                    onClick={handleViewReceipt}
+                  >
+                    Ver
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    onClick={() => setDeleteReceipt(true)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Input
+                  id="receipt-manual"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] || null
+                    setSelectedFile(file)
+                  }}
+                  disabled={isScanning}
+                  className="bg-muted/50 focus:bg-background h-9 text-xs"
+                />
+              )}
             </div>
           </div>
 
