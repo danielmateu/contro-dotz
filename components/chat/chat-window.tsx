@@ -294,7 +294,7 @@ export function ChatWindow({
         </div>
 
         {/* Lista de avatares de miembros en la cabecera */}
-        <div className="flex items-center gap-1.5 self-start sm:self-center overflow-x-auto max-w-full pb-1 sm:pb-0">
+        <div className="flex items-center gap-1.5 self-start sm:self-center overflow-x-auto scrollbar-none max-w-full py-1">
           <div className="text-[10px] text-muted-foreground flex items-center gap-1 mr-1 font-semibold uppercase tracking-wider">
             <Users className="h-3.5 w-3.5" />
             Familia:
@@ -302,7 +302,7 @@ export function ChatWindow({
           {members.map((m) => (
             <div
               key={m.user_id}
-              className="relative group flex-shrink-0"
+              className="relative group"
               title={`${m.display_name} ${m.status ? `(${m.status})` : ''}`}
             >
               <Avatar className="h-7 w-7 border-2 border-background shadow-xs hover:scale-105 transition-transform duration-200">
@@ -319,7 +319,7 @@ export function ChatWindow({
               )}
 
               {/* Tooltip personalizado */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block bg-slate-950 text-white text-[10px] px-2 py-1 rounded-md shadow-lg whitespace-nowrap z-50">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden bg-slate-950 text-white text-[10px] px-2 py-1 rounded-md shadow-lg whitespace-nowrap z-50">
                 <p className="font-bold">{m.display_name}</p>
                 {m.status && <p className="text-slate-300 italic mt-0.5">{m.status}</p>}
               </div>
@@ -388,11 +388,10 @@ export function ChatWindow({
                           </span>
                         </MessageHeader>
                         <div
-                          className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] break-words shadow-xs border ${
-                            isMe
-                              ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
-                              : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
-                          }`}
+                          className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] break-words shadow-xs border ${isMe
+                            ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
+                            : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
+                            }`}
                         >
                           {msg.content}
                         </div>
