@@ -51,7 +51,7 @@ export function HogarCompartidoDemo() {
   return (
     <div className="flex flex-col h-full justify-between text-xs space-y-4">
       <div className="space-y-2.5">
-        <div className="flex justify-between items-center text-muted-foreground border-b border-slate-800 pb-1.5 font-bold uppercase tracking-wider text-[10px]">
+        <div className="flex justify-between items-center text-muted-foreground border-b border-slate-200 dark:border-slate-800 pb-1.5 font-bold uppercase tracking-wider text-[10px]">
           <span>Miembro</span>
           <span>Balance Familiar</span>
         </div>
@@ -69,7 +69,7 @@ export function HogarCompartidoDemo() {
               >
                 {b.name.substring(0, 2)}
               </div>
-              <span className="font-semibold text-slate-200">{b.name}</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-200">{b.name}</span>
             </div>
             <motion.span
               key={b.amount}
@@ -77,10 +77,10 @@ export function HogarCompartidoDemo() {
               animate={{ scale: 1 }}
               className={`font-bold ${
                 b.amount > 0
-                  ? 'text-emerald-400'
+                  ? 'text-emerald-600 dark:text-emerald-400'
                   : b.amount < 0
-                    ? 'text-rose-400'
-                    : 'text-slate-400'
+                    ? 'text-rose-600 dark:text-rose-400'
+                    : 'text-slate-500 dark:text-slate-400'
               }`}
             >
               {b.amount > 0 ? `+${b.amount.toFixed(2)} €` : `${b.amount.toFixed(2)} €`}
@@ -94,7 +94,7 @@ export function HogarCompartidoDemo() {
           <button
             onClick={handleSettle}
             disabled={animating}
-            className="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-violet-800 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
+            className="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-violet-850/50 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
           >
             {animating ? (
               <>
@@ -114,12 +114,12 @@ export function HogarCompartidoDemo() {
             animate={{ opacity: 1, scale: 1 }}
             className="w-full space-y-2"
           >
-            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-2 rounded-xl text-center font-medium flex items-center justify-center gap-1.5">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-xl text-center font-medium flex items-center justify-center gap-1.5">
               <Check className="h-4 w-4 stroke-[3px]" /> ¡Hogar liquidado! Todo a cero.
             </div>
             <button
               onClick={handleReset}
-              className="w-full border border-slate-700 hover:bg-slate-800 text-slate-300 py-1.5 rounded-lg transition-colors font-medium text-[10px]"
+              className="w-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 py-1.5 rounded-lg transition-colors font-medium text-[10px]"
             >
               Reiniciar Simulación
             </button>
@@ -152,11 +152,11 @@ export function EscanerIADemo() {
 
   return (
     <div className="flex flex-col h-full justify-between text-xs space-y-3">
-      <div className="relative border border-dashed border-slate-800 bg-slate-900/30 rounded-xl p-3 flex-1 overflow-hidden flex flex-col justify-center min-h-[130px]">
+      <div className="relative border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 rounded-xl p-3 flex-1 overflow-hidden flex flex-col justify-center min-h-[130px]">
         {scanState === 'idle' && (
           <div className="text-center space-y-2 py-4">
             <span className="text-2xl select-none">🧾</span>
-            <p className="text-slate-400 text-[11px] leading-relaxed">
+            <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
               Sube un ticket de compra de ejemplo para ver extraer a Gemini la información.
             </p>
           </div>
@@ -172,7 +172,7 @@ export function EscanerIADemo() {
               className="absolute left-0 right-0 h-0.5 bg-emerald-500/80 shadow-md shadow-emerald-500 z-10 pointer-events-none"
             />
             <span className="text-2xl animate-pulse">🧾</span>
-            <p className="text-emerald-400 font-semibold text-[10px] animate-pulse">
+            <p className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] animate-pulse">
               Gemini extrae los datos...
             </p>
           </div>
@@ -184,15 +184,15 @@ export function EscanerIADemo() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-2 text-[11px]"
           >
-            <div className="flex justify-between border-b border-slate-800 pb-1 font-bold text-slate-200">
+            <div className="flex justify-between border-b border-slate-100 dark:border-slate-800 pb-1 font-bold text-slate-800 dark:text-slate-200">
               <span>{data.establecimiento}</span>
-              <span className="text-emerald-400">{data.total}</span>
+              <span className="text-emerald-600 dark:text-emerald-400">{data.total}</span>
             </div>
-            <div className="grid grid-cols-2 gap-y-1 text-slate-400 text-[10px]">
-              <div>Fecha: <span className="text-slate-300 font-semibold">{data.fecha}</span></div>
-              <div>Categoría: <span className="text-slate-300 font-semibold">{data.categoria}</span></div>
+            <div className="grid grid-cols-2 gap-y-1 text-slate-500 dark:text-slate-400 text-[10px]">
+              <div>Fecha: <span className="text-slate-700 dark:text-slate-300 font-semibold">{data.fecha}</span></div>
+              <div>Categoría: <span className="text-slate-700 dark:text-slate-300 font-semibold">{data.categoria}</span></div>
             </div>
-            <div className="mt-1 pt-1.5 border-t border-slate-800/50">
+            <div className="mt-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/50">
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1">
                 Artículos detectados:
               </p>
@@ -200,7 +200,7 @@ export function EscanerIADemo() {
                 {data.items.map((item: string) => (
                   <span
                     key={item}
-                    className="px-1.5 py-0.5 bg-slate-800 border border-slate-700/50 text-slate-300 rounded text-[9px]"
+                    className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 rounded text-[9px]"
                   >
                     {item}
                   </span>
@@ -254,8 +254,8 @@ export function PresupuestosDemo() {
               spent >= 100
                 ? 'bg-rose-500/10 border-rose-500/20 text-rose-500'
                 : spent >= 80
-                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500'
+                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
             }`}
           >
             {spent}%
@@ -263,7 +263,7 @@ export function PresupuestosDemo() {
         </div>
 
         {/* Barra de progreso */}
-        <div className="h-2 w-full rounded-full bg-slate-800 overflow-hidden relative">
+        <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
           <motion.div
             animate={{ width: `${Math.min(spent, 100)}%` }}
             className={`h-full rounded-full ${
@@ -281,7 +281,7 @@ export function PresupuestosDemo() {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="bg-rose-500/15 border border-rose-500/30 text-rose-400 p-2 rounded-xl text-[10px] leading-relaxed flex gap-1.5 items-start"
+                className="bg-rose-500/10 border border-rose-500/20 dark:border-rose-500/30 text-rose-600 dark:text-rose-400 p-2 rounded-xl text-[10px] leading-relaxed flex gap-1.5 items-start"
               >
                 <AlertTriangle className="h-4 w-4 shrink-0 stroke-[2.5px]" />
                 <div>
@@ -296,7 +296,7 @@ export function PresupuestosDemo() {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="bg-amber-500/15 border border-amber-500/30 text-amber-400 p-2 rounded-xl text-[10px] leading-relaxed flex gap-1.5 items-start"
+                className="bg-amber-500/10 border border-amber-500/20 dark:border-amber-500/30 text-amber-600 dark:text-amber-400 p-2 rounded-xl text-[10px] leading-relaxed flex gap-1.5 items-start"
               >
                 <AlertTriangle className="h-4 w-4 shrink-0 stroke-[2.5px]" />
                 <div>
@@ -311,7 +311,7 @@ export function PresupuestosDemo() {
                 initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -5 }}
-                className="text-slate-400 italic text-[10.5px] leading-normal pt-2 text-center"
+                className="text-slate-500 dark:text-slate-400 italic text-[10.5px] leading-normal pt-2 text-center"
               >
                 "Simula añadir gastos en cenas o cines para activar las notificaciones predictivas automáticas."
               </motion.div>
@@ -330,7 +330,7 @@ export function PresupuestosDemo() {
         </button>
         <button
           onClick={resetSpend}
-          className="border border-slate-800 hover:bg-slate-800 text-slate-400 px-3.5 rounded-xl transition-colors"
+          className="border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 px-3.5 rounded-xl transition-colors"
         >
           Reiniciar
         </button>
@@ -395,7 +395,7 @@ export function ChatGeminiDemo() {
             <div
               className={`px-3 py-1.5 rounded-2xl max-w-[85%] leading-normal text-[10.5px] ${
                 m.sender === 'user'
-                  ? 'bg-slate-800 text-slate-100 rounded-tr-none'
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tr-none'
                   : 'bg-violet-600 text-white rounded-tl-none'
               }`}
             >
@@ -415,7 +415,7 @@ export function ChatGeminiDemo() {
       </div>
 
       {/* Sugerencias de preguntas rápidas */}
-      <div className="pt-2 border-t border-slate-800/80 space-y-1.5 shrink-0">
+      <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1.5 shrink-0">
         <p className="text-[8.5px] text-muted-foreground uppercase font-bold tracking-wider">
           Preguntas sugeridas:
         </p>
@@ -423,21 +423,21 @@ export function ChatGeminiDemo() {
           <button
             onClick={() => askQuestion('¿Cuánto gastamos en alimentación?')}
             disabled={typing}
-            className="text-[9.5px] bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 px-2 py-1 rounded-lg border border-slate-700/50 transition-colors shrink-0"
+            className="text-[9.5px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors shrink-0"
           >
             📊 Gastos Alimentación
           </button>
           <button
             onClick={() => askQuestion('¿Quiénes deben dinero y cuánto?')}
             disabled={typing}
-            className="text-[9.5px] bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 px-2 py-1 rounded-lg border border-slate-700/50 transition-colors shrink-0"
+            className="text-[9.5px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors shrink-0"
           >
             💸 Saldos familiares
           </button>
           <button
             onClick={() => askQuestion('Dame un consejo para ahorrar')}
             disabled={typing}
-            className="text-[9.5px] bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-300 px-2 py-1 rounded-lg border border-slate-700/50 transition-colors shrink-0"
+            className="text-[9.5px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors shrink-0"
           >
             💡 Consejo ahorro
           </button>
@@ -492,7 +492,7 @@ export function ListaCompraDemo() {
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
-              className="absolute w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] font-bold py-0.5 rounded-md text-center"
+              className="absolute w-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[9px] font-bold py-0.5 rounded-md text-center"
             >
               📢 {expenseNotice}
             </motion.div>
@@ -508,14 +508,14 @@ export function ListaCompraDemo() {
             onClick={() => toggleItem(item.id)}
             className={`flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer select-none ${
               item.done
-                ? 'bg-background/40 border-dashed border-slate-800 opacity-60'
-                : 'bg-slate-900/60 border-slate-800/80 hover:border-slate-700'
+                ? 'bg-background/40 border-dashed border-slate-200 dark:border-slate-800 opacity-60'
+                : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
             }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div
                 className={`h-4 w-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
-                  item.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-700'
+                  item.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700'
                 }`}
               >
                 {item.done && <Check className="h-2.5 w-2.5 font-bold" />}
@@ -523,7 +523,7 @@ export function ListaCompraDemo() {
               <div className="truncate">
                 <p
                   className={`font-semibold leading-tight text-[11px] truncate ${
-                    item.done ? 'line-through text-slate-500' : 'text-slate-200'
+                    item.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
                   }`}
                 >
                   {item.name}
@@ -536,8 +536,8 @@ export function ListaCompraDemo() {
             <span
               className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
                 item.done
-                  ? 'bg-slate-800 text-slate-500'
-                  : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/10'
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
+                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10'
               }`}
             >
               {item.price.toFixed(2)} €
@@ -571,37 +571,37 @@ export function ProyeccionInformesDemo() {
   return (
     <div className="flex flex-col h-full justify-between text-xs space-y-3">
       {/* Vista previa del Informe */}
-      <div className="border border-slate-850 bg-slate-900/40 rounded-xl p-3 flex-1 text-[10px] space-y-2">
-        <div className="flex justify-between items-center border-b border-slate-800 pb-1 font-bold text-slate-300">
+      <div className="border border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 flex-1 text-[10px] space-y-2">
+        <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-1 font-bold text-slate-700 dark:text-slate-300">
           <span>INFORMES MENSUALES</span>
-          <span className="text-[8px] bg-indigo-500/20 text-indigo-400 px-1.5 py-0.2 rounded uppercase">Agosto</span>
+          <span className="text-[8px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.2 rounded uppercase">Agosto</span>
         </div>
         
         {/* Gráfico de barras mini */}
         <div className="space-y-1.5 pt-1">
           <div className="space-y-0.5">
-            <div className="flex justify-between text-[8.5px] text-slate-400">
+            <div className="flex justify-between text-[8.5px] text-slate-500 dark:text-slate-400">
               <span>Alimentación (Presupuesto: 200€)</span>
-              <span className="font-bold text-slate-200">164,00 €</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">164,00 €</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
               <div className="h-full bg-amber-500" style={{ width: '82%' }}></div>
             </div>
           </div>
           <div className="space-y-0.5">
-            <div className="flex justify-between text-[8.5px] text-slate-400">
+            <div className="flex justify-between text-[8.5px] text-slate-500 dark:text-slate-400">
               <span>Ocio y Cenas (Presupuesto: 100€)</span>
-              <span className="font-bold text-slate-200">105,00 €</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">105,00 €</span>
             </div>
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
               <div className="h-full bg-rose-500" style={{ width: '100%' }}></div>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-between items-center text-[9px] pt-1 text-slate-400 border-t border-slate-800/50 mt-2">
-          <span>Gasto Total: <strong className="text-slate-200">1.450,20 €</strong></span>
-          <span>Proyección: <strong className="text-violet-400">~1.680 €</strong></span>
+        <div className="flex justify-between items-center text-[9px] pt-1 text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/50 mt-2">
+          <span>Gasto Total: <strong className="text-slate-800 dark:text-slate-200">1.450,20 €</strong></span>
+          <span>Proyección: <strong className="text-violet-600 dark:text-violet-400">~1.680 €</strong></span>
         </div>
       </div>
 
@@ -629,14 +629,14 @@ export function ProyeccionInformesDemo() {
             animate={{ opacity: 1, scale: 1 }}
             className="space-y-2"
           >
-            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 p-2 rounded-xl text-center font-medium flex items-center justify-center gap-1.5">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-xl text-center font-medium flex items-center justify-center gap-1.5">
               <Check className="h-4 w-4 stroke-[3px]" /> ¡Enviado a toda la familia! 🚀
             </div>
             <button
               onClick={resetReport}
-              className="w-full border border-slate-700 hover:bg-slate-800 text-slate-300 py-1 rounded-lg transition-colors font-medium text-[9px]"
+              className="w-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 py-1.5 rounded-lg transition-colors font-medium text-[10px]"
             >
-              Enviar de nuevo
+              Reiniciar Simulación
             </button>
           </motion.div>
         )}
