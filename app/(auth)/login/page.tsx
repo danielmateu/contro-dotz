@@ -18,6 +18,7 @@ import {
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, ArrowRight, ShieldCheck, Mail, Lock } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 const initialState = {
   error: '',
@@ -54,7 +55,12 @@ function LoginForm() {
       {/* Background patterns */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
-      <div className="w-full max-w-md relative z-10">
+      <motion.div
+        initial={{ opacity: 0, y: 20, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.45, ease: 'easeOut' }}
+        className="w-full max-w-md relative z-10"
+      >
         <div className="mb-6 text-center">
           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
             <ShieldCheck className="h-6 w-6" />
@@ -152,7 +158,7 @@ function LoginForm() {
             </CardFooter>
           </form>
         </Card>
-      </div>
+      </motion.div>
     </div>
   )
 }
