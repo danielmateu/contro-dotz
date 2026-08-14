@@ -7,6 +7,16 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { AlertCircle, CheckCircle2, Calendar, Landmark, Loader2, Trash2, FileText, Upload } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
@@ -30,7 +40,7 @@ export function MonthlyIncomesListForm({
   userId,
 }: MonthlyIncomesListFormProps) {
   const [isPending, startTransition] = useTransition()
-
+  
   // Obtener fecha actual para establecer valores por defecto
   const today = new Date()
   const currentMonthValue = (today.getMonth() + 1).toString().padStart(2, '0') // "01"-"12"
@@ -43,6 +53,10 @@ export function MonthlyIncomesListForm({
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  
+  // Confirmación de eliminación
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
+  const [incomeToDelete, setIncomeToDelete] = useState<string | null>(null)
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
@@ -84,7 +98,7 @@ export function MonthlyIncomesListForm({
 
     const normalized = amount.trim().replace(',', '.')
     const numericAmount = parseFloat(normalized)
-
+    
     if (isNaN(numericAmount) || numericAmount < 0) {
       setError('Introduce un importe válido y mayor o igual a 0.')
       return
@@ -111,7 +125,7 @@ export function MonthlyIncomesListForm({
         try {
           const fileExt = file.name.split('.').pop()
           filePath = `${householdId}/${userId}/${monthStr}-${Date.now()}.${fileExt}`
-
+          
           const { error: uploadError } = await supabase.storage
             .from('payrolls')
             .upload(filePath, file, {
@@ -146,16 +160,23 @@ export function MonthlyIncomesListForm({
     })
   }
 
-  const handleDeleteIncome = (incomeId: string) => {
+  const handleDeleteClick = (incomeId: string) => {
+    setIncomeToDelete(incomeId)
+    setIsConfirmOpen(true)
+  }
+
+  const confirmDelete = () => {
+    if (!incomeToDelete) return
+
     setError(null)
     setSuccess(null)
+    setIsConfirmOpen(false)
 
-    if (!confirm('¿Estás seguro de que deseas eliminar este registro de ingresos y su documento asociado?')) {
-      return
-    }
+    const id = incomeToDelete
+    setIncomeToDelete(null)
 
     startTransition(async () => {
-      const res = await deleteMonthlyIncomeAction(incomeId)
+      const res = await deleteMonthlyIncomeAction(id)
       if (res?.error) {
         setError(res.error)
       } else {
@@ -363,7 +384,7 @@ export function MonthlyIncomesListForm({
                         type="button"
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDeleteIncome(inc.id)}
+                        onClick={() => handleDeleteClick(inc.id)}
                         disabled={isPending}
                         className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
                       >
@@ -377,6 +398,27 @@ export function MonthlyIncomesListForm({
           </div>
         )}
       </div>
+
+      {/* Diálogo de Confirmación */}
+      <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas eliminar este registro de ingresos y su documento asociado? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={confirmDelete}
+            >
+              Eliminar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

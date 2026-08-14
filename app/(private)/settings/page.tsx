@@ -73,7 +73,7 @@ export default async function SettingsPage() {
   const status = profile?.status || ''
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="space-y-6">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
           Ajustes de Perfil
@@ -83,94 +83,103 @@ export default async function SettingsPage() {
         </p>
       </div>
 
-      <Card className="border-slate-200/50 shadow-md">
-        <CardHeader>
-          <CardTitle className="text-lg">Información Personal</CardTitle>
-          <CardDescription>
-            Actualiza los datos de tu perfil público y de contacto.
-          </CardDescription>
-        </CardHeader>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Columna Izquierda: Perfil, Ingresos Base e Informes */}
+        <div className="space-y-6">
+          <Card className="border-slate-200/50 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg">Información Personal e Ingreso Base</CardTitle>
+              <CardDescription>
+                Actualiza los datos de tu perfil y tus ingresos netos base para el reparto equitativo de los gastos del hogar.
+              </CardDescription>
+            </CardHeader>
 
-        <CardContent className="space-y-6">
-          {/* Correo electrónico (deshabilitado por seguridad de Auth) */}
-          <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico de la cuenta</Label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                disabled
-                className="pl-9 bg-muted/60 text-muted-foreground cursor-not-allowed border-muted-foreground/20"
-              />
-            </div>
-            <p className="text-[11px] text-muted-foreground">
-              El correo electrónico está vinculado a tu autenticación y no puede modificarse directamente.
-            </p>
-          </div>
+            <CardContent className="space-y-6">
+              {/* Correo electrónico (deshabilitado por seguridad de Auth) */}
+              <div className="space-y-2">
+                <Label htmlFor="email">Correo electrónico de la cuenta</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    disabled
+                    className="pl-9 bg-muted/60 text-muted-foreground cursor-not-allowed border-muted-foreground/20"
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground">
+                  El correo electrónico está vinculado a tu autenticación y no puede modificarse directamente.
+                </p>
+              </div>
 
-          {/* Formulario de actualización de nombre, avatar y estado */}
-          <ProfileNameForm
-            initialName={displayName}
-            initialAvatarUrl={avatarUrl}
-            initialStatus={status}
-            userId={user.id}
-          />
-        </CardContent>
-      </Card>
+              {/* Grid interno de dos columnas: Datos personales a la izquierda, Ingreso Base a la derecha */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-200/50 dark:border-slate-800/50 pt-6">
+                {/* Formulario de perfil */}
+                <div className="space-y-4">
+                  <h3 className="font-semibold text-sm text-foreground">Datos del Perfil</h3>
+                  <ProfileNameForm
+                    initialName={displayName}
+                    initialAvatarUrl={avatarUrl}
+                    initialStatus={status}
+                    userId={user.id}
+                  />
+                </div>
 
-      {/* Ingresos Mensuales */}
-      {householdId && (
-        <Card className="border-slate-200/50 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Ingresos Mensuales (Base)</CardTitle>
-            <CardDescription>
-              Introduce tus ingresos mensuales netos base para poder analizar de forma justa el reparto de los gastos del hogar.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MemberIncomeForm
-              initialIncome={monthlyIncome}
-              householdId={householdId}
-            />
-          </CardContent>
-        </Card>
-      )}
+                {/* Formulario de ingresos mensuales base */}
+                {householdId && (
+                  <div className="border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-slate-800/50 pt-6 md:pt-0 md:pl-6 space-y-4">
+                    <h3 className="font-semibold text-sm text-foreground font-heading">Ingresos Mensuales (Base)</h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed">
+                      Introduce tus ingresos netos base habituales. Se usarán para calcular la cuota proporcional de los gastos del hogar si no registras una nómina específica en un mes concreto.
+                    </p>
+                    <MemberIncomeForm
+                      initialIncome={monthlyIncome}
+                      householdId={householdId}
+                    />
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
 
-      {/* Nóminas e Ingresos Variables */}
-      {householdId && (
-        <Card className="border-slate-200/50 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Nóminas e Ingresos Variables</CardTitle>
-            <CardDescription>
-              Registra ingresos netos específicos para meses concretos (ej. nóminas con pagas extra, comisiones o bonus). Si un mes no tiene registro aquí, se usará tu ingreso base por defecto.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <MonthlyIncomesListForm
-              initialIncomes={memberIncomes}
-              householdId={householdId}
-              userId={user.id}
-            />
-          </CardContent>
-        </Card>
-      )}
+          {/* Reportes del Hogar (Opción C) */}
+          {householdId && (
+            <Card className="border-slate-200/50 shadow-md">
+              <CardHeader>
+                <CardTitle className="text-lg">Reportes del Hogar</CardTitle>
+                <CardDescription>
+                  Envía un reporte financiero detallado por email a todos los miembros de tu familia. El informe incluye desglose de gastos mensuales, límites de presupuestos consumidos y sugerencias de transferencias para liquidar saldos pendientes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SendReportButton householdId={householdId} />
+              </CardContent>
+            </Card>
+          )}
+        </div>
 
-      {/* Reportes del Hogar (Opción C) */}
-      {householdId && (
-        <Card className="border-slate-200/50 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg">Reportes del Hogar</CardTitle>
-            <CardDescription>
-              Envía un reporte financiero detallado por email a todos los miembros de tu familia. El informe incluye desglose de gastos mensuales, límites de presupuestos consumidos y sugerencias de transferencias para liquidar saldos pendientes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <SendReportButton householdId={householdId} />
-          </CardContent>
-        </Card>
-      )}
+        {/* Columna Derecha: Nóminas e Ingresos Variables */}
+        <div className="space-y-6">
+          {householdId && (
+            <Card className="border-slate-200/50 shadow-md">
+              <CardHeader>
+                <CardTitle className="text-lg">Nóminas e Ingresos Variables</CardTitle>
+                <CardDescription>
+                  Registra ingresos netos específicos para meses concretos (ej. nóminas con pagas extra, comisiones o bonus). Si un mes no tiene registro aquí, se usará tu ingreso base por defecto.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <MonthlyIncomesListForm
+                  initialIncomes={memberIncomes}
+                  householdId={householdId}
+                  userId={user.id}
+                />
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
