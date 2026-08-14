@@ -40,7 +40,7 @@ function LoadedPiggyBank({ opacity = 1.0, scale = 0.8, ...props }: { opacity?: n
       inject={(node: any) => {
         if (node.isMesh && node.material) {
           node.material = node.material.clone()
-          node.material.transparent = true
+          node.material.transparent = opacity < 1.0
           node.material.opacity = opacity
 
           // Preservar ojos negros/oscuros o ranura negra calculando luminancia
@@ -77,9 +77,9 @@ function DefaultPiggy({ opacity = 1.0, isDark, ...props }: { opacity?: number; i
           metalness={0.1}
           clearcoat={1.0}
           clearcoatRoughness={0.05}
-          transparent
+          transparent={opacity < 1.0}
           opacity={opacity}
-          transmission={isDark ? 0.15 * opacity : 0}
+          transmission={0}
           thickness={1.5}
         />
       </mesh>
@@ -87,67 +87,67 @@ function DefaultPiggy({ opacity = 1.0, isDark, ...props }: { opacity?: number; i
       {/* Hocico */}
       <mesh position={[1.5, -0.15, 0]} rotation={[0, 0, -Math.PI / 2]} castShadow>
         <cylinderGeometry args={[0.3, 0.3, 0.2, 32]} />
-        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.15} clearcoat={0.5} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.15} clearcoat={0.5} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       {/* Fosas nasales */}
       <mesh position={[1.61, -0.07, 0.08]} rotation={[0, 0, -Math.PI / 2]}>
         <cylinderGeometry args={[0.04, 0.04, 0.02, 8]} />
-        <meshBasicMaterial color="#1e293b" transparent opacity={opacity} />
+        <meshBasicMaterial color="#1e293b" transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       <mesh position={[1.61, -0.07, -0.08]} rotation={[0, 0, -Math.PI / 2]}>
         <cylinderGeometry args={[0.04, 0.04, 0.02, 8]} />
-        <meshBasicMaterial color="#1e293b" transparent opacity={opacity} />
+        <meshBasicMaterial color="#1e293b" transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
 
       {/* Ojos */}
       <mesh position={[1.05, 0.35, 0.45]}>
         <sphereGeometry args={[0.09, 16, 16]} />
-        <meshBasicMaterial color="#1e293b" transparent opacity={opacity} />
+        <meshBasicMaterial color="#1e293b" transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       <mesh position={[1.05, 0.35, -0.45]}>
         <sphereGeometry args={[0.09, 16, 16]} />
-        <meshBasicMaterial color="#1e293b" transparent opacity={opacity} />
+        <meshBasicMaterial color="#1e293b" transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
 
       {/* Oreja Derecha */}
       <mesh position={[0.4, 1.1, 0.65]} rotation={[0.3, 0.2, -0.4]} castShadow>
         <cylinderGeometry args={[0.32, 0.32, 0.08, 32]} />
-        <meshPhysicalMaterial color={isDark ? '#f472b6' : '#ec4899'} roughness={0.15} clearcoat={0.5} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#f472b6' : '#ec4899'} roughness={0.15} clearcoat={0.5} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       {/* Oreja Izquierda */}
       <mesh position={[0.4, 1.1, -0.65]} rotation={[-0.3, -0.2, -0.4]} castShadow>
         <cylinderGeometry args={[0.32, 0.32, 0.08, 32]} />
-        <meshPhysicalMaterial color={isDark ? '#f472b6' : '#ec4899'} roughness={0.15} clearcoat={0.5} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#f472b6' : '#ec4899'} roughness={0.15} clearcoat={0.5} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
 
       {/* Patas */}
       <mesh position={[0.5, -0.9, 0.6]} castShadow>
         <cylinderGeometry args={[0.18, 0.18, 0.4, 16]} />
-        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       <mesh position={[0.5, -0.9, -0.6]} castShadow>
         <cylinderGeometry args={[0.18, 0.18, 0.4, 16]} />
-        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       <mesh position={[-0.5, -0.9, 0.6]} castShadow>
         <cylinderGeometry args={[0.18, 0.18, 0.4, 16]} />
-        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
       <mesh position={[-0.5, -0.9, -0.6]} castShadow>
         <cylinderGeometry args={[0.18, 0.18, 0.4, 16]} />
-        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#ec4899' : '#db2777'} roughness={0.1} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
 
       {/* Ranura para Monedas */}
       <mesh position={[0, 0.98, 0]}>
         <boxGeometry args={[0.5, 0.04, 0.1]} />
-        <meshBasicMaterial color="#111827" transparent opacity={opacity} />
+        <meshBasicMaterial color="#111827" transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
 
       {/* Cola */}
       <mesh position={[-1.35, 0, 0]} rotation={[0.4, 0.5, 0.8]}>
         <torusGeometry args={[0.18, 0.05, 8, 24, Math.PI * 1.6]} />
-        <meshPhysicalMaterial color={isDark ? '#f472b6' : '#ec4899'} roughness={0.1} transparent opacity={opacity} />
+        <meshPhysicalMaterial color={isDark ? '#f472b6' : '#ec4899'} roughness={0.1} transparent={opacity < 1.0} opacity={opacity} />
       </mesh>
     </group>
   )
@@ -291,7 +291,7 @@ function SceneContent({ theme, hasModel }: SceneContentProps) {
     { id: 'bg5', basePosition: [-0.5, 3.2, -2.0] as [number, number, number], baseRotation: [0, Math.PI / 2, 0] as [number, number, number], scale: 0.9, opacity: 0.2, speed: 0.4, phase: 0.7 },
     { id: 'bg6', basePosition: [-5.2, 0.2, 1.0] as [number, number, number], baseRotation: [0, -Math.PI / 2, 0] as [number, number, number], scale: 1.2, opacity: 0.35, speed: 0.5, phase: 2.1 },
     { id: 'bg7', basePosition: [0.2, -3.4, -1.5] as [number, number, number], baseRotation: [0, Math.PI / 1.1, 0] as [number, number, number], scale: 1.0, opacity: 0.25, speed: 0.3, phase: 3.5 },
-    { id: 'bg8', basePosition: [5.5, -0.2, -2.5] as [number, number, number], baseRotation: [0, -Math.PI / 1.3, 0] as [number, number, number], scale: 0.95, opacity: 0.15, speed: 0.6, phase: 4.9 },
+    { id: 'bg8', basePosition: [5.5, -0.2, -2.5] as [number, number, number], baseRotation: [0, -Math.PI / 1.3, 0] as [number, number, number], scale: 0.95, opacity: 1, speed: 0.6, phase: 4.9 },
     // Cerdito gigante del usuario
     { id: 'bg9', basePosition: [2, 2.0, -2.0] as [number, number, number], baseRotation: [0, Math.PI / 2, 0] as [number, number, number], scale: 10.6, opacity: 1, speed: 0.4, phase: 0 },
     // NUEVOS cerditos súper cercanos (primer plano) en los laterales
