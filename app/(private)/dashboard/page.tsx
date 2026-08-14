@@ -11,8 +11,10 @@ export const metadata: Metadata = {
   },
 }
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
+import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { SendReportButton } from '@/components/household/send-report-button'
+import { getRecentActivityAction } from '@/app/actions/activity'
 import { formatCurrency } from '@/lib/format'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -84,7 +86,8 @@ export default async function DashboardPage() {
     prevExpensesRes,
     currentBudgetsRes,
     householdMembersRes,
-    memberIncomesRes
+    memberIncomesRes,
+    activities
   ] = await Promise.all([
     supabase
       .from('categories')
@@ -118,7 +121,8 @@ export default async function DashboardPage() {
       .from('member_incomes')
       .select('user_id, amount')
       .eq('household_id', membership.household_id)
-      .eq('month', currentMonthStr)
+      .eq('month', currentMonthStr),
+    getRecentActivityAction(membership.household_id)
   ])
 
   const categories = categoriesRes.data
@@ -473,8 +477,8 @@ export default async function DashboardPage() {
         membersIncomeAndSpent={membersIncomeAndSpent}
       />
 
-      {/* Sección inferior de alertas y últimos gastos */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* Sección inferior de alertas, actividad y últimos gastos */}
+      <div className="grid gap-6 lg:grid-cols-3 items-start">
         {/* Presupuestos en Alerta */}
         <Card className="border-slate-200/50 shadow-md lg:col-span-1">
           <CardHeader>
@@ -540,8 +544,13 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
+        {/* Actividad Reciente del Hogar */}
+        <div className="lg:col-span-1 h-full">
+          <ActivityFeed activities={activities} />
+        </div>
+
         {/* Últimos 5 Gastos Registrados */}
-        <Card className="border-slate-200/50 shadow-md lg:col-span-2">
+        <Card className="border-slate-200/50 shadow-md lg:col-span-1">
           <CardHeader>
             <CardTitle className="text-lg">Últimas Transacciones</CardTitle>
             <CardDescription>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useState } from 'react'
+import { useActionState, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -23,8 +23,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { AlertCircle, ArrowLeft, Save, Receipt, X } from 'lucide-react'
+import { AlertCircle, ArrowLeft, Save, Receipt, X, Sparkles } from 'lucide-react'
 import { PAYMENT_METHODS } from '@/lib/validations'
+import { predictCategory } from '@/lib/category-predictor'
 
 interface Category {
   id: string
@@ -71,6 +72,18 @@ export function ExpenseForm({
 }: ExpenseFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState)
   const [deleteReceipt, setDeleteReceipt] = useState(false)
+  const [categoryId, setCategoryId] = useState(initialData?.category_id || '')
+  const [description, setDescription] = useState(initialData?.description || '')
+  const [suggestedCategory, setSuggestedCategory] = useState<any | null>(null)
+
+  useEffect(() => {
+    const predicted = predictCategory(description, categories)
+    if (predicted && predicted.id !== categoryId) {
+      setSuggestedCategory(predicted)
+    } else {
+      setSuggestedCategory(null)
+    }
+  }, [description, categoryId, categories])
 
   // Obtener fecha por defecto en formato YYYY-MM-DD
   const defaultDate = initialData?.expense_date
@@ -121,7 +134,12 @@ export function ExpenseForm({
           {/* Categoría */}
           <div className="space-y-1">
             <Label htmlFor="category_id">Categoría</Label>
-            <Select name="category_id" defaultValue={initialData?.category_id || ''} items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}>
+            <Select
+              name="category_id"
+              value={categoryId}
+              onValueChange={(val) => setCategoryId(val || '')}
+              items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
+            >
               <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
                 <SelectValue placeholder="-- Selecciona una categoría --" />
               </SelectTrigger>
@@ -143,10 +161,24 @@ export function ExpenseForm({
               name="description"
               type="text"
               placeholder="Ej. Compra semanal Mercadona, Combustible coche"
-              defaultValue={initialData?.description}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
               required
               className="bg-muted/50 focus:bg-background"
             />
+            {suggestedCategory && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCategoryId(suggestedCategory.id)
+                  setSuggestedCategory(null)
+                }}
+                className="mt-1 text-[11px] text-primary hover:underline flex items-center gap-1.5 animate-pulse text-left"
+              >
+                <Sparkles className="h-3 w-3 text-primary shrink-0" />
+                <span>¿Categoría <strong>{suggestedCategory.name}</strong>? Haz clic para aplicar.</span>
+              </button>
+            )}
           </div>
 
           {/* Fecha del gasto */}

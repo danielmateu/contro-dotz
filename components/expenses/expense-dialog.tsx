@@ -41,6 +41,7 @@ import { __iconNode as PlusData } from 'lucide-react/dist/esm/icons/plus.mjs'
 // @ts-ignore
 import { __iconNode as SaveData } from 'lucide-react/dist/esm/icons/save.mjs'
 import { PAYMENT_METHODS } from '@/lib/validations'
+import { predictCategory } from '@/lib/category-predictor'
 
 interface Category {
   id: string
@@ -109,6 +110,16 @@ export function ExpenseDialog({
   const [paymentMethod, setPaymentMethod] = useState('Tarjeta')
   const [notes, setNotes] = useState('')
   const [createdBy, setCreatedBy] = useState('')
+  const [suggestedCategory, setSuggestedCategory] = useState<any | null>(null)
+
+  useEffect(() => {
+    const predicted = predictCategory(description, categories)
+    if (predicted && predicted.id !== categoryId) {
+      setSuggestedCategory(predicted)
+    } else {
+      setSuggestedCategory(null)
+    }
+  }, [description, categoryId, categories])
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [deleteReceipt, setDeleteReceipt] = useState(false)
@@ -435,6 +446,19 @@ export function ExpenseDialog({
                 required
                 className="bg-muted/50 focus:bg-background"
               />
+              {suggestedCategory && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCategoryId(suggestedCategory.id)
+                    setSuggestedCategory(null)
+                  }}
+                  className="mt-1 text-[11px] text-primary hover:underline flex items-center gap-1.5 animate-pulse text-left"
+                >
+                  <Sparkles className="h-3 w-3 text-primary shrink-0" />
+                  <span>¿Categoría <strong>{suggestedCategory.name}</strong>? Haz clic para aplicar.</span>
+                </button>
+              )}
             </div>
 
             {/* Fecha y Método de pago */}

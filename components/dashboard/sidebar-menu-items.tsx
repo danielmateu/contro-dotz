@@ -39,6 +39,10 @@ import { __iconNode as MessagesSquareData } from 'lucide-react/dist/esm/icons/me
 import { __iconNode as ShoppingBasketData } from 'lucide-react/dist/esm/icons/shopping-basket.mjs'
 // @ts-ignore
 import { __iconNode as ShoppingCartData } from 'lucide-react/dist/esm/icons/shopping-cart.mjs'
+// @ts-ignore
+import { __iconNode as WalletData } from 'lucide-react/dist/esm/icons/wallet.mjs'
+// @ts-ignore
+import { __iconNode as TargetData } from 'lucide-react/dist/esm/icons/target.mjs'
 
 interface SidebarMenuItemsProps {
   hasHousehold: boolean
@@ -114,6 +118,13 @@ export function SidebarMenuItems({ hasHousehold, householdId, userId }: SidebarM
       url: '/budgets',
       icon: PiggyBankData,
       activeIcon: ScaleData,
+      disabled: !hasHousehold,
+    },
+    {
+      title: 'Huchas Ahorro',
+      url: '/saving-goals',
+      icon: WalletData,
+      activeIcon: TargetData,
       disabled: !hasHousehold,
     },
     {
