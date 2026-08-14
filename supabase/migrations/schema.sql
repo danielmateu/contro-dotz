@@ -588,3 +588,79 @@ create policy "Los usuarios pueden ver su propio perfil y perfiles relacionados"
     )
     or id = '00000000-0000-0000-0000-000000000000'
   );
+
+-- ==========================================
+-- 11. TABLA: member_incomes (ingresos mensuales específicos / nóminas)
+-- ==========================================
+create table public.member_incomes (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid references public.households on delete cascade not null,
+  user_id uuid references public.profiles on delete cascade not null,
+  month varchar(7) not null check (month ~ '^\d{4}-\d{2}$'),
+  amount numeric(12,2) not null check (amount >= 0),
+  payroll_path text,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  unique(household_id, user_id, month)
+);
+
+-- Habilitar RLS en member_incomes
+alter table public.member_incomes enable row level security;
+
+-- Políticas de RLS para member_incomes
+create policy "Los miembros pueden leer los ingresos de su hogar"
+  on public.member_incomes for select
+  using (household_id in (select public.get_user_households()));
+
+create policy "Los usuarios pueden registrar sus propios ingresos mensuales"
+  on public.member_incomes for insert
+  with check (
+    household_id in (select public.get_user_households()) 
+    and user_id = auth.uid()
+  );
+
+create policy "Los usuarios pueden actualizar sus propios ingresos mensuales"
+  on public.member_incomes for update
+  using (
+    household_id in (select public.get_user_households()) 
+    and user_id = auth.uid()
+  );
+
+create policy "Los usuarios pueden eliminar sus propios ingresos mensuales"
+  on public.member_incomes for delete
+  using (
+    household_id in (select public.get_user_households()) 
+    and user_id = auth.uid()
+  );
+
+-- Trigger de actualización de timestamp para member_incomes
+create trigger tr_member_incomes_updated_at before update on public.member_incomes for each row execute procedure public.update_updated_at_column();
+
+-- ==========================================
+-- ALMACENAMIENTO DE NÓMINAS (Storage)
+-- ==========================================
+insert into storage.buckets (id, name, public)
+values ('payrolls', 'payrolls', false)
+on conflict (id) do nothing;
+
+-- Políticas para el bucket "payrolls"
+create policy "Los usuarios pueden leer sus propias nóminas"
+  on storage.objects for select
+  using (
+    bucket_id = 'payrolls'
+    and (storage.foldername(name))[2]::uuid = auth.uid()
+  );
+
+create policy "Los usuarios pueden subir sus propias nóminas"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'payrolls'
+    and (storage.foldername(name))[2]::uuid = auth.uid()
+  );
+
+create policy "Los usuarios pueden borrar sus propias nóminas"
+  on storage.objects for delete
+  using (
+    bucket_id = 'payrolls'
+    and (storage.foldername(name))[2]::uuid = auth.uid()
+  );

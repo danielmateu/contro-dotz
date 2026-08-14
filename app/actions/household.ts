@@ -565,3 +565,132 @@ export async function updateMemberIncomeAction(
   revalidatePath('/dashboard')
   return { success: 'Ingresos actualizados con éxito.' }
 }
+
+/**
+ * Guarda o actualiza un ingreso específico para un mes determinado, con documento adjunto opcional
+ */
+export async function saveMonthlyIncomeAction(
+  householdId: string,
+  month: string,
+  amount: number,
+  payrollPath?: string | null
+): Promise<any> {
+  const supabase = await createClient()
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  if (amount < 0) {
+    return { error: 'El importe no puede ser negativo.' }
+  }
+
+  // Validar formato de mes YYYY-MM
+  if (!/^\d{4}-\d{2}$/.test(month)) {
+    return { error: 'Formato de mes no válido (debe ser AAAA-MM).' }
+  }
+
+  const { error } = await supabase
+    .from('member_incomes')
+    .upsert({
+      household_id: householdId,
+      user_id: user.id,
+      month,
+      amount,
+      payroll_path: payrollPath || null
+    }, {
+      onConflict: 'household_id,user_id,month'
+    })
+
+  if (error) {
+    console.error('SAVE MONTHLY INCOME ERROR:', error)
+    return { error: 'Error al registrar el ingreso mensual en la base de datos.' }
+  }
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+  return { success: 'Nómina registrada con éxito.' }
+}
+
+/**
+ * Genera un enlace firmado temporal para descargar una nómina
+ */
+export async function getPayrollUrlAction(path: string): Promise<any> {
+  const supabase = await createClient()
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  // Seguridad: verificar que el path de la nómina contiene el ID del usuario en el segundo segmento
+  // Formato de path esperado: householdId/userId/fileName
+  const segments = path.split('/')
+  if (segments.length < 2 || segments[1] !== user.id) {
+    return { error: 'Acceso denegado. No tienes permisos para descargar este documento.' }
+  }
+
+  const { data, error } = await supabase.storage
+    .from('payrolls')
+    .createSignedUrl(path, 60) // Enlace temporal válido por 60 segundos
+
+  if (error || !data) {
+    console.error('ERROR GENERATING SIGNED URL:', error)
+    return { error: 'Error al generar la descarga del documento.' }
+  }
+
+  return { url: data.signedUrl }
+}
+
+/**
+ * Elimina un registro de ingreso mensual específico y su archivo físico si existe
+ */
+export async function deleteMonthlyIncomeAction(incomeId: string): Promise<any> {
+  const supabase = await createClient()
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  // 1. Recuperar el registro para comprobar si tiene archivo físico
+  const { data: incomeRecord, error: fetchError } = await supabase
+    .from('member_incomes')
+    .select('payroll_path')
+    .eq('id', incomeId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (fetchError || !incomeRecord) {
+    return { error: 'No se encontró el registro de ingresos.' }
+  }
+
+  // 2. Si hay archivo físico, eliminarlo del bucket "payrolls"
+  if (incomeRecord.payroll_path) {
+    const { error: storageError } = await supabase.storage
+      .from('payrolls')
+      .remove([incomeRecord.payroll_path])
+    if (storageError) {
+      console.error('ERROR DELETING PAYROLL DOCUMENT:', storageError)
+    }
+  }
+
+  // 3. Eliminar registro de base de datos
+  const { error } = await supabase
+    .from('member_incomes')
+    .delete()
+    .eq('id', incomeId)
+
+  if (error) {
+    console.error('DELETE MONTHLY INCOME ERROR:', error)
+    return { error: 'Error al eliminar el registro de ingresos.' }
+  }
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+  return { success: 'Ingreso mensual eliminado con éxito.' }
+}

@@ -179,6 +179,7 @@ export async function askGeminiAction(
       budgetsRes,
       settlementsRes,
       allExpensesRes,
+      memberIncomesRes,
     ] = await Promise.all([
       // A. Miembros del hogar
       supabase
@@ -208,6 +209,12 @@ export async function askGeminiAction(
         .from('expenses')
         .select('created_by, amount')
         .eq('household_id', householdId),
+      // F. Ingresos específicos del mes
+      supabase
+        .from('member_incomes')
+        .select('user_id, amount')
+        .eq('household_id', householdId)
+        .eq('month', currentMonthStr),
     ])
 
     const membersList = membersRes.data || []
@@ -283,7 +290,17 @@ export async function askGeminiAction(
     }))
 
     const totalSpent = currentExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
-    const totalHouseholdIncome = membersList.reduce((sum, mem) => sum + Number(mem.monthly_income || 0), 0)
+    const monthlyIncomes = memberIncomesRes.data || []
+
+    // Obtener los ingresos reales aplicables para el mes en curso (nómina específica o base)
+    const membersIncomeList = membersList.map((m) => {
+      const specificIncome = monthlyIncomes.find((inc) => inc.user_id === m.user_id)
+      return {
+        user_id: m.user_id,
+        income: specificIncome ? Number(specificIncome.amount) : Number(m.monthly_income || 0),
+      }
+    })
+    const totalHouseholdIncome = membersIncomeList.reduce((sum, item) => sum + item.income, 0)
 
     // Gastos realizados por miembro este mes
     const memberSpentMap: Record<string, number> = {}
@@ -303,7 +320,8 @@ export async function askGeminiAction(
         return name === b.name
       })
 
-      const income = Number(matchedMember?.monthly_income || 0)
+      const matchedIncomeItem = matchedMember ? membersIncomeList.find(item => item.user_id === matchedMember.user_id) : null
+      const income = matchedIncomeItem ? matchedIncomeItem.income : 0
       const spent = matchedMember ? (memberSpentMap[matchedMember.user_id] || 0) : 0
       const incomePercentage = totalHouseholdIncome > 0 ? (income / totalHouseholdIncome) * 100 : 0
       const proportionalShare = totalHouseholdIncome > 0 ? totalSpent * (income / totalHouseholdIncome) : 0

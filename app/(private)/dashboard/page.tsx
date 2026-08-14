@@ -83,7 +83,8 @@ export default async function DashboardPage() {
     currentExpensesRes,
     prevExpensesRes,
     currentBudgetsRes,
-    householdMembersRes
+    householdMembersRes,
+    memberIncomesRes
   ] = await Promise.all([
     supabase
       .from('categories')
@@ -112,7 +113,12 @@ export default async function DashboardPage() {
     supabase
       .from('household_members')
       .select('user_id, role, monthly_income, profiles(display_name, email, avatar_url, status)')
+      .eq('household_id', membership.household_id),
+    supabase
+      .from('member_incomes')
+      .select('user_id, amount')
       .eq('household_id', membership.household_id)
+      .eq('month', currentMonthStr)
   ])
 
   const categories = categoriesRes.data
@@ -120,6 +126,7 @@ export default async function DashboardPage() {
   const prevExpenses = prevExpensesRes.data
   const currentBudgets = currentBudgetsRes.data
   const householdMembers = householdMembersRes.data
+  const monthlyIncomes = memberIncomesRes.data || []
 
   const membersList = householdMembers || []
   const memberNames = [
@@ -152,9 +159,16 @@ export default async function DashboardPage() {
   const membersIncomeAndSpent = membersList.map((m) => {
     const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
     const name = profile?.display_name || profile?.email?.split('@')[0] || 'Miembro'
+    
+    // Buscar si hay ingreso específico para el mes actual, sino usar base
+    const specificIncome = monthlyIncomes.find((inc) => inc.user_id === m.user_id)
+    const income = specificIncome 
+      ? Number(specificIncome.amount) 
+      : Number(m.monthly_income || 0)
+
     return {
       name,
-      income: Number(m.monthly_income || 0),
+      income,
       spent: memberSpentMap[m.user_id] || 0,
     }
   })

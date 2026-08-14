@@ -12,6 +12,7 @@ export const metadata: Metadata = {
 import { ProfileNameForm } from '@/components/household/profile-name-form'
 import { SendReportButton } from '@/components/household/send-report-button'
 import { MemberIncomeForm } from '@/components/household/member-income-form'
+import { MonthlyIncomesListForm } from '@/components/household/monthly-incomes-list-form'
 import {
   Card,
   CardContent,
@@ -54,6 +55,17 @@ export default async function SettingsPage() {
   const membership = membershipRes.data
   const householdId = membership?.household_id || null
   const monthlyIncome = Number(membership?.monthly_income || 0)
+
+  // Cargar ingresos mensuales específicos del usuario logueado en este hogar
+  let memberIncomes: any[] = []
+  if (householdId) {
+    const { data: incomesRes } = await supabase
+      .from('member_incomes')
+      .select('id, month, amount, payroll_path')
+      .eq('household_id', householdId)
+      .eq('user_id', user.id)
+    memberIncomes = incomesRes || []
+  }
 
   const displayName = profile?.display_name || ''
   const email = profile?.email || ''
@@ -112,15 +124,34 @@ export default async function SettingsPage() {
       {householdId && (
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader>
-            <CardTitle className="text-lg">Ingresos Mensuales</CardTitle>
+            <CardTitle className="text-lg">Ingresos Mensuales (Base)</CardTitle>
             <CardDescription>
-              Introduce tus ingresos mensuales netos para poder analizar de forma justa el reparto de los gastos del hogar.
+              Introduce tus ingresos mensuales netos base para poder analizar de forma justa el reparto de los gastos del hogar.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <MemberIncomeForm
               initialIncome={monthlyIncome}
               householdId={householdId}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Nóminas e Ingresos Variables */}
+      {householdId && (
+        <Card className="border-slate-200/50 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Nóminas e Ingresos Variables</CardTitle>
+            <CardDescription>
+              Registra ingresos netos específicos para meses concretos (ej. nóminas con pagas extra, comisiones o bonus). Si un mes no tiene registro aquí, se usará tu ingreso base por defecto.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MonthlyIncomesListForm
+              initialIncomes={memberIncomes}
+              householdId={householdId}
+              userId={user.id}
             />
           </CardContent>
         </Card>
