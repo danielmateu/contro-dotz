@@ -13,6 +13,7 @@ import { ProfileNameForm } from '@/components/household/profile-name-form'
 import { SendReportButton } from '@/components/household/send-report-button'
 import { MemberIncomeForm } from '@/components/household/member-income-form'
 import { MonthlyIncomesListForm } from '@/components/household/monthly-incomes-list-form'
+import { ChangePasswordForm } from '@/components/household/change-password-form'
 import {
   Card,
   CardContent,
@@ -178,6 +179,18 @@ export default async function SettingsPage() {
               </CardContent>
             </Card>
           )}
+
+          <Card className="border-slate-200/50 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg">Seguridad de la Cuenta</CardTitle>
+              <CardDescription>
+                Cambia la contraseña de tu cuenta para mantener tu información segura.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ChangePasswordForm />
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

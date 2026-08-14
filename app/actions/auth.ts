@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { loginSchema, registerSchema, forgotPasswordSchema } from '@/lib/validations'
+import { loginSchema, registerSchema, forgotPasswordSchema, resetPasswordSchema } from '@/lib/validations'
 
 /**
  * Registra un nuevo usuario
@@ -101,7 +101,7 @@ export async function resetPasswordRequestAction(prevState: any, formData: FormD
 
   const supabase = await createClient()
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/settings`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/auth/callback?next=/reset-password`,
   })
 
   if (error) {
@@ -114,5 +114,33 @@ export async function resetPasswordRequestAction(prevState: any, formData: FormD
   return {
     success:
       'Te hemos enviado un correo con instrucciones para restablecer tu contraseña.',
+  }
+}
+
+/**
+ * Restablece o cambia la contraseña del usuario actualmente autenticado
+ */
+export async function updatePasswordAction(prevState: any, formData: FormData) {
+  const password = formData.get('password') as string
+  const confirmPassword = formData.get('confirmPassword') as string
+
+  const validation = resetPasswordSchema.safeParse({ password, confirmPassword })
+
+  if (!validation.success) {
+    return { error: validation.error.issues[0].message }
+  }
+
+  const supabase = await createClient()
+  const { error } = await supabase.auth.updateUser({ password })
+
+  if (error) {
+    if (error.message.includes('same password') || error.status === 422) {
+      return { error: 'La nueva contraseña no puede ser igual a la anterior.' }
+    }
+    return { error: error.message }
+  }
+
+  return {
+    success: 'Tu contraseña ha sido actualizada con éxito.',
   }
 }
