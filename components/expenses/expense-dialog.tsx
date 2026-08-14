@@ -99,6 +99,7 @@ export function ExpenseDialog({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [deleteReceipt, setDeleteReceipt] = useState(false)
+  const [showOptionalFields, setShowOptionalFields] = useState(false)
 
   // Estados de escaneo IA
   const [isScanning, setIsScanning] = useState(false)
@@ -127,6 +128,7 @@ export function ExpenseDialog({
       setFormState({})
       setSelectedFile(null)
       setDeleteReceipt(false)
+      setShowOptionalFields(!!expense?.notes || !!expense?.receipt_path)
     }
   }, [open, expense, defaultDate])
 
@@ -278,7 +280,7 @@ export function ExpenseDialog({
           <DialogTitle>
             {expense ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="hidden sm:block">
             {expense
               ? 'Modifica los detalles del gasto seleccionado.'
               : 'Añade un nuevo gasto para tu hogar familiar.'}
@@ -355,47 +357,50 @@ export function ExpenseDialog({
               </Alert>
             )}
 
-            {/* Importe */}
-            <div className="space-y-1">
-              <Label htmlFor="amount">Importe (€)</Label>
-              <Input
-                id="amount"
-                name="amount"
-                type="text"
-                inputMode="decimal"
-                placeholder="0,00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                disabled={isScanning}
-                required
-                className="bg-muted/50 focus:bg-background text-lg font-semibold"
-              />
-              <p className="text-[10px] text-muted-foreground">
-                Utiliza una coma o punto para separar los decimales (máx. 2 decimales).
-              </p>
-            </div>
+            {/* Importe y Categoría */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Importe */}
+              <div className="space-y-1">
+                <Label htmlFor="amount">Importe (€)</Label>
+                <Input
+                  id="amount"
+                  name="amount"
+                  type="text"
+                  inputMode="decimal"
+                  placeholder="0,00"
+                  value={amount}
+                  onChange={(e) => setAmount(e.target.value)}
+                  disabled={isScanning}
+                  required
+                  className="bg-muted/50 focus:bg-background text-lg font-semibold"
+                />
+                <p className="text-[10px] text-muted-foreground leading-tight">
+                  Utiliza coma/punto (máx. 2 dec.).
+                </p>
+              </div>
 
-            {/* Categoría */}
-            <div className="space-y-1">
-              <Label htmlFor="category_id">Categoría</Label>
-              <Select
-                name="category_id"
-                value={categoryId}
-                onValueChange={(val) => setCategoryId(val || '')}
-                disabled={isScanning}
-                items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
-              >
-                <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
-                  <SelectValue placeholder="-- Selecciona una categoría --" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {/* Categoría */}
+              <div className="space-y-1">
+                <Label htmlFor="category_id">Categoría</Label>
+                <Select
+                  name="category_id"
+                  value={categoryId}
+                  onValueChange={(val) => setCategoryId(val || '')}
+                  disabled={isScanning}
+                  items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
+                >
+                  <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             {/* Concepto / Descripción */}
@@ -414,113 +419,141 @@ export function ExpenseDialog({
               />
             </div>
 
-            {/* Fecha del gasto */}
-            <div className="space-y-1">
-              <Label htmlFor="expense_date">Fecha</Label>
-              <Input
-                id="expense_date"
-                name="expense_date"
-                type="date"
-                value={expenseDate}
-                onChange={(e) => setExpenseDate(e.target.value)}
-                disabled={isScanning}
-                required
-                className="bg-muted/50 focus:bg-background"
-              />
-            </div>
-
-            {/* Método de pago */}
-            <div className="space-y-1">
-              <Label htmlFor="payment_method">Método de pago</Label>
-              <Select
-                name="payment_method"
-                value={paymentMethod}
-                onValueChange={(val) => setPaymentMethod(val || 'Tarjeta')}
-                disabled={isScanning}
-                items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}
-              >
-                <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
-                  <SelectValue placeholder="-- Selecciona método de pago --" />
-                </SelectTrigger>
-                <SelectContent>
-                  {PAYMENT_METHODS.map((method) => (
-                    <SelectItem key={method} value={method}>
-                      {method}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Notas */}
-            <div className="space-y-1">
-              <Label htmlFor="notes">Notas adicionales (opcional)</Label>
-              <Textarea
-                id="notes"
-                name="notes"
-                placeholder="Detalles adicionales..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                disabled={isScanning}
-                className="bg-muted/50 focus:bg-background min-h-20"
-              />
-            </div>
-
-            {/* Ticket de compra */}
-            <div className="space-y-1">
-              <Label className="text-xs">Ticket de compra (opcional)</Label>
-
-              {selectedFile ? (
-                <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-emerald-500/20">
-                  <Receipt className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span className="truncate flex-1 font-medium">{selectedFile.name}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                    onClick={() => setSelectedFile(null)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : expense?.receipt_path && !deleteReceipt ? (
-                <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-primary/20">
-                  <Receipt className="h-4 w-4 text-primary shrink-0" />
-                  <span className="truncate flex-1 font-medium text-muted-foreground">Ticket guardado</span>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2 text-[10px]"
-                    onClick={handleViewReceipt}
-                  >
-                    Ver
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                    onClick={() => setDeleteReceipt(true)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              ) : (
+            {/* Fecha y Método de pago */}
+            <div className="grid grid-cols-2 gap-3">
+              {/* Fecha del gasto */}
+              <div className="space-y-1">
+                <Label htmlFor="expense_date">Fecha</Label>
                 <Input
-                  id="receipt-manual"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] || null
-                    setSelectedFile(file)
-                  }}
+                  id="expense_date"
+                  name="expense_date"
+                  type="date"
+                  value={expenseDate}
+                  onChange={(e) => setExpenseDate(e.target.value)}
                   disabled={isScanning}
-                  className="bg-muted/50 focus:bg-background h-9 text-xs"
+                  required
+                  className="bg-muted/50 focus:bg-background"
                 />
-              )}
+              </div>
+
+              {/* Método de pago */}
+              <div className="space-y-1">
+                <Label htmlFor="payment_method">Método de pago</Label>
+                <Select
+                  name="payment_method"
+                  value={paymentMethod}
+                  onValueChange={(val) => setPaymentMethod(val || 'Tarjeta')}
+                  disabled={isScanning}
+                  items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}
+                >
+                  <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
+                    <SelectValue placeholder="Seleccionar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PAYMENT_METHODS.map((method) => (
+                      <SelectItem key={method} value={method}>
+                        {method}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+
+            {showOptionalFields ? (
+              <>
+                {/* Notas */}
+                <div className="space-y-1">
+                  <Label htmlFor="notes">Notas adicionales (opcional)</Label>
+                  <Textarea
+                    id="notes"
+                    name="notes"
+                    placeholder="Detalles adicionales..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    disabled={isScanning}
+                    className="bg-muted/50 focus:bg-background min-h-16"
+                  />
+                </div>
+
+                {/* Ticket de compra */}
+                <div className="space-y-1">
+                  <Label className="text-xs">Ticket de compra (opcional)</Label>
+
+                  {selectedFile ? (
+                    <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-emerald-500/20">
+                      <Receipt className="h-4 w-4 text-emerald-500 shrink-0" />
+                      <span className="truncate flex-1 font-medium">{selectedFile.name}</span>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                        onClick={() => setSelectedFile(null)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : expense?.receipt_path && !deleteReceipt ? (
+                    <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-primary/20">
+                      <Receipt className="h-4 w-4 text-primary shrink-0" />
+                      <span className="truncate flex-1 font-medium text-muted-foreground">Ticket guardado</span>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-7 px-2 text-[10px]"
+                        onClick={handleViewReceipt}
+                      >
+                        Ver
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                        onClick={() => setDeleteReceipt(true)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Input
+                      id="receipt-manual"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] || null
+                        setSelectedFile(file)
+                      }}
+                      disabled={isScanning}
+                      className="bg-muted/50 focus:bg-background h-9 text-xs"
+                    />
+                  )}
+                </div>
+
+                {/* Botón para colapsar */}
+                <Button
+                  type="button"
+                  variant="link"
+                  size="sm"
+                  className="w-full text-xs text-muted-foreground hover:text-foreground py-1 h-auto flex items-center justify-center gap-1"
+                  onClick={() => setShowOptionalFields(false)}
+                >
+                  - Ocultar campos opcionales
+                </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-muted-foreground hover:text-foreground py-2.5 h-auto border border-dashed border-muted/80 hover:border-muted-foreground/30 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300"
+                onClick={() => setShowOptionalFields(true)}
+              >
+                + Añadir notas o ticket (opcional)
+              </Button>
+            )}
           </div>
 
           <DialogFooter className="pt-4">
