@@ -222,7 +222,7 @@ export function DashboardCharts({
 
   return (
     <Tabs defaultValue="overview" className="w-full space-y-6">
-      <TabsList className="grid w-full grid-cols-4 max-w-[550px] p-1 rounded-xl bg-transparent">
+      <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 p-1 rounded-xl bg-transparent">
         <TabsTrigger value="overview" className="flex items-center gap-1.5 rounded-lg ">
           Vista General
         </TabsTrigger>
@@ -560,12 +560,11 @@ export function DashboardCharts({
                       <span className="text-muted-foreground">Presupuesto total del mes:</span>
                       <span className="text-foreground font-semibold">{formatCurrency(totalBudget)}</span>
                     </div>
-                    
-                    <div className={`p-3.5 rounded-xl border flex flex-col gap-1.5 ${
-                      isOverBudget
-                        ? 'bg-rose-50/50 border-rose-500/20 text-rose-700 dark:bg-rose-950/10 dark:border-rose-500/10 dark:text-rose-400'
-                        : 'bg-emerald-50/50 border-emerald-500/20 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-500/10 dark:text-emerald-400'
-                    }`}>
+
+                    <div className={`p-3.5 rounded-xl border flex flex-col gap-1.5 ${isOverBudget
+                      ? 'bg-rose-50/50 border-rose-500/20 text-rose-700 dark:bg-rose-950/10 dark:border-rose-500/10 dark:text-rose-400'
+                      : 'bg-emerald-50/50 border-emerald-500/20 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-500/10 dark:text-emerald-400'
+                      }`}>
                       <span className="text-xs font-bold uppercase tracking-wider">
                         {isOverBudget ? '⚠️ Alerta de Desviación' : '✅ Proyección Saludable'}
                       </span>
