@@ -12,8 +12,13 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, CheckCircle, ArrowRight, ShieldCheck, Lock, Eye, EyeOff, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle, ArrowRight, ShieldCheck, Lock, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { MorphIcon } from 'morphicons/react'
+// @ts-ignore
+import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
+// @ts-ignore
+import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
 
 type FormState = {
   error?: string
@@ -259,11 +264,11 @@ function ResetPasswordContent() {
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden"
                       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      <MorphIcon
+                        icon={showPassword ? EyeOffData : EyeData}
+                        spring="snappy"
+                        className="h-4 w-4"
+                      />
                     </button>
                   </div>
                 </div>
@@ -289,11 +294,11 @@ function ResetPasswordContent() {
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden"
                       aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
+                      <MorphIcon
+                        icon={showConfirmPassword ? EyeOffData : EyeData}
+                        spring="snappy"
+                        className="h-4 w-4"
+                      />
                     </button>
                   </div>
                 </div>

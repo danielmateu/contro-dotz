@@ -6,7 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, CheckCircle2, Lock, Eye, EyeOff } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Lock } from 'lucide-react'
+import { MorphIcon } from 'morphicons/react'
+// @ts-ignore
+import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
+// @ts-ignore
+import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
 
 type FormState = {
   error?: string
@@ -65,11 +70,11 @@ export function ChangePasswordForm() {
             className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground focus:outline-hidden"
             aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
           >
-            {showPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
+            <MorphIcon
+              icon={showPassword ? EyeOffData : EyeData}
+              spring="snappy"
+              className="h-4 w-4"
+            />
           </button>
         </div>
       </div>
@@ -95,11 +100,11 @@ export function ChangePasswordForm() {
               showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
             }
           >
-            {showConfirmPassword ? (
-              <EyeOff className="h-4 w-4" />
-            ) : (
-              <Eye className="h-4 w-4" />
-            )}
+            <MorphIcon
+              icon={showConfirmPassword ? EyeOffData : EyeData}
+              spring="snappy"
+              className="h-4 w-4"
+            />
           </button>
         </div>
       </div>
