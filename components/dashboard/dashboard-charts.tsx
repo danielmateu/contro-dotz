@@ -67,6 +67,7 @@ export function DashboardCharts({
   memberNames,
 }: DashboardChartsProps) {
   const [isMounted, setIsMounted] = useState(false)
+  const [activeTab, setActiveTab] = useState("overview")
 
   useEffect(() => {
     setIsMounted(true)
@@ -220,8 +221,16 @@ export function DashboardCharts({
     return null
   }
 
+  if (!isMounted) {
+    return (
+      <div className="w-full h-[400px] flex items-center justify-center text-xs text-muted-foreground border border-slate-200/50 rounded-2xl bg-background/50 dark:border-slate-800/50">
+        Cargando gráficos...
+      </div>
+    )
+  }
+
   return (
-    <Tabs defaultValue="overview" className="w-full space-y-6">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
       <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 p-1 rounded-xl bg-transparent">
         <TabsTrigger value="overview" className="flex items-center gap-1.5 rounded-lg ">
           Vista General
@@ -239,7 +248,8 @@ export function DashboardCharts({
 
       {/* PESTAÑA 1: VISTA GENERAL (PIE + SIMPLE AREA) */}
       <TabsContent value="overview" className="outline-none">
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {activeTab === 'overview' && (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           <Card className="border-slate-200/50 shadow-md md:col-span-2">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -250,7 +260,7 @@ export function DashboardCharts({
                 Historial del gasto familiar diario acumulado durante el mes actual.
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-87.5">
+            <CardContent className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart
                   data={lineData}
@@ -302,12 +312,12 @@ export function DashboardCharts({
             </CardHeader>
             <CardContent className="flex flex-col items-center justify-center">
               {pieData.length === 0 ? (
-                <div className="w-55 flex items-center justify-center text-xs text-muted-foreground">
+                <div className="w-[220px] h-[220px] flex items-center justify-center text-xs text-muted-foreground">
                   Registra gastos para visualizar la distribución.
                 </div>
               ) : (
                 <>
-                  <div className="w-55">
+                  <div className="w-[220px] h-[220px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                       <PieChart>
                         <Pie
@@ -348,9 +358,11 @@ export function DashboardCharts({
             </CardContent>
           </Card>
         </div>
+        )}
       </TabsContent>
 
       <TabsContent value="budgets" className="outline-none">
+        {activeTab === 'budgets' && (
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -361,7 +373,7 @@ export function DashboardCharts({
               Comparación visual de los presupuestos asignados frente al importe real consumido por categoría.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-87.5">
+          <CardContent className="h-[350px]">
             {barData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                 No hay presupuestos ni gastos registrados este mes.
@@ -404,9 +416,11 @@ export function DashboardCharts({
             )}
           </CardContent>
         </Card>
+        )}
       </TabsContent>
 
       <TabsContent value="members" className="outline-none">
+        {activeTab === 'members' && (
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
@@ -417,7 +431,7 @@ export function DashboardCharts({
               Evolución acumulada de los gastos del mes dividida por la aportación individual de cada miembro.
             </CardDescription>
           </CardHeader>
-          <CardContent className="h-87.5">
+          <CardContent className="h-[350px]">
             {memberNames.length === 0 || stackedData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                 No hay aportaciones de miembros registradas este mes.
@@ -459,11 +473,13 @@ export function DashboardCharts({
             )}
           </CardContent>
         </Card>
+        )}
       </TabsContent>
 
       {/* PESTAÑA 4: PROYECCIÓN PREDICTIVA (AREA + LINE PROJECTION) */}
       <TabsContent value="projection" className="outline-none">
-        <div className="grid gap-6 md:grid-cols-3">
+        {activeTab === 'projection' && (
+          <div className="grid gap-6 md:grid-cols-3">
           <Card className="border-slate-200/50 shadow-md md:col-span-2">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
@@ -474,7 +490,7 @@ export function DashboardCharts({
                 Proyección del gasto final estimado basándose en el ritmo diario acumulado hasta hoy.
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-87.5">
+            <CardContent className="h-[350px]">
               <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                 <AreaChart
                   data={projectionData}
@@ -585,6 +601,7 @@ export function DashboardCharts({
             </CardContent>
           </Card>
         </div>
+        )}
       </TabsContent>
     </Tabs>
   )
