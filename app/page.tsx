@@ -8,6 +8,7 @@ export const metadata = {
   description: 'La aplicación colaborativa y premium para gestionar los gastos del hogar, presupuestos mensuales y liquidar deudas familiares con facilidad y escáner de tickets con IA.',
 }
 import { MouseGlow } from '@/components/landing/mouse-glow'
+import { DynamicThreeScene } from '@/components/landing/dynamic-three-scene'
 import { InteractiveShowcase } from '@/components/landing/interactive-showcase'
 import { FeaturesGrid } from '@/components/landing/features-grid'
 import { CTASection } from '@/components/landing/cta-section'
@@ -31,6 +32,9 @@ export default async function LandingPage() {
     <div className="min-h-screen bg-radial from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-between overflow-x-hidden relative">
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
+
+      {/* Escena 3D interactiva de finanzas (Solo Cerditos) */}
+      <DynamicThreeScene />
 
       {/* Background glow structures */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
@@ -71,11 +75,7 @@ export default async function LandingPage() {
 
       {/* Hero Section */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-5xl mx-auto space-y-8">
-        {/* <div className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-semibold text-primary backdrop-blur-md animate-fade-in">
-          <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping"></span>
-          Moneda principal: Euros (€) • Zona Horaria: Europe/Madrid
-        </div> */}
-
+        
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300">
           Controla tus gastos diarios en familia con total claridad
         </h1>

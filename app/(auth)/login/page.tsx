@@ -16,6 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { MouseGlow } from '@/components/landing/mouse-glow'
+import { DynamicThreeScene } from '@/components/landing/dynamic-three-scene'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, ArrowRight, ShieldCheck, Mail, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -51,6 +52,9 @@ function LoginForm() {
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
+
+      {/* Escena 3D interactiva de finanzas (Solo Cerditos) */}
+      <DynamicThreeScene />
 
       {/* Background patterns */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
