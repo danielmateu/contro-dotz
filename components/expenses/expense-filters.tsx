@@ -175,13 +175,18 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
           <Select
             value={memberId}
             onValueChange={(val) => updateFilters('memberId', val || '')}
-            items={[{ value: '', label: 'Todos los miembros' }, ...members.map((mem) => ({ value: mem.user_id, label: mem.profiles?.display_name || 'Desconocido' }))]}
+            items={[
+              { value: '', label: 'Todos los miembros' },
+              { value: 'shared', label: 'A medias / Compartido' },
+              ...members.map((mem) => ({ value: mem.user_id, label: mem.profiles?.display_name || 'Desconocido' }))
+            ]}
           >
             <SelectTrigger id="filterMember" className="w-full bg-muted/40">
               <SelectValue placeholder="Todos los miembros" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="">Todos los miembros</SelectItem>
+              <SelectItem value="shared">A medias / Compartido</SelectItem>
               {members.map((mem) => (
                 <SelectItem key={mem.user_id} value={mem.user_id}>
                   {mem.profiles?.display_name || 'Desconocido'}

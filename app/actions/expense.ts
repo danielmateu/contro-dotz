@@ -26,7 +26,7 @@ export async function createExpenseAction(
     description,
     expense_date,
     payment_method,
-    notes,
+    notes: notes || undefined,
   })
 
   if (!validation.success) {
@@ -42,11 +42,26 @@ export async function createExpenseAction(
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Sesión no iniciada.' }
 
+  // Verificar si es propietario para permitir asignar custom created_by
+  const customCreatedBy = formData.get('created_by') as string | null
+  const { data: memberInfo } = await supabase
+    .from('household_members')
+    .select('role')
+    .eq('household_id', householdId)
+    .eq('user_id', user.id)
+    .single()
+  const isOwner = memberInfo?.role === 'owner'
+
+  let targetCreatedBy: string | null = user.id
+  if (isOwner && customCreatedBy) {
+    targetCreatedBy = customCreatedBy === 'shared' ? null : customCreatedBy
+  }
+
   const { data: inserted, error } = await supabase
     .from('expenses')
     .insert({
       household_id: householdId,
-      created_by: user.id,
+      created_by: user.id, // Forzar creador a user.id temporalmente por políticas RLS
       amount: numericAmount,
       category_id,
       description: description.trim(),
@@ -59,6 +74,18 @@ export async function createExpenseAction(
 
   if (error) {
     return { error: 'Error al registrar el gasto en la base de datos.' }
+  }
+
+  // Si el pagador final es distinto al usuario actual (incluye 'shared'/null), hacemos el update
+  if (inserted && targetCreatedBy !== user.id) {
+    const { error: updateError } = await supabase
+      .from('expenses')
+      .update({ created_by: targetCreatedBy })
+      .eq('id', inserted.id)
+
+    if (updateError) {
+      console.error('Error al actualizar el pagador final en base de datos:', updateError)
+    }
   }
 
   if (receipt && receipt.size > 0) {
@@ -192,7 +219,7 @@ export async function updateExpenseAction(
     description,
     expense_date,
     payment_method,
-    notes,
+    notes: notes || undefined,
   })
 
   if (!validation.success) {
@@ -202,12 +229,30 @@ export async function updateExpenseAction(
   const numericAmount = parseFloat(amount.replace(',', '.'))
   const supabase = await createClient()
 
-  // Obtener el gasto existente para gestionar el ticket
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  // Obtener el gasto existente para gestionar el ticket y verificar el hogar
   const { data: existing } = await supabase
     .from('expenses')
     .select('receipt_path, household_id')
     .eq('id', expenseId)
     .single()
+
+  if (!existing) return { error: 'Gasto no encontrado.' }
+
+  // Verificar si es propietario del hogar
+  const customCreatedBy = formData.get('created_by') as string | null
+  const { data: memberInfo } = await supabase
+    .from('household_members')
+    .select('role')
+    .eq('household_id', existing.household_id)
+    .eq('user_id', user.id)
+    .single()
+  const isOwner = memberInfo?.role === 'owner'
 
   let receiptPath = existing?.receipt_path || null
 
@@ -239,17 +284,23 @@ export async function updateExpenseAction(
     }
   }
 
+  const updateFields: any = {
+    amount: numericAmount,
+    category_id,
+    description: description.trim(),
+    expense_date,
+    payment_method,
+    notes: notes ? notes.trim() : null,
+    receipt_path: receiptPath,
+  }
+
+  if (isOwner && customCreatedBy !== null) {
+    updateFields.created_by = customCreatedBy === 'shared' ? null : customCreatedBy
+  }
+
   const { error } = await supabase
     .from('expenses')
-    .update({
-      amount: numericAmount,
-      category_id,
-      description: description.trim(),
-      expense_date,
-      payment_method,
-      notes: notes ? notes.trim() : null,
-      receipt_path: receiptPath,
-    })
+    .update(updateFields)
     .eq('id', expenseId)
 
   if (error) {
@@ -290,4 +341,55 @@ export async function deleteExpenseAction(expenseId: string): Promise<any> {
   revalidatePath('/expenses')
   revalidatePath('/dashboard')
   return { success: 'Gasto eliminado con éxito.' }
+}
+
+/**
+ * Actualiza el pagador de un gasto directamente
+ */
+export async function updateExpensePayerAction(
+  expenseId: string,
+  payerId: string | null
+): Promise<any> {
+  const supabase = await createClient()
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  // Obtener el gasto existente para verificar el hogar
+  const { data: existing } = await supabase
+    .from('expenses')
+    .select('household_id')
+    .eq('id', expenseId)
+    .single()
+
+  if (!existing) return { error: 'Gasto no encontrado.' }
+
+  // Verificar si es propietario del hogar
+  const { data: memberInfo } = await supabase
+    .from('household_members')
+    .select('role')
+    .eq('household_id', existing.household_id)
+    .eq('user_id', user.id)
+    .single()
+  const isOwner = memberInfo?.role === 'owner'
+
+  if (!isOwner) {
+    return { error: 'Solo el propietario del hogar puede cambiar el pagador.' }
+  }
+
+  const { error } = await supabase
+    .from('expenses')
+    .update({ created_by: payerId })
+    .eq('id', expenseId)
+
+  if (error) {
+    return { error: 'Error al actualizar el pagador en la base de datos.' }
+  }
+
+  revalidatePath('/expenses')
+  revalidatePath('/dashboard')
+  return { success: 'Pagador actualizado con éxito.' }
 }

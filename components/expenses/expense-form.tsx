@@ -31,6 +31,11 @@ interface Category {
   name: string
 }
 
+interface Member {
+  id: string
+  name: string
+}
+
 interface ExpenseFormProps {
   categories: Category[]
   action: (prevState: any, formData: FormData) => Promise<any>
@@ -43,7 +48,11 @@ interface ExpenseFormProps {
     payment_method: string
     notes?: string | null
     receipt_path?: string | null
+    created_by?: string | null
   }
+  members?: Member[]
+  currentUserId?: string
+  isOwner?: boolean
 }
 
 type FormState = {
@@ -56,6 +65,9 @@ export function ExpenseForm({
   categories,
   action,
   initialData,
+  members = [],
+  currentUserId = '',
+  isOwner = false,
 }: ExpenseFormProps) {
   const [state, formAction, pending] = useActionState(action, initialState)
   const [deleteReceipt, setDeleteReceipt] = useState(false)
@@ -166,6 +178,37 @@ export function ExpenseForm({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Pagado por (solo para propietarios) */}
+          {isOwner && members && members.length > 0 && (
+            <div className="space-y-1">
+              <Label htmlFor="created_by">Pagado por</Label>
+              <Select
+                name="created_by"
+                defaultValue={
+                  initialData?.created_by === null
+                    ? 'shared'
+                    : (initialData?.created_by || currentUserId || '')
+                }
+                items={[
+                  ...members.map((m) => ({ value: m.id, label: m.name })),
+                  { value: 'shared', label: 'A medias / Compartido (Todos)' },
+                ]}
+              >
+                <SelectTrigger id="created_by" className="w-full bg-muted/50 h-9">
+                  <SelectValue placeholder="Seleccionar miembro" />
+                </SelectTrigger>
+                <SelectContent>
+                  {members.map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      {member.name}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="shared">A medias / Compartido (Todos)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          )}
 
           {/* Notas */}
           <div className="space-y-1">

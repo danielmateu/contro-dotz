@@ -24,17 +24,19 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
   // Cargar membresía
   const { data: membership } = await supabase
     .from('household_members')
-    .select('household_id')
+    .select('household_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (!membership) redirect('/household')
 
+  const isOwner = membership.role === 'owner'
+
   // Cargar el gasto y validar que pertenece al mismo hogar
   const { data: expense } = await supabase
     .from('expenses')
-    .select('id, amount, category_id, description, expense_date, payment_method, notes, household_id, receipt_path')
+    .select('id, amount, category_id, description, expense_date, payment_method, notes, household_id, receipt_path, created_by')
     .eq('id', expenseId)
     .single()
 
@@ -42,12 +44,27 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
     notFound()
   }
 
-  // Cargar categorías del hogar
-  const { data: categories } = await supabase
-    .from('categories')
-    .select('id, name')
-    .eq('household_id', membership.household_id)
-    .order('name')
+  // Cargar categorías y miembros en paralelo
+  const [categoriesRes, membersRes] = await Promise.all([
+    supabase
+      .from('categories')
+      .select('id, name')
+      .eq('household_id', membership.household_id)
+      .order('name'),
+    supabase
+      .from('household_members')
+      .select('user_id, profiles(display_name)')
+      .eq('household_id', membership.household_id)
+  ])
+
+  const categories = categoriesRes.data
+  const members = (membersRes.data || []).map((m: any) => {
+    const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+    return {
+      id: m.user_id,
+      name: profile?.display_name || profile?.email?.split('@')[0] || 'Miembro',
+    }
+  })
 
   // Enlazar el ID del gasto a la Server Action de edición
   const updateActionWithId = updateExpenseAction.bind(null, expenseId)
@@ -57,6 +74,9 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
       <ExpenseForm
         categories={categories || []}
         action={updateActionWithId}
+        members={members}
+        currentUserId={user.id}
+        isOwner={isOwner}
         initialData={{
           id: expense.id,
           amount: Number(expense.amount),
@@ -66,6 +86,7 @@ export default async function EditExpensePage({ params }: EditExpensePageProps) 
           payment_method: expense.payment_method,
           notes: expense.notes,
           receipt_path: expense.receipt_path,
+          created_by: expense.created_by,
         }}
       />
     </div>

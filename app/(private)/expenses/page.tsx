@@ -14,6 +14,7 @@ import { ExpenseFilters } from '@/components/expenses/expense-filters'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { DeleteExpenseButton } from '@/components/expenses/delete-expense-button'
 import { ReceiptButton } from '@/components/expenses/receipt-button'
+import { PayerSelectorInline } from '@/components/expenses/payer-selector-inline'
 import { formatCurrency, formatDate } from '@/lib/format'
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
@@ -58,12 +59,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   // Cargar membresía de hogar
   const { data: membership } = await supabase
     .from('household_members')
-    .select('household_id')
+    .select('household_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (!membership) redirect('/household')
+
+  const isOwner = membership.role === 'owner'
 
   // 1. Preparar consulta de categorías
   const categoriesPromise = supabase
@@ -89,7 +92,13 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   if (startDate) dbQuery = dbQuery.gte('expense_date', startDate)
   if (endDate) dbQuery = dbQuery.lte('expense_date', endDate)
   if (categoryId) dbQuery = dbQuery.eq('category_id', categoryId)
-  if (memberId) dbQuery = dbQuery.eq('created_by', memberId)
+  if (memberId) {
+    if (memberId === 'shared') {
+      dbQuery = dbQuery.is('created_by', null)
+    } else {
+      dbQuery = dbQuery.eq('created_by', memberId)
+    }
+  }
 
   if (sortBy === 'date_asc') {
     dbQuery = dbQuery
@@ -119,6 +128,15 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   const members = membersRes.data
   const expenses = expensesRes.data
 
+  const mappedMembers = (members || []).map((m: any) => {
+    const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+    return {
+      id: m.user_id,
+      name: profile?.display_name || profile?.email?.split('@')[0] || 'Miembro',
+      avatarUrl: profile?.avatar_url || null,
+    }
+  })
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -134,6 +152,9 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
         <ExpenseDialog
           householdId={membership.household_id}
           categories={categories || []}
+          members={mappedMembers}
+          currentUserId={user.id}
+          isOwner={isOwner}
         />
       </div>
 
@@ -163,6 +184,9 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                 householdId={membership.household_id}
                 categories={categories || []}
                 className="mt-6"
+                members={mappedMembers}
+                currentUserId={user.id}
+                isOwner={isOwner}
               />
             )}
           </CardContent>
@@ -244,17 +268,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
                     {/* Creador */}
                     <TableCell className="text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6 border border-border/40">
-                          {creator?.avatar_url ? (
-                            <AvatarImage src={creator.avatar_url} alt={creator.display_name || 'Miembro'} className="object-cover" />
-                          ) : null}
-                          <AvatarFallback className="bg-muted text-muted-foreground text-[10px] font-semibold">
-                            {(creator?.display_name || 'M').substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span>{creator?.display_name || 'Desconocido'}</span>
-                      </div>
+                      <PayerSelectorInline
+                        expenseId={expense.id}
+                        currentPayerId={expense.created_by}
+                        currentPayerName={creator?.display_name || 'A medias / Compartido'}
+                        currentPayerAvatar={creator?.avatar_url || null}
+                        members={mappedMembers}
+                        isOwner={isOwner}
+                      />
                     </TableCell>
 
                     {/* Importe */}
@@ -276,7 +297,11 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
                             payment_method: expense.payment_method,
                             notes: expense.notes,
                             receipt_path: expense.receipt_path,
+                            created_by: expense.created_by,
                           }}
+                          members={mappedMembers}
+                          currentUserId={user.id}
+                          isOwner={isOwner}
                           trigger={
                             <Button
                               size="icon"

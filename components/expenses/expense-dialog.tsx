@@ -47,6 +47,11 @@ interface Category {
   name: string
 }
 
+interface Member {
+  id: string
+  name: string
+}
+
 interface ExpenseDialogProps {
   householdId?: string // Requerido para crear
   categories: Category[]
@@ -59,7 +64,11 @@ interface ExpenseDialogProps {
     payment_method: string
     notes?: string | null
     receipt_path?: string | null
+    created_by?: string | null
   } // Requerido para editar
+  members?: Member[]
+  currentUserId?: string
+  isOwner?: boolean
   trigger?: React.ReactElement
   className?: string
   size?: 'default' | 'sm' | 'lg' | 'icon'
@@ -76,6 +85,9 @@ export function ExpenseDialog({
   householdId,
   categories,
   expense,
+  members = [],
+  currentUserId = '',
+  isOwner = false,
   trigger,
   className,
   size,
@@ -96,6 +108,7 @@ export function ExpenseDialog({
   const [expenseDate, setExpenseDate] = useState(defaultDate)
   const [paymentMethod, setPaymentMethod] = useState('Tarjeta')
   const [notes, setNotes] = useState('')
+  const [createdBy, setCreatedBy] = useState('')
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [deleteReceipt, setDeleteReceipt] = useState(false)
@@ -129,8 +142,13 @@ export function ExpenseDialog({
       setSelectedFile(null)
       setDeleteReceipt(false)
       setShowOptionalFields(!!expense?.notes || !!expense?.receipt_path)
+      
+      const initialCreatedBy = expense?.created_by === null 
+        ? 'shared' 
+        : (expense?.created_by || currentUserId || '')
+      setCreatedBy(initialCreatedBy)
     }
-  }, [open, expense, defaultDate])
+  }, [open, expense, defaultDate, currentUserId])
 
   // Cerrar el modal cuando la acción se ejecuta con éxito
   useEffect(() => {
@@ -459,6 +477,35 @@ export function ExpenseDialog({
                 </Select>
               </div>
             </div>
+
+            {/* Pagado por (solo para propietarios) */}
+            {isOwner && members && members.length > 0 && (
+              <div className="space-y-1">
+                <Label htmlFor="created_by">Pagado por</Label>
+                <Select
+                  name="created_by"
+                  value={createdBy}
+                  onValueChange={(val) => setCreatedBy(val || '')}
+                  disabled={isScanning}
+                  items={[
+                    ...members.map((m) => ({ value: m.id, label: m.name })),
+                    { value: 'shared', label: 'A medias / Compartido (Todos)' },
+                  ]}
+                >
+                  <SelectTrigger id="created_by" className="w-full bg-muted/50 h-9">
+                    <SelectValue placeholder="Seleccionar miembro" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {members.map((member) => (
+                      <SelectItem key={member.id} value={member.id}>
+                        {member.name}
+                      </SelectItem>
+                    ))}
+                    <SelectItem value="shared">A medias / Compartido (Todos)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             {showOptionalFields ? (
               <>

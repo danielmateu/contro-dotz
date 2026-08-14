@@ -46,12 +46,14 @@ export default async function DashboardPage() {
   // Cargar membresía
   const { data: membership } = await supabase
     .from('household_members')
-    .select('household_id')
+    .select('household_id, role')
     .eq('user_id', user.id)
     .limit(1)
     .maybeSingle()
 
   if (!membership) redirect('/household')
+
+  const isOwner = membership.role === 'owner'
 
   // Obtener fechas del mes actual y mes anterior
   const now = new Date()
@@ -120,9 +122,20 @@ export default async function DashboardPage() {
   const householdMembers = householdMembersRes.data
 
   const membersList = householdMembers || []
-  const memberNames = membersList.map(m => {
-    const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
-    return prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+  const memberNames = [
+    ...membersList.map(m => {
+      const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+      return prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+    }),
+    'Compartido'
+  ]
+
+  const mappedMembers = membersList.map((m: any) => {
+    const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+    return {
+      id: m.user_id,
+      name: profile?.display_name || profile?.email?.split('@')[0] || 'Miembro',
+    }
   })
 
   // --- CÁLCULO DE KPIs ---
@@ -241,9 +254,12 @@ export default async function DashboardPage() {
     }) || []
 
     dayExpenses.forEach(exp => {
-      const matchedMember = membersList.find(m => m.user_id === exp.created_by)
-      const prof = matchedMember ? (Array.isArray(matchedMember.profiles) ? matchedMember.profiles[0] : matchedMember.profiles) : null
-      const name = prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+      let name = 'Compartido'
+      if (exp.created_by) {
+        const matchedMember = membersList.find(m => m.user_id === exp.created_by)
+        const prof = matchedMember ? (Array.isArray(matchedMember.profiles) ? matchedMember.profiles[0] : matchedMember.profiles) : null
+        name = prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+      }
       runningTotal[name] = (runningTotal[name] || 0) + Number(exp.amount)
     })
 
@@ -305,6 +321,9 @@ export default async function DashboardPage() {
           <ExpenseDialog
             householdId={membership.household_id}
             categories={categories || []}
+            members={mappedMembers}
+            currentUserId={user.id}
+            isOwner={isOwner}
           />
         </div>
       </div>
