@@ -10,6 +10,7 @@ export const metadata = {
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import { InteractiveShowcase } from '@/components/landing/interactive-showcase'
 import { FeaturesGrid } from '@/components/landing/features-grid'
+import { CTASection } from '@/components/landing/cta-section'
 import {
   ArrowRight,
   ShieldCheck,
@@ -107,6 +108,9 @@ export default async function LandingPage() {
 
         {/* Feature Cards Grid */}
         <FeaturesGrid />
+
+        {/* CTA Final Section */}
+        <CTASection isAuthenticated={isAuthenticated} />
       </main>
 
       {/* Footer */}
