@@ -55,7 +55,19 @@ export function ChatWindow({
   const [error, setError] = useState<string | null>(null)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
+
+  const handleActivateGemini = () => {
+    setInputMessage((prev) => {
+      const trimmed = prev.trim()
+      if (trimmed.toLowerCase().includes('@gemini')) return prev
+      return `@gemini ${trimmed}`.trim()
+    })
+    setTimeout(() => {
+      inputRef.current?.focus()
+    }, 50)
+  }
 
   // Auto-scroll al final del chat
   const scrollToBottom = (behavior: ScrollBehavior = 'smooth') => {
@@ -99,6 +111,51 @@ export function ChatWindow({
       supabase.removeChannel(channel)
     }
   }, [householdId, supabase])
+
+  const handleSendSuggestedQuestion = async (questionText: string) => {
+    if (isSending || isBotTyping) return
+    setIsSending(true)
+    setError(null)
+
+    try {
+      // Insertar en la base de datos (Supabase)
+      const { data, error: insertError } = await supabase
+        .from('messages')
+        .insert({
+          household_id: householdId,
+          content: questionText,
+          created_by: userId,
+        })
+        .select()
+
+      if (insertError) {
+        throw insertError
+      }
+
+      if (data && data.length > 0) {
+        const createdMessage = data[0] as ChatMessage
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === createdMessage.id)) return prev
+          return [...prev, createdMessage]
+        })
+
+        // Invocar de fondo al bot Gemini
+        setIsBotTyping(true)
+        askGeminiAction(householdId, questionText)
+          .catch((err) => {
+            console.error('Error al consultar a Gemini:', err)
+          })
+          .finally(() => {
+            setIsBotTyping(false)
+          })
+      }
+    } catch (err: any) {
+      console.error('Error al enviar pregunta sugerida:', err)
+      setError('No se pudo enviar la pregunta sugerida. Inténtalo de nuevo.')
+    } finally {
+      setIsSending(false)
+    }
+  }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -371,8 +428,61 @@ export function ChatWindow({
 
       {/* Barra de Entrada de Texto */}
       <div className="p-4 border-t border-border/60 bg-muted/10">
+        {/* Preguntas sugeridas a Gemini AI */}
+        <div className="mb-3.5 flex flex-wrap gap-2 items-center">
+          <button
+            type="button"
+            onClick={handleActivateGemini}
+            className="text-[10px] uppercase font-bold tracking-widest text-primary/80 hover:text-primary dark:text-violet-400 dark:hover:text-violet-300 select-none mr-1 flex items-center gap-1 cursor-pointer transition-colors"
+            title="Haz clic para mencionar a @gemini y empezar a escribir"
+          >
+            🤖 Consultar a Gemini:
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo van nuestros límites y presupuestos de este mes?')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+          >
+            📊 Presupuestos
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini ¿quién debe dinero a quién y cuánto en nuestro hogar?')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+          >
+            💸 Saldar Deudas
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini dame un consejo financiero para ahorrar este mes')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+          >
+            💡 Consejo Ahorro
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini ¿en qué categoría hemos gastado más dinero este mes?')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+          >
+            📈 Top Categorías
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini hazme un resumen rápido de las finanzas familiares de la última semana')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+          >
+            🗓️ Resumen Semanal
+          </button>
+        </div>
+
         <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
           <Input
+            ref={inputRef}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             placeholder="Escribe un mensaje para tu familia..."
