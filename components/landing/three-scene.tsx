@@ -232,9 +232,14 @@ function InteractivePiggy({
     }
   })
 
-  const piggyProps = {
+  const loadedPigProps = {
     opacity,
-    scale: 0.8, // Escala base interna del primitive
+    scale: 0.32, // Escala base interna adaptada para el modelo GLTF hucha.glb
+  }
+
+  const fallbackPigProps = {
+    opacity,
+    scale: 0.64, // Escala base interna adaptada para el DefaultPiggy
   }
 
   return (
@@ -257,14 +262,10 @@ function InteractivePiggy({
         triggerBounce()
       }}
     >
-      {hasModel === true ? (
-        <GLTFErrorBoundary fallback={<DefaultPiggy {...piggyProps} isDark={isDark} />}>
-          <Suspense fallback={<DefaultPiggy {...piggyProps} isDark={isDark} />}>
-            <LoadedPiggyBank {...piggyProps} />
-          </Suspense>
-        </GLTFErrorBoundary>
-      ) : (
-        <DefaultPiggy {...piggyProps} isDark={isDark} />
+      {hasModel === true && (
+        <Suspense fallback={null}>
+          <LoadedPiggyBank {...loadedPigProps} />
+        </Suspense>
       )}
     </group>
   )
@@ -280,26 +281,23 @@ function SceneContent({ theme, hasModel }: SceneContentProps) {
 
   // Configuración de los cerditos flotantes (posiciones base, orientaciones, tamaños y opacidades)
   const piggiesConfig = useMemo(() => [
-    // Hucha central principal (más grande e intensa, escala optimizada)
-    { id: 'main', basePosition: [2.5, -0.6, 0] as [number, number, number], baseRotation: [0, -Math.PI / 1, 0] as [number, number, number], scale: 1.1, opacity: 0.75, speed: 0.7, phase: 0 },
-    // Cerdito flotante arriba izquierda
-    { id: 'bg1', basePosition: [-3.8, 2.3, -2.5] as [number, number, number], baseRotation: [0, Math.PI / 4, 0] as [number, number, number], scale: 0.65, opacity: 0.35, speed: 0.45, phase: 1.2 },
-    // Cerdito flotante arriba derecha
-    { id: 'bg2', basePosition: [3.6, 2.2, -3.0] as [number, number, number], baseRotation: [0, -Math.PI / 3, 0] as [number, number, number], scale: 0.55, opacity: 0.25, speed: 0.55, phase: 2.8 },
-    // Cerdito flotante abajo izquierda
-    { id: 'bg3', basePosition: [-2.8, -2.2, -1.8] as [number, number, number], baseRotation: [0, Math.PI / 6, 0] as [number, number, number], scale: 0.7, opacity: 0.45, speed: 0.35, phase: 4.1 },
-    // Cerdito flotante abajo derecha
-    { id: 'bg4', basePosition: [3.2, -2.0, -2.2] as [number, number, number], baseRotation: [0, -Math.PI / 5, 0] as [number, number, number], scale: 0.58, opacity: 0.3, speed: 0.5, phase: 5.4 },
-    // Cerdito flotante arriba centro
-    { id: 'bg5', basePosition: [-0.5, 3.2, -4.0] as [number, number, number], baseRotation: [0, Math.PI / 2, 0] as [number, number, number], scale: 0.45, opacity: 0.2, speed: 0.4, phase: 0.7 },
-    // Cerdito flotante centro izquierda
-    { id: 'bg6', basePosition: [-5.2, 0.2, -2.0] as [number, number, number], baseRotation: [0, -Math.PI / 2, 0] as [number, number, number], scale: 0.6, opacity: 0.35, speed: 0.5, phase: 2.1 },
-    // Cerdito flotante abajo centro
-    { id: 'bg7', basePosition: [0.2, -3.4, -3.5] as [number, number, number], baseRotation: [0, Math.PI / 1.1, 0] as [number, number, number], scale: 0.5, opacity: 0.25, speed: 0.3, phase: 3.5 },
-    // Cerdito flotante extremo derecho centro
-    { id: 'bg8', basePosition: [5.5, -0.2, -4.5] as [number, number, number], baseRotation: [0, -Math.PI / 1.3, 0] as [number, number, number], scale: 0.48, opacity: 0.15, speed: 0.6, phase: 4.9 },
-    // Cerdito adicional equilibrado
-    { id: 'bg9', basePosition: [2, 2.0, -2.0] as [number, number, number], baseRotation: [0, Math.PI / 2, 0] as [number, number, number], scale: 3.6, opacity: 1, speed: 0.4, phase: 0 },
+    // Hucha central principal (más cercana Z=1.0)
+    { id: 'main', basePosition: [2.5, -0.6, 1.0] as [number, number, number], baseRotation: [0, -Math.PI / 1, 0] as [number, number, number], scale: 2.2, opacity: 0.75, speed: 0.7, phase: 0 },
+    // Cerditos de fondo pero traídos más cerca en el eje Z
+    { id: 'bg1', basePosition: [-3.8, 2.3, -0.5] as [number, number, number], baseRotation: [0, Math.PI / 4, 0] as [number, number, number], scale: 1.3, opacity: 0.35, speed: 0.45, phase: 1.2 },
+    { id: 'bg2', basePosition: [3.6, 2.2, -1.0] as [number, number, number], baseRotation: [0, -Math.PI / 3, 0] as [number, number, number], scale: 1.1, opacity: 0.25, speed: 0.55, phase: 2.8 },
+    { id: 'bg3', basePosition: [-2.8, -2.2, 0.5] as [number, number, number], baseRotation: [0, Math.PI / 6, 0] as [number, number, number], scale: 1.4, opacity: 0.45, speed: 0.35, phase: 4.1 },
+    { id: 'bg4', basePosition: [3.2, -2.0, -0.5] as [number, number, number], baseRotation: [0, -Math.PI / 5, 0] as [number, number, number], scale: 1.15, opacity: 0.3, speed: 0.5, phase: 5.4 },
+    { id: 'bg5', basePosition: [-0.5, 3.2, -2.0] as [number, number, number], baseRotation: [0, Math.PI / 2, 0] as [number, number, number], scale: 0.9, opacity: 0.2, speed: 0.4, phase: 0.7 },
+    { id: 'bg6', basePosition: [-5.2, 0.2, 1.0] as [number, number, number], baseRotation: [0, -Math.PI / 2, 0] as [number, number, number], scale: 1.2, opacity: 0.35, speed: 0.5, phase: 2.1 },
+    { id: 'bg7', basePosition: [0.2, -3.4, -1.5] as [number, number, number], baseRotation: [0, Math.PI / 1.1, 0] as [number, number, number], scale: 1.0, opacity: 0.25, speed: 0.3, phase: 3.5 },
+    { id: 'bg8', basePosition: [5.5, -0.2, -2.5] as [number, number, number], baseRotation: [0, -Math.PI / 1.3, 0] as [number, number, number], scale: 0.95, opacity: 0.15, speed: 0.6, phase: 4.9 },
+    // Cerdito gigante del usuario
+    { id: 'bg9', basePosition: [2, 2.0, -2.0] as [number, number, number], baseRotation: [0, Math.PI / 2, 0] as [number, number, number], scale: 10.6, opacity: 1, speed: 0.4, phase: 0 },
+    // NUEVOS cerditos súper cercanos (primer plano) en los laterales
+    { id: 'bg10', basePosition: [-4.5, -1.0, 2.0] as [number, number, number], baseRotation: [0, Math.PI / 4, 0] as [number, number, number], scale: 3.2, opacity: 0.6, speed: 0.5, phase: 1.8 },
+    { id: 'bg11', basePosition: [4.8, -1.5, 1.5] as [number, number, number], baseRotation: [0, -Math.PI / 3, 0] as [number, number, number], scale: 2.8, opacity: 0.5, speed: 0.45, phase: 3.1 },
+    { id: 'bg12', basePosition: [-3.0, 2.5, 2.5] as [number, number, number], baseRotation: [0, Math.PI / 1.2, 1] as [number, number, number], scale: 4.5, opacity: 1, speed: 0.5, phase: 4.9 },
   ], [])
 
   return (
