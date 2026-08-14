@@ -183,7 +183,7 @@ export async function askGeminiAction(
       // A. Miembros del hogar
       supabase
         .from('household_members')
-        .select('user_id, role, profiles(display_name, email)')
+        .select('user_id, role, monthly_income, profiles(display_name, email)')
         .eq('household_id', householdId),
       // B. Gastos del mes actual
       supabase
@@ -282,6 +282,43 @@ export async function askGeminiAction(
       importe: d.amount,
     }))
 
+    const totalSpent = currentExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
+    const totalHouseholdIncome = membersList.reduce((sum, mem) => sum + Number(mem.monthly_income || 0), 0)
+
+    // Gastos realizados por miembro este mes
+    const memberSpentMap: Record<string, number> = {}
+    membersList.forEach((m) => {
+      memberSpentMap[m.user_id] = 0
+    })
+    currentExpenses.forEach((exp) => {
+      if (exp.created_by && memberSpentMap[exp.created_by] !== undefined) {
+        memberSpentMap[exp.created_by] += Number(exp.amount)
+      }
+    })
+
+    const analisisProporcional = exactBalances.map((b) => {
+      const matchedMember = membersList.find((m) => {
+        const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+        const name = prof?.display_name || prof?.email?.split('@')[0] || 'Miembro'
+        return name === b.name
+      })
+
+      const income = Number(matchedMember?.monthly_income || 0)
+      const spent = matchedMember ? (memberSpentMap[matchedMember.user_id] || 0) : 0
+      const incomePercentage = totalHouseholdIncome > 0 ? (income / totalHouseholdIncome) * 100 : 0
+      const proportionalShare = totalHouseholdIncome > 0 ? totalSpent * (income / totalHouseholdIncome) : 0
+      const diff = spent - proportionalShare
+
+      return {
+        nombre: b.name,
+        ingreso: income,
+        porcentaje_ingresos_hogar: incomePercentage,
+        aportacion_real: spent,
+        cuota_proporcional: proportionalShare,
+        diferencia: diff,
+      }
+    })
+
     const householdContext = {
       mes_actual: currentMonthStr,
       miembros: formattedMembers.map((m) => m.profiles?.display_name),
@@ -291,6 +328,10 @@ export async function askGeminiAction(
         saldos_netos: balancesContext,
         transferencias_sugeridas: debtsContext,
       },
+      ingresos_y_analisis_proporcional: {
+        ingresos_totales_hogar: totalHouseholdIncome,
+        reparto_proporcional: analisisProporcional,
+      }
     }
 
     // 3. Crear el prompt estructurado para Gemini
@@ -305,6 +346,8 @@ Instrucciones para responder:
 - No muestres código JSON en tu respuesta. Tradúcelo todo a un formato de texto amigable en español.
 - Si te preguntan sobre quién le debe a quién, fíjate en "transferencias_sugeridas" en el JSON, ya que están optimizadas matemáticamente.
 - Sé preciso con los datos del JSON. Si no tienes datos sobre lo que te preguntan, indícalo con amabilidad.
+- Analiza si el reparto de gastos es justo de acuerdo con la proporción de ingresos de cada miembro ("reparto_proporcional"). Si un miembro aporta más o menos de lo correspondiente proporcionalmente a sus ingresos (diferencia positiva o negativa), ofréceles consejos constructivos y empáticos sobre cómo equilibrar las cuentas del hogar.
+- Compara los gastos totales del mes con los ingresos del hogar para aconsejarles sobre su nivel de ahorro y darles recomendaciones personalizadas de mejora para el día a día.
 - La pregunta del usuario fue: "${userPrompt.replace(/@gemini/gi, '').trim()}"`
 
     // 4. Llamar a la API de Gemini

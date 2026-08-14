@@ -530,3 +530,38 @@ export async function sendHouseholdReportAction(
     return { error: 'Error inesperado al generar y enviar el reporte financiero.' }
   }
 }
+
+/**
+ * Actualiza los ingresos mensuales de un miembro en un hogar
+ */
+export async function updateMemberIncomeAction(
+  householdId: string,
+  income: number
+): Promise<any> {
+  const supabase = await createClient()
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  if (income < 0) {
+    return { error: 'El ingreso no puede ser un valor negativo.' }
+  }
+
+  const { error } = await supabase
+    .from('household_members')
+    .update({ monthly_income: income })
+    .eq('household_id', householdId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('UPDATE INCOME ERROR:', error)
+    return { error: 'Error al actualizar tus ingresos en la base de datos.' }
+  }
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+  return { success: 'Ingresos actualizados con éxito.' }
+}

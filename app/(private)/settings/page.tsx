@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 }
 import { ProfileNameForm } from '@/components/household/profile-name-form'
 import { SendReportButton } from '@/components/household/send-report-button'
+import { MemberIncomeForm } from '@/components/household/member-income-form'
 import {
   Card,
   CardContent,
@@ -43,7 +44,7 @@ export default async function SettingsPage() {
       .single(),
     supabase
       .from('household_members')
-      .select('household_id')
+      .select('household_id, monthly_income')
       .eq('user_id', user.id)
       .limit(1)
       .maybeSingle(),
@@ -52,6 +53,7 @@ export default async function SettingsPage() {
   const profile = profileRes.data
   const membership = membershipRes.data
   const householdId = membership?.household_id || null
+  const monthlyIncome = Number(membership?.monthly_income || 0)
 
   const displayName = profile?.display_name || ''
   const email = profile?.email || ''
@@ -105,6 +107,24 @@ export default async function SettingsPage() {
           />
         </CardContent>
       </Card>
+
+      {/* Ingresos Mensuales */}
+      {householdId && (
+        <Card className="border-slate-200/50 shadow-md">
+          <CardHeader>
+            <CardTitle className="text-lg">Ingresos Mensuales</CardTitle>
+            <CardDescription>
+              Introduce tus ingresos mensuales netos para poder analizar de forma justa el reparto de los gastos del hogar.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <MemberIncomeForm
+              initialIncome={monthlyIncome}
+              householdId={householdId}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reportes del Hogar (Opción C) */}
       {householdId && (

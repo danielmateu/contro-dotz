@@ -111,7 +111,7 @@ export default async function DashboardPage() {
       .eq('month', currentMonthStr),
     supabase
       .from('household_members')
-      .select('user_id, profiles(display_name, email, avatar_url, status)')
+      .select('user_id, role, monthly_income, profiles(display_name, email, avatar_url, status)')
       .eq('household_id', membership.household_id)
   ])
 
@@ -135,6 +135,27 @@ export default async function DashboardPage() {
     return {
       id: m.user_id,
       name: profile?.display_name || profile?.email?.split('@')[0] || 'Miembro',
+    }
+  })
+
+  // Calcular gastos por miembro en el mes actual
+  const memberSpentMap: Record<string, number> = {}
+  membersList.forEach((m) => {
+    memberSpentMap[m.user_id] = 0
+  })
+  currentExpenses?.forEach((exp) => {
+    if (exp.created_by && memberSpentMap[exp.created_by] !== undefined) {
+      memberSpentMap[exp.created_by] += Number(exp.amount)
+    }
+  })
+
+  const membersIncomeAndSpent = membersList.map((m) => {
+    const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+    const name = profile?.display_name || profile?.email?.split('@')[0] || 'Miembro'
+    return {
+      name,
+      income: Number(m.monthly_income || 0),
+      spent: memberSpentMap[m.user_id] || 0,
     }
   })
 
@@ -435,6 +456,7 @@ export default async function DashboardPage() {
         barData={barChartData}
         stackedData={stackedChartData}
         memberNames={memberNames}
+        membersIncomeAndSpent={membersIncomeAndSpent}
       />
 
       {/* Sección inferior de alertas y últimos gastos */}

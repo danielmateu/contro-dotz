@@ -30,6 +30,7 @@ create table public.household_members (
   household_id uuid references public.households on delete cascade not null,
   user_id uuid references public.profiles on delete cascade not null,
   role text check (role in ('owner', 'member')) not null default 'member',
+  monthly_income numeric(12,2) default 0.00 check (monthly_income >= 0),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(household_id, user_id)

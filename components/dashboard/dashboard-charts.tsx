@@ -51,12 +51,19 @@ interface BarData {
   color: string
 }
 
+interface MemberIncomeAndSpent {
+  name: string
+  income: number
+  spent: number
+}
+
 interface DashboardChartsProps {
   pieData: PieData[]
   lineData: LineData[]
   barData: BarData[]
   stackedData: any[]
   memberNames: string[]
+  membersIncomeAndSpent?: MemberIncomeAndSpent[]
 }
 
 export function DashboardCharts({
@@ -65,6 +72,7 @@ export function DashboardCharts({
   barData,
   stackedData,
   memberNames,
+  membersIncomeAndSpent = [],
 }: DashboardChartsProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
@@ -102,6 +110,23 @@ export function DashboardCharts({
   const totalBudget = barData.reduce((sum, item) => sum + item.Presupuesto, 0)
   const budgetDiff = totalBudget - finalProjected
   const isOverBudget = budgetDiff < 0
+
+  // 5. Calcular estadísticas proporcionales
+  const totalHouseholdIncome = membersIncomeAndSpent.reduce((sum, m) => sum + m.income, 0)
+  const totalMemberSpent = membersIncomeAndSpent.reduce((sum, m) => sum + m.spent, 0)
+  const totalSpentThisMonth = lineData[lineData.length - 1]?.Gasto || totalMemberSpent
+
+  const proportionalAnalysis = membersIncomeAndSpent.map((m) => {
+    const incomePercentage = totalHouseholdIncome > 0 ? (m.income / totalHouseholdIncome) * 100 : 0
+    const proportionalShare = totalHouseholdIncome > 0 ? totalSpentThisMonth * (m.income / totalHouseholdIncome) : 0
+    const diff = m.spent - proportionalShare
+    return {
+      ...m,
+      incomePercentage,
+      proportionalShare,
+      diff,
+    }
+  })
 
   if (!isMounted) {
     return (
@@ -421,58 +446,159 @@ export function DashboardCharts({
 
       <TabsContent value="members" className="outline-none">
         {activeTab === 'members' && (
-        <Card className="border-slate-200/50 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Users2 className="h-5 w-5 text-emerald-500" />
-              Aportación de Gastos por Miembro
-            </CardTitle>
-            <CardDescription>
-              Evolución acumulada de los gastos del mes dividida por la aportación individual de cada miembro.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[350px]">
-            {memberNames.length === 0 || stackedData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                No hay aportaciones de miembros registradas este mes.
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <AreaChart
-                  data={stackedData}
-                  margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                  <XAxis
-                    dataKey="day"
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                    tickFormatter={(val) => `${val}€`}
-                  />
-                  <Tooltip content={<CustomStackedTooltip />} />
-                  <Legend verticalAlign="top" height={36} />
-                  {memberNames.map((name, index) => (
-                    <Area
-                      key={name}
-                      type="monotone"
-                      dataKey={name}
-                      stackId="1"
-                      stroke={MEMBER_COLORS[index % MEMBER_COLORS.length]}
-                      fill={MEMBER_COLORS[index % MEMBER_COLORS.length]}
-                      fillOpacity={0.4}
-                    />
-                  ))}
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+          <div className="grid gap-6 lg:grid-cols-3">
+            {/* Gráfico de Aportación */}
+            <Card className="border-slate-200/50 shadow-md lg:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Users2 className="h-5 w-5 text-emerald-500" />
+                  Aportación de Gastos por Miembro
+                </CardTitle>
+                <CardDescription>
+                  Evolución acumulada de los gastos del mes dividida por la aportación individual de cada miembro.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[350px]">
+                {memberNames.length === 0 || stackedData.length === 0 ? (
+                  <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                    No hay aportaciones de miembros registradas este mes.
+                  </div>
+                ) : (
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                    <AreaChart
+                      data={stackedData}
+                      margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                      <XAxis
+                        dataKey="day"
+                        tickLine={false}
+                        axisLine={false}
+                        className="text-[10px] fill-muted-foreground font-medium"
+                      />
+                      <YAxis
+                        tickLine={false}
+                        axisLine={false}
+                        className="text-[10px] fill-muted-foreground font-medium"
+                        tickFormatter={(val) => `${val}€`}
+                      />
+                      <Tooltip content={<CustomStackedTooltip />} />
+                      <Legend verticalAlign="top" height={36} />
+                      {memberNames.map((name, index) => (
+                        <Area
+                          key={name}
+                          type="monotone"
+                          dataKey={name}
+                          stackId="1"
+                          stroke={MEMBER_COLORS[index % MEMBER_COLORS.length]}
+                          fill={MEMBER_COLORS[index % MEMBER_COLORS.length]}
+                          fillOpacity={0.4}
+                        />
+                      ))}
+                    </AreaChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Reparto Proporcional */}
+            <Card className="border-slate-200/50 shadow-md lg:col-span-1 flex flex-col">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Landmark className="h-5 w-5 text-indigo-500" />
+                  Reparto Proporcional
+                </CardTitle>
+                <CardDescription>
+                  Comparación del esfuerzo financiero basado en los ingresos de cada uno.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex-1 flex flex-col justify-between">
+                {totalHouseholdIncome === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-12 text-center text-xs text-muted-foreground gap-3 h-full">
+                    <div className="p-3 bg-muted/40 rounded-full">
+                      <Landmark className="h-6 w-6 text-muted-foreground/60" />
+                    </div>
+                    <p className="max-w-[220px]">
+                      No hay ingresos configurados en este hogar.
+                    </p>
+                    <p className="text-[11px] max-w-[240px] text-muted-foreground/80">
+                      Configura tus ingresos mensuales netos en la sección de <strong>Ajustes</strong> para activar el análisis proporcional.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-5">
+                    <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/40 flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground">Ingresos del Hogar:</span>
+                      <span className="font-semibold text-foreground text-sm">{formatCurrency(totalHouseholdIncome)}</span>
+                    </div>
+
+                    <div className="space-y-4 max-h-[280px] overflow-y-auto pr-1">
+                      {proportionalAnalysis.map((m) => {
+                        const contributionPercentage = totalMemberSpent > 0 ? (m.spent / totalMemberSpent) * 100 : 0
+                        return (
+                          <div key={m.name} className="space-y-2 pb-3 border-b border-slate-100 dark:border-slate-800/30 last:border-0 last:pb-0">
+                            <div className="flex justify-between items-start">
+                              <div>
+                                <span className="font-semibold text-sm text-foreground">{m.name}</span>
+                                <p className="text-[10px] text-muted-foreground">
+                                  Ingreso: {formatCurrency(m.income)} ({m.incomePercentage.toFixed(0)}%)
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span className={`text-xs font-bold ${
+                                  m.diff > 0 
+                                    ? 'text-emerald-600 dark:text-emerald-400' 
+                                    : m.diff < 0 
+                                      ? 'text-rose-600 dark:text-rose-400' 
+                                      : 'text-muted-foreground'
+                                }`}>
+                                  {m.diff > 0 ? '+' : ''}{formatCurrency(m.diff)}
+                                </span>
+                                <p className="text-[9px] text-muted-foreground">
+                                  {m.diff > 0 ? 'Aportó de más' : m.diff < 0 ? 'Aportó de menos' : 'Equilibrado'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Progresos comparativos */}
+                            <div className="space-y-1">
+                              {/* Barra de Ingreso */}
+                              <div className="space-y-0.5">
+                                <div className="flex justify-between text-[9px] text-muted-foreground/80">
+                                  <span>Peso de ingresos:</span>
+                                  <span>{m.incomePercentage.toFixed(0)}%</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                                    style={{ width: `${m.incomePercentage}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              {/* Barra de Gasto Real */}
+                              <div className="space-y-0.5">
+                                <div className="flex justify-between text-[9px] text-muted-foreground/80">
+                                  <span>Gasto real aportado:</span>
+                                  <span>{contributionPercentage.toFixed(0)}%</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                  <div 
+                                    className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+                                    style={{ width: `${contributionPercentage}%` }}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </TabsContent>
 
