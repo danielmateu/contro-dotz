@@ -399,13 +399,19 @@ Instrucciones para responder:
       throw new Error('Respuesta de bot vacía')
     }
 
-    // 5. Insertar la respuesta del bot en la tabla de mensajes
-    await supabase.from('messages').insert({
+    // 5. Insertar la respuesta del bot en la tabla de mensajes (usando user.id para cumplir RLS)
+    const botText = botReply.trim()
+    const content = botText.startsWith('🤖') ? botText : `🤖 ${botText}`
+
+    const { error: insertBotErr } = await supabase.from('messages').insert({
       household_id: householdId,
-      created_by: null,
-      is_bot: true,
-      content: botReply.trim(),
+      created_by: user.id,
+      content,
     })
+
+    if (insertBotErr) {
+      console.error('Error inserting Gemini bot message:', insertBotErr)
+    }
 
     return { success: true }
   } catch (err: any) {

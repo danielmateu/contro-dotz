@@ -15,6 +15,11 @@ import {
   Mail,
   Loader2,
 } from 'lucide-react'
+import { MorphIcon } from '@/components/ui/client-morph-icon'
+// @ts-ignore
+import { __iconNode as StickerData } from 'lucide-react/dist/esm/icons/sticker.mjs'
+// @ts-ignore
+import { __iconNode as ScanFaceData } from 'lucide-react/dist/esm/icons/scan-face.mjs'
 
 // --- 1. HOGAR COMPARTIDO DEMO ---
 export function HogarCompartidoDemo() {
@@ -59,13 +64,12 @@ export function HogarCompartidoDemo() {
           <div key={b.name} className="flex justify-between items-center py-0.5">
             <div className="flex items-center gap-2">
               <div
-                className={`h-5 w-5 rounded-full flex items-center justify-center font-bold text-[9px] ${
-                  b.name === 'Mateu'
-                    ? 'bg-violet-600 text-white'
-                    : b.name === 'Mamá'
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-amber-500 text-white'
-                }`}
+                className={`h-5 w-5 rounded-full flex items-center justify-center font-bold text-[9px] ${b.name === 'Mateu'
+                  ? 'bg-violet-600 text-white'
+                  : b.name === 'Mamá'
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-amber-500 text-white'
+                  }`}
               >
                 {b.name.substring(0, 2)}
               </div>
@@ -75,13 +79,12 @@ export function HogarCompartidoDemo() {
               key={b.amount}
               initial={{ scale: 0.8 }}
               animate={{ scale: 1 }}
-              className={`font-bold ${
-                b.amount > 0
-                  ? 'text-emerald-600 dark:text-emerald-400'
-                  : b.amount < 0
-                    ? 'text-rose-600 dark:text-rose-400'
-                    : 'text-slate-500 dark:text-slate-400'
-              }`}
+              className={`font-bold ${b.amount > 0
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : b.amount < 0
+                  ? 'text-rose-600 dark:text-rose-400'
+                  : 'text-slate-500 dark:text-slate-400'
+                }`}
             >
               {b.amount > 0 ? `+${b.amount.toFixed(2)} €` : `${b.amount.toFixed(2)} €`}
             </motion.span>
@@ -134,6 +137,7 @@ export function HogarCompartidoDemo() {
 export function EscanerIADemo() {
   const [scanState, setScanState] = useState<'idle' | 'scanning' | 'success'>('idle')
   const [data, setData] = useState<any>(null)
+  const [isHovered, setIsHovered] = useState(false)
 
   const startScan = () => {
     setScanState('scanning')
@@ -151,11 +155,21 @@ export function EscanerIADemo() {
   }
 
   return (
-    <div className="flex flex-col h-full justify-between text-xs space-y-3">
+    <div
+      className="flex flex-col h-full justify-between text-xs space-y-3"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div className="relative border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 rounded-xl p-3 flex-1 overflow-hidden flex flex-col justify-center min-h-[130px]">
         {scanState === 'idle' && (
-          <div className="text-center space-y-2 py-4">
-            <span className="text-2xl select-none">🧾</span>
+          <div className="flex items-center flex-col space-y-2 py-4">
+            <span className="text-2xl select-none">
+              <MorphIcon
+                icon={isHovered ? ScanFaceData : StickerData}
+                spring="snappy"
+                className="h-[22px] w-[22px]"
+              />
+            </span>
             <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
               Sube un ticket de compra de ejemplo para ver extraer a Gemini la información.
             </p>
@@ -171,7 +185,13 @@ export function EscanerIADemo() {
               transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
               className="absolute left-0 right-0 h-0.5 bg-emerald-500/80 shadow-md shadow-emerald-500 z-10 pointer-events-none"
             />
-            <span className="text-2xl animate-pulse">🧾</span>
+            {/* <span className="text-2xl animate-pulse">🧾</span> */}
+            <span className="text-2xl select-none">
+              <Loader2
+                size={22}
+                className="animate-spin"
+              />
+            </span>
             <p className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] animate-pulse">
               Gemini extrae los datos...
             </p>
@@ -250,13 +270,12 @@ export function PresupuestosDemo() {
             </div>
           </div>
           <span
-            className={`text-xs font-extrabold px-2 py-0.5 rounded-lg border ${
-              spent >= 100
-                ? 'bg-rose-500/10 border-rose-500/20 text-rose-500'
-                : spent >= 80
-                  ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500'
-                  : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
-            }`}
+            className={`text-xs font-extrabold px-2 py-0.5 rounded-lg border ${spent >= 100
+              ? 'bg-rose-500/10 border-rose-500/20 text-rose-500'
+              : spent >= 80
+                ? 'bg-amber-500/10 border-amber-500/20 text-amber-600 dark:text-amber-500'
+                : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+              }`}
           >
             {spent}%
           </span>
@@ -266,9 +285,8 @@ export function PresupuestosDemo() {
         <div className="h-2 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden relative">
           <motion.div
             animate={{ width: `${Math.min(spent, 100)}%` }}
-            className={`h-full rounded-full ${
-              spent >= 100 ? 'bg-rose-500' : spent >= 80 ? 'bg-amber-500' : 'bg-emerald-500'
-            }`}
+            className={`h-full rounded-full ${spent >= 100 ? 'bg-rose-500' : spent >= 80 ? 'bg-amber-500' : 'bg-emerald-500'
+              }`}
           />
         </div>
 
@@ -393,11 +411,10 @@ export function ChatGeminiDemo() {
               {m.sender === 'user' ? 'Tú (Familia)' : '🤖 Gemini Bot'}
             </span>
             <div
-              className={`px-3 py-1.5 rounded-2xl max-w-[85%] leading-normal text-[10.5px] ${
-                m.sender === 'user'
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tr-none'
-                  : 'bg-violet-600 text-white rounded-tl-none'
-              }`}
+              className={`px-3 py-1.5 rounded-2xl max-w-[85%] leading-normal text-[10.5px] ${m.sender === 'user'
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tr-none'
+                : 'bg-violet-600 text-white rounded-tl-none'
+                }`}
             >
               {m.text}
             </div>
@@ -506,25 +523,22 @@ export function ListaCompraDemo() {
           <div
             key={item.id}
             onClick={() => toggleItem(item.id)}
-            className={`flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer select-none ${
-              item.done
-                ? 'bg-background/40 border-dashed border-slate-200 dark:border-slate-800 opacity-60'
-                : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
-            }`}
+            className={`flex items-center justify-between p-2 rounded-xl border transition-all cursor-pointer select-none ${item.done
+              ? 'bg-background/40 border-dashed border-slate-200 dark:border-slate-800 opacity-60'
+              : 'bg-slate-50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700'
+              }`}
           >
             <div className="flex items-center gap-2 min-w-0">
               <div
-                className={`h-4 w-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${
-                  item.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700'
-                }`}
+                className={`h-4 w-4 rounded-md border flex items-center justify-center shrink-0 transition-colors ${item.done ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-300 dark:border-slate-700'
+                  }`}
               >
                 {item.done && <Check className="h-2.5 w-2.5 font-bold" />}
               </div>
               <div className="truncate">
                 <p
-                  className={`font-semibold leading-tight text-[11px] truncate ${
-                    item.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
-                  }`}
+                  className={`font-semibold leading-tight text-[11px] truncate ${item.done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'
+                    }`}
                 >
                   {item.name}
                 </p>
@@ -534,11 +548,10 @@ export function ListaCompraDemo() {
               </div>
             </div>
             <span
-              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${
-                item.done
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
-                  : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10'
-              }`}
+              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md ${item.done
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
+                : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/10'
+                }`}
             >
               {item.price.toFixed(2)} €
             </span>
@@ -576,7 +589,7 @@ export function ProyeccionInformesDemo() {
           <span>INFORMES MENSUALES</span>
           <span className="text-[8px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.2 rounded uppercase">Agosto</span>
         </div>
-        
+
         {/* Gráfico de barras mini */}
         <div className="space-y-1.5 pt-1">
           <div className="space-y-0.5">

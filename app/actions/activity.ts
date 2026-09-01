@@ -59,7 +59,7 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
           id,
           content,
           created_at,
-          is_bot,
+          created_by,
           profiles:created_by (display_name, email, avatar_url)
         `)
         .eq('household_id', householdId)
@@ -116,7 +116,8 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
     // Procesar Mensajes
     const messages = messagesRes.data || []
     messages.forEach((m: any) => {
-      if (m.is_bot) {
+      const isBot = m.created_by === '00000000-0000-0000-0000-000000000000' || m.is_bot
+      if (isBot) {
         events.push({
           id: m.id,
           type: 'message',

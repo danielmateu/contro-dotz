@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { askGeminiAction } from '@/app/actions/gemini'
+import { sendMessageAction } from '@/app/actions/chat'
 import {
   MessageGroup,
   Message,
@@ -98,6 +99,9 @@ export function ChatWindow({
         },
         (payload) => {
           const newMessage = payload.new as ChatMessage
+          if (newMessage.content?.startsWith('🤖')) {
+            setIsBotTyping(false)
+          }
           setMessages((prev) => {
             // Evitar duplicados si el mensaje ya fue insertado optimistamente
             if (prev.some((m) => m.id === newMessage.id)) return prev
@@ -115,45 +119,28 @@ export function ChatWindow({
   const handleSendSuggestedQuestion = async (questionText: string) => {
     if (isSending || isBotTyping) return
     setIsSending(true)
+    setIsBotTyping(true)
     setError(null)
 
     try {
-      // Insertar en la base de datos (Supabase)
-      const { data, error: insertError } = await supabase
-        .from('messages')
-        .insert({
-          household_id: householdId,
-          content: questionText,
-          created_by: userId,
-        })
-        .select()
-
-      if (insertError) {
-        throw insertError
+      const res = await sendMessageAction(householdId, questionText)
+      if (res.error) {
+        throw new Error(res.error)
       }
 
-      if (data && data.length > 0) {
-        const createdMessage = data[0] as ChatMessage
+      if (res.message) {
+        const createdMessage = res.message as ChatMessage
         setMessages((prev) => {
           if (prev.some((m) => m.id === createdMessage.id)) return prev
           return [...prev, createdMessage]
         })
-
-        // Invocar de fondo al bot Gemini
-        setIsBotTyping(true)
-        askGeminiAction(householdId, questionText)
-          .catch((err) => {
-            console.error('Error al consultar a Gemini:', err)
-          })
-          .finally(() => {
-            setIsBotTyping(false)
-          })
       }
     } catch (err: any) {
       console.error('Error al enviar pregunta sugerida:', err)
-      setError('No se pudo enviar la pregunta sugerida. Inténtalo de nuevo.')
+      setError(err?.message || 'No se pudo enviar la pregunta sugerida. Inténtalo de nuevo.')
     } finally {
       setIsSending(false)
+      setIsBotTyping(false)
     }
   }
 
@@ -162,50 +149,34 @@ export function ChatWindow({
     if (!inputMessage.trim() || isSending) return
 
     const messageText = inputMessage.trim()
+    const isGeminiQuery = messageText.toLowerCase().includes('@gemini')
     setInputMessage('')
     setIsSending(true)
+    if (isGeminiQuery) {
+      setIsBotTyping(true)
+    }
     setError(null)
 
     try {
-      // Insertar en la base de datos (Supabase)
-      const { data, error: insertError } = await supabase
-        .from('messages')
-        .insert({
-          household_id: householdId,
-          content: messageText,
-          created_by: userId,
-        })
-        .select()
-
-      if (insertError) {
-        throw insertError
+      const res = await sendMessageAction(householdId, messageText)
+      if (res.error) {
+        throw new Error(res.error)
       }
 
-      if (data && data.length > 0) {
-        const createdMessage = data[0] as ChatMessage
+      if (res.message) {
+        const createdMessage = res.message as ChatMessage
         setMessages((prev) => {
           if (prev.some((m) => m.id === createdMessage.id)) return prev
           return [...prev, createdMessage]
         })
-
-        // Invocar de fondo al bot Gemini si se le menciona en el mensaje
-        if (messageText.toLowerCase().includes('@gemini')) {
-          setIsBotTyping(true)
-          askGeminiAction(householdId, messageText)
-            .catch((err) => {
-              console.error('Error al consultar a Gemini:', err)
-            })
-            .finally(() => {
-              setIsBotTyping(false)
-            })
-        }
       }
     } catch (err: any) {
       console.error('Error al enviar el mensaje:', err)
-      setError('No se pudo enviar el mensaje. Inténtalo de nuevo.')
+      setError(err?.message || 'No se pudo enviar el mensaje. Inténtalo de nuevo.')
       setInputMessage(messageText) // restaurar texto
     } finally {
       setIsSending(false)
+      setIsBotTyping(false)
     }
   }
 
@@ -353,8 +324,9 @@ export function ChatWindow({
               {/* Mensajes del día */}
               <MessageGroup className="gap-4">
                 {groupedMessages[dateKey].map((msg) => {
-                  const isMe = msg.created_by === userId
-                  const sender = getMemberProfile(msg.created_by, msg.is_bot)
+                  const isBot = msg.is_bot || msg.created_by === '00000000-0000-0000-0000-000000000000' || msg.content?.startsWith('🤖')
+                  const isMe = !isBot && msg.created_by === userId
+                  const sender = getMemberProfile(msg.created_by, isBot)
 
                   return (
                     <Message key={msg.id} align={isMe ? 'end' : 'start'} className="px-1">
