@@ -66,6 +66,7 @@ interface ExpenseDialogProps {
     notes?: string | null
     receipt_path?: string | null
     created_by?: string | null
+    is_personal?: boolean
   } // Requerido para editar
   members?: Member[]
   currentUserId?: string
@@ -110,6 +111,7 @@ export function ExpenseDialog({
   const [paymentMethod, setPaymentMethod] = useState('Tarjeta')
   const [notes, setNotes] = useState('')
   const [createdBy, setCreatedBy] = useState('')
+  const [isPersonal, setIsPersonal] = useState(false)
   const [suggestedCategory, setSuggestedCategory] = useState<any | null>(null)
 
   useEffect(() => {
@@ -147,6 +149,7 @@ export function ExpenseDialog({
       setExpenseDate(defaultDate)
       setPaymentMethod(expense?.payment_method || 'Tarjeta')
       setNotes(expense?.notes || '')
+      setIsPersonal(expense?.is_personal ?? false)
       setScanError('')
       setScanSuccess(false)
       setFormState({})
@@ -192,6 +195,7 @@ export function ExpenseDialog({
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     const formData = new FormData(e.currentTarget)
+    formData.append('is_personal', isPersonal ? 'true' : 'false')
     if (selectedFile) {
       formData.append('receipt', selectedFile)
     }
@@ -530,6 +534,35 @@ export function ExpenseDialog({
                 </Select>
               </div>
             )}
+
+            {/* Ámbito del gasto: Compartido del Hogar vs Personal */}
+            <div className="space-y-1">
+              <Label className="text-xs">Ámbito del Gasto</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsPersonal(false)}
+                  className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${
+                    !isPersonal
+                      ? 'border-emerald-500 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 font-semibold shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
+                  }`}
+                >
+                  <span>🏡 Del Hogar (Compartido)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPersonal(true)}
+                  className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${
+                    isPersonal
+                      ? 'border-indigo-500 bg-indigo-50/50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 font-semibold shadow-2xs'
+                      : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
+                  }`}
+                >
+                  <span>👤 Gasto Personal</span>
+                </button>
+              </div>
+            </div>
 
             {showOptionalFields ? (
               <>

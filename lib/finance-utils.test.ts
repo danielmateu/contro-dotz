@@ -112,4 +112,35 @@ describe('Saldos y Deudas', () => {
       amount: 30,
     })
   })
+
+  it('debe calcular la cuota justa basada en aportaciones acordadas (40% / 60%)', () => {
+    const coupleMembers = [
+      { user_id: 'daniel', monthly_contribution: 600, profiles: { display_name: 'Daniel', email: 'd@test.com' } },
+      { user_id: 'pareja', monthly_contribution: 900, profiles: { display_name: 'Pareja', email: 'p@test.com' } },
+    ]
+    const expenses = [
+      { created_by: 'daniel', amount: 500, is_personal: false }, // Daniel pagó 500€ de hogar
+      { created_by: 'daniel', amount: 100, is_personal: true },  // 100€ es personal, debe ignorarse en el bote
+      { created_by: 'pareja', amount: 1000, is_personal: false }, // Pareja pagó 1000€ de hogar
+    ]
+    const settlements: any[] = []
+
+    const balances = calculateBalances(coupleMembers, expenses, settlements)
+
+    const daniel = balances.find((b: any) => b.user_id === 'daniel')
+    const pareja = balances.find((b: any) => b.user_id === 'pareja')
+
+    // Gastos totales compartidos = 500 + 1000 = 1500€
+    // Aportación total = 600 + 900 = 1500€
+    // Cuota Daniel (600/1500 = 40%) = 600€
+    // Cuota Pareja (900/1500 = 60%) = 900€
+    expect(daniel!.spent).toBe(500)
+    expect(daniel!.fairShare).toBe(600)
+    expect(daniel!.balance).toBe(-100) // Debe 100€ a Pareja
+
+    expect(pareja!.spent).toBe(1000)
+    expect(pareja!.fairShare).toBe(900)
+    expect(pareja!.balance).toBe(100) // Le deben 100€
+  })
 })
+

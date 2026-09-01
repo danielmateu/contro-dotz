@@ -21,9 +21,10 @@ export function calculatePercentageChange(
   return (diffAbsolute / previousTotal) * 100
 }
 
-// Interfaces para cálculo de balances y deudas
 export interface Member {
   user_id: string
+  monthly_income?: number
+  monthly_contribution?: number
   profiles?: {
     display_name: string | null
     email: string
@@ -33,6 +34,7 @@ export interface Member {
 export interface Expense {
   created_by: string | null
   amount: number
+  is_personal?: boolean
 }
 
 export interface Settlement {
@@ -52,6 +54,7 @@ export interface MemberBalance {
   received: number
   fairShare: number
   balance: number
+  contribution?: number
 }
 
 export interface Debt {
@@ -63,7 +66,7 @@ export interface Debt {
 }
 
 /**
- * Calcula el balance neto de cada miembro del hogar teniendo en cuenta los gastos y las liquidaciones
+ * Calcula el balance neto de cada miembro del hogar teniendo en cuenta los gastos del hogar (no personales) y las liquidaciones
  */
 export function calculateBalances(
   members: Member[],
@@ -81,10 +84,10 @@ export function calculateBalances(
     receivedMap.set(m.user_id, 0)
   })
 
-  // Acumular gastos (solo si el creador pertenece al hogar activo)
+  // Acumular gastos compartidos del hogar (excluyendo gastos marcados como is_personal)
   let totalSpent = 0
   expenses.forEach((e) => {
-    if (e.created_by && spentMap.has(e.created_by)) {
+    if (!e.is_personal && e.created_by && spentMap.has(e.created_by)) {
       const current = spentMap.get(e.created_by) || 0
       spentMap.set(e.created_by, current + Number(e.amount))
       totalSpent += Number(e.amount)
@@ -103,14 +106,25 @@ export function calculateBalances(
     }
   })
 
+  // Calcular la cuota justa basada en aportaciones si están configuradas, sino división equitativa
+  const totalContributions = members.reduce((sum, m) => sum + Number(m.monthly_contribution || 0), 0)
   const numMembers = members.length
-  const fairShare = numMembers > 0 ? totalSpent / numMembers : 0
 
   return members.map((m) => {
     const spent = spentMap.get(m.user_id) || 0
     const paid = paidMap.get(m.user_id) || 0
     const received = receivedMap.get(m.user_id) || 0
-    const balance = spent + paid - received - fairShare
+    const contribution = Number(m.monthly_contribution || 0)
+
+    let memberFairShare = 0
+    if (totalContributions > 0) {
+      const weight = contribution / totalContributions
+      memberFairShare = totalSpent * weight
+    } else {
+      memberFairShare = numMembers > 0 ? totalSpent / numMembers : 0
+    }
+
+    const balance = spent + paid - received - memberFairShare
 
     return {
       user_id: m.user_id,
@@ -119,8 +133,9 @@ export function calculateBalances(
       spent,
       paid,
       received,
-      fairShare,
+      fairShare: Math.round(memberFairShare * 100) / 100,
       balance: Math.round(balance * 100) / 100, // Redondear a 2 decimales
+      contribution,
     }
   })
 }

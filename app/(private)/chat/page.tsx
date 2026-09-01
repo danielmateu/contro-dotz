@@ -48,12 +48,12 @@ export default async function ChatPage() {
       .from('messages')
       .select('id, content, created_at, created_by')
       .eq('household_id', householdId)
-      .order('created_at', { ascending: true })
-      .limit(50)
+      .order('created_at', { ascending: false })
+      .limit(100)
   ])
 
   const membersList = membersRes.data || []
-  const initialMessages = messagesRes.data || []
+  const initialMessages = [...(messagesRes.data || [])].reverse()
 
   // Mapear miembros para tener una lista limpia
   const members = membersList.map((m) => {

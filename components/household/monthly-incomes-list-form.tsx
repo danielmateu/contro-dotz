@@ -25,6 +25,7 @@ interface MonthlyIncome {
   id: string
   month: string
   amount: number
+  contribution?: number
   payroll_path?: string | null
 }
 
@@ -49,11 +50,12 @@ export function MonthlyIncomesListForm({
   const [selectedMonth, setSelectedMonth] = useState(currentMonthValue)
   const [selectedYear, setSelectedYear] = useState(currentYearValue)
   const [amount, setAmount] = useState('')
+  const [contribution, setContribution] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
-  
+
   // Confirmación de eliminación
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [incomeToDelete, setIncomeToDelete] = useState<string | null>(null)
@@ -96,11 +98,19 @@ export function MonthlyIncomesListForm({
     // Recomponer la fecha en formato YYYY-MM
     const monthStr = `${selectedYear}-${selectedMonth}`
 
-    const normalized = amount.trim().replace(',', '.')
-    const numericAmount = parseFloat(normalized)
+    const normalizedAmount = amount.trim().replace(',', '.')
+    const numericAmount = parseFloat(normalizedAmount)
+
+    const normalizedContrib = contribution.trim().replace(',', '.')
+    const numericContrib = contribution.trim() === '' ? 0 : parseFloat(normalizedContrib)
     
     if (isNaN(numericAmount) || numericAmount < 0) {
       setError('Introduce un importe válido y mayor o igual a 0.')
+      return
+    }
+
+    if (isNaN(numericContrib) || numericContrib < 0) {
+      setError('Introduce una aportación válida y mayor o igual a 0.')
       return
     }
 
@@ -143,12 +153,13 @@ export function MonthlyIncomesListForm({
         }
       }
 
-      const res = await saveMonthlyIncomeAction(householdId, monthStr, numericAmount, filePath)
+      const res = await saveMonthlyIncomeAction(householdId, monthStr, numericAmount, numericContrib, filePath)
       if (res?.error) {
         setError(res.error)
       } else {
         setSuccess('Ingreso mensual y documento registrados con éxito.')
         setAmount('')
+        setContribution('')
         // Restablecer a mes y año actuales por defecto
         setSelectedMonth(currentMonthValue)
         setSelectedYear(currentYearValue)
@@ -229,9 +240,9 @@ export function MonthlyIncomesListForm({
 
       {/* Formulario de registro */}
       <form onSubmit={handleAddIncome} className="space-y-4 p-4 rounded-xl border border-slate-200/50 bg-slate-50/30 dark:border-slate-800/40 dark:bg-slate-900/10">
-        <div className="flex justify-between items-center">
+        <div className="grid sm:grid-cols-3 gap-3">
           <div className="flex gap-2">
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               <Label htmlFor="monthSelect">Mes</Label>
               <Select value={selectedMonth} onValueChange={(val) => setSelectedMonth(val || '')} disabled={isPending}>
                 <SelectTrigger id="monthSelect" className="bg-background">
@@ -247,7 +258,7 @@ export function MonthlyIncomesListForm({
               </Select>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
               <Label htmlFor="yearSelect">Año</Label>
               <Select value={selectedYear} onValueChange={(val) => setSelectedYear(val || '')} disabled={isPending}>
                 <SelectTrigger id="yearSelect" className="bg-background">
@@ -276,6 +287,22 @@ export function MonthlyIncomesListForm({
                 placeholder="Ej. 2450"
                 disabled={isPending}
                 required
+                className="pl-9 bg-background focus:bg-background"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="monthlyContribution">Aportación al Hogar (€)</Label>
+            <div className="relative">
+              <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
+              <Input
+                id="monthlyContribution"
+                type="text"
+                value={contribution}
+                onChange={(e) => setContribution(e.target.value)}
+                placeholder="Ej. 600 (opcional)"
+                disabled={isPending}
                 className="pl-9 bg-background focus:bg-background"
               />
             </div>
@@ -314,7 +341,7 @@ export function MonthlyIncomesListForm({
             )}
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Formatos admitidos: PDF, PNG, JPG, JPEG. Tamaño máximo de 5MB. El documento será estrictamente privado para ti.
+            Formatos admitidos: PDF, PNG, JPG, JPEG. Tamaño máximo de 5MB. El documento será strictly privado para ti.
           </p>
         </div>
 
@@ -343,7 +370,8 @@ export function MonthlyIncomesListForm({
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50 text-muted-foreground font-semibold">
                   <th className="p-3">Mes</th>
-                  <th className="p-3 text-right">Importe</th>
+                  <th className="p-3 text-right">Ingreso Neto</th>
+                  <th className="p-3 text-right">Aportación Hogar</th>
                   <th className="p-3 text-center">Documento</th>
                   <th className="p-3 w-16 text-center">Acción</th>
                 </tr>
@@ -357,6 +385,9 @@ export function MonthlyIncomesListForm({
                     </td>
                     <td className="p-3 text-right font-semibold">
                       {formatCurrency(inc.amount)}
+                    </td>
+                    <td className="p-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                      {inc.contribution ? formatCurrency(inc.contribution) : '-'}
                     </td>
                     <td className="p-3 text-center">
                       {inc.payroll_path ? (

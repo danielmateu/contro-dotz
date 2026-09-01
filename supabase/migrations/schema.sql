@@ -31,6 +31,7 @@ create table public.household_members (
   user_id uuid references public.profiles on delete cascade not null,
   role text check (role in ('owner', 'member')) not null default 'member',
   monthly_income numeric(12,2) default 0.00 check (monthly_income >= 0),
+  monthly_contribution numeric(12,2) default 0.00 check (monthly_contribution >= 0),
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,
   unique(household_id, user_id)
@@ -61,6 +62,7 @@ create table public.expenses (
   payment_method text check (payment_method in ('Efectivo', 'Tarjeta', 'Transferencia', 'Domiciliación', 'Bizum', 'Otro')) not null,
   notes text,
   receipt_path text,
+  is_personal boolean default false not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -598,6 +600,7 @@ create table public.member_incomes (
   user_id uuid references public.profiles on delete cascade not null,
   month varchar(7) not null check (month ~ '^\d{4}-\d{2}$'),
   amount numeric(12,2) not null check (amount >= 0),
+  contribution numeric(12,2) check (contribution >= 0),
   payroll_path text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null,

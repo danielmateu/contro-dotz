@@ -29,6 +29,7 @@ interface MemberBalance {
   received: number
   fairShare: number
   balance: number
+  contribution?: number
 }
 
 interface Debt {
@@ -86,7 +87,7 @@ export function SettlementsTabContent({
               Saldos del Grupo
             </CardTitle>
             <CardDescription>
-              Resumen detallado de cuánto ha aportado cada miembro y su saldo respecto al total.
+              Resumen detallado de cuánto ha aportado cada miembro a los gastos del hogar respecto a su cuota acordada.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -102,11 +103,18 @@ export function SettlementsTabContent({
                     className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-xl bg-muted/20 gap-4"
                   >
                     <div className="space-y-1">
-                      <p className="text-sm font-semibold">{b.name}</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm font-semibold">{b.name}</p>
+                        {b.contribution && b.contribution > 0 ? (
+                          <Badge variant="outline" className="text-[10px] bg-emerald-50/50 text-emerald-600 border-emerald-500/30">
+                            Cuota: {b.contribution.toFixed(2)}€
+                          </Badge>
+                        ) : null}
+                      </div>
                       <p className="text-xs text-muted-foreground">
-                        Gastado: <span className="font-medium">{b.spent.toFixed(2)}€</span>
-                        {b.paid > 0 && <span className="text-emerald-600"> (+{b.paid.toFixed(2)}€ liquidados)</span>}
-                        {b.received > 0 && <span className="text-rose-600"> (-{b.received.toFixed(2)}€ recibidos)</span>}
+                        Gastado en Hogar: <span className="font-medium">{b.spent.toFixed(2)}€</span> (Cuota justa: {b.fairShare.toFixed(2)}€)
+                        {b.paid > 0 && <span className="text-emerald-600 font-medium"> (+{b.paid.toFixed(2)}€ liquidados)</span>}
+                        {b.received > 0 && <span className="text-rose-600 font-medium"> (-{b.received.toFixed(2)}€ recibidos)</span>}
                       </p>
                     </div>
 

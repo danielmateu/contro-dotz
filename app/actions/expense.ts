@@ -19,6 +19,7 @@ export async function createExpenseAction(
   const payment_method = formData.get('payment_method') as string
   const notes = formData.get('notes') as string
   const receipt = formData.get('receipt') as File | null
+  const is_personal = formData.get('is_personal') === 'true'
 
   const validation = expenseSchema.safeParse({
     amount,
@@ -27,6 +28,7 @@ export async function createExpenseAction(
     expense_date,
     payment_method,
     notes: notes || undefined,
+    is_personal,
   })
 
   if (!validation.success) {
@@ -68,6 +70,7 @@ export async function createExpenseAction(
       expense_date,
       payment_method,
       notes: notes ? notes.trim() : null,
+      is_personal,
     })
     .select('id')
     .single()
@@ -212,6 +215,7 @@ export async function updateExpenseAction(
   const notes = formData.get('notes') as string
   const receipt = formData.get('receipt') as File | null
   const deleteReceipt = formData.get('delete_receipt') === 'true'
+  const is_personal = formData.get('is_personal') === 'true'
 
   const validation = expenseSchema.safeParse({
     amount,
@@ -220,6 +224,7 @@ export async function updateExpenseAction(
     expense_date,
     payment_method,
     notes: notes || undefined,
+    is_personal,
   })
 
   if (!validation.success) {
@@ -292,6 +297,7 @@ export async function updateExpenseAction(
     payment_method,
     notes: notes ? notes.trim() : null,
     receipt_path: receiptPath,
+    is_personal,
   }
 
   if (isOwner && customCreatedBy !== null) {

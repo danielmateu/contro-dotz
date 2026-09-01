@@ -532,11 +532,12 @@ export async function sendHouseholdReportAction(
 }
 
 /**
- * Actualiza los ingresos mensuales de un miembro en un hogar
+ * Actualiza los ingresos y la aportación mensual base de un miembro en un hogar
  */
 export async function updateMemberIncomeAction(
   householdId: string,
-  income: number
+  income: number,
+  contribution: number = 0
 ): Promise<any> {
   const supabase = await createClient()
 
@@ -546,33 +547,38 @@ export async function updateMemberIncomeAction(
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Sesión no iniciada.' }
 
-  if (income < 0) {
-    return { error: 'El ingreso no puede ser un valor negativo.' }
+  if (income < 0 || contribution < 0) {
+    return { error: 'El ingreso y la aportación no pueden ser valores negativos.' }
   }
 
   const { error } = await supabase
     .from('household_members')
-    .update({ monthly_income: income })
+    .update({ 
+      monthly_income: income,
+      monthly_contribution: contribution
+    })
     .eq('household_id', householdId)
     .eq('user_id', user.id)
 
   if (error) {
     console.error('UPDATE INCOME ERROR:', error)
-    return { error: 'Error al actualizar tus ingresos en la base de datos.' }
+    return { error: 'Error al actualizar tus ingresos y aportación en la base de datos.' }
   }
 
   revalidatePath('/settings')
   revalidatePath('/dashboard')
-  return { success: 'Ingresos actualizados con éxito.' }
+  revalidatePath('/household')
+  return { success: 'Ingresos y aportación mensual actualizados con éxito.' }
 }
 
 /**
- * Guarda o actualiza un ingreso específico para un mes determinado, con documento adjunto opcional
+ * Guarda o actualiza un ingreso y aportación específicos para un mes determinado, con documento adjunto opcional
  */
 export async function saveMonthlyIncomeAction(
   householdId: string,
   month: string,
   amount: number,
+  contribution: number = 0,
   payrollPath?: string | null
 ): Promise<any> {
   const supabase = await createClient()
@@ -583,8 +589,8 @@ export async function saveMonthlyIncomeAction(
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Sesión no iniciada.' }
 
-  if (amount < 0) {
-    return { error: 'El importe no puede ser negativo.' }
+  if (amount < 0 || contribution < 0) {
+    return { error: 'El importe y la aportación no pueden ser negativos.' }
   }
 
   // Validar formato de mes YYYY-MM
@@ -599,6 +605,7 @@ export async function saveMonthlyIncomeAction(
       user_id: user.id,
       month,
       amount,
+      contribution,
       payroll_path: payrollPath || null
     }, {
       onConflict: 'household_id,user_id,month'
@@ -606,12 +613,13 @@ export async function saveMonthlyIncomeAction(
 
   if (error) {
     console.error('SAVE MONTHLY INCOME ERROR:', error)
-    return { error: 'Error al registrar el ingreso mensual en la base de datos.' }
+    return { error: 'Error al registrar el ingreso y aportación mensual en la base de datos.' }
   }
 
   revalidatePath('/settings')
   revalidatePath('/dashboard')
-  return { success: 'Nómina registrada con éxito.' }
+  revalidatePath('/household')
+  return { success: 'Nómina y aportación registradas con éxito.' }
 }
 
 /**

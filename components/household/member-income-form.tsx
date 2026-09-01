@@ -6,20 +6,24 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, CheckCircle2, Landmark, Loader2 } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Landmark, PiggyBank, Loader2 } from 'lucide-react'
 
 interface MemberIncomeFormProps {
   initialIncome: number
+  initialContribution?: number
   householdId: string
 }
 
 export function MemberIncomeForm({
   initialIncome,
+  initialContribution = 0,
   householdId,
 }: MemberIncomeFormProps) {
   const [isPending, startTransition] = useTransition()
-  // Reemplazar punto por coma para comodidad del usuario español si fuera necesario, o simplemente cadena
   const [income, setIncome] = useState(initialIncome > 0 ? initialIncome.toString() : '')
+  const [contribution, setContribution] = useState(
+    initialContribution > 0 ? initialContribution.toString() : ''
+  )
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -28,22 +32,31 @@ export function MemberIncomeForm({
     setError(null)
     setSuccess(null)
 
-    const normalized = income.trim().replace(',', '.')
-    const numericIncome = parseFloat(normalized)
+    const normalizedIncome = income.trim().replace(',', '.')
+    const numericIncome = parseFloat(normalizedIncome)
+
+    const normalizedContribution = contribution.trim().replace(',', '.')
+    const numericContribution = parseFloat(normalizedContribution)
     
     if (income.trim() !== '' && (isNaN(numericIncome) || numericIncome < 0)) {
       setError('Introduce un importe de ingresos válido y mayor o igual a 0.')
       return
     }
 
-    const valueToSend = income.trim() === '' ? 0 : numericIncome
+    if (contribution.trim() !== '' && (isNaN(numericContribution) || numericContribution < 0)) {
+      setError('Introduce un importe de aportación válido y mayor o igual a 0.')
+      return
+    }
+
+    const incomeToSend = income.trim() === '' ? 0 : numericIncome
+    const contributionToSend = contribution.trim() === '' ? 0 : numericContribution
 
     startTransition(async () => {
-      const res = await updateMemberIncomeAction(householdId, valueToSend)
+      const res = await updateMemberIncomeAction(householdId, incomeToSend, contributionToSend)
       if (res?.error) {
         setError(res.error)
       } else {
-        setSuccess('Tus ingresos mensuales han sido actualizados con éxito.')
+        setSuccess('Tus ingresos y aportación mensual han sido actualizados con éxito.')
       }
     })
   }
@@ -66,24 +79,48 @@ export function MemberIncomeForm({
         </Alert>
       )}
 
-      <div className="space-y-2">
-        <Label htmlFor="income">Tus ingresos mensuales netos (€)</Label>
-        <div className="relative">
-          <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            id="income"
-            name="income"
-            type="text"
-            value={income}
-            onChange={(e) => setIncome(e.target.value)}
-            placeholder="Ej. 1850"
-            disabled={isPending}
-            className="pl-9 bg-muted/50 focus:bg-background"
-          />
+      <div className="grid sm:grid-cols-2 gap-4">
+        {/* Ingreso Neto */}
+        <div className="space-y-2">
+          <Label htmlFor="income">Tus ingresos mensuales netos (€)</Label>
+          <div className="relative">
+            <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              id="income"
+              name="income"
+              type="text"
+              value={income}
+              onChange={(e) => setIncome(e.target.value)}
+              placeholder="Ej. 2011"
+              disabled={isPending}
+              className="pl-9 bg-muted/50 focus:bg-background"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Sueldo o ingresos netos totales de tu nómina.
+          </p>
         </div>
-        <p className="text-xs text-muted-foreground">
-          Tus ingresos se guardan por hogar y se utilizan para calcular la distribución equitativa y proporcional de los gastos familiares.
-        </p>
+
+        {/* Aportación al Hogar */}
+        <div className="space-y-2">
+          <Label htmlFor="contribution">Tu aportación mensual al hogar (€)</Label>
+          <div className="relative">
+            <PiggyBank className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
+            <Input
+              id="contribution"
+              name="contribution"
+              type="text"
+              value={contribution}
+              onChange={(e) => setContribution(e.target.value)}
+              placeholder="Ej. 600"
+              disabled={isPending}
+              className="pl-9 bg-muted/50 focus:bg-background font-semibold"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground">
+            Cantidad que destinas al fondo común del hogar.
+          </p>
+        </div>
       </div>
 
       <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
@@ -93,7 +130,7 @@ export function MemberIncomeForm({
             Guardando...
           </>
         ) : (
-          'Actualizar Ingresos'
+          'Actualizar Ingresos y Aportación'
         )}
       </Button>
     </form>

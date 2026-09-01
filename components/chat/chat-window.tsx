@@ -75,6 +75,11 @@ export function ChatWindow({
     messagesEndRef.current?.scrollIntoView({ behavior })
   }
 
+  // Sincronizar mensajes iniciales cuando la prop se actualiza desde el servidor
+  useEffect(() => {
+    setMessages(initialMessages)
+  }, [initialMessages])
+
   // Desplazarse al fondo al cargar por primera vez
   useEffect(() => {
     scrollToBottom('auto')

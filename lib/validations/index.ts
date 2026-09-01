@@ -120,6 +120,7 @@ export const expenseSchema = z.object({
     }
   ),
   notes: z.string().optional(),
+  is_personal: z.boolean().optional(),
 })
 
 // Esquema de Presupuesto

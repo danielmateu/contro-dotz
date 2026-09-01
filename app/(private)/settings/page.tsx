@@ -46,7 +46,7 @@ export default async function SettingsPage() {
       .single(),
     supabase
       .from('household_members')
-      .select('household_id, monthly_income')
+      .select('household_id, monthly_income, monthly_contribution')
       .eq('user_id', user.id)
       .limit(1)
       .maybeSingle(),
@@ -56,13 +56,14 @@ export default async function SettingsPage() {
   const membership = membershipRes.data
   const householdId = membership?.household_id || null
   const monthlyIncome = Number(membership?.monthly_income || 0)
+  const monthlyContribution = Number(membership?.monthly_contribution || 0)
 
   // Cargar ingresos mensuales específicos del usuario logueado en este hogar
   let memberIncomes: any[] = []
   if (householdId) {
     const { data: incomesRes } = await supabase
       .from('member_incomes')
-      .select('id, month, amount, payroll_path')
+      .select('id, month, amount, contribution, payroll_path')
       .eq('household_id', householdId)
       .eq('user_id', user.id)
     memberIncomes = incomesRes || []
@@ -136,6 +137,7 @@ export default async function SettingsPage() {
                     </p>
                     <MemberIncomeForm
                       initialIncome={monthlyIncome}
+                      initialContribution={monthlyContribution}
                       householdId={householdId}
                     />
                   </div>

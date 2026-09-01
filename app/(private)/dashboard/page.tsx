@@ -97,14 +97,14 @@ export default async function DashboardPage() {
     supabase
       .from('expenses')
       .select(
-        'id, amount, description, expense_date, category_id, created_by, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
+        'id, amount, description, expense_date, category_id, created_by, is_personal, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
       )
       .eq('household_id', membership.household_id)
       .gte('expense_date', currentStartDate)
       .lte('expense_date', currentEndDate),
     supabase
       .from('expenses')
-      .select('amount')
+      .select('amount, is_personal')
       .eq('household_id', membership.household_id)
       .gte('expense_date', prevStartDate)
       .lte('expense_date', prevEndDate),
@@ -115,19 +115,19 @@ export default async function DashboardPage() {
       .eq('month', currentMonthStr),
     supabase
       .from('household_members')
-      .select('user_id, role, monthly_income, profiles(display_name, email, avatar_url, status)')
+      .select('user_id, role, monthly_income, monthly_contribution, profiles(display_name, email, avatar_url, status)')
       .eq('household_id', membership.household_id),
     supabase
       .from('member_incomes')
-      .select('user_id, amount')
+      .select('user_id, amount, contribution')
       .eq('household_id', membership.household_id)
       .eq('month', currentMonthStr),
     getRecentActivityAction(membership.household_id)
   ])
 
   const categories = categoriesRes.data
-  const currentExpenses = currentExpensesRes.data
-  const prevExpenses = prevExpensesRes.data
+  const currentExpenses = currentExpensesRes.data || []
+  const prevExpenses = prevExpensesRes.data || []
   const currentBudgets = currentBudgetsRes.data
   const householdMembers = householdMembersRes.data
   const monthlyIncomes = memberIncomesRes.data || []
@@ -149,12 +149,15 @@ export default async function DashboardPage() {
     }
   })
 
-  // Calcular gastos por miembro en el mes actual
+  // Gastos del Hogar (compartidos, excluyendo personales)
+  const sharedExpenses = currentExpenses.filter((e) => !e.is_personal)
+
+  // Calcular gastos compartidos por miembro en el mes actual
   const memberSpentMap: Record<string, number> = {}
   membersList.forEach((m) => {
     memberSpentMap[m.user_id] = 0
   })
-  currentExpenses?.forEach((exp) => {
+  sharedExpenses.forEach((exp) => {
     if (exp.created_by && memberSpentMap[exp.created_by] !== undefined) {
       memberSpentMap[exp.created_by] += Number(exp.amount)
     }
@@ -164,25 +167,33 @@ export default async function DashboardPage() {
     const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
     const name = profile?.display_name || profile?.email?.split('@')[0] || 'Miembro'
     
-    // Buscar si hay ingreso específico para el mes actual, sino usar base
+    // Buscar si hay ingreso/aportación específico para el mes actual, sino usar base
     const specificIncome = monthlyIncomes.find((inc) => inc.user_id === m.user_id)
     const income = specificIncome 
       ? Number(specificIncome.amount) 
       : Number(m.monthly_income || 0)
 
+    const contribution = specificIncome && specificIncome.contribution !== null && specificIncome.contribution !== undefined
+      ? Number(specificIncome.contribution)
+      : Number(m.monthly_contribution || 0)
+
     return {
       name,
       income,
+      contribution,
       spent: memberSpentMap[m.user_id] || 0,
     }
   })
 
+  // Total del fondo aportado por el hogar (sumatorio de cuotas prometidas)
+  const totalHouseholdFund = membersIncomeAndSpent.reduce((sum, m) => sum + m.contribution, 0)
+
   // --- CÁLCULO DE KPIs ---
-  // A. Total Gastado
+  // A. Total Gastado (Compartido del hogar)
   const currentTotalSpent =
-    currentExpenses?.reduce((sum, exp) => sum + Number(exp.amount), 0) || 0
+    sharedExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
   const prevTotalSpent =
-    prevExpenses?.reduce((sum, exp) => sum + Number(exp.amount), 0) || 0
+    prevExpenses.filter((e) => !e.is_personal).reduce((sum, exp) => sum + Number(exp.amount), 0)
 
   // B. Promedio Diario
   const daysPassed = now.getDate()
@@ -369,11 +380,38 @@ export default async function DashboardPage() {
 
       {/* Tarjetas de KPIs */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Total Gastado */}
+        {/* Fondo Común del Hogar */}
+        <Card className="border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/10 shadow-xs relative overflow-hidden">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
+              Fondo Común del Hogar
+            </span>
+            <PiggyBank className="h-4.5 w-4.5 text-emerald-500" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-foreground">
+              {formatCurrency(totalHouseholdFund)}
+            </div>
+            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
+              {totalHouseholdFund > 0 ? (
+                <>
+                  <span className="font-semibold text-foreground">
+                    {formatCurrency(totalHouseholdFund - currentTotalSpent)}
+                  </span>
+                  <span>remanente de las cuotas del hogar.</span>
+                </>
+              ) : (
+                <span>Sin aportaciones configuradas.</span>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Total Gastado (Hogar) */}
         <Card className="border-slate-200/50 shadow-xs relative overflow-hidden">
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Gasto del Mes
+              Gasto del Hogar
             </span>
             <Receipt className="h-4.5 w-4.5 text-muted-foreground" />
           </CardHeader>
@@ -431,7 +469,7 @@ export default async function DashboardPage() {
             <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Presupuestos Establecidos
             </span>
-            <PiggyBank className="h-4.5 w-4.5 text-muted-foreground" />
+            <Layers className="h-4.5 w-4.5 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-foreground">
@@ -445,24 +483,6 @@ export default async function DashboardPage() {
               </span>
               <span>del total asignado consumido.</span>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Categorías Activas */}
-        <Card className="border-slate-200/50 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Categorías en Uso
-            </span>
-            <Layers className="h-4.5 w-4.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {pieChartData.length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              De las categorías de tu hogar familiar.
-            </p>
           </CardContent>
         </Card>
       </div>

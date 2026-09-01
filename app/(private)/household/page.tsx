@@ -90,7 +90,7 @@ export default async function HouseholdPage() {
     const [membersRes, sentRes, expensesRes, settlementsRes] = await Promise.all([
       supabase
         .from('household_members')
-        .select('id, role, user_id, profiles(display_name, email, avatar_url, status)')
+        .select('id, role, user_id, monthly_income, monthly_contribution, profiles(display_name, email, avatar_url, status)')
         .eq('household_id', membership.household_id),
       supabase
         .from('invitations')
@@ -99,7 +99,7 @@ export default async function HouseholdPage() {
         .eq('status', 'pending'),
       supabase
         .from('expenses')
-        .select('created_by, amount')
+        .select('created_by, amount, is_personal')
         .eq('household_id', membership.household_id),
       supabase
         .from('settlements')
