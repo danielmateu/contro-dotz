@@ -59,7 +59,7 @@ export function SettingsViewClient({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Left Column: Personal info, base income, reports */}
+        {/* Left Column: Personal info & base income */}
         <div className="space-y-6">
           <Card className="border-slate-200/50 shadow-md">
             <CardHeader>
@@ -100,42 +100,39 @@ export function SettingsViewClient({
                 </p>
               </div>
 
-              {/* Inner 2-column Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-slate-200/50 dark:border-slate-800/50 pt-6">
-                {/* Profile Form */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-sm text-foreground">
-                    {locale === 'en' ? 'Profile Data' : locale === 'ca' ? 'Dades del Perfil' : 'Datos del Perfil'}
+              {/* Profile Data Section */}
+              <div className="border-t border-slate-200/50 dark:border-slate-800/50 pt-6 space-y-4">
+                <h3 className="font-semibold text-sm text-foreground">
+                  {locale === 'en' ? 'Profile Data' : locale === 'ca' ? 'Dades del Perfil' : 'Datos del Perfil'}
+                </h3>
+                <ProfileNameForm
+                  initialName={displayName}
+                  initialAvatarUrl={avatarUrl}
+                  initialStatus={status}
+                  userId={userId}
+                />
+              </div>
+
+              {/* Base Income Section */}
+              {householdId && (
+                <div className="border-t border-slate-200/50 dark:border-slate-800/50 pt-6 space-y-4">
+                  <h3 className="font-semibold text-sm text-foreground font-heading">
+                    {t('household.monthlyIncomes')} (Base)
                   </h3>
-                  <ProfileNameForm
-                    initialName={displayName}
-                    initialAvatarUrl={avatarUrl}
-                    initialStatus={status}
-                    userId={userId}
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {locale === 'en'
+                      ? 'Enter your regular net base income. It will be used for proportional expense sharing unless a specific monthly income is logged.'
+                      : locale === 'ca'
+                      ? 'Introdueix els teus ingressos nets base habituals per calcular la quota proporcional.'
+                      : 'Introduce tus ingresos netos base habituales. Se usarán para calcular la cuota proporcional de los gastos del hogar si no registras una nómina específica en un mes concreto.'}
+                  </p>
+                  <MemberIncomeForm
+                    initialIncome={monthlyIncome}
+                    initialContribution={monthlyContribution}
+                    householdId={householdId}
                   />
                 </div>
-
-                {/* Base Income Form */}
-                {householdId && (
-                  <div className="border-t md:border-t-0 md:border-l border-slate-200/50 dark:border-slate-800/50 pt-6 md:pt-0 md:pl-6 space-y-4">
-                    <h3 className="font-semibold text-sm text-foreground font-heading">
-                      {t('household.monthlyIncomes')} (Base)
-                    </h3>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      {locale === 'en'
-                        ? 'Enter your regular net base income. It will be used for proportional expense sharing unless a specific monthly income is logged.'
-                        : locale === 'ca'
-                        ? 'Introdueix els teus ingressos nets base habituals per calcular la quota proporcional.'
-                        : 'Introduce tus ingresos netos base habituales. Se usarán para calcular la cuota proporcional de los gastos del hogar si no registras una nómina específica en un mes concreto.'}
-                    </p>
-                    <MemberIncomeForm
-                      initialIncome={monthlyIncome}
-                      initialContribution={monthlyContribution}
-                      householdId={householdId}
-                    />
-                  </div>
-                )}
-              </div>
+              )}
             </CardContent>
           </Card>
 

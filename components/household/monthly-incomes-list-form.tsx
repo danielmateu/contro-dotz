@@ -240,7 +240,7 @@ export function MonthlyIncomesListForm({
 
       {/* Formulario de registro */}
       <form onSubmit={handleAddIncome} className="space-y-4 p-4 rounded-xl border border-slate-200/50 bg-slate-50/30 dark:border-slate-800/40 dark:bg-slate-900/10">
-        <div className="grid sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex gap-2">
             <div className="space-y-2 flex-1">
               <Label htmlFor="monthSelect">Mes</Label>
@@ -292,7 +292,7 @@ export function MonthlyIncomesListForm({
             </div>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-2 sm:col-span-2">
             <Label htmlFor="monthlyContribution">Aportación al Hogar (€)</Label>
             <div className="relative">
               <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
@@ -341,7 +341,7 @@ export function MonthlyIncomesListForm({
             )}
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Formatos admitidos: PDF, PNG, JPG, JPEG. Tamaño máximo de 5MB. El documento será strictly privado para ti.
+            Formatos admitidos: PDF, PNG, JPG, JPEG. Tamaño máximo de 5MB. El documento será estrictamente privado para ti.
           </p>
         </div>
 
@@ -365,15 +365,15 @@ export function MonthlyIncomesListForm({
             No has registrado nóminas específicas para meses anteriores. El sistema aplicará tu ingreso base por defecto.
           </p>
         ) : (
-          <div className="rounded-xl border border-slate-200/50 overflow-hidden dark:border-slate-800/50">
-            <table className="w-full border-collapse text-left text-xs">
+          <div className="rounded-xl border border-slate-200/50 overflow-x-auto dark:border-slate-800/50">
+            <table className="w-full border-collapse text-left text-xs min-w-[440px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50 text-muted-foreground font-semibold">
-                  <th className="p-3">Mes</th>
-                  <th className="p-3 text-right">Ingreso Neto</th>
-                  <th className="p-3 text-right">Aportación Hogar</th>
-                  <th className="p-3 text-center">Documento</th>
-                  <th className="p-3 w-16 text-center">Acción</th>
+                  <th className="p-3 whitespace-nowrap">Mes</th>
+                  <th className="p-3 text-right whitespace-nowrap">Ingreso Neto</th>
+                  <th className="p-3 text-right whitespace-nowrap">Aportación Hogar</th>
+                  <th className="p-3 text-center whitespace-nowrap">Documento</th>
+                  <th className="p-3 w-16 text-center whitespace-nowrap">Acción</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">

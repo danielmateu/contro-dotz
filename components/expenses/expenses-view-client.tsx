@@ -13,6 +13,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
@@ -48,6 +49,11 @@ export function ExpensesViewClient({
   memberId,
 }: ExpensesViewClientProps) {
   const { t, locale } = useI18n()
+
+  const totalExpensesAmount = (expenses || []).reduce(
+    (sum, exp) => sum + Number(exp.amount || 0),
+    0
+  )
 
   return (
     <div className="space-y-6">
@@ -244,6 +250,21 @@ export function ExpensesViewClient({
                 )
               })}
             </TableBody>
+            <TableFooter className="bg-muted/40 border-t border-slate-200 dark:border-slate-800 font-bold">
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={5} className="font-bold text-sm text-foreground py-3">
+                  {locale === 'en'
+                    ? `Total (${expenses.length} expenses)`
+                    : locale === 'ca'
+                    ? `Total (${expenses.length} despeses)`
+                    : `Total (${expenses.length} gastos)`}
+                </TableCell>
+                <TableCell className="text-right font-extrabold text-base text-primary py-3">
+                  {formatCurrency(totalExpensesAmount)}
+                </TableCell>
+                <TableCell></TableCell>
+              </TableRow>
+            </TableFooter>
           </Table>
         </Card>
       )}
