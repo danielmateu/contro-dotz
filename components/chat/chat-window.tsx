@@ -356,7 +356,7 @@ export function ChatWindow({
                           )}
                           {!isMe && sender.status && (
                             <span
-                              className="text-[10px] text-muted-foreground italic mr-2 truncate max-w-[120px] sm:max-w-[180px]"
+                              className="text-[10px] text-muted-foreground italic mr-2 truncate max-w-30 sm:max-w-45"
                               title={sender.status}
                             >
                               ({sender.status})
@@ -367,7 +367,7 @@ export function ChatWindow({
                           </span>
                         </MessageHeader>
                         <div
-                          className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] break-words shadow-xs border ${isMe
+                          className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] wrap-break-word shadow-xs border ${isMe
                             ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
                             : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
                             }`}

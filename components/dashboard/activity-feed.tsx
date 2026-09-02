@@ -2,12 +2,12 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { 
-  Receipt, 
-  MessageSquare, 
-  ShoppingBasket, 
-  Check, 
-  PiggyBank, 
+import {
+  Receipt,
+  MessageSquare,
+  ShoppingBasket,
+  Check,
+  PiggyBank,
   Sparkles,
   Activity
 } from 'lucide-react'
@@ -89,7 +89,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     if (diffMins < 1) return 'Hace un momento'
     if (diffMins < 60) return `Hace ${diffMins} min`
     if (diffHours < 24) return `Hace ${diffHours} h`
-    
+
     return date.toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'short',
@@ -109,7 +109,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
           Últimos movimientos colaborativos de la familia en tiempo real.
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-1 overflow-y-auto px-0 pb-4 max-h-[380px]">
+      <CardContent className="flex-1 overflow-y-auto px-0 pb-4 max-h-95">
         {activities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center text-xs text-muted-foreground">
             No hay actividad reciente registrada en el hogar.
@@ -137,13 +137,13 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
 
                   {/* Cuerpo de la actividad */}
                   <div className="flex-1 min-w-0 space-y-0.5">
-                    <p className="text-xs text-muted-foreground leading-normal break-words">
+                    <p className="text-xs text-muted-foreground leading-normal wrap-break-word">
                       <span className="font-bold text-foreground mr-1">
                         {activity.user_name}
                       </span>
                       {renderFormattedText(activity.title)}
                     </p>
-                    
+
                     <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
                       <span>{formatActivityDate(activity.date)}</span>
                     </div>

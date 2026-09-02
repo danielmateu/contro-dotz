@@ -248,7 +248,7 @@ export function DashboardCharts({
 
   if (!isMounted) {
     return (
-      <div className="w-full h-[400px] flex items-center justify-center text-xs text-muted-foreground border border-slate-200/50 rounded-2xl bg-background/50 dark:border-slate-800/50">
+      <div className="w-full h-100 flex items-center justify-center text-xs text-muted-foreground border border-slate-200/50 rounded-2xl bg-background/50 dark:border-slate-800/50">
         Cargando gráficos...
       </div>
     )
@@ -337,12 +337,12 @@ export function DashboardCharts({
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center">
                 {pieData.length === 0 ? (
-                  <div className="w-[220px] h-[220px] flex items-center justify-center text-xs text-muted-foreground">
+                  <div className="w-55 h-55 flex items-center justify-center text-xs text-muted-foreground">
                     Registra gastos para visualizar la distribución.
                   </div>
                 ) : (
                   <>
-                    <div className="w-[220px] h-[220px]">
+                    <div className="w-55 h-55">
                       <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                         <PieChart>
                           <Pie
@@ -398,7 +398,7 @@ export function DashboardCharts({
                 Comparación visual de los presupuestos asignados frente al importe real consumido por categoría.
               </CardDescription>
             </CardHeader>
-            <CardContent className="h-[350px]">
+            <CardContent className="h-87.5">
               {barData.length === 0 ? (
                 <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                   No hay presupuestos ni gastos registrados este mes.
@@ -458,7 +458,7 @@ export function DashboardCharts({
                   Evolución acumulada de los gastos del mes dividida por la aportación individual de cada miembro.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[350px]">
+              <CardContent className="h-87.5">
                 {memberNames.length === 0 || stackedData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                     No hay aportaciones de miembros registradas este mes.
@@ -518,10 +518,10 @@ export function DashboardCharts({
                     <div className="p-3 bg-muted/40 rounded-full">
                       <Landmark className="h-6 w-6 text-muted-foreground/60" />
                     </div>
-                    <p className="max-w-[220px]">
+                    <p className="max-w-55">
                       No hay ingresos configurados en este hogar.
                     </p>
-                    <p className="text-[11px] max-w-[240px] text-muted-foreground/80">
+                    <p className="text-[11px] max-w-60 text-muted-foreground/80">
                       Configura tus ingresos mensuales netos en la sección de <strong>Ajustes</strong> para activar el análisis proporcional.
                     </p>
                   </div>
@@ -532,7 +532,7 @@ export function DashboardCharts({
                       <span className="font-semibold text-foreground text-sm">{formatCurrency(totalHouseholdIncome)}</span>
                     </div>
 
-                    <div className="space-y-4 max-h-[280px] overflow-y-auto pr-1">
+                    <div className="space-y-4 max-h-70 overflow-y-auto pr-1">
                       {proportionalAnalysis.map((m) => {
                         const contributionPercentage = totalMemberSpent > 0 ? (m.spent / totalMemberSpent) * 100 : 0
                         return (
@@ -615,7 +615,7 @@ export function DashboardCharts({
                   Proyección del gasto final estimado basándose en el ritmo diario acumulado hasta hoy.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="h-[350px]">
+              <CardContent className="h-87.5">
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                   <AreaChart
                     data={projectionData}

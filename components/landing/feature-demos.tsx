@@ -160,14 +160,14 @@ export function EscanerIADemo() {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="relative border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 rounded-xl p-3 flex-1 overflow-hidden flex flex-col justify-center min-h-[130px]">
+      <div className="relative border border-dashed border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/30 rounded-xl p-3 flex-1 overflow-hidden flex flex-col justify-center min-h-32.5">
         {scanState === 'idle' && (
           <div className="flex items-center flex-col space-y-2 py-4">
             <span className="text-2xl select-none">
               <MorphIcon
                 icon={isHovered ? ScanFaceData : StickerData}
                 spring="snappy"
-                className="h-[22px] w-[22px]"
+                className="h-5.5 w-5.5"
               />
             </span>
             <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
@@ -291,7 +291,7 @@ export function PresupuestosDemo() {
         </div>
 
         {/* Notificación Alerta */}
-        <div className="h-[48px]">
+        <div className="h-12">
           <AnimatePresence mode="wait">
             {spent >= 100 ? (
               <motion.div
@@ -399,7 +399,7 @@ export function ChatGeminiDemo() {
   }
 
   return (
-    <div className="flex flex-col h-[220px] justify-between text-xs overflow-hidden">
+    <div className="flex flex-col h-55 justify-between text-xs overflow-hidden">
       {/* Caja de mensajes */}
       <div className="flex-1 overflow-y-auto space-y-2.5 pb-2 pr-1 scrollbar-none flex flex-col justify-end">
         {messages.map((m) => (

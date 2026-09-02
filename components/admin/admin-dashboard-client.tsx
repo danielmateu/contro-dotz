@@ -313,7 +313,7 @@ export function AdminDashboardClient() {
                 <div key={h.id} className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
                   <div className="space-y-0.5">
                     <span className="text-sm font-semibold text-foreground">{h.name}</span>
-                    <p className="text-xs text-muted-foreground font-mono truncate max-w-[200px]">
+                    <p className="text-xs text-muted-foreground font-mono truncate max-w-50">
                       ID: {h.id}
                     </p>
                   </div>

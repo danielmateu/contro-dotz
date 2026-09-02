@@ -81,10 +81,10 @@ export function ShoppingListWindow({
   const [items, setItems] = useState<ShoppingItem[]>(initialItems)
   const [itemName, setItemName] = useState('')
   const [itemQuantity, setItemQuantity] = useState('')
-  
+
   const [isAdding, setIsAdding] = useState(false)
   const [addError, setAddError] = useState<string | null>(null)
-  
+
   // Estados del Dialog Conversor a Gasto
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [activeItem, setActiveItem] = useState<ShoppingItem | null>(null)
@@ -92,11 +92,11 @@ export function ShoppingListWindow({
   const [expenseCategoryId, setExpenseCategoryId] = useState('')
   const [expensePaymentMethod, setExpensePaymentMethod] = useState('Tarjeta')
   const [expenseNotes, setExpenseNotes] = useState('')
-  
+
   const [isSavingExpense, setIsSavingExpense] = useState(false)
   const [expenseError, setExpenseError] = useState<string | null>(null)
   const [expenseSuccess, setExpenseSuccess] = useState<string | null>(null)
-  
+
   const [showBought, setShowBought] = useState(true)
   const [isClearingBought, setIsClearingBought] = useState(false)
 
@@ -275,7 +275,7 @@ export function ShoppingListWindow({
         setExpenseError(res.error)
       } else {
         setExpenseSuccess('¡Gasto registrado y artículo removido con éxito!')
-        
+
         // Eliminar de la lista de la compra al convertirse con éxito
         await supabase.from('shopping_list').delete().eq('id', activeItem.id)
         setItems((prev) => prev.filter((i) => i.id !== activeItem.id))
@@ -404,7 +404,7 @@ export function ShoppingListWindow({
                         </button>
 
                         <div className="flex flex-col min-w-0">
-                          <span className="font-semibold text-sm text-foreground break-words">
+                          <span className="font-semibold text-sm text-foreground wrap-break-word">
                             {item.name}
                           </span>
                           <div className="flex items-center gap-1.5 mt-1 text-[10px] text-muted-foreground flex-wrap">
@@ -482,7 +482,7 @@ export function ShoppingListWindow({
                 {showBought ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
               </Button>
             </CardHeader>
-            
+
             {showBought && (
               <CardContent className="pt-0 space-y-4">
                 <div className="divide-y divide-border/40">
@@ -504,7 +504,7 @@ export function ShoppingListWindow({
                           </button>
 
                           <div className="flex flex-col min-w-0">
-                            <span className="font-medium text-sm text-muted-foreground line-through break-words">
+                            <span className="font-medium text-sm text-muted-foreground line-through wrap-break-word">
                               {item.name}
                             </span>
                             <div className="flex items-center gap-1.5 mt-1 text-[10px] text-muted-foreground/80 flex-wrap">

@@ -41,7 +41,7 @@ export function MonthlyIncomesListForm({
   userId,
 }: MonthlyIncomesListFormProps) {
   const [isPending, startTransition] = useTransition()
-  
+
   // Obtener fecha actual para establecer valores por defecto
   const today = new Date()
   const currentMonthValue = (today.getMonth() + 1).toString().padStart(2, '0') // "01"-"12"
@@ -103,7 +103,7 @@ export function MonthlyIncomesListForm({
 
     const normalizedContrib = contribution.trim().replace(',', '.')
     const numericContrib = contribution.trim() === '' ? 0 : parseFloat(normalizedContrib)
-    
+
     if (isNaN(numericAmount) || numericAmount < 0) {
       setError('Introduce un importe válido y mayor o igual a 0.')
       return
@@ -135,7 +135,7 @@ export function MonthlyIncomesListForm({
         try {
           const fileExt = file.name.split('.').pop()
           filePath = `${householdId}/${userId}/${monthStr}-${Date.now()}.${fileExt}`
-          
+
           const { error: uploadError } = await supabase.storage
             .from('payrolls')
             .upload(filePath, file, {
@@ -366,7 +366,7 @@ export function MonthlyIncomesListForm({
           </p>
         ) : (
           <div className="rounded-xl border border-slate-200/50 overflow-x-auto dark:border-slate-800/50">
-            <table className="w-full border-collapse text-left text-xs min-w-[440px]">
+            <table className="w-full border-collapse text-left text-xs min-w-110">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50 text-muted-foreground font-semibold">
                   <th className="p-3 whitespace-nowrap">Mes</th>

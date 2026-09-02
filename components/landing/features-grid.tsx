@@ -254,12 +254,12 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-100px' }}
-        className="w-full md:w-[430px] lg:w-[470px] shrink-0 border border-slate-200/50 dark:border-slate-800 bg-background/55 dark:bg-slate-900/50 rounded-3xl p-6 shadow-2xl backdrop-blur-xs relative overflow-hidden group hover:border-violet-500/25 transition-all duration-300"
+        className="w-full md:w-107.5 lg:w-117.5 shrink-0 border border-slate-200/50 dark:border-slate-800 bg-background/55 dark:bg-slate-900/50 rounded-3xl p-6 shadow-2xl backdrop-blur-xs relative overflow-hidden group hover:border-violet-500/25 transition-all duration-300"
       >
         {/* Glow sutil en hover sobre la caja del demo */}
         <div className="absolute inset-px rounded-[22px] border border-violet-500/0 group-hover:border-violet-500/10 dark:group-hover:border-violet-500/15 transition-colors duration-300 pointer-events-none" />
 
-        <div className="flex flex-col justify-between min-h-[220px]">
+        <div className="flex flex-col justify-between min-h-55">
           <FeatureDemoId id={feature.id} />
         </div>
       </motion.div>
