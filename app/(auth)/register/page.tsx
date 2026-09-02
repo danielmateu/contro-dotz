@@ -6,6 +6,7 @@ import { signUpAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import {
   Card,
   CardContent,
@@ -93,6 +94,17 @@ export default function RegisterPage() {
 
               {!state?.success && (
                 <>
+                  {/* Botón de registro rápido con Google OAuth */}
+                  <GoogleSignInButton text="Registrarse con Google" />
+
+                  <div className="relative flex items-center justify-center my-3">
+                    <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
+                    <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider relative z-10 shrink-0">
+                      o con correo
+                    </span>
+                    <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
+                  </div>
+
                   <div className="space-y-1.5">
                     <Label htmlFor="displayName" className="font-semibold text-xs text-foreground">Nombre o Alias</Label>
                     <div className="relative">
