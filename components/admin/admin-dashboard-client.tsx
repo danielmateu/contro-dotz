@@ -5,6 +5,12 @@ import { AdminMetrics, getAdminMetricsAction } from '@/app/actions/admin'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
   Users,
   Home,
   Receipt,
@@ -18,14 +24,32 @@ import {
   MessageSquare,
   Sparkles,
   Lock,
+  ChevronDown,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  XCircle,
 } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
+import { updateFeedbackStatusAction, FeedbackStatus } from '@/app/actions/feedback'
+import { toast } from '@/components/ui/toast'
+
+const statusBadges: Record<
+  string,
+  { label: string; icon: React.ComponentType<{ className?: string }>; color: string }
+> = {
+  pending: { label: 'Pendiente', icon: Clock, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+  in_progress: { label: 'En Curso', icon: AlertCircle, color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+  completed: { label: 'Completado', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+  rejected: { label: 'Descartado', icon: XCircle, color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+}
 
 export function AdminDashboardClient() {
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [updatingId, setUpdatingId] = useState<string | null>(null)
 
   const fetchMetrics = async () => {
     setLoading(true)
@@ -37,6 +61,40 @@ export function AdminDashboardClient() {
       setMetrics(res.data)
     }
     setLoading(false)
+  }
+
+  const handleStatusChange = async (feedbackId: string, newStatus: FeedbackStatus) => {
+    if (!metrics) return
+
+    // Actualización optimista de estado
+    setUpdatingId(feedbackId)
+    setMetrics((prev) => {
+      if (!prev) return prev
+      return {
+        ...prev,
+        recentFeedback: prev.recentFeedback.map((fb) =>
+          fb.id === feedbackId ? { ...fb, status: newStatus } : fb
+        ),
+      }
+    })
+
+    const res = await updateFeedbackStatusAction(feedbackId, newStatus)
+    setUpdatingId(null)
+
+    if (res.error) {
+      toast.add({
+        title: 'Error al cambiar estado',
+        description: res.error,
+        type: 'error',
+      })
+      fetchMetrics() // Revertir en caso de falla
+    } else {
+      toast.add({
+        title: 'Estado de sugerencia actualizado',
+        description: `La sugerencia ahora está marked como ${statusBadges[newStatus]?.label || newStatus}.`,
+        type: 'success',
+      })
+    }
   }
 
   useEffect(() => {
@@ -270,6 +328,101 @@ export function AdminDashboardClient() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Feedback Submissions Section */}
+      {metrics.recentFeedback && metrics.recentFeedback.length > 0 && (
+        <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md rounded-2xl overflow-hidden">
+          <CardHeader className="border-b border-slate-800/60 pb-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
+                  <MessageSquare className="h-5 w-5 text-violet-400" />
+                  Sugerencias y Feedback de Usuarios
+                </CardTitle>
+                <CardDescription className="text-xs font-medium">
+                  Gestión de estado y resolución de peticiones in-app
+                </CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="divide-y divide-slate-800/60">
+              {metrics.recentFeedback.map((fb) => {
+                const currentStatus = fb.status || 'pending'
+                const statusConfig = statusBadges[currentStatus] || statusBadges.pending
+                const StatusIcon = statusConfig.icon
+
+                return (
+                  <div key={fb.id} className="p-4 space-y-2 hover:bg-slate-800/30 transition-colors">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-violet-500/10 text-violet-400 border-violet-500/20 uppercase tracking-wider">
+                          {fb.category}
+                        </span>
+                        <span className="text-sm font-bold text-foreground">{fb.title}</span>
+                      </div>
+
+                      {/* Dropdown Selector de Estado para el SuperAdmin */}
+                      <div className="flex items-center gap-3">
+                        <span className="text-[11px] text-muted-foreground font-medium">
+                          {new Date(fb.created_at).toLocaleDateString('es-ES', {
+                            day: '2-digit',
+                            month: 'short',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            render={
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled={updatingId === fb.id}
+                                className={`h-7 px-2.5 rounded-lg border text-xs font-semibold gap-1.5 transition-all ${statusConfig.color}`}
+                              >
+                                <StatusIcon className="h-3.5 w-3.5" />
+                                <span>{statusConfig.label}</span>
+                                <ChevronDown className="h-3 w-3 opacity-60" />
+                              </Button>
+                            }
+                          />
+                          <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-foreground rounded-xl w-40 p-1">
+                            {(Object.keys(statusBadges) as FeedbackStatus[]).map((stKey) => {
+                              const cfg = statusBadges[stKey]
+                              const IconComp = cfg.icon
+                              return (
+                                <DropdownMenuItem
+                                  key={stKey}
+                                  onClick={() => handleStatusChange(fb.id, stKey)}
+                                  className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2 py-1.5 hover:bg-slate-800 focus:bg-slate-800"
+                                >
+                                  <IconComp className="h-3.5 w-3.5 text-muted-foreground" />
+                                  <span>{cfg.label}</span>
+                                </DropdownMenuItem>
+                              )
+                            })}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-3 border-l-2 border-slate-700/80">
+                      {fb.description}
+                    </p>
+                    {fb.user_email && (
+                      <p className="text-[10px] text-slate-500 font-mono">
+                        Enviado por: <span className="text-slate-400 font-semibold">{fb.user_email}</span>
+                      </p>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

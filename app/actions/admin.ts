@@ -22,6 +22,15 @@ export interface AdminMetrics {
     name: string
     created_at: string
   }>
+  recentFeedback: Array<{
+    id: string
+    user_email: string | null
+    category: string
+    title: string
+    description: string
+    status: string
+    created_at: string
+  }>
 }
 
 /**
@@ -55,7 +64,16 @@ export async function getAdminMetricsAction(): Promise<{
     return { error: 'No tienes permisos de SuperAdministrador para acceder a esta área.' }
   }
 
-  // 3. Intentar obtener métricas globales del sistema mediante RPC con SECURITY DEFINER (para ignorar RLS de otros usuarios/hogares)
+  // 3. Obtener tabla de feedback reciente de Supabase
+  const { data: feedbackData } = await supabase
+    .from('feedback')
+    .select('id, user_email, category, title, description, status, created_at')
+    .order('created_at', { ascending: false })
+    .limit(10)
+
+  const recentFeedback = feedbackData || []
+
+  // 4. Intentar obtener métricas globales del sistema mediante RPC con SECURITY DEFINER
   const { data: rpcData, error: rpcError } = await supabase.rpc('get_superadmin_metrics')
 
   if (!rpcError && rpcData) {
@@ -69,6 +87,7 @@ export async function getAdminMetricsAction(): Promise<{
         totalAiResponses: Number(rpcData.totalAiResponses || 0),
         recentUsers: rpcData.recentUsers || [],
         recentHouseholds: rpcData.recentHouseholds || [],
+        recentFeedback,
       },
     }
   }
@@ -120,6 +139,7 @@ export async function getAdminMetricsAction(): Promise<{
       totalAiResponses: totalAiResponses || 0,
       recentUsers: recentUsers || [],
       recentHouseholds: recentHouseholds || [],
+      recentFeedback,
     },
   }
 }

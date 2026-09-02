@@ -1,0 +1,38 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "expenses": "Expenses",
+    "categories": "Categories",
+    "budgets": "Budgets",
+    "savingGoals": "Piggy Banks",
+    "chat": "Family Chat",
+    "shoppingList": "Shopping List",
+    "household": "Household / Family",
+    "settings": "Settings",
+    "admin": "SuperAdmin",
+    "logout": "Log out",
+    "language": "Language",
+    "spanish": "Español",
+    "english": "English",
+    "catalan": "Català"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Sign up",
+    "continueWithGoogle": "Continue with Google",
+    "orWithEmail": "or with email",
+    "email": "Email address",
+    "password": "Password",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "registerNow": "Register now",
+    "alreadyHaveAccount": "Already have an account?"
+  },
+  "dashboard": {
+    "title": "Family Dashboard",
+    "totalSpent": "Total Spent",
+    "budgetStatus": "Budget Status",
+    "addExpense": "Add Expense",
+    "recentExpenses": "Recent Expenses"
+  }
+}

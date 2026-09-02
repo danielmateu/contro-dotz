@@ -38,6 +38,8 @@ import {
 import { SidebarBrandLogo } from '@/components/dashboard/sidebar-brand-logo'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { ActiveRouteName } from '@/components/dashboard/active-route-name'
+import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
+import { FeatureBaseWidget } from '@/components/feedback/featurebase-widget'
 
 interface PrivateLayoutProps {
   children: React.ReactNode
@@ -172,7 +174,12 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
             {/* <Separator orientation="vertical" className="h-4" /> */}
             <ActiveRouteName />
           </div>
-          <ModeToggle />
+
+          <div className="flex items-center gap-3">
+            <FeatureBaseWidget userEmail={profile?.email} userName={profile?.display_name || undefined} />
+            <LocaleSwitcher />
+            <ModeToggle />
+          </div>
         </header>
 
         {/* Contenido Principal */}

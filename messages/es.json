@@ -1,0 +1,38 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "expenses": "Gastos",
+    "categories": "Categorías",
+    "budgets": "Presupuestos",
+    "savingGoals": "Huchas Ahorro",
+    "chat": "Chat Familiar",
+    "shoppingList": "Lista Compra",
+    "household": "Hogar / Familia",
+    "settings": "Ajustes",
+    "admin": "SuperAdmin",
+    "logout": "Cerrar sesión",
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "English",
+    "catalan": "Català"
+  },
+  "auth": {
+    "login": "Iniciar sesión",
+    "register": "Crear cuenta",
+    "continueWithGoogle": "Continuar con Google",
+    "orWithEmail": "o con correo",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "forgotPassword": "¿La has olvidado?",
+    "noAccount": "¿No tienes cuenta?",
+    "registerNow": "Regístrate ahora",
+    "alreadyHaveAccount": "¿Ya tienes cuenta?"
+  },
+  "dashboard": {
+    "title": "Panel Familiar",
+    "totalSpent": "Total Gastado",
+    "budgetStatus": "Estado del Presupuesto",
+    "addExpense": "Registrar Gasto",
+    "recentExpenses": "Últimos Gastos Registrados"
+  }
+}

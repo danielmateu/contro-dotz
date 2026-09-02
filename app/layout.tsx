@@ -4,6 +4,7 @@ import { Geist, Geist_Mono, Inter, Roboto } from "next/font/google"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { PostHogProvider } from "@/components/providers/posthog-provider"
+import { I18nProvider } from "@/lib/i18n/i18n-context"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toast"
 
@@ -56,10 +57,12 @@ export default function RootLayout({
     >
       <body>
         <PostHogProvider>
-          <ThemeProvider>
-            {children}
-            <Toaster />
-          </ThemeProvider>
+          <I18nProvider>
+            <ThemeProvider>
+              {children}
+              <Toaster />
+            </ThemeProvider>
+          </I18nProvider>
         </PostHogProvider>
       </body>
     </html>

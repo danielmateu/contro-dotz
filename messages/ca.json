@@ -1,0 +1,38 @@
+{
+  "common": {
+    "dashboard": "Panell Principal",
+    "expenses": "Despeses",
+    "categories": "Categories",
+    "budgets": "Pressupostos",
+    "savingGoals": "Hutxotes d'Estalvi",
+    "chat": "Xat Familiar",
+    "shoppingList": "Llista de la Compra",
+    "household": "Llar / Família",
+    "settings": "Ajustos",
+    "admin": "SuperAdmin",
+    "logout": "Tancar sessió",
+    "language": "Idioma",
+    "spanish": "Español",
+    "english": "English",
+    "catalan": "Català"
+  },
+  "auth": {
+    "login": "Iniciar sessió",
+    "register": "Crear compte",
+    "continueWithGoogle": "Continuar amb Google",
+    "orWithEmail": "o amb correu",
+    "email": "Correu electrònic",
+    "password": "Contrasenya",
+    "forgotPassword": "L'has oblidat?",
+    "noAccount": "No tens compte?",
+    "registerNow": "Registra't ara",
+    "alreadyHaveAccount": "Ja tens un compte?"
+  },
+  "dashboard": {
+    "title": "Panell Familiar",
+    "totalSpent": "Total Gastat",
+    "budgetStatus": "Estat del Pressupost",
+    "addExpense": "Registrar Despesa",
+    "recentExpenses": "Últimes Despeses Enregistrades"
+  }
+}
