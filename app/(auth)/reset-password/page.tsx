@@ -17,6 +17,10 @@ import { AlertCircle, CheckCircle, ArrowRight, ShieldCheck, Lock, Loader2 } from
 import { createClient } from '@/lib/supabase/client'
 import { MorphIcon } from 'morphicons/react'
 // @ts-ignore
+import { __iconNode as LockData } from 'lucide-react/dist/esm/icons/lock.mjs'
+// @ts-ignore
+import { __iconNode as KeyRoundData } from 'lucide-react/dist/esm/icons/key-round.mjs'
+// @ts-ignore
 import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
 // @ts-ignore
 import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
@@ -53,6 +57,7 @@ function ResetPasswordContent() {
   const [verifying, setVerifying] = useState(true)
   const [verified, setVerified] = useState(false)
   const [verifyError, setVerifyError] = useState<string | null>(null)
+  const [isSubmitHovered, setIsSubmitHovered] = useState(false)
 
   const [state, formAction, pending] = useActionState(
     updatePasswordAction,
@@ -308,14 +313,23 @@ function ResetPasswordContent() {
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">
-                <Button
-                  type="submit"
-                  disabled={pending}
-                  className="w-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98]"
-                >
-                  {pending ? 'Actualizando contraseña...' : 'Restablecer contraseña'}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="relative w-full group">
+                  <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
+                  <Button
+                    type="submit"
+                    disabled={pending}
+                    onMouseEnter={() => setIsSubmitHovered(true)}
+                    onMouseLeave={() => setIsSubmitHovered(false)}
+                    className="relative w-full h-11 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <MorphIcon
+                      icon={isSubmitHovered ? KeyRoundData : LockData}
+                      spring="snappy"
+                      className="w-4.5 h-4.5 text-violet-200"
+                    />
+                    <span>{pending ? 'Actualizando contraseña...' : 'Restablecer contraseña'}</span>
+                  </Button>
+                </div>
               </CardFooter>
             </form>
           )}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect } from 'react'
+import { useActionState, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { resetPasswordRequestAction } from '@/app/actions/auth'
@@ -18,7 +18,12 @@ import {
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import { DynamicThreeScene } from '@/components/landing/dynamic-three-scene'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, CheckCircle, ArrowRight, ShieldCheck, Mail } from 'lucide-react'
+import { AlertCircle, CheckCircle, ShieldCheck, Mail } from 'lucide-react'
+import { MorphIcon } from 'morphicons/react'
+// @ts-ignore
+import { __iconNode as MailData } from 'lucide-react/dist/esm/icons/mail.mjs'
+// @ts-ignore
+import { __iconNode as SendData } from 'lucide-react/dist/esm/icons/send.mjs'
 
 type FormState = {
   error?: string
@@ -32,6 +37,7 @@ export default function ForgotPasswordPage() {
     resetPasswordRequestAction,
     initialState
   )
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     document.title = 'Recuperar contraseña | Control Dotz'
@@ -115,10 +121,23 @@ export default function ForgotPasswordPage() {
 
             <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">
               {!state?.success && (
-                <Button type="submit" className="w-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98]" disabled={pending}>
-                  {pending ? 'Enviando enlace...' : 'Enviar enlace de recuperación'}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
+                <div className="relative w-full group">
+                  <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
+                  <Button
+                    type="submit"
+                    disabled={pending}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    className="relative w-full h-11 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <MorphIcon
+                      icon={isHovered ? SendData : MailData}
+                      spring="snappy"
+                      className="w-4.5 h-4.5 text-violet-200"
+                    />
+                    <span>{pending ? 'Enviando enlace...' : 'Enviar enlace de recuperación'}</span>
+                  </Button>
+                </div>
               )}
 
               <div className="text-center text-sm text-muted-foreground w-full font-medium">

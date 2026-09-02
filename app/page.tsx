@@ -16,6 +16,8 @@ import {
   ArrowRight,
   ShieldCheck,
   Lock,
+  Rocket,
+  LayoutDashboard,
 } from 'lucide-react'
 
 export default async function LandingPage() {
@@ -65,7 +67,7 @@ export default async function LandingPage() {
               <Link href="/login" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'rounded-xl' })}>
                 Iniciar sesión
               </Link>
-              <Link href="/register" className={buttonVariants({ size: 'sm', className: 'rounded-xl shadow-xs' })}>
+              <Link href="/register" className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'rounded-xl shadow-xs' })}>
                 Registrarse
               </Link>
             </>
@@ -75,7 +77,7 @@ export default async function LandingPage() {
 
       {/* Hero Section */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 py-20 max-w-5xl mx-auto space-y-8">
-        
+
         <h1 className="text-4xl sm:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300">
           Controla tus gastos diarios en familia con total claridad
         </h1>
@@ -84,23 +86,56 @@ export default async function LandingPage() {
           Una aplicación colaborativa, rápida y con diseño premium para registrar gastos en el hogar, supervisar presupuestos mensuales y potenciar el ahorro familiar de forma segura.
         </p>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center pt-2">
+        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-2">
           {isAuthenticated ? (
-            <Link href="/dashboard" className={cn(buttonVariants({ size: 'lg' }), "px-8 py-6 rounded-xl text-base shadow-xl shadow-primary/25 hover:scale-[1.02] active:scale-95 transition-all duration-200")}>
-              Ir a mi Dashboard
-              <ArrowRight className="ml-2 h-5 w-5" />
+            <Link
+              href="/dashboard"
+              className="group relative inline-flex items-center justify-center"
+            >
+              {/* Resplandor de fondo */}
+              <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-600 to-cyan-500 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
+              {/* Botón Principal */}
+              <span className="relative px-8 py-4 bg-slate-900 dark:bg-slate-950 border border-violet-500/30 rounded-2xl flex items-center gap-3 text-white font-bold text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
+                <LayoutDashboard className="w-5 h-5 text-violet-300" />
+                Ir a mi Dashboard
+                <ArrowRight className="w-5 h-5 text-violet-400 group-hover:translate-x-1.5 transition-transform duration-200" />
+              </span>
             </Link>
           ) : (
             <>
-              <Link href="/register" className={cn(buttonVariants({ size: 'lg' }), "px-8 py-6 rounded-xl text-base shadow-xl shadow-primary/25 hover:scale-[1.02] active:scale-95 transition-all duration-200")}>
-                Crear cuenta gratis
-                <ArrowRight className="ml-2 h-5 w-5" />
+              <Link
+                href="/register"
+                className="group relative inline-flex items-center justify-center"
+              >
+                {/* Resplandor de fondo */}
+                <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
+                {/* Botón Principal */}
+                <span className="relative px-8 py-4 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-2xl flex items-center gap-3 text-white font-bold text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
+                  <Rocket className="w-5 h-5 text-indigo-200" />
+                  Crear cuenta gratis
+                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
+                </span>
               </Link>
-              <Link href="/login" className={cn(buttonVariants({ variant: 'outline', size: 'lg' }), "px-8 py-6 rounded-xl text-base hover:bg-muted/50 hover:scale-[1.02] active:scale-95 transition-all duration-200")}>
+
+              <Link
+                href="/login"
+                className="px-7 py-4 rounded-2xl font-semibold text-base border border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-100 transition-all duration-200 hover:scale-[1.01] active:scale-95 shadow-xs"
+              >
                 Iniciar sesión
               </Link>
             </>
           )}
+        </div>
+
+        {/* Micro-Badges de Confianza */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground/80 font-medium pt-1">
+          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+            <ShieldCheck className="w-4 h-4" /> 100% Gratis para tu hogar
+          </span>
+          <span className="hidden sm:inline text-muted-foreground/30">•</span>
+          <span className="flex items-center gap-1.5">
+            <Lock className="w-3.5 h-3.5" /> Sin necesidad de tarjeta de crédito
+          </span>
         </div>
 
         {/* Mock UI Showcase de la aplicación */}

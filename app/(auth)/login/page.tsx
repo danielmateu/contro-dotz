@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, Suspense } from 'react'
+import { useActionState, useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signInAction } from '@/app/actions/auth'
@@ -19,8 +19,13 @@ import {
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import { DynamicThreeScene } from '@/components/landing/dynamic-three-scene'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, ArrowRight, ShieldCheck, Mail, Lock } from 'lucide-react'
+import { AlertCircle, ShieldCheck, Mail, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { MorphIcon } from 'morphicons/react'
+// @ts-ignore
+import { __iconNode as LogInData } from 'lucide-react/dist/esm/icons/log-in.mjs'
+// @ts-ignore
+import { __iconNode as ArrowRightData } from 'lucide-react/dist/esm/icons/arrow-right.mjs'
 
 const initialState = {
   error: '',
@@ -44,6 +49,7 @@ function LoginForm() {
   const [state, formAction, pending] = useActionState(signInAction, initialState)
   const searchParams = useSearchParams()
   const errorParam = searchParams.get('error')
+  const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
     document.title = 'Iniciar sesión | Control Dotz'
@@ -157,10 +163,23 @@ function LoginForm() {
             </CardContent>
 
             <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">
-              <Button type="submit" className="w-full bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98]" disabled={pending}>
-                {pending ? 'Iniciando sesión...' : 'Entrar en mi cuenta'}
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
+              <div className="relative w-full group">
+                <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
+                <Button
+                  type="submit"
+                  disabled={pending}
+                  onMouseEnter={() => setIsHovered(true)}
+                  onMouseLeave={() => setIsHovered(false)}
+                  className="relative w-full h-11 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <MorphIcon
+                    icon={isHovered ? ArrowRightData : LogInData}
+                    spring="snappy"
+                    className="w-4.5 h-4.5 text-violet-200"
+                  />
+                  <span>{pending ? 'Iniciando sesión...' : 'Entrar en mi cuenta'}</span>
+                </Button>
+              </div>
 
               <div className="text-center text-sm text-muted-foreground w-full font-medium">
                 ¿No tienes cuenta?{' '}
