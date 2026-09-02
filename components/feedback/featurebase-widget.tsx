@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { MessageSquarePlus, Send, CheckCircle2, Sparkles } from 'lucide-react'
+import { MessageSquarePlus, Send, CheckCircle2, Sparkles, MessageCircleDashed } from 'lucide-react'
 import { sendFeedbackAction } from '@/app/actions/feedback'
 
 interface FeatureBaseWidgetProps {
@@ -73,7 +73,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
       <DialogContent className="sm:max-w-md  border-slate-800 text-foreground rounded-2xl p-6">
         <DialogHeader className="space-y-1.5">
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 mb-1">
-            <Sparkles className="h-5 w-5" />
+            <MessageCircleDashed className="h-5 w-5" />
           </div>
           <DialogTitle className="text-xl font-bold font-heading">
             Envíanos tu Feedback o Sugerencia
@@ -123,7 +123,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                   type="button"
                   onClick={() => setCategory('other')}
                   className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'other'
-                    ? 'bg-indigo-600 text-white border-indigo-500'
+                    ? 'bg-slate-600 text-white border-slate-500'
                     : ' border-slate-700'
                     }`}
                 >
