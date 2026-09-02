@@ -43,14 +43,22 @@ import { __iconNode as ShoppingCartData } from 'lucide-react/dist/esm/icons/shop
 import { __iconNode as WalletData } from 'lucide-react/dist/esm/icons/wallet.mjs'
 // @ts-ignore
 import { __iconNode as TargetData } from 'lucide-react/dist/esm/icons/target.mjs'
+// @ts-ignore
+import { __iconNode as ShieldCheckData } from 'lucide-react/dist/esm/icons/shield-check.mjs'
 
 interface SidebarMenuItemsProps {
   hasHousehold: boolean
   householdId?: string | null
   userId?: string
+  isSuperAdmin?: boolean
 }
 
-export function SidebarMenuItems({ hasHousehold, householdId, userId }: SidebarMenuItemsProps) {
+export function SidebarMenuItems({
+  hasHousehold,
+  householdId,
+  userId,
+  isSuperAdmin,
+}: SidebarMenuItemsProps) {
   const pathname = usePathname()
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [hasUnread, setHasUnread] = useState(false)
@@ -155,6 +163,17 @@ export function SidebarMenuItems({ hasHousehold, householdId, userId }: SidebarM
       activeIcon: WrenchData,
       disabled: !hasHousehold,
     },
+    ...(isSuperAdmin
+      ? [
+          {
+            title: 'SuperAdmin',
+            url: '/admin',
+            icon: ShieldCheckData,
+            activeIcon: ShieldCheckData,
+            disabled: false,
+          },
+        ]
+      : []),
   ]
 
   return (

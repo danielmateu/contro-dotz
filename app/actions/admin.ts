@@ -55,7 +55,25 @@ export async function getAdminMetricsAction(): Promise<{
     return { error: 'No tienes permisos de SuperAdministrador para acceder a esta área.' }
   }
 
-  // 3. Obtener métricas globales del sistema
+  // 3. Intentar obtener métricas globales del sistema mediante RPC con SECURITY DEFINER (para ignorar RLS de otros usuarios/hogares)
+  const { data: rpcData, error: rpcError } = await supabase.rpc('get_superadmin_metrics')
+
+  if (!rpcError && rpcData) {
+    return {
+      data: {
+        totalUsers: Number(rpcData.totalUsers || 0),
+        totalHouseholds: Number(rpcData.totalHouseholds || 0),
+        totalExpenses: Number(rpcData.totalExpenses || 0),
+        totalAmountTracked: Math.round(Number(rpcData.totalAmountTracked || 0) * 100) / 100,
+        totalChatMessages: Number(rpcData.totalChatMessages || 0),
+        totalAiResponses: Number(rpcData.totalAiResponses || 0),
+        recentUsers: rpcData.recentUsers || [],
+        recentHouseholds: rpcData.recentHouseholds || [],
+      },
+    }
+  }
+
+  // Fallback directo si la función RPC aún no se ha ejecutado en Postgres
   const [
     { count: totalUsers },
     { count: totalHouseholds },

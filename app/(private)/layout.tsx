@@ -59,7 +59,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const [profileResult, membershipResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('display_name, email, avatar_url, status')
+      .select('display_name, email, avatar_url, status, is_super_admin')
       .eq('id', user.id)
       .single(),
     supabase
@@ -78,6 +78,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const householdName = membership?.households
     ? (membership.households as any).name
     : null
+  const isSuperAdmin = profile?.is_super_admin ?? false
 
   return (
     <SidebarProvider>
@@ -107,7 +108,12 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
               Menú Principal
             </SidebarGroupLabel>
             <SidebarGroupContent>
-              <SidebarMenuItems hasHousehold={hasHousehold} householdId={householdId} userId={user.id} />
+              <SidebarMenuItems
+                hasHousehold={hasHousehold}
+                householdId={householdId}
+                userId={user.id}
+                isSuperAdmin={isSuperAdmin}
+              />
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
