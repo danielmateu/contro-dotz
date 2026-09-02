@@ -12,8 +12,8 @@ import { Globe, Check } from 'lucide-react'
 
 const languages: Array<{ code: SupportedLocale; label: string; flag: string }> = [
   { code: 'es', label: 'Español', flag: '🇪🇸' },
+  { code: 'ca', label: 'Català', flag: 'cat' },
   { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'ca', label: 'Català', flag: '🏴󠁥󠁳󠁣󠁴​' },
 ]
 
 export function LocaleSwitcher({ className = '' }: { className?: string }) {

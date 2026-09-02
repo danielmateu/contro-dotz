@@ -14,7 +14,15 @@
     "language": "Language",
     "spanish": "Español",
     "english": "English",
-    "catalan": "Català"
+    "catalan": "Català",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search...",
+    "filter": "Filter",
+    "loading": "Loading..."
   },
   "auth": {
     "login": "Log in",
@@ -30,9 +38,33 @@
   },
   "dashboard": {
     "title": "Family Dashboard",
+    "subtitle": "Real-time financial summary of your household",
     "totalSpent": "Total Spent",
     "budgetStatus": "Budget Status",
     "addExpense": "Add Expense",
-    "recentExpenses": "Recent Expenses"
+    "recentExpenses": "Recent Expenses",
+    "monthlyAvg": "Daily Average",
+    "activeGoals": "Savings Goals",
+    "scanTicket": "Scan Receipt AI"
+  },
+  "expenses": {
+    "title": "Household Expenses",
+    "subtitle": "View, filter and manage all registered receipts",
+    "newExpense": "New Expense",
+    "scanOCR": "Scan Receipt with AI",
+    "amount": "Amount",
+    "date": "Date",
+    "category": "Category",
+    "payer": "Paid by",
+    "description": "Concept / Description",
+    "noExpenses": "No expenses found."
+  },
+  "household": {
+    "title": "Household Management",
+    "subtitle": "Manage family members, roles, contributions and monthly incomes",
+    "members": "Family members",
+    "monthlyIncomes": "Monthly Incomes",
+    "settlements": "Settlement & Balances",
+    "invite": "Invite Member"
   }
 }

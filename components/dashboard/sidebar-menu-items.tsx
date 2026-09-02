@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import { cn } from '@/lib/utils'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { MorphIcon } from 'morphicons/react'
@@ -60,6 +61,7 @@ export function SidebarMenuItems({
   isSuperAdmin,
 }: SidebarMenuItemsProps) {
   const pathname = usePathname()
+  const { t } = useI18n()
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
   const [hasUnread, setHasUnread] = useState(false)
 
@@ -101,63 +103,63 @@ export function SidebarMenuItems({
 
   const navItems = [
     {
-      title: 'Dashboard',
+      title: t('common.dashboard'),
       url: '/dashboard',
       icon: LayoutDashboardData,
       activeIcon: TrendingUpData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Gastos',
+      title: t('common.expenses'),
       url: '/expenses',
       icon: ReceiptData,
       activeIcon: CoinsData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Categorías',
+      title: t('common.categories'),
       url: '/categories',
       icon: TagsData,
       activeIcon: FolderOpenData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Presupuestos',
+      title: t('common.budgets'),
       url: '/budgets',
       icon: PiggyBankData,
       activeIcon: ScaleData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Huchas Ahorro',
+      title: t('common.savingGoals'),
       url: '/saving-goals',
       icon: WalletData,
       activeIcon: TargetData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Chat Familiar',
+      title: t('common.chat'),
       url: '/chat',
       icon: MessageSquareData,
       activeIcon: MessagesSquareData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Lista Compra',
+      title: t('common.shoppingList'),
       url: '/shopping',
       icon: ShoppingBasketData,
       activeIcon: ShoppingCartData,
       disabled: !hasHousehold,
     },
     {
-      title: 'Hogar / Familia',
+      title: t('common.household'),
       url: '/household',
       icon: Users2Data,
       activeIcon: HomeData,
       disabled: false,
     },
     {
-      title: 'Ajustes',
+      title: t('common.settings'),
       url: '/settings',
       icon: SettingsData,
       activeIcon: WrenchData,
@@ -166,7 +168,7 @@ export function SidebarMenuItems({
     ...(isSuperAdmin
       ? [
           {
-            title: 'SuperAdmin',
+            title: t('common.admin'),
             url: '/admin',
             icon: ShieldCheckData,
             activeIcon: ShieldCheckData,

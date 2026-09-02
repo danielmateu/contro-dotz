@@ -14,7 +14,15 @@
     "language": "Idioma",
     "spanish": "Español",
     "english": "English",
-    "catalan": "Català"
+    "catalan": "Català",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Añadir",
+    "search": "Buscar...",
+    "filter": "Filtrar",
+    "loading": "Cargando..."
   },
   "auth": {
     "login": "Iniciar sesión",
@@ -30,9 +38,33 @@
   },
   "dashboard": {
     "title": "Panel Familiar",
+    "subtitle": "Resumen financiero de tu hogar en tiempo real",
     "totalSpent": "Total Gastado",
     "budgetStatus": "Estado del Presupuesto",
     "addExpense": "Registrar Gasto",
-    "recentExpenses": "Últimos Gastos Registrados"
+    "recentExpenses": "Últimos Gastos Registrados",
+    "monthlyAvg": "Promedio Diario",
+    "activeGoals": "Huchas de Ahorro",
+    "scanTicket": "Escanear Ticket IA"
+  },
+  "expenses": {
+    "title": "Gastos del Hogar",
+    "subtitle": "Consulta, filtra y gestiona todos los tickets registrados",
+    "newExpense": "Nuevo Gasto",
+    "scanOCR": "Escanear Ticket con IA",
+    "amount": "Importe",
+    "date": "Fecha",
+    "category": "Categoría",
+    "payer": "Pagado por",
+    "description": "Concepto / Detalle",
+    "noExpenses": "No se han encontrado gastos."
+  },
+  "household": {
+    "title": "Gestión del Hogar",
+    "subtitle": "Administra miembros, roles, aportaciones e ingresos mensuales",
+    "members": "Miembros de la familia",
+    "monthlyIncomes": "Ingresos Mensuales",
+    "settlements": "Liquidación y Saldos",
+    "invite": "Invitar Miembro"
   }
 }

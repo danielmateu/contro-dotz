@@ -14,7 +14,15 @@
     "language": "Idioma",
     "spanish": "Español",
     "english": "English",
-    "catalan": "Català"
+    "catalan": "Català",
+    "save": "Desar",
+    "cancel": "Cancel·lar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "add": "Afegir",
+    "search": "Cercar...",
+    "filter": "Filtrar",
+    "loading": "Carregant..."
   },
   "auth": {
     "login": "Iniciar sessió",
@@ -30,9 +38,33 @@
   },
   "dashboard": {
     "title": "Panell Familiar",
+    "subtitle": "Resum financer de la teva llar en temps real",
     "totalSpent": "Total Gastat",
     "budgetStatus": "Estat del Pressupost",
     "addExpense": "Registrar Despesa",
-    "recentExpenses": "Últimes Despeses Enregistrades"
+    "recentExpenses": "Últimes Despeses Enregistrades",
+    "monthlyAvg": "Mitjana Diària",
+    "activeGoals": "Hutxotes d'Estalvi",
+    "scanTicket": "Escanejar Ticat IA"
+  },
+  "expenses": {
+    "title": "Despeses de la Llar",
+    "subtitle": "Consulta, filtra i gestiona tots els tiquets enregistrats",
+    "newExpense": "Nova Despesa",
+    "scanOCR": "Escanejar Tiquet amb IA",
+    "amount": "Import",
+    "date": "Data",
+    "category": "Categoria",
+    "payer": "Pagat per",
+    "description": "Concepte / Detall",
+    "noExpenses": "No s'han trobat despeses."
+  },
+  "household": {
+    "title": "Gestió de la Llar",
+    "subtitle": "Administra membres, rols, aportacions i ingressos mensuals",
+    "members": "Membres de la família",
+    "monthlyIncomes": "Ingressos Mensuals",
+    "settlements": "Liquidació i Saldos",
+    "invite": "Convidar Membre"
   }
 }
