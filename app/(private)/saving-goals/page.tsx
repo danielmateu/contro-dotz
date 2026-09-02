@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { SavingGoalsClient } from '@/components/saving-goals/saving-goals-client'
+import { SavingGoalsViewClient } from '@/components/saving-goals/saving-goals-view-client'
 
 export const metadata: Metadata = {
   title: 'Huchas de Ahorro',
@@ -95,24 +95,13 @@ export default async function SavingGoalsPage() {
   })
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
-          Huchas de Ahorro Colectivo
-        </h1>
-        <p className="text-muted-foreground">
-          Define metas financieras colaborativas con tu familia, realiza aportaciones y sigue el progreso de vuestro ahorro en tiempo real.
-        </p>
-      </div>
-
-      <SavingGoalsClient
-        householdId={householdId}
-        currentUserId={user.id}
-        isOwner={userRole === 'owner'}
-        initialGoals={goals}
-        initialContributions={contributions}
-        members={members}
-      />
-    </div>
+    <SavingGoalsViewClient
+      householdId={householdId}
+      currentUserId={user.id}
+      isOwner={userRole === 'owner'}
+      initialGoals={goals}
+      initialContributions={contributions}
+      members={members}
+    />
   )
 }

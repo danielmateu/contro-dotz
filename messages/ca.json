@@ -4,7 +4,7 @@
     "expenses": "Despeses",
     "categories": "Categories",
     "budgets": "Pressupostos",
-    "savingGoals": "Hutxotes d'Estalvi",
+    "savingGoals": "Guardioles d'Estalvi",
     "chat": "Xat Familiar",
     "shoppingList": "Llista de la Compra",
     "household": "Llar / Família",
@@ -44,7 +44,7 @@
     "addExpense": "Registrar Despesa",
     "recentExpenses": "Últimes Despeses Enregistrades",
     "monthlyAvg": "Mitjana Diària",
-    "activeGoals": "Hutxotes d'Estalvi",
+    "activeGoals": "Guardioles d'Estalvi",
     "scanTicket": "Escanejar Ticat IA"
   },
   "expenses": {

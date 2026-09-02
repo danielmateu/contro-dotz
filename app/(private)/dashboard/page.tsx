@@ -1,7 +1,9 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { getRecentActivityAction } from '@/app/actions/activity'
+import { calculateDailyAverage, calculatePercentageChange } from '@/lib/finance-utils'
+import { DashboardViewClient } from '@/components/dashboard/dashboard-view-client'
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -10,31 +12,6 @@ export const metadata: Metadata = {
     follow: false,
   },
 }
-import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
-import { ActivityFeed } from '@/components/dashboard/activity-feed'
-import { ExpenseDialog } from '@/components/expenses/expense-dialog'
-import { SendReportButton } from '@/components/household/send-report-button'
-import { getRecentActivityAction } from '@/app/actions/activity'
-import { formatCurrency } from '@/lib/format'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { calculateDailyAverage, calculatePercentageChange } from '@/lib/finance-utils'
-import { Progress } from '@/components/ui/progress' // wait, we don't have shadcn progress but we can render a native div bar easily!
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
-import {
-  TrendingUp,
-  TrendingDown,
-  Minus,
-  Receipt,
-  PiggyBank,
-  Plus,
-  AlertTriangle,
-  ArrowRight,
-  Calendar,
-  Layers,
-} from 'lucide-react'
-import * as Icons from 'lucide-react'
-import { LucideIcon } from 'lucide-react'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -167,7 +144,6 @@ export default async function DashboardPage() {
     const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
     const name = profile?.display_name || profile?.email?.split('@')[0] || 'Miembro'
     
-    // Buscar si hay ingreso/aportación específico para el mes actual, sino usar base
     const specificIncome = monthlyIncomes.find((inc) => inc.user_id === m.user_id)
     const income = specificIncome 
       ? Number(specificIncome.amount) 
@@ -189,25 +165,20 @@ export default async function DashboardPage() {
   const totalHouseholdFund = membersIncomeAndSpent.reduce((sum, m) => sum + m.contribution, 0)
 
   // --- CÁLCULO DE KPIs ---
-  // A. Total Gastado (Compartido del hogar)
   const currentTotalSpent =
     sharedExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
   const prevTotalSpent =
     prevExpenses.filter((e) => !e.is_personal).reduce((sum, exp) => sum + Number(exp.amount), 0)
 
-  // B. Promedio Diario
   const daysPassed = now.getDate()
   const dailyAverage = calculateDailyAverage(currentTotalSpent, daysPassed)
 
-  // C. Comparativa
   const diffAbsolute = currentTotalSpent - prevTotalSpent
   const diffPercentage = calculatePercentageChange(currentTotalSpent, prevTotalSpent)
 
-  // D. Total Presupuestado
   const totalBudgeted =
     currentBudgets?.reduce((sum, b) => sum + Number(b.amount), 0) || 0
 
-  // E. Suma de gastos por categoría
   const categorySpentMap: Record<string, number> = {}
   currentExpenses?.forEach((exp) => {
     const catId = exp.category_id
@@ -216,7 +187,6 @@ export default async function DashboardPage() {
   })
 
   // --- PREPARAR DATOS PARA GRÁFICOS ---
-  // Donut chart: gastos por categoría
   const categoryAgg: Record<
     string,
     { name: string; value: number; color: string }
@@ -243,7 +213,6 @@ export default async function DashboardPage() {
       value: parseFloat(d.value.toFixed(2)),
     }))
 
-  // Area chart: evolución diaria acumulada
   const dailyMap: Record<number, number> = {}
   for (let d = 1; d <= currentLastDay; d++) {
     dailyMap[d] = 0
@@ -264,7 +233,6 @@ export default async function DashboardPage() {
     }
   })
 
-  // Gráfico de barras: Presupuesto vs Real
   const categoriesMap = new Map<string, { id: string; name: string; color: string }>()
   currentBudgets?.forEach(b => {
     const cat = b.categories as any
@@ -290,7 +258,6 @@ export default async function DashboardPage() {
     }
   })
 
-  // Stacked Area: Evolución acumulada diaria por cada miembro
   const runningTotal: Record<string, number> = {}
   memberNames.forEach(name => {
     runningTotal[name] = 0
@@ -320,7 +287,6 @@ export default async function DashboardPage() {
     stackedChartData.push(dataPoint)
   }
 
-  // Presupuestos en alerta (>80%) o superados
   const budgetsAlert = currentBudgets
     ?.map((b) => {
       const cat = b.categories as any
@@ -340,7 +306,6 @@ export default async function DashboardPage() {
     .filter((b) => b.percent >= 80)
     .sort((a, b) => b.percent - a.percent)
 
-  // Últimos 5 gastos del mes
   const latestExpenses = currentExpenses
     ? [...currentExpenses]
       .sort(
@@ -352,317 +317,28 @@ export default async function DashboardPage() {
     : []
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
-            Resumen Financiero
-          </h1>
-          <p className="text-muted-foreground">
-            Control de gastos familiares mensual y estado de tus presupuestos.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <SendReportButton
-            householdId={membership.household_id}
-            compact
-          />
-          <ExpenseDialog
-            householdId={membership.household_id}
-            categories={categories || []}
-            members={mappedMembers}
-            currentUserId={user.id}
-            isOwner={isOwner}
-          />
-        </div>
-      </div>
-
-      {/* Tarjetas de KPIs */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {/* Fondo Común del Hogar */}
-        <Card className="border-emerald-500/20 bg-emerald-50/20 dark:bg-emerald-950/10 shadow-xs relative overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">
-              Fondo Común del Hogar
-            </span>
-            <PiggyBank className="h-4.5 w-4.5 text-emerald-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(totalHouseholdFund)}
-            </div>
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-              {totalHouseholdFund > 0 ? (
-                <>
-                  <span className="font-semibold text-foreground">
-                    {formatCurrency(totalHouseholdFund - currentTotalSpent)}
-                  </span>
-                  <span>remanente de las cuotas del hogar.</span>
-                </>
-              ) : (
-                <span>Sin aportaciones configuradas.</span>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Total Gastado (Hogar) */}
-        <Card className="border-slate-200/50 shadow-xs relative overflow-hidden">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Gasto del Hogar
-            </span>
-            <Receipt className="h-4.5 w-4.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(currentTotalSpent)}
-            </div>
-            <div className="flex items-center gap-1 mt-1 text-xs">
-              {diffAbsolute > 0 ? (
-                <>
-                  <TrendingUp className="h-4 w-4 text-destructive shrink-0" />
-                  <span className="text-destructive font-semibold">
-                    +{diffPercentage.toFixed(0)}%
-                  </span>
-                </>
-              ) : diffAbsolute < 0 ? (
-                <>
-                  <TrendingDown className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span className="text-emerald-500 font-semibold">
-                    {diffPercentage.toFixed(0)}%
-                  </span>
-                </>
-              ) : (
-                <>
-                  <Minus className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-muted-foreground">Igual</span>
-                </>
-              )}
-              <span className="text-muted-foreground">vs. mes anterior</span>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Promedio Diario */}
-        <Card className="border-slate-200/50 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Promedio Diario
-            </span>
-            <Calendar className="h-4.5 w-4.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(dailyAverage)}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Calculado sobre {daysPassed} días transcurridos.
-            </p>
-          </CardContent>
-        </Card>
-
-        {/* Límite de Presupuesto */}
-        <Card className="border-slate-200/50 shadow-xs">
-          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-              Presupuestos Establecidos
-            </span>
-            <Layers className="h-4.5 w-4.5 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {formatCurrency(totalBudgeted)}
-            </div>
-            <div className="flex items-center gap-1.5 mt-1 text-xs text-muted-foreground">
-              <span className="font-semibold text-foreground">
-                {totalBudgeted > 0
-                  ? `${((currentTotalSpent / totalBudgeted) * 100).toFixed(0)}%`
-                  : '0%'}
-              </span>
-              <span>del total asignado consumido.</span>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Gráficos del dashboard */}
-      <DashboardCharts
-        pieData={pieChartData}
-        lineData={lineChartData}
-        barData={barChartData}
-        stackedData={stackedChartData}
-        memberNames={memberNames}
-        membersIncomeAndSpent={membersIncomeAndSpent}
-      />
-
-      {/* Sección inferior de alertas, actividad y últimos gastos */}
-      <div className="grid gap-6 lg:grid-cols-3 items-start">
-        {/* Presupuestos en Alerta */}
-        <Card className="border-slate-200/50 shadow-md lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-              Presupuestos en Alerta
-            </CardTitle>
-            <CardDescription>
-              Categorías que han superado el 80% de su presupuesto mensual.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {!budgetsAlert || budgetsAlert.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center text-xs text-muted-foreground">
-                No hay presupuestos en estado de alerta este mes. ¡Buen trabajo!
-              </div>
-            ) : (
-              budgetsAlert.map((b) => {
-                const LucideIconComp = (Icons as any)[b.icon] as LucideIcon
-                const isExceeded = b.percent >= 100
-
-                return (
-                  <div key={b.id} className="space-y-2">
-                    <div className="flex items-center justify-between text-xs font-medium">
-                      <span className="flex items-center gap-1.5 font-semibold text-foreground">
-                        <span
-                          className="h-2 w-2 rounded-full"
-                          style={{ backgroundColor: b.color }}
-                        />
-                        {b.categoryName}
-                      </span>
-                      <span className={isExceeded ? 'text-destructive font-bold' : 'text-amber-500 font-semibold'}>
-                        {b.percent.toFixed(0)}%
-                      </span>
-                    </div>
-
-                    <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${isExceeded ? 'bg-destructive' : 'bg-amber-500'}`}
-                        style={{ width: `${Math.min(b.percent, 100)}%` }}
-                      />
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] text-muted-foreground">
-                      <span>{formatCurrency(b.spent)} gastados</span>
-                      <span>Límite: {formatCurrency(b.limit)}</span>
-                    </div>
-                  </div>
-                )
-              })
-            )}
-            <Link
-              href="/budgets"
-              className={buttonVariants({
-                variant: 'ghost',
-                size: 'sm',
-                className: 'w-full text-xs text-primary hover:text-primary mt-2',
-              })}
-            >
-              Gestionar presupuestos
-              <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-            </Link>
-          </CardContent>
-        </Card>
-
-        {/* Actividad Reciente del Hogar */}
-        <div className="lg:col-span-1 h-full">
-          <ActivityFeed activities={activities} />
-        </div>
-
-        {/* Últimos 5 Gastos Registrados */}
-        <Card className="border-slate-200/50 shadow-md lg:col-span-1">
-          <CardHeader>
-            <CardTitle className="text-lg">Últimas Transacciones</CardTitle>
-            <CardDescription>
-              Los 5 gastos registrados más recientes de este mes.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {latestExpenses.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-center text-xs text-muted-foreground">
-                No hay transacciones registradas este mes.
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {latestExpenses.map((exp, idx) => {
-                  const category = exp.categories as any
-                  const creator = exp.profiles as any
-                  const LucideIconComp = category?.icon
-                    ? ((Icons as any)[category.icon] as LucideIcon)
-                    : null
-
-                  return (
-                    <div
-                      key={idx}
-                      className="flex items-center justify-between gap-4 p-3 border border-slate-100 dark:border-slate-800/60 rounded-xl hover:bg-muted/10 transition-all"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="h-9 w-9 rounded-xl flex items-center justify-center shadow-xs border"
-                          style={{
-                            backgroundColor: `${category?.color || '#64748b'}15`,
-                            color: category?.color || '#64748b',
-                          }}
-                        >
-                          {LucideIconComp ? (
-                            <LucideIconComp className="h-5 w-5" />
-                          ) : (
-                            <Icons.Tag className="h-5 w-5" />
-                          )}
-                        </div>
-                        <div className="flex flex-col min-w-0">
-                          <span className="font-bold text-sm text-foreground truncate">
-                            {exp.description}
-                          </span>
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                            <span>{category?.name}</span>
-                            <span>•</span>
-                            <span className="flex items-center gap-1">
-                              <Avatar className="h-3.5 w-3.5 border border-border/40">
-                                {creator?.avatar_url ? (
-                                  <AvatarImage src={creator.avatar_url} alt={creator.display_name || 'Miembro'} className="object-cover" />
-                                ) : null}
-                                <AvatarFallback className="bg-muted text-muted-foreground text-[8px] font-semibold">
-                                  {(creator?.display_name || 'M').substring(0, 1).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>{creator?.display_name}</span>
-                            </span>
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col items-end shrink-0">
-                        <span className="font-bold text-sm text-foreground">
-                          {formatCurrency(exp.amount)}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground mt-0.5">
-                          {new Date(exp.expense_date).toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'short',
-                          })}
-                        </span>
-                      </div>
-                    </div>
-                  )
-                })}
-
-                <Link
-                  href="/expenses"
-                  className={buttonVariants({
-                    variant: 'ghost',
-                    size: 'sm',
-                    className: 'w-full text-xs text-primary hover:text-primary mt-2',
-                  })}
-                >
-                  Ver todos los gastos
-                  <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <DashboardViewClient
+      householdId={membership.household_id}
+      userId={user.id}
+      isOwner={isOwner}
+      categories={categories || []}
+      mappedMembers={mappedMembers}
+      totalHouseholdFund={totalHouseholdFund}
+      currentTotalSpent={currentTotalSpent}
+      dailyAverage={dailyAverage}
+      daysPassed={daysPassed}
+      diffAbsolute={diffAbsolute}
+      diffPercentage={diffPercentage}
+      totalBudgeted={totalBudgeted}
+      pieChartData={pieChartData}
+      lineChartData={lineChartData}
+      barChartData={barChartData}
+      stackedChartData={stackedChartData}
+      memberNames={memberNames}
+      membersIncomeAndSpent={membersIncomeAndSpent}
+      budgetsAlert={budgetsAlert || []}
+      latestExpenses={latestExpenses}
+      activities={activities}
+    />
   )
 }

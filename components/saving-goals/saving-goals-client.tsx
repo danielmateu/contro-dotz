@@ -34,9 +34,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Progress } from '@/components/ui/progress' // Let's check: do we have Progress? If not we render a custom div, but wait, let's render a custom div to ensure maximum visual control and robustness!
 import { formatCurrency } from '@/lib/format'
 import { PiggyBank, Plus, Calendar, Trash2, ShieldAlert, Sparkles, PlusCircle } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface SavingGoal {
   id: string
@@ -83,6 +83,7 @@ export function SavingGoalsClient({
   members,
 }: SavingGoalsClientProps) {
   const router = useRouter()
+  const { t, locale } = useI18n()
   const [isPending, startTransition] = useTransition()
   
   // Modals state

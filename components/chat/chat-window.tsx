@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
 import { Send, Users, Smile, MessageSquare, AlertCircle } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface Member {
   user_id: string
@@ -49,6 +50,7 @@ export function ChatWindow({
   initialMessages,
   members,
 }: ChatWindowProps) {
+  const { t, locale } = useI18n()
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputMessage, setInputMessage] = useState('')
   const [isSending, setIsSending] = useState(false)

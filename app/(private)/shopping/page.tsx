@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { ShoppingListWindow } from '@/components/shopping/shopping-list-window'
+import { ShoppingViewClient } from '@/components/shopping/shopping-view-client'
 
 export const metadata: Metadata = {
   title: 'Lista de la Compra',
@@ -71,24 +71,13 @@ export default async function ShoppingPage() {
   })
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
-          Lista de la Compra
-        </h1>
-        <p className="text-muted-foreground">
-          Añade artículos que hacen falta en el hogar en tiempo real y regístralos como gastos con un solo clic.
-        </p>
-      </div>
-
-      <ShoppingListWindow
-        householdId={householdId}
-        householdName={householdName}
-        userId={user.id}
-        initialItems={initialItems}
-        categories={categories}
-        members={members}
-      />
-    </div>
+    <ShoppingViewClient
+      householdId={householdId}
+      householdName={householdName}
+      userId={user.id}
+      initialItems={initialItems}
+      categories={categories}
+      members={members}
+    />
   )
 }

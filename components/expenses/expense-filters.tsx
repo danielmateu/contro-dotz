@@ -4,6 +4,7 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Calendar as CalendarIcon, X } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Select,
   SelectContent,
@@ -19,7 +20,7 @@ import {
 import { Calendar } from '@/components/ui/calendar'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS, ca } from 'date-fns/locale'
 import type { DateRange } from 'react-day-picker'
 
 interface Category {
@@ -43,6 +44,9 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
   const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const { t, locale } = useI18n()
+
+  const dateLocale = locale === 'ca' ? ca : locale === 'en' ? enUS : es
 
   // Leer filtros activos
   const startDate = searchParams.get('startDate') || ''
@@ -89,7 +93,6 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
     } else {
       params.delete(key)
     }
-    // Volver a la primera página si hubiera paginación
     params.delete('page')
     router.push(`${pathname}?${params.toString()}`)
   }
@@ -106,7 +109,9 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
       <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
         {/* Rango de Fechas */}
         <div className="space-y-1">
-          <Label className="text-xs">Rango de Fechas</Label>
+          <Label className="text-xs">
+            {locale === 'en' ? 'Date Range' : locale === 'ca' ? 'Rangs de Dates' : 'Rango de Fechas'}
+          </Label>
           <Popover>
             <PopoverTrigger render={
               <Button
@@ -120,15 +125,15 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
                 {startDate ? (
                   endDate ? (
                     <span className="truncate">
-                      {format(new Date(startDate), "dd/MM/yyyy", { locale: es })} - {format(new Date(endDate), "dd/MM/yyyy", { locale: es })}
+                      {format(new Date(startDate), "dd/MM/yyyy", { locale: dateLocale })} - {format(new Date(endDate), "dd/MM/yyyy", { locale: dateLocale })}
                     </span>
                   ) : (
                     <span>
-                      {format(new Date(startDate), "dd/MM/yyyy", { locale: es })}
+                      {format(new Date(startDate), "dd/MM/yyyy", { locale: dateLocale })}
                     </span>
                   )
                 ) : (
-                  <span>Seleccionar fechas</span>
+                  <span>{locale === 'en' ? 'Select dates' : locale === 'ca' ? 'Seleccionar dates' : 'Seleccionar fechas'}</span>
                 )}
               </Button>
             } />
@@ -137,7 +142,7 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
                 mode="range"
                 selected={calendarRange}
                 onSelect={handleRangeChange}
-                locale={es}
+                locale={dateLocale}
               />
             </PopoverContent>
           </Popover>
@@ -146,18 +151,21 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
         {/* Filtrar por Categoría */}
         <div className="space-y-1">
           <Label htmlFor="filterCategory" className="text-xs">
-            Categoría
+            {t('expenses.category')}
           </Label>
           <Select
             value={categoryId}
             onValueChange={(val) => updateFilters('categoryId', val || '')}
-            items={[{ value: '', label: 'Todas las categorías' }, ...categories.map((cat) => ({ value: cat.id, label: cat.name }))]}
+            items={[
+              { value: '', label: locale === 'en' ? 'All categories' : locale === 'ca' ? 'Totes les categories' : 'Todas las categorías' },
+              ...categories.map((cat) => ({ value: cat.id, label: cat.name }))
+            ]}
           >
             <SelectTrigger id="filterCategory" className="w-full bg-muted/40">
-              <SelectValue placeholder="Todas las categorías" />
+              <SelectValue placeholder={locale === 'en' ? 'All categories' : locale === 'ca' ? 'Totes les categories' : 'Todas las categorías'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas las categorías</SelectItem>
+              <SelectItem value="">{locale === 'en' ? 'All categories' : locale === 'ca' ? 'Totes les categories' : 'Todas las categorías'}</SelectItem>
               {categories.map((cat) => (
                 <SelectItem key={cat.id} value={cat.id}>
                   {cat.name}
@@ -170,23 +178,23 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
         {/* Filtrar por Miembro */}
         <div className="space-y-1">
           <Label htmlFor="filterMember" className="text-xs">
-            Miembro
+            {locale === 'en' ? 'Member' : locale === 'ca' ? 'Membre' : 'Miembro'}
           </Label>
           <Select
             value={memberId}
             onValueChange={(val) => updateFilters('memberId', val || '')}
             items={[
-              { value: '', label: 'Todos los miembros' },
-              { value: 'shared', label: 'A medias / Compartido' },
+              { value: '', label: locale === 'en' ? 'All members' : locale === 'ca' ? 'Tots els membres' : 'Todos los miembros' },
+              { value: 'shared', label: locale === 'en' ? 'Shared / Half' : locale === 'ca' ? 'A mitges / Compartit' : 'A medias / Compartido' },
               ...members.map((mem) => ({ value: mem.user_id, label: mem.profiles?.display_name || 'Desconocido' }))
             ]}
           >
             <SelectTrigger id="filterMember" className="w-full bg-muted/40">
-              <SelectValue placeholder="Todos los miembros" />
+              <SelectValue placeholder={locale === 'en' ? 'All members' : locale === 'ca' ? 'Tots els membres' : 'Todos los miembros'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los miembros</SelectItem>
-              <SelectItem value="shared">A medias / Compartido</SelectItem>
+              <SelectItem value="">{locale === 'en' ? 'All members' : locale === 'ca' ? 'Tots els membres' : 'Todos los miembros'}</SelectItem>
+              <SelectItem value="shared">{locale === 'en' ? 'Shared / Half' : locale === 'ca' ? 'A mitges / Compartit' : 'A medias / Compartido'}</SelectItem>
               {members.map((mem) => (
                 <SelectItem key={mem.user_id} value={mem.user_id}>
                   {mem.profiles?.display_name || 'Desconocido'}
@@ -199,26 +207,26 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
         {/* Ordenación */}
         <div className="space-y-1">
           <Label htmlFor="sortBy" className="text-xs">
-            Ordenar por
+            {locale === 'en' ? 'Sort by' : locale === 'ca' ? 'Ordenar per' : 'Ordenar por'}
           </Label>
           <Select
             value={sortBy}
             onValueChange={(val) => updateFilters('sortBy', val || 'date_desc')}
             items={[
-              { value: 'date_desc', label: 'Fecha (recientes primero)' },
-              { value: 'date_asc', label: 'Fecha (antiguos primero)' },
-              { value: 'amount_desc', label: 'Importe (mayor primero)' },
-              { value: 'amount_asc', label: 'Importe (menor primero)' },
+              { value: 'date_desc', label: locale === 'en' ? 'Date (newest first)' : locale === 'ca' ? 'Data (recents primer)' : 'Fecha (recientes primero)' },
+              { value: 'date_asc', label: locale === 'en' ? 'Date (oldest first)' : locale === 'ca' ? 'Data (antics primer)' : 'Fecha (antiguos primero)' },
+              { value: 'amount_desc', label: locale === 'en' ? 'Amount (highest first)' : locale === 'ca' ? 'Import (major primer)' : 'Importe (mayor primero)' },
+              { value: 'amount_asc', label: locale === 'en' ? 'Amount (lowest first)' : locale === 'ca' ? 'Import (menor primer)' : 'Importe (menor primero)' },
             ]}
           >
             <SelectTrigger id="sortBy" className="w-full bg-muted/40">
-              <SelectValue placeholder="Ordenar por" />
+              <SelectValue placeholder={locale === 'en' ? 'Sort by' : locale === 'ca' ? 'Ordenar per' : 'Ordenar por'} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="date_desc">Fecha (recientes primero)</SelectItem>
-              <SelectItem value="date_asc">Fecha (antiguos primero)</SelectItem>
-              <SelectItem value="amount_desc">Importe (mayor primero)</SelectItem>
-              <SelectItem value="amount_asc">Importe (menor primero)</SelectItem>
+              <SelectItem value="date_desc">{locale === 'en' ? 'Date (newest first)' : locale === 'ca' ? 'Data (recents primer)' : 'Fecha (recientes primero)'}</SelectItem>
+              <SelectItem value="date_asc">{locale === 'en' ? 'Date (oldest first)' : locale === 'ca' ? 'Data (antics primer)' : 'Fecha (antiguos primero)'}</SelectItem>
+              <SelectItem value="amount_desc">{locale === 'en' ? 'Amount (highest first)' : locale === 'ca' ? 'Import (major primer)' : 'Importe (mayor primero)'}</SelectItem>
+              <SelectItem value="amount_asc">{locale === 'en' ? 'Amount (lowest first)' : locale === 'ca' ? 'Import (menor primer)' : 'Importe (menor primero)'}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -233,7 +241,7 @@ export function ExpenseFilters({ categories, members }: ExpenseFiltersProps) {
             className="h-8 text-xs text-muted-foreground hover:text-foreground"
           >
             <X className="mr-1.5 h-3.5 w-3.5" />
-            Limpiar filtros
+            {locale === 'en' ? 'Clear filters' : locale === 'ca' ? 'Netejar filtres' : 'Limpiar filtros'}
           </Button>
         </div>
       )}

@@ -1,6 +1,8 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { calculateBalances, calculateDebts } from '@/lib/finance-utils'
+import { HouseholdViewClient } from '@/components/household/household-view-client'
 
 export const metadata: Metadata = {
   title: 'Mi Hogar / Familia',
@@ -9,35 +11,6 @@ export const metadata: Metadata = {
     follow: false,
   },
 }
-import { CreateHouseholdForm } from '@/components/household/create-household-form'
-import { InviteMemberForm } from '@/components/household/invite-member-form'
-import { InvitationActions } from '@/components/household/invitation-actions'
-import { MemberActions } from '@/components/household/member-actions'
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { Badge } from '@/components/ui/badge'
-import {
-  Home,
-  Users2,
-  Mail,
-  UserPlus,
-  Shield,
-  Hourglass,
-  Calendar,
-  Coins,
-} from 'lucide-react'
-import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { calculateBalances, calculateDebts } from '@/lib/finance-utils'
-import { SettlementsTabContent } from '@/components/household/settlements-tab-content'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 
 export default async function HouseholdPage() {
   const supabase = await createClient()
@@ -130,293 +103,19 @@ export default async function HouseholdPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
-          Hogar y Familia
-        </h1>
-        <p className="text-muted-foreground">
-          {hasHousehold
-            ? 'Administra los miembros de tu familia e invita a otros.'
-            : 'Crea un nuevo hogar o acepta una invitación para empezar.'}
-        </p>
-      </div>
-
-      {!hasHousehold ? (
-        // ==========================================
-        // VISTA: USUARIO SIN HOGAR
-        // ==========================================
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Formulario de creación */}
-          <CreateHouseholdForm />
-
-          {/* Invitaciones recibidas */}
-          <Card className="border-slate-200/50 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
-                Invitaciones Recibidas
-              </CardTitle>
-              <CardDescription>
-                Hogares que te han invitado a unirte a ellos.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {receivedInvitations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
-                  <Mail className="h-10 w-10 stroke-1 mb-2 text-slate-400" />
-                  <p className="text-sm">No tienes invitaciones pendientes.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {receivedInvitations.map((inv) => (
-                    <div
-                      key={inv.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-xl bg-muted/30 gap-4"
-                    >
-                      <div className="space-y-1">
-                        <p className="text-sm font-semibold text-foreground">
-                          {(inv.households as any)?.name || 'Hogar Invitado'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          Invitado por:{' '}
-                          <span className="font-medium">
-                            {(inv.profiles as any)?.display_name || 'Alguien'}
-                          </span>
-                        </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(inv.created_at), "d 'de' MMMM, yyyy", {
-                            locale: es,
-                          })}
-                        </p>
-                      </div>
-                      <InvitationActions invitationId={inv.id} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      ) : (
-        // ==========================================
-        // VISTA: USUARIO CON HOGAR (TABS)
-        // ==========================================
-        <Tabs defaultValue="members" className="w-full space-y-6">
-          <TabsList className="grid w-full grid-cols-2 max-w-100 bg-transparent p-1 rounded-xl">
-            <TabsTrigger value="members" className="flex items-center gap-2 rounded-lg py-2">
-              <Users2 className="h-4 w-4" />
-              Miembros y Familia
-            </TabsTrigger>
-            <TabsTrigger value="settlements" className="flex items-center gap-2 rounded-lg py-2">
-              <Coins className="h-4 w-4" />
-              Saldos y Cuentas
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="members" className="space-y-6 outline-none">
-            <div className="grid gap-6 lg:grid-cols-3">
-              {/* Lista de miembros */}
-              <div className="lg:col-span-2 space-y-6">
-                <Card className="border-slate-200/50 shadow-md">
-                  <CardHeader className="flex flex-row items-center justify-between pb-4">
-                    <div className="space-y-1">
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Users2 className="h-5 w-5 text-primary" />
-                        Miembros de {householdName}
-                      </CardTitle>
-                      {householdCreatedAt && (
-                        <CardDescription className="flex items-center gap-1.5 mt-0.5">
-                          <Calendar className="h-3.5 w-3.5" />
-                          Creado el{' '}
-                          {format(
-                            new Date(householdCreatedAt),
-                            "d 'de' MMMM, yyyy",
-                            { locale: es }
-                          )}
-                        </CardDescription>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="px-0 sm:px-6">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Nombre</TableHead>
-                          <TableHead>Email</TableHead>
-                          <TableHead>Rol</TableHead>
-                          <TableHead className="w-16 text-right"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {membersList.map((member) => {
-                          const isCurrentUser = member.user_id === user.id
-                          const memberDisplayName =
-                            member.profiles?.display_name || 'Miembro'
-                          const memberEmail =
-                            member.profiles?.email || 'Desconocido'
-                          const memberAvatarUrl = member.profiles?.avatar_url
-                          const memberStatus = member.profiles?.status
-
-                          return (
-                            <TableRow key={member.id}>
-                              <TableCell className="font-medium">
-                                <div className="flex items-center gap-3">
-                                  <Avatar className="h-8 w-8 border border-border/40">
-                                    {memberAvatarUrl ? (
-                                      <AvatarImage src={memberAvatarUrl} alt={memberDisplayName} className="object-cover" />
-                                    ) : null}
-                                    <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                                      {memberDisplayName.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="flex flex-col">
-                                    <span className="flex items-center gap-1.5">
-                                      {memberDisplayName}
-                                      {isCurrentUser && (
-                                        <span className="text-xs text-muted-foreground font-normal">
-                                          (Tú)
-                                        </span>
-                                      )}
-                                    </span>
-                                    {memberStatus && (
-                                      <span className="text-[10px] text-muted-foreground italic font-normal mt-0.5">
-                                        {memberStatus}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {memberEmail}
-                              </TableCell>
-                              <TableCell>
-                                <Badge
-                                  variant={
-                                    member.role === 'owner' ? 'default' : 'secondary'
-                                  }
-                                  className="gap-1"
-                                >
-                                  {member.role === 'owner' && (
-                                    <Shield className="h-3 w-3" />
-                                  )}
-                                  {member.role === 'owner'
-                                    ? 'Propietario'
-                                    : 'Miembro'}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-right">
-                                {/* Mostrar acciones de eliminar miembro o salir */}
-                                {(membership.role === 'owner' && !isCurrentUser) ||
-                                  (isCurrentUser && membership.role === 'member') ? (
-                                  <MemberActions
-                                    memberId={member.id}
-                                    householdId={membership.household_id}
-                                    isSelf={isCurrentUser}
-                                    memberName={memberDisplayName}
-                                  />
-                                ) : null}
-                              </TableCell>
-                            </TableRow>
-                          )
-                        })}
-                      </TableBody>
-                    </Table>
-                  </CardContent>
-                </Card>
-
-                {/* Invitaciones enviadas (solo para owners) */}
-                {membership.role === 'owner' && (
-                  <Card className="border-slate-200/50 shadow-md">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <Hourglass className="h-5 w-5 text-amber-500 animate-pulse" />
-                        Invitaciones Enviadas Pendientes
-                      </CardTitle>
-                      <CardDescription>
-                        Invitaciones pendientes de aceptar por los destinatarios.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {sentInvitations.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">
-                          No hay invitaciones enviadas pendientes.
-                        </p>
-                      ) : (
-                        <div className="space-y-3">
-                          {sentInvitations.map((inv) => (
-                            <div
-                              key={inv.id}
-                              className="flex items-center justify-between p-3 border rounded-xl bg-muted/20"
-                            >
-                              <div>
-                                <p className="text-sm font-semibold">{inv.email}</p>
-                                <p className="text-xs text-muted-foreground mt-0.5">
-                                  Rol asignado:{' '}
-                                  {inv.role === 'owner' ? 'Propietario' : 'Miembro'}
-                                </p>
-                              </div>
-                              <Badge variant="outline" className="text-amber-600 bg-amber-50 dark:bg-amber-950/20">
-                                Pendiente
-                              </Badge>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-
-              {/* Formulario de invitar (solo para owners) */}
-              <div className="space-y-6">
-                {membership.role === 'owner' ? (
-                  <Card className="border-slate-200/50 shadow-md">
-                    <CardHeader>
-                      <CardTitle className="text-lg flex items-center gap-2">
-                        <UserPlus className="h-5 w-5 text-primary" />
-                        Añadir Familiares
-                      </CardTitle>
-                      <CardDescription>
-                        Envía una invitación por correo a los miembros que deseas sumar.
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <InviteMemberForm householdId={membership.household_id} />
-                    </CardContent>
-                  </Card>
-                ) : (
-                  // {-- Mensaje informativo para miembros no propietarios --}
-                  <Card className="border-slate-200/50 shadow-md bg-muted/20">
-                    <CardHeader>
-                      <CardTitle className="text-sm flex items-center gap-2">
-                        <Shield className="h-4 w-4 text-muted-foreground" />
-                        Miembro del hogar
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm text-muted-foreground">
-                      Solo el propietario del hogar puede gestionar las invitaciones y
-                      miembros adicionales. Si necesitas invitar a alguien, pídeselo al
-                      propietario.
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="settlements" className="outline-none">
-            <SettlementsTabContent
-              householdId={membership.household_id}
-              membersList={membersList}
-              balances={balances}
-              debts={debts}
-              settlementsList={settlementsList}
-            />
-          </TabsContent>
-        </Tabs>
-      )}
-    </div>
+    <HouseholdViewClient
+      hasHousehold={hasHousehold}
+      householdName={householdName}
+      householdCreatedAt={householdCreatedAt}
+      householdId={membership?.household_id}
+      role={membership?.role}
+      currentUserId={user.id}
+      membersList={membersList}
+      sentInvitations={sentInvitations}
+      receivedInvitations={receivedInvitations}
+      balances={balances}
+      debts={debts}
+      settlementsList={settlementsList}
+    />
   )
 }

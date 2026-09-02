@@ -34,6 +34,7 @@ import { formatCurrency } from '@/lib/format'
 import Link from 'next/link'
 import { updateFeedbackStatusAction, FeedbackStatus } from '@/app/actions/feedback'
 import { toast } from '@/components/ui/toast'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 const statusBadges: Record<
   string,
@@ -46,6 +47,7 @@ const statusBadges: Record<
 }
 
 export function AdminDashboardClient() {
+  const { t, locale } = useI18n()
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
