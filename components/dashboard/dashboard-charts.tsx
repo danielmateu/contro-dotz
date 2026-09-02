@@ -275,172 +275,172 @@ export function DashboardCharts({
       <TabsContent value="overview" className="outline-none">
         {activeTab === 'overview' && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="border-slate-200/50 shadow-md md:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                Evolución de Gastos (Acumulado)
-              </CardTitle>
-              <CardDescription>
-                Historial del gasto familiar diario acumulado durante el mes actual.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[350px]">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <AreaChart
-                  data={lineData}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorGasto" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
-                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                  <XAxis
-                    dataKey="day"
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                    tickFormatter={(val) => `${val}€`}
-                  />
-                  <Tooltip content={<CustomAreaTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="Gasto"
-                    name="Total Gastado"
-                    stroke="var(--primary)"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorGasto)"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            <Card className="border-slate-200/50 shadow-md md:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  Evolución de Gastos (Acumulado)
+                </CardTitle>
+                <CardDescription>
+                  Historial del gasto familiar diario acumulado durante el mes actual.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-87.5">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <AreaChart
+                    data={lineData}
+                    margin={{ top: 10, right: 10, left: -8, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorGasto" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                    <XAxis
+                      dataKey="day"
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-[10px] fill-muted-foreground font-medium"
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-[10px] fill-muted-foreground font-medium"
+                      tickFormatter={(val) => `${val}€`}
+                    />
+                    <Tooltip content={<CustomAreaTooltip />} />
+                    <Area
+                      type="monotone"
+                      dataKey="Gasto"
+                      name="Total Gastado"
+                      stroke="var(--primary)"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorGasto)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
 
-          <Card className="border-slate-200/50 shadow-md md:col-span-2 lg:col-span-1">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <PieChartIcon className="h-5 w-5 text-emerald-500" />
-                Reparto de Gastos
-              </CardTitle>
-              <CardDescription>
-                Gastos por categoría este mes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center justify-center">
-              {pieData.length === 0 ? (
-                <div className="w-[220px] h-[220px] flex items-center justify-center text-xs text-muted-foreground">
-                  Registra gastos para visualizar la distribución.
-                </div>
-              ) : (
-                <>
-                  <div className="w-[220px] h-[220px]">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                      <PieChart>
-                        <Pie
-                          data={pieData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={80}
-                          paddingAngle={5}
-                          cornerRadius={8}
-                          dataKey="value"
-                        >
-                          {pieData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Pie>
-                        <Tooltip content={<CustomPieTooltip />} />
-                      </PieChart>
-                    </ResponsiveContainer>
+            <Card className="border-slate-200/50 shadow-md md:col-span-2 lg:col-span-1">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <PieChartIcon className="h-5 w-5 text-emerald-500" />
+                  Reparto de Gastos
+                </CardTitle>
+                <CardDescription>
+                  Gastos por categoría este mes.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center">
+                {pieData.length === 0 ? (
+                  <div className="w-[220px] h-[220px] flex items-center justify-center text-xs text-muted-foreground">
+                    Registra gastos para visualizar la distribución.
                   </div>
+                ) : (
+                  <>
+                    <div className="w-[220px] h-[220px]">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                        <PieChart>
+                          <Pie
+                            data={pieData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            cornerRadius={8}
+                            dataKey="value"
+                          >
+                            {pieData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip content={<CustomPieTooltip />} />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </div>
 
-                  <div className="w-full grid grid-cols-2 gap-2 mt-2 max-h-17.5 overflow-y-auto pr-1">
-                    {pieData.slice(0, 6).map((entry, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-1.5 text-xs text-muted-foreground truncate"
-                      >
+                    <div className="w-full grid grid-cols-2 gap-2 mt-2 max-h-17.5 overflow-y-auto pr-1">
+                      {pieData.slice(0, 6).map((entry, index) => (
                         <div
-                          className="h-2 w-2 rounded-full shrink-0"
-                          style={{ backgroundColor: entry.color }}
-                        />
-                        <span className="truncate font-medium">{entry.name}</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+                          key={index}
+                          className="flex items-center gap-1.5 text-xs text-muted-foreground truncate"
+                        >
+                          <div
+                            className="h-2 w-2 rounded-full shrink-0"
+                            style={{ backgroundColor: entry.color }}
+                          />
+                          <span className="truncate font-medium">{entry.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         )}
       </TabsContent>
 
       <TabsContent value="budgets" className="outline-none">
         {activeTab === 'budgets' && (
-        <Card className="border-slate-200/50 shadow-md">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-indigo-500" />
-              Presupuestos vs Gastos por Categoría
-            </CardTitle>
-            <CardDescription>
-              Comparación visual de los presupuestos asignados frente al importe real consumido por categoría.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="h-[350px]">
-            {barData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                No hay presupuestos ni gastos registrados este mes.
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <BarChart
-                  data={barData}
-                  margin={{ top: 20, right: 10, left: -20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                  <XAxis
-                    dataKey="name"
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                    tickFormatter={(val) => `${val}€`}
-                  />
-                  <Tooltip content={<CustomBarTooltip />} />
-                  <Legend verticalAlign="top" height={36} className="text-xs" />
-                  <Bar
-                    dataKey="Presupuesto"
-                    name="Presupuesto"
-                    fill="#a855f7"
-                    radius={[4, 4, 0, 0]}
-                  />
-                  <Bar
-                    dataKey="Gastado"
-                    name="Gastado Real"
-                    fill="#10b981"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
+          <Card className="border-slate-200/50 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="h-5 w-5 text-indigo-500" />
+                Presupuestos vs Gastos por Categoría
+              </CardTitle>
+              <CardDescription>
+                Comparación visual de los presupuestos asignados frente al importe real consumido por categoría.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="h-[350px]">
+              {barData.length === 0 ? (
+                <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                  No hay presupuestos ni gastos registrados este mes.
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <BarChart
+                    data={barData}
+                    margin={{ top: 20, right: 10, left: -20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                    <XAxis
+                      dataKey="name"
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-[10px] fill-muted-foreground font-medium"
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-[10px] fill-muted-foreground font-medium"
+                      tickFormatter={(val) => `${val}€`}
+                    />
+                    <Tooltip content={<CustomBarTooltip />} />
+                    <Legend verticalAlign="top" height={36} className="text-xs" />
+                    <Bar
+                      dataKey="Presupuesto"
+                      name="Presupuesto"
+                      fill="#a855f7"
+                      radius={[4, 4, 0, 0]}
+                    />
+                    <Bar
+                      dataKey="Gastado"
+                      name="Gastado Real"
+                      fill="#10b981"
+                      radius={[4, 4, 0, 0]}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </CardContent>
+          </Card>
         )}
       </TabsContent>
 
@@ -545,13 +545,12 @@ export function DashboardCharts({
                                 </p>
                               </div>
                               <div className="text-right">
-                                <span className={`text-xs font-bold ${
-                                  m.diff > 0 
-                                    ? 'text-emerald-600 dark:text-emerald-400' 
-                                    : m.diff < 0 
-                                      ? 'text-rose-600 dark:text-rose-400' 
-                                      : 'text-muted-foreground'
-                                }`}>
+                                <span className={`text-xs font-bold ${m.diff > 0
+                                  ? 'text-emerald-600 dark:text-emerald-400'
+                                  : m.diff < 0
+                                    ? 'text-rose-600 dark:text-rose-400'
+                                    : 'text-muted-foreground'
+                                  }`}>
                                   {m.diff > 0 ? '+' : ''}{formatCurrency(m.diff)}
                                 </span>
                                 <p className="text-[9px] text-muted-foreground">
@@ -569,8 +568,8 @@ export function DashboardCharts({
                                   <span>{m.incomePercentage.toFixed(0)}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-indigo-500 rounded-full transition-all duration-500" 
+                                  <div
+                                    className="h-full bg-indigo-500 rounded-full transition-all duration-500"
                                     style={{ width: `${m.incomePercentage}%` }}
                                   />
                                 </div>
@@ -583,8 +582,8 @@ export function DashboardCharts({
                                   <span>{contributionPercentage.toFixed(0)}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                  <div 
-                                    className="h-full bg-emerald-500 rounded-full transition-all duration-500" 
+                                  <div
+                                    className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                                     style={{ width: `${contributionPercentage}%` }}
                                   />
                                 </div>
@@ -606,127 +605,127 @@ export function DashboardCharts({
       <TabsContent value="projection" className="outline-none">
         {activeTab === 'projection' && (
           <div className="grid gap-6 md:grid-cols-3">
-          <Card className="border-slate-200/50 shadow-md md:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <TrendingUp className="h-5 w-5 text-emerald-500" />
-                Proyección de Gastos del Mes
-              </CardTitle>
-              <CardDescription>
-                Proyección del gasto final estimado basándose en el ritmo diario acumulado hasta hoy.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="h-[350px]">
-              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                <AreaChart
-                  data={projectionData}
-                  margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
-                >
-                  <defs>
-                    <linearGradient id="colorGastoReal" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
-                      <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                  <XAxis
-                    dataKey="day"
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                  />
-                  <YAxis
-                    tickLine={false}
-                    axisLine={false}
-                    className="text-[10px] fill-muted-foreground font-medium"
-                    tickFormatter={(val) => `${val}€`}
-                  />
-                  <Tooltip content={<CustomProjectionTooltip />} />
-                  <Legend verticalAlign="top" height={36} />
-                  <Area
-                    type="monotone"
-                    dataKey="Gasto Real"
-                    stroke="var(--primary)"
-                    strokeWidth={2}
-                    fillOpacity={1}
-                    fill="url(#colorGastoReal)"
-                    name="Gasto Real Acumulado"
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="Proyección"
-                    stroke="#10b981"
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    dot={false}
-                    name="Proyección Estimada"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
+            <Card className="border-slate-200/50 shadow-md md:col-span-2">
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-emerald-500" />
+                  Proyección de Gastos del Mes
+                </CardTitle>
+                <CardDescription>
+                  Proyección del gasto final estimado basándose en el ritmo diario acumulado hasta hoy.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[350px]">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                  <AreaChart
+                    data={projectionData}
+                    margin={{ top: 20, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorGastoReal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.2} />
+                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                    <XAxis
+                      dataKey="day"
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-[10px] fill-muted-foreground font-medium"
+                    />
+                    <YAxis
+                      tickLine={false}
+                      axisLine={false}
+                      className="text-[10px] fill-muted-foreground font-medium"
+                      tickFormatter={(val) => `${val}€`}
+                    />
+                    <Tooltip content={<CustomProjectionTooltip />} />
+                    <Legend verticalAlign="top" height={36} />
+                    <Area
+                      type="monotone"
+                      dataKey="Gasto Real"
+                      stroke="var(--primary)"
+                      strokeWidth={2}
+                      fillOpacity={1}
+                      fill="url(#colorGastoReal)"
+                      name="Gasto Real Acumulado"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="Proyección"
+                      stroke="#10b981"
+                      strokeWidth={2}
+                      strokeDasharray="5 5"
+                      dot={false}
+                      name="Proyección Estimada"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
 
-          <Card className="border-slate-200/50 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                Análisis Predictivo
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground">Promedio de gasto diario</span>
-                <p className="text-2xl font-extrabold text-foreground">
-                  {formatCurrency(avgDaily)}
-                  <span className="text-xs font-normal text-muted-foreground"> / día</span>
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground">Gasto real acumulado (Día {currentDay})</span>
-                <p className="text-2xl font-bold text-foreground">
-                  {formatCurrency(todayCumulative)}
-                </p>
-              </div>
-
-              <div className="space-y-1">
-                <span className="text-xs text-muted-foreground">Gasto final proyectado</span>
-                <p className="text-3xl font-extrabold text-primary">
-                  {formatCurrency(finalProjected)}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-border/60">
-                {totalBudget > 0 ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-xs font-medium">
-                      <span className="text-muted-foreground">Presupuesto total del mes:</span>
-                      <span className="text-foreground font-semibold">{formatCurrency(totalBudget)}</span>
-                    </div>
-
-                    <div className={`p-3.5 rounded-xl border flex flex-col gap-1.5 ${isOverBudget
-                      ? 'bg-rose-50/50 border-rose-500/20 text-rose-700 dark:bg-rose-950/10 dark:border-rose-500/10 dark:text-rose-400'
-                      : 'bg-emerald-50/50 border-emerald-500/20 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-500/10 dark:text-emerald-400'
-                      }`}>
-                      <span className="text-xs font-bold uppercase tracking-wider">
-                        {isOverBudget ? '⚠️ Alerta de Desviación' : '✅ Proyección Saludable'}
-                      </span>
-                      <span className="text-xs leading-relaxed">
-                        {isOverBudget
-                          ? `A este ritmo, superaréis el presupuesto mensual por ${formatCurrency(Math.abs(budgetDiff))}. Considera reducir gastos no esenciales.`
-                          : `¡Excelente control! A este ritmo, terminaréis el mes ahorrando ${formatCurrency(budgetDiff)} respecto al presupuesto.`
-                        }
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    Establece presupuestos en la pestaña de presupuestos para comparar con la proyección.
+            <Card className="border-slate-200/50 shadow-md">
+              <CardHeader>
+                <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Análisis Predictivo
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Promedio de gasto diario</span>
+                  <p className="text-2xl font-extrabold text-foreground">
+                    {formatCurrency(avgDaily)}
+                    <span className="text-xs font-normal text-muted-foreground"> / día</span>
                   </p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Gasto real acumulado (Día {currentDay})</span>
+                  <p className="text-2xl font-bold text-foreground">
+                    {formatCurrency(todayCumulative)}
+                  </p>
+                </div>
+
+                <div className="space-y-1">
+                  <span className="text-xs text-muted-foreground">Gasto final proyectado</span>
+                  <p className="text-3xl font-extrabold text-primary">
+                    {formatCurrency(finalProjected)}
+                  </p>
+                </div>
+
+                <div className="pt-4 border-t border-border/60">
+                  {totalBudget > 0 ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between text-xs font-medium">
+                        <span className="text-muted-foreground">Presupuesto total del mes:</span>
+                        <span className="text-foreground font-semibold">{formatCurrency(totalBudget)}</span>
+                      </div>
+
+                      <div className={`p-3.5 rounded-xl border flex flex-col gap-1.5 ${isOverBudget
+                        ? 'bg-rose-50/50 border-rose-500/20 text-rose-700 dark:bg-rose-950/10 dark:border-rose-500/10 dark:text-rose-400'
+                        : 'bg-emerald-50/50 border-emerald-500/20 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-500/10 dark:text-emerald-400'
+                        }`}>
+                        <span className="text-xs font-bold uppercase tracking-wider">
+                          {isOverBudget ? '⚠️ Alerta de Desviación' : '✅ Proyección Saludable'}
+                        </span>
+                        <span className="text-xs leading-relaxed">
+                          {isOverBudget
+                            ? `A este ritmo, superaréis el presupuesto mensual por ${formatCurrency(Math.abs(budgetDiff))}. Considera reducir gastos no esenciales.`
+                            : `¡Excelente control! A este ritmo, terminaréis el mes ahorrando ${formatCurrency(budgetDiff)} respecto al presupuesto.`
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">
+                      Establece presupuestos en la pestaña de presupuestos para comparar con la proyección.
+                    </p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </TabsContent>
     </Tabs>

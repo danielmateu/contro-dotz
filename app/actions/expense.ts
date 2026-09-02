@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { expenseSchema } from '@/lib/validations'
+import { validateUploadedFile } from '@/lib/file-validation'
 
 /**
  * Registra un nuevo gasto diario
@@ -20,6 +21,12 @@ export async function createExpenseAction(
   const notes = formData.get('notes') as string
   const receipt = formData.get('receipt') as File | null
   const is_personal = formData.get('is_personal') === 'true'
+
+  // Validar archivo si se ha adjuntado
+  const fileValidation = validateUploadedFile(receipt)
+  if (!fileValidation.valid) {
+    return { error: fileValidation.error }
+  }
 
   const validation = expenseSchema.safeParse({
     amount,
@@ -216,6 +223,12 @@ export async function updateExpenseAction(
   const receipt = formData.get('receipt') as File | null
   const deleteReceipt = formData.get('delete_receipt') === 'true'
   const is_personal = formData.get('is_personal') === 'true'
+
+  // Validar archivo si se ha adjuntado
+  const fileValidation = validateUploadedFile(receipt)
+  if (!fileValidation.valid) {
+    return { error: fileValidation.error }
+  }
 
   const validation = expenseSchema.safeParse({
     amount,
