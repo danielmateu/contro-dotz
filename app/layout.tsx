@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Roboto } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
+import { PostHogProvider } from "@/components/providers/posthog-provider"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toast"
 
@@ -54,10 +55,12 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", inter.variable, robotoHeading.variable)}
     >
       <body>
-        <ThemeProvider>
-          {children}
-          <Toaster />
-        </ThemeProvider>
+        <PostHogProvider>
+          <ThemeProvider>
+            {children}
+            <Toaster />
+          </ThemeProvider>
+        </PostHogProvider>
       </body>
     </html>
   )

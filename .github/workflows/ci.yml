@@ -10,6 +10,9 @@ jobs:
   test-and-verify:
     name: Typecheck, Lint & Automated Tests
     runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://fnzflibtaxdzqxxtpzzb.supabase.co' }}
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_UTm9gPvg7wrRgdVn_JeUsw_d1xRO3nC' }}
 
     steps:
       - name: Checkout Código Fuente
@@ -35,12 +38,6 @@ jobs:
 
       - name: Instalar Navegadores de Playwright
         run: npx playwright install --with-deps chromium
-
-      - name: Construir Aplicación para Pruebas E2E
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://fnzflibtaxdzqxxtpzzb.supabase.co' }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_dummy' }}
 
       - name: Ejecutar Pruebas End-to-End (Playwright)
         run: npm run test:e2e
