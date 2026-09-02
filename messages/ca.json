@@ -66,5 +66,10 @@
     "monthlyIncomes": "Ingressos Mensuals",
     "settlements": "Liquidació i Saldos",
     "invite": "Convidar Membre"
+  },
+  "mode": {
+    "light": "Clar",
+    "dark": "Fosc",
+    "system": "Sistema"
   }
 }

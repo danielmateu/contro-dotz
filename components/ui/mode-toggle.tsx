@@ -11,9 +11,12 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useI18n } from "@/lib/i18n/i18n-context"
+
 
 export function ModeToggle() {
     const { setTheme } = useTheme()
+    const { t, locale } = useI18n()
 
     return (
         <DropdownMenu>
@@ -26,13 +29,16 @@ export function ModeToggle() {
             } />
             <DropdownMenuContent align="end">
                 <DropdownMenuItem onClick={() => setTheme("light")}>
-                    Light
+                    {/* Light */}
+                    {t('mode.light')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("dark")}>
-                    Dark
+                    {/* Dark */}
+                    {t('mode.dark')}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setTheme("system")}>
-                    System
+                    {/* System */}
+                    {t('mode.system')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>

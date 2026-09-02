@@ -66,5 +66,10 @@
     "monthlyIncomes": "Monthly Incomes",
     "settlements": "Settlement & Balances",
     "invite": "Invite Member"
+  },
+  "mode": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
   }
 }
