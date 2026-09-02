@@ -1,4 +1,4 @@
-import { Metadata } from 'next'
+import { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono, Inter, Roboto } from "next/font/google"
 
 import "./globals.css"
@@ -7,6 +7,15 @@ import { PostHogProvider } from "@/components/providers/posthog-provider"
 import { I18nProvider } from "@/lib/i18n/i18n-context"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toast"
+import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
+
+export const viewport: Viewport = {
+  themeColor: '#09090b',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export const metadata: Metadata = {
   title: {
@@ -18,6 +27,25 @@ export const metadata: Metadata = {
   authors: [{ name: 'Control Dotz Team' }],
   creator: 'Control Dotz',
   metadataBase: new URL('https://controldotz.com'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Control Dotz',
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
     type: 'website',
     locale: 'es_ES',
@@ -61,6 +89,7 @@ export default function RootLayout({
             <ThemeProvider>
               {children}
               <Toaster />
+              <PWAInstallPrompt />
             </ThemeProvider>
           </I18nProvider>
         </PostHogProvider>
