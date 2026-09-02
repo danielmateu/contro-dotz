@@ -70,7 +70,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
         }
       />
 
-      <DialogContent className="sm:max-w-md bg-slate-900 border-slate-800 text-foreground rounded-2xl p-6">
+      <DialogContent className="sm:max-w-md  border-slate-800 text-foreground rounded-2xl p-6">
         <DialogHeader className="space-y-1.5">
           <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 mb-1">
             <Sparkles className="h-5 w-5" />
@@ -96,39 +96,39 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
             <div className="space-y-1.5">
               <Label className="text-xs font-semibold">Tipo de Petición</Label>
               <div className="grid grid-cols-3 gap-2">
-                <button
+                <Button
+                  variant='outline'
                   type="button"
                   onClick={() => setCategory('feature')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                    category === 'feature'
-                      ? 'bg-violet-600 text-white border-violet-500'
-                      : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:bg-slate-800'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'feature'
+                    ? 'bg-violet-600 text-white border-violet-500'
+                    : ' border-slate-700'
+                    }`}
                 >
-                  💡 Nueva Idea
-                </button>
-                <button
+                  Nueva Idea
+                </Button>
+                <Button
                   type="button"
+                  variant='outline'
                   onClick={() => setCategory('bug')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                    category === 'bug'
-                      ? 'bg-rose-600 text-white border-rose-500'
-                      : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:bg-slate-800'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'bug'
+                    ? 'bg-rose-600 text-white border-rose-500'
+                    : ' border-slate-700  '
+                    }`}
                 >
-                  🐛 Error / Bug
-                </button>
-                <button
+                  Error / Bug
+                </Button>
+                <Button
+                  variant='outline'
                   type="button"
                   onClick={() => setCategory('other')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
-                    category === 'other'
-                      ? 'bg-indigo-600 text-white border-indigo-500'
-                      : 'bg-slate-800/60 text-slate-400 border-slate-700 hover:bg-slate-800'
-                  }`}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'other'
+                    ? 'bg-indigo-600 text-white border-indigo-500'
+                    : ' border-slate-700'
+                    }`}
                 >
-                  💬 Otro
-                </button>
+                  Otro
+                </Button>
               </div>
             </div>
 
@@ -140,7 +140,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
-                className="bg-slate-800/60 border-slate-700 rounded-xl h-10 text-xs"
+                className=" border-slate-700 rounded-xl h-10 text-xs"
               />
             </div>
 
@@ -153,7 +153,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                 onChange={(e) => setFeedback(e.target.value)}
                 rows={4}
                 required
-                className="bg-slate-800/60 border-slate-700 rounded-xl text-xs resize-none"
+                className=" border-slate-700 rounded-xl text-xs resize-none"
               />
             </div>
 
