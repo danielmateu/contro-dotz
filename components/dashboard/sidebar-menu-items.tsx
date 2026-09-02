@@ -46,6 +46,8 @@ import { __iconNode as WalletData } from 'lucide-react/dist/esm/icons/wallet.mjs
 import { __iconNode as TargetData } from 'lucide-react/dist/esm/icons/target.mjs'
 // @ts-ignore
 import { __iconNode as ShieldCheckData } from 'lucide-react/dist/esm/icons/shield-check.mjs'
+// @ts-ignore
+import { __iconNode as ShieldUser } from 'lucide-react/dist/esm/icons/shield-user.mjs'
 
 interface SidebarMenuItemsProps {
   hasHousehold: boolean
@@ -167,14 +169,14 @@ export function SidebarMenuItems({
     },
     ...(isSuperAdmin
       ? [
-          {
-            title: t('common.admin'),
-            url: '/admin',
-            icon: ShieldCheckData,
-            activeIcon: ShieldCheckData,
-            disabled: false,
-          },
-        ]
+        {
+          title: t('common.admin'),
+          url: '/admin',
+          icon: ShieldCheckData,
+          activeIcon: ShieldUser,
+          disabled: false,
+        },
+      ]
       : []),
   ]
 
