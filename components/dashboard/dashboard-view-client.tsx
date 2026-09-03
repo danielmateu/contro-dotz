@@ -8,6 +8,8 @@ import { ActivityFeed } from '@/components/dashboard/activity-feed'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { SendReportButton } from '@/components/household/send-report-button'
 import { formatCurrency } from '@/lib/format'
+import { TamagotchiCard } from '@/components/game/tamagotchi-card'
+import { calculatePetStats } from '@/lib/game/fin-pet-engine'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
@@ -76,6 +78,15 @@ export function DashboardViewClient({
 
   const dateLocaleStr = locale === 'ca' ? 'ca-ES' : locale === 'en' ? 'en-US' : 'es-ES'
 
+  const petStats = calculatePetStats({
+    currentTotalSpent,
+    totalBudgeted,
+    daysPassed,
+    totalDaysInMonth: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate(),
+    totalHouseholdFund,
+    locale,
+  })
+
   return (
     <div className="space-y-6">
       {/* Top Title & Actions */}
@@ -103,6 +114,13 @@ export function DashboardViewClient({
           />
         </div>
       </div>
+
+      {/* Hero Widget: Tamagotchi Dotzi */}
+      <TamagotchiCard
+        stats={petStats}
+        locale={locale}
+        variant="hero"
+      />
 
       {/* KPI Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

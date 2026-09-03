@@ -42,6 +42,7 @@ import { ActiveRouteName } from '@/components/dashboard/active-route-name'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { FeatureBaseWidget } from '@/components/feedback/featurebase-widget'
 import { ShareAppModal } from '@/components/share-app-modal'
+import { HeaderTamagotchiTrigger } from '@/components/game/header-tamagotchi-trigger'
 
 interface PrivateLayoutProps {
   children: React.ReactNode
@@ -159,6 +160,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
+            <HeaderTamagotchiTrigger householdId={householdId || undefined} />
             <ShareAppModal />
             <FeatureBaseWidget userEmail={profile?.email} userName={profile?.display_name || undefined} />
             <LocaleSwitcher />
