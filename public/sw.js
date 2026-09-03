@@ -37,8 +37,8 @@ self.addEventListener('push', (event) => {
     const title = payload.title || 'Control Dotz';
     const options = {
       body: payload.body || 'Nuevo mensaje recibido',
-      icon: payload.icon || '/icons/icon-192x192.png',
-      badge: '/icons/icon-192x192.png',
+      icon: payload.icon || '/icon-192.png',
+      badge: '/icon-192.png',
       tag: payload.tag || 'household-chat',
       renotify: true,
       data: {

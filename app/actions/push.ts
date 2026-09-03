@@ -154,7 +154,7 @@ export async function sendHouseholdChatPushAction({
     const payload = JSON.stringify({
       title: `💬 ${senderName}`,
       body: text.length > 100 ? `${text.substring(0, 100)}...` : text,
-      icon: '/icons/icon-192x192.png',
+      icon: '/icon-192.png',
       url: '/chat',
       tag: `chat-${householdId}`,
     })
