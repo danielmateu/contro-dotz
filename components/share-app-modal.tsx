@@ -18,6 +18,7 @@ interface ShareAppModalProps {
   variant?: 'default' | 'outline' | 'ghost' | 'secondary'
   size?: 'default' | 'sm' | 'lg' | 'icon'
   className?: string
+  customUrl?: string
 }
 
 export function ShareAppModal({
@@ -25,12 +26,36 @@ export function ShareAppModal({
   variant = 'outline',
   size = 'sm',
   className,
+  customUrl,
 }: ShareAppModalProps) {
   const { locale } = useI18n()
   const [open, setOpen] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const shareUrl = typeof window !== 'undefined' ? window.location.origin : 'https://controldotz.app'
+  // Obtener URL de forma inteligente: si hay una URL de producción configurada o personalizada, usarla
+  const getAppUrl = () => {
+    if (customUrl) return customUrl
+
+    const envSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL
+    const isEnvProduction = envSiteUrl && !envSiteUrl.includes('localhost') && !envSiteUrl.includes('127.0.0.1')
+
+    if (isEnvProduction) {
+      return envSiteUrl
+    }
+
+    if (typeof window !== 'undefined') {
+      const origin = window.location.origin
+      const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1')
+      // Si estamos navegando en un dominio real (desplegado), usar la URL del navegador
+      if (!isLocalhost) {
+        return origin
+      }
+    }
+
+    return envSiteUrl || 'https://controldotz.app'
+  }
+
+  const shareUrl = getAppUrl()
   
   const shareTitle =
     locale === 'en'
