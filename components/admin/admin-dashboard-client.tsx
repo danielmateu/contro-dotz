@@ -40,10 +40,10 @@ const statusBadges: Record<
   string,
   { label: string; icon: React.ComponentType<{ className?: string }>; color: string }
 > = {
-  pending: { label: 'Pendiente', icon: Clock, color: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
-  in_progress: { label: 'En Curso', icon: AlertCircle, color: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
-  completed: { label: 'Completado', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
-  rejected: { label: 'Descartado', icon: XCircle, color: 'bg-rose-500/10 text-rose-400 border-rose-500/20' },
+  pending: { label: 'Pendiente', icon: Clock, color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
+  in_progress: { label: 'En Curso', icon: AlertCircle, color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
+  completed: { label: 'Completado', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
+  rejected: { label: 'Descartado', icon: XCircle, color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' },
 }
 
 export function AdminDashboardClient() {
@@ -93,7 +93,7 @@ export function AdminDashboardClient() {
     } else {
       toast.add({
         title: 'Estado de sugerencia actualizado',
-        description: `La sugerencia ahora está marked como ${statusBadges[newStatus]?.label || newStatus}.`,
+        description: `La sugerencia ahora está marcada como ${statusBadges[newStatus]?.label || newStatus}.`,
         type: 'success',
       })
     }
@@ -136,10 +136,10 @@ export function AdminDashboardClient() {
 
   return (
     <div className="space-y-8 pb-12">
-      {/* Top Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-linear-to-r from-violet-900/40 via-indigo-900/40 to-slate-900/60 p-6 rounded-3xl border border-violet-500/20 backdrop-blur-xl">
+      {/* Top Header Card */}
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-violet-500/20 bg-linear-to-r from-violet-500/10 via-indigo-500/5 to-background dark:from-violet-950/40 dark:via-indigo-950/30 dark:to-slate-900/60 backdrop-blur-xl shadow-xs">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-400 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="h-3.5 w-3.5" />
             <span>Panel de SuperAdministrador</span>
           </div>
@@ -155,22 +155,22 @@ export function AdminDashboardClient() {
           onClick={fetchMetrics}
           disabled={loading}
           variant="outline"
-          className="rounded-xl bg-background/50 hover:bg-background backdrop-blur-sm border-slate-700 font-semibold gap-2 self-start sm:self-auto"
+          className="rounded-xl bg-background/80 hover:bg-background backdrop-blur-sm border-border font-semibold gap-2 self-start sm:self-auto shadow-2xs"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           Actualizar
         </Button>
-      </div>
+      </Card>
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Users */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Usuarios Totales
             </CardTitle>
-            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-500 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <Users className="h-5 w-5" />
             </div>
           </CardHeader>
@@ -185,12 +185,12 @@ export function AdminDashboardClient() {
         </Card>
 
         {/* Total Households */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Hogares Activos
             </CardTitle>
-            <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-500 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <Home className="h-5 w-5" />
             </div>
           </CardHeader>
@@ -205,12 +205,12 @@ export function AdminDashboardClient() {
         </Card>
 
         {/* Total Expenses Count */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Gastos Registrados
             </CardTitle>
-            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <Receipt className="h-5 w-5" />
             </div>
           </CardHeader>
@@ -219,18 +219,18 @@ export function AdminDashboardClient() {
               {metrics.totalExpenses}
             </div>
             <p className="text-[11px] text-muted-foreground mt-1 font-medium truncate">
-              Volumen: <span className="text-emerald-400 font-bold">{formatCurrency(metrics.totalAmountTracked)}</span>
+              Volumen: <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatCurrency(metrics.totalAmountTracked)}</span>
             </p>
           </CardContent>
         </Card>
 
         {/* AI Bot Usage */}
-        <Card className="border-slate-800 bg-slate-900/50 backdrop-blur-md rounded-2xl">
+        <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Uso de Gemini AI
             </CardTitle>
-            <div className="h-9 w-9 rounded-xl bg-violet-500/10 text-violet-400 flex items-center justify-center">
+            <div className="h-9 w-9 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
               <Sparkles className="h-5 w-5" />
             </div>
           </CardHeader>
@@ -248,31 +248,31 @@ export function AdminDashboardClient() {
       {/* Tables Row: Recent Users & Recent Households */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Users Table */}
-        <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md rounded-2xl overflow-hidden">
-          <CardHeader className="border-b border-slate-800/60 pb-4">
+        <Card className="border-border bg-card text-card-foreground rounded-2xl overflow-hidden shadow-2xs">
+          <CardHeader className="border-b border-border/60 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
                   <Users className="h-5 w-5 text-blue-500" />
                   Últimos Usuarios Registrados
                 </CardTitle>
-                <CardDescription className="text-xs font-medium">
+                <CardDescription className="text-xs font-medium text-muted-foreground">
                   Cuentas más recientes en la plataforma
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-slate-800/60">
+            <div className="divide-y divide-border/60">
               {metrics.recentUsers.map((u) => (
-                <div key={u.id} className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+                <div key={u.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
                   <div className="space-y-0.5">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-semibold text-foreground">
                         {u.display_name || u.email.split('@')[0]}
                       </span>
                       {u.is_super_admin && (
-                        <span className="text-[10px] bg-violet-500/20 text-violet-400 border border-violet-500/30 px-2 py-0.5 rounded-full font-bold">
+                        <span className="text-[10px] bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-2 py-0.5 rounded-full font-bold">
                           Admin
                         </span>
                       )}
@@ -280,7 +280,7 @@ export function AdminDashboardClient() {
                     <p className="text-xs text-muted-foreground font-mono">{u.email}</p>
                   </div>
                   <span className="text-[11px] text-muted-foreground font-medium">
-                    {new Date(u.created_at).toLocaleDateString('es-ES', {
+                    {new Date(u.created_at).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
                       day: '2-digit',
                       month: 'short',
                       year: 'numeric',
@@ -293,24 +293,24 @@ export function AdminDashboardClient() {
         </Card>
 
         {/* Recent Households Table */}
-        <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md rounded-2xl overflow-hidden">
-          <CardHeader className="border-b border-slate-800/60 pb-4">
+        <Card className="border-border bg-card text-card-foreground rounded-2xl overflow-hidden shadow-2xs">
+          <CardHeader className="border-b border-border/60 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
                   <Home className="h-5 w-5 text-indigo-500" />
                   Últimos Hogares Creados
                 </CardTitle>
-                <CardDescription className="text-xs font-medium">
+                <CardDescription className="text-xs font-medium text-muted-foreground">
                   Nuevos grupos familiares en el sistema
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-slate-800/60">
+            <div className="divide-y divide-border/60">
               {metrics.recentHouseholds.map((h) => (
-                <div key={h.id} className="p-4 flex items-center justify-between hover:bg-slate-800/30 transition-colors">
+                <div key={h.id} className="p-4 flex items-center justify-between hover:bg-muted/50 transition-colors">
                   <div className="space-y-0.5">
                     <span className="text-sm font-semibold text-foreground">{h.name}</span>
                     <p className="text-xs text-muted-foreground font-mono truncate max-w-50">
@@ -318,7 +318,7 @@ export function AdminDashboardClient() {
                     </p>
                   </div>
                   <span className="text-[11px] text-muted-foreground font-medium">
-                    {new Date(h.created_at).toLocaleDateString('es-ES', {
+                    {new Date(h.created_at).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
                       day: '2-digit',
                       month: 'short',
                       year: 'numeric',
@@ -333,32 +333,32 @@ export function AdminDashboardClient() {
 
       {/* Recent Feedback Submissions Section */}
       {metrics.recentFeedback && metrics.recentFeedback.length > 0 && (
-        <Card className="border-slate-800 bg-slate-900/40 backdrop-blur-md rounded-2xl overflow-hidden">
-          <CardHeader className="border-b border-slate-800/60 pb-4">
+        <Card className="border-border bg-card text-card-foreground rounded-2xl overflow-hidden shadow-2xs">
+          <CardHeader className="border-b border-border/60 pb-4">
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
-                  <MessageSquare className="h-5 w-5 text-violet-400" />
+                  <MessageSquare className="h-5 w-5 text-violet-500" />
                   Sugerencias y Feedback de Usuarios
                 </CardTitle>
-                <CardDescription className="text-xs font-medium">
+                <CardDescription className="text-xs font-medium text-muted-foreground">
                   Gestión de estado y resolución de peticiones in-app
                 </CardDescription>
               </div>
             </div>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="divide-y divide-slate-800/60">
+            <div className="divide-y divide-border/60">
               {metrics.recentFeedback.map((fb) => {
                 const currentStatus = fb.status || 'pending'
                 const statusConfig = statusBadges[currentStatus] || statusBadges.pending
                 const StatusIcon = statusConfig.icon
 
                 return (
-                  <div key={fb.id} className="p-4 space-y-2 hover:bg-slate-800/30 transition-colors">
+                  <div key={fb.id} className="p-4 space-y-2 hover:bg-muted/50 transition-colors">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-violet-500/10 text-violet-400 border-violet-500/20 uppercase tracking-wider">
+                        <span className="text-xs font-bold px-2.5 py-0.5 rounded-full border bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20 uppercase tracking-wider">
                           {fb.category}
                         </span>
                         <span className="text-sm font-bold text-foreground">{fb.title}</span>
@@ -367,7 +367,7 @@ export function AdminDashboardClient() {
                       {/* Dropdown Selector de Estado para el SuperAdmin */}
                       <div className="flex items-center gap-3">
                         <span className="text-[11px] text-muted-foreground font-medium">
-                          {new Date(fb.created_at).toLocaleDateString('es-ES', {
+                          {new Date(fb.created_at).toLocaleDateString(locale === 'ca' ? 'ca-ES' : 'es-ES', {
                             day: '2-digit',
                             month: 'short',
                             hour: '2-digit',
@@ -390,7 +390,7 @@ export function AdminDashboardClient() {
                               </Button>
                             }
                           />
-                          <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-foreground rounded-xl w-40 p-1">
+                          <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground rounded-xl w-40 p-1 shadow-md">
                             {(Object.keys(statusBadges) as FeedbackStatus[]).map((stKey) => {
                               const cfg = statusBadges[stKey]
                               const IconComp = cfg.icon
@@ -398,7 +398,7 @@ export function AdminDashboardClient() {
                                 <DropdownMenuItem
                                   key={stKey}
                                   onClick={() => handleStatusChange(fb.id, stKey)}
-                                  className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2 py-1.5 hover:bg-slate-800 focus:bg-slate-800"
+                                  className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2 py-1.5 hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
                                 >
                                   <IconComp className="h-3.5 w-3.5 text-muted-foreground" />
                                   <span>{cfg.label}</span>
@@ -410,12 +410,12 @@ export function AdminDashboardClient() {
                       </div>
                     </div>
 
-                    <p className="text-xs text-muted-foreground leading-relaxed pl-3 border-l-2 border-slate-700/80">
+                    <p className="text-xs text-muted-foreground leading-relaxed pl-3 border-l-2 border-border/80">
                       {fb.description}
                     </p>
                     {fb.user_email && (
-                      <p className="text-[10px] text-slate-500 font-mono">
-                        Enviado por: <span className="text-slate-400 font-semibold">{fb.user_email}</span>
+                      <p className="text-[10px] text-muted-foreground font-mono">
+                        Enviado por: <span className="text-foreground font-semibold">{fb.user_email}</span>
                       </p>
                     )}
                   </div>
