@@ -347,7 +347,7 @@ export function ThreeScene() {
   }, [])
 
   return (
-    <div className="fixed inset-0 w-screen h-screen z-0 overflow-hidden bg-transparent pointer-events-none">
+    <div className="fixed inset-0 w-full h-full z-0 overflow-hidden bg-transparent pointer-events-none">
       {/* Indicador flotante sutil para invitar a hacer clic */}
       {/* <div className="absolute top-24 left-1/2 -translate-x-1/2 pointer-events-none select-none z-10 hidden sm:flex flex-col items-center gap-1 opacity-45 hover:opacity-85 transition-opacity">
         <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-slate-500/5 dark:bg-slate-500/10 border border-slate-200/20 dark:border-slate-800/40 px-3.5 py-1.5 rounded-full backdrop-blur-xs pointer-events-auto cursor-pointer">

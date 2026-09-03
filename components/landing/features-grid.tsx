@@ -179,22 +179,22 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
   const [hovered, setHovered] = useState(false)
   const isEven = index % 2 === 0
 
-  // Variantes de entrada lateral para el bloque de información
+  // Variantes de entrada vertical segura para el bloque de información
   const infoVariants = {
-    hidden: { opacity: 0, x: isEven ? -60 : 60 },
+    hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: { type: 'spring' as const, stiffness: 70, damping: 14 },
     },
   }
 
-  // Variantes de entrada lateral para el bloque de la demo interactiva
+  // Variantes de entrada vertical segura para el bloque de la demo interactiva
   const demoVariants = {
-    hidden: { opacity: 0, x: isEven ? 60 : -60 },
+    hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
-      x: 0,
+      y: 0,
       transition: { type: 'spring' as const, stiffness: 70, damping: 14, delay: 0.15 },
     },
   }
@@ -206,7 +206,7 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={cn(
-        'flex flex-col md:flex-row gap-12 lg:gap-24 items-center justify-between py-12 md:py-24 w-full border-b border-slate-200/10 dark:border-slate-800/40 last:border-b-0 overflow-hidden',
+        'flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-24 items-center justify-between py-8 md:py-24 w-full border-b border-slate-200/10 dark:border-slate-800/40 last:border-b-0 overflow-hidden',
         isEven ? '' : 'md:flex-row-reverse'
       )}
     >
@@ -215,18 +215,18 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
         variants={infoVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: '-100px' }}
-        className="w-full md:w-1/2 space-y-5 text-left"
+        viewport={{ once: true, margin: '-50px' }}
+        className="w-full md:w-1/2 space-y-4 sm:space-y-5 text-left"
       >
         <div className="flex items-center gap-3">
           <div
-            className={`h-12 w-12 flex items-center justify-center rounded-xl shadow-xs shrink-0 ${feature.colorClass}`}
+            className={`h-10 w-10 sm:h-12 sm:w-12 flex items-center justify-center rounded-xl shadow-xs shrink-0 ${feature.colorClass}`}
           >
             <motion.div
               animate={hovered ? feature.animation.animate : { scale: 1, rotate: 0, y: 0 }}
               transition={hovered ? feature.animation.transition : { duration: 0.3 }}
             >
-              <Icon className="h-6 w-6" />
+              <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
             </motion.div>
           </div>
           <span className="text-[10px] uppercase font-bold tracking-widest text-primary dark:text-violet-400">
@@ -234,15 +234,15 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
           </span>
         </div>
 
-        <h3 className="font-extrabold text-2xl md:text-4xl font-heading text-slate-900 dark:text-slate-100 leading-tight">
+        <h3 className="font-extrabold text-xl sm:text-2xl md:text-4xl font-heading text-slate-900 dark:text-slate-100 leading-tight">
           {feature.title}
         </h3>
 
-        <p className="text-base md:text-lg text-muted-foreground leading-relaxed font-medium">
+        <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed font-medium">
           {feature.description}
         </p>
 
-        <div className="pt-2 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 select-none">
+        <div className="pt-1 sm:pt-2 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 select-none">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Prueba el demo interactivo en vivo</span>
         </div>
@@ -253,8 +253,8 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
         variants={demoVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: '-100px' }}
-        className="w-full md:w-107.5 lg:w-117.5 shrink-0 border border-slate-200/50 dark:border-slate-800 bg-background/55 dark:bg-slate-900/50 rounded-3xl p-6 shadow-2xl backdrop-blur-xs relative overflow-hidden group hover:border-violet-500/25 transition-all duration-300"
+        viewport={{ once: true, margin: '-50px' }}
+        className="w-full md:w-107.5 lg:w-117.5 shrink-0 border border-slate-200/50 dark:border-slate-800 bg-background/55 dark:bg-slate-900/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl backdrop-blur-xs relative overflow-hidden group hover:border-violet-500/25 transition-all duration-300 min-w-0"
       >
         {/* Glow sutil en hover sobre la caja del demo */}
         <div className="absolute inset-px rounded-[22px] border border-violet-500/0 group-hover:border-violet-500/10 dark:group-hover:border-violet-500/15 transition-colors duration-300 pointer-events-none" />

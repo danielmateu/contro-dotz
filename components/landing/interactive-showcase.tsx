@@ -18,34 +18,34 @@ export function InteractiveShowcase() {
   }, [])
 
   return (
-    <div className="w-full max-w-5xl mx-auto mt-16 p-2 border border-slate-200/40 bg-slate-200/20 dark:border-slate-800/80 dark:bg-slate-900/50 rounded-3xl shadow-2xl backdrop-blur-md transform hover:scale-[1.005] transition-all duration-350">
-      <div className="bg-background rounded-[22px] p-6 text-left border border-slate-200/50 dark:border-slate-950 shadow-inner">
+    <div className="w-full max-w-5xl mx-auto mt-12 sm:mt-16 p-1.5 sm:p-2 border border-slate-200/40 bg-slate-200/20 dark:border-slate-800/80 dark:bg-slate-900/50 rounded-2xl sm:rounded-3xl shadow-2xl backdrop-blur-md transform hover:scale-[1.005] transition-all duration-350 overflow-hidden">
+      <div className="bg-background rounded-[18px] sm:rounded-[22px] p-4 sm:p-6 text-left border border-slate-200/50 dark:border-slate-950 shadow-inner">
         {/* Header del Mockup */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 pb-4 mb-5">
-          <div className="flex items-center gap-1.5">
-            <div className="h-3 w-3 rounded-full bg-rose-500/80"></div>
-            <div className="h-3 w-3 rounded-full bg-amber-500/80"></div>
-            <div className="h-3 w-3 rounded-full bg-emerald-500/80"></div>
-            <span className="text-[11px] font-mono text-muted-foreground ml-3 select-none">
+        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-900 pb-3 sm:pb-4 mb-4 sm:mb-5 gap-2">
+          <div className="flex items-center gap-1.5 min-w-0">
+            <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-rose-500/80 shrink-0"></div>
+            <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-amber-500/80 shrink-0"></div>
+            <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-500/80 shrink-0"></div>
+            <span className="text-[10px] sm:text-[11px] font-mono text-muted-foreground ml-1.5 sm:ml-3 truncate select-none">
               control-dotz.app/dashboard
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex -space-x-1.5">
-              <div className="h-5.5 w-5.5 rounded-full border border-background bg-violet-600 text-white text-[8px] font-bold flex items-center justify-center select-none shadow-xs">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <div className="hidden xs:flex -space-x-1.5">
+              <div className="h-5 w-5 sm:h-5.5 sm:w-5.5 rounded-full border border-background bg-violet-600 text-white text-[8px] font-bold flex items-center justify-center select-none shadow-xs">
                 MA
               </div>
-              <div className="h-5.5 w-5.5 rounded-full border border-background bg-emerald-500 text-white text-[8px] font-bold flex items-center justify-center select-none shadow-xs">
+              <div className="h-5 w-5 sm:h-5.5 sm:w-5.5 rounded-full border border-background bg-emerald-500 text-white text-[8px] font-bold flex items-center justify-center select-none shadow-xs">
                 PA
               </div>
               <div
-                className="h-5.5 w-5.5 rounded-full border border-background bg-slate-950 text-violet-400 text-[8px] font-bold flex items-center justify-center select-none shadow-xs"
+                className="h-5 w-5 sm:h-5.5 sm:w-5.5 rounded-full border border-background bg-slate-950 text-violet-400 text-[8px] font-bold flex items-center justify-center select-none shadow-xs"
                 title="Gemini AI"
               >
                 🤖
               </div>
             </div>
-            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-[10px] text-primary font-bold select-none">
+            <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full bg-primary/10 border border-primary/20 text-[9px] sm:text-[10px] text-primary font-bold select-none">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               Dotzi House
             </div>
