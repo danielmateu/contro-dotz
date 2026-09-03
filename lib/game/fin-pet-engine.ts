@@ -86,7 +86,7 @@ export function calculatePetStats({
     else if (paceStatus === 'critical') paceAdjustment = -15
   }
 
-  let health = Math.min(100, Math.max(10, Math.round(baseHealth + paceAdjustment)))
+  const health = Math.min(100, Math.max(10, Math.round(baseHealth + paceAdjustment)))
 
   // Determinar estado de ánimo (mood)
   let mood: PetMood = 'happy'

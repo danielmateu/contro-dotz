@@ -16,24 +16,10 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import {
-  LayoutDashboard,
-  Receipt,
-  Tags,
-  PiggyBank,
-  Users2,
-  Settings,
-  LogOut,
-  User,
-  Home,
-  Menu,
-} from 'lucide-react'
+import { LogOut } from 'lucide-react'
 
 import { HouseholdSwitcher } from '@/components/dashboard/household-switcher'
 import { getActiveHouseholdHelper } from '@/lib/household-context'
