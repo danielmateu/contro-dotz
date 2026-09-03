@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { ExpensesViewClient } from '@/components/expenses/expenses-view-client'
 
 export const metadata: Metadata = {
@@ -38,30 +39,25 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Cargar membresía de hogar
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id, role')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  // Cargar hogar activo
+  const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
+  if (!activeMembership || !activeHouseholdId) redirect('/household')
 
-  if (!membership) redirect('/household')
-
-  const isOwner = membership.role === 'owner'
+  const isOwner = activeMembership.role === 'owner'
+  const householdId = activeHouseholdId
 
   // 1. Preparar consulta de categorías
   const categoriesPromise = supabase
     .from('categories')
     .select('id, name')
-    .eq('household_id', membership.household_id)
+    .eq('household_id', householdId)
     .order('name')
 
   // 2. Preparar consulta de miembros del hogar
   const membersPromise = supabase
     .from('household_members')
     .select('user_id, profiles(display_name)')
-    .eq('household_id', membership.household_id)
+    .eq('household_id', householdId)
 
   // 3. Preparar consulta de gastos con filtros y ordenación
   let dbQuery = supabase
@@ -69,7 +65,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
     .select(
       'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
     )
-    .eq('household_id', membership.household_id)
+    .eq('household_id', householdId)
 
   if (startDate) dbQuery = dbQuery.gte('expense_date', startDate)
   if (endDate) dbQuery = dbQuery.lte('expense_date', endDate)
@@ -121,7 +117,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   return (
     <ExpensesViewClient
-      householdId={membership.household_id}
+      householdId={householdId}
       currentUserId={user.id}
       isOwner={isOwner}
       categories={categories || []}

@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { getRecentActivityAction } from '@/app/actions/activity'
 import { calculateDailyAverage, calculatePercentageChange } from '@/lib/finance-utils'
 import { DashboardViewClient } from '@/components/dashboard/dashboard-view-client'
@@ -22,17 +23,12 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Cargar membresía
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id, role')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  // Cargar hogar activo
+  const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
+  if (!activeMembership || !activeHouseholdId) redirect('/household')
 
-  if (!membership) redirect('/household')
-
-  const isOwner = membership.role === 'owner'
+  const isOwner = activeMembership.role === 'owner'
+  const householdId = activeHouseholdId
 
   // Obtener fechas del mes actual y mes anterior
   const now = new Date()
@@ -69,37 +65,37 @@ export default async function DashboardPage() {
     supabase
       .from('categories')
       .select('id, name')
-      .eq('household_id', membership.household_id)
+      .eq('household_id', householdId)
       .order('name'),
     supabase
       .from('expenses')
       .select(
         'id, amount, description, expense_date, category_id, created_by, is_personal, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
       )
-      .eq('household_id', membership.household_id)
+      .eq('household_id', householdId)
       .gte('expense_date', currentStartDate)
       .lte('expense_date', currentEndDate),
     supabase
       .from('expenses')
       .select('amount, is_personal')
-      .eq('household_id', membership.household_id)
+      .eq('household_id', householdId)
       .gte('expense_date', prevStartDate)
       .lte('expense_date', prevEndDate),
     supabase
       .from('budgets')
       .select('id, amount, category_id, categories(name, color, icon)')
-      .eq('household_id', membership.household_id)
+      .eq('household_id', householdId)
       .eq('month', currentMonthStr),
     supabase
       .from('household_members')
       .select('user_id, role, monthly_income, monthly_contribution, profiles(display_name, email, avatar_url, status)')
-      .eq('household_id', membership.household_id),
+      .eq('household_id', householdId),
     supabase
       .from('member_incomes')
       .select('user_id, amount, contribution')
-      .eq('household_id', membership.household_id)
+      .eq('household_id', householdId)
       .eq('month', currentMonthStr),
-    getRecentActivityAction(membership.household_id)
+    getRecentActivityAction(householdId)
   ])
 
   const categories = categoriesRes.data
@@ -318,7 +314,7 @@ export default async function DashboardPage() {
 
   return (
     <DashboardViewClient
-      householdId={membership.household_id}
+      householdId={householdId}
       userId={user.id}
       isOwner={isOwner}
       categories={categories || []}

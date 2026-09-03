@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { SavingGoalsViewClient } from '@/components/saving-goals/saving-goals-view-client'
 
 export const metadata: Metadata = {
@@ -23,20 +24,12 @@ export default async function SavingGoalsPage() {
     redirect('/login')
   }
 
-  // Cargar membresía de hogar del usuario
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id, role')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  // Cargar hogar activo
+  const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
+  if (!activeMembership || !activeHouseholdId) redirect('/household')
 
-  if (!membership) {
-    redirect('/household')
-  }
-
-  const householdId = membership.household_id
-  const userRole = membership.role
+  const householdId = activeHouseholdId
+  const userRole = activeMembership.role
 
   // Cargar metas de ahorro, aportaciones y miembros en paralelo
   const [goalsRes, contributionsRes, membersRes] = await Promise.all([

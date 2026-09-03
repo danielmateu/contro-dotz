@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { CategoriesViewClient } from '@/components/categories/categories-view-client'
 
 export const metadata: Metadata = {
@@ -20,26 +21,20 @@ export default async function CategoriesPage() {
   } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Cargar membresía
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
-
-  if (!membership) redirect('/household')
+  // Cargar hogar activo
+  const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
+  if (!activeMembership || !activeHouseholdId) redirect('/household')
 
   // Cargar las categorías del hogar
   const { data: categories } = await supabase
     .from('categories')
     .select('id, name, color, icon')
-    .eq('household_id', membership.household_id)
+    .eq('household_id', activeHouseholdId)
     .order('name')
 
   return (
     <CategoriesViewClient
-      householdId={membership.household_id}
+      householdId={activeHouseholdId}
       categories={categories || []}
     />
   )

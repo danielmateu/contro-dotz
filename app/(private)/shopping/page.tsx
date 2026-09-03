@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { ShoppingViewClient } from '@/components/shopping/shopping-view-client'
 
 export const metadata: Metadata = {
@@ -23,20 +24,12 @@ export default async function ShoppingPage() {
     redirect('/login')
   }
 
-  // Cargar membresía de hogar del usuario
-  const { data: membership } = await supabase
-    .from('household_members')
-    .select('household_id, households(name)')
-    .eq('user_id', user.id)
-    .limit(1)
-    .maybeSingle()
+  // Cargar hogar activo
+  const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
+  if (!activeMembership || !activeHouseholdId) redirect('/household')
 
-  if (!membership) {
-    redirect('/household')
-  }
-
-  const householdId = membership.household_id
-  const householdName = (membership.households as any)?.name || 'Hogar'
+  const householdId = activeHouseholdId
+  const householdName = activeMembership.households.name
 
   // Cargar artículos de compra, categorías y miembros del hogar en paralelo
   const [itemsRes, categoriesRes, membersRes] = await Promise.all([

@@ -35,7 +35,8 @@ import {
   Menu,
 } from 'lucide-react'
 
-import { SidebarBrandLogo } from '@/components/dashboard/sidebar-brand-logo'
+import { HouseholdSwitcher } from '@/components/dashboard/household-switcher'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { ActiveRouteName } from '@/components/dashboard/active-route-name'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
@@ -58,51 +59,32 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
     redirect('/login')
   }
 
-  // Cargar perfil y membresía de hogar en paralelo
-  const [profileResult, membershipResult] = await Promise.all([
+  // Cargar perfil y contexto multihogar
+  const [profileResult, householdContext] = await Promise.all([
     supabase
       .from('profiles')
       .select('display_name, email, avatar_url, status, is_super_admin')
       .eq('id', user.id)
       .single(),
-    supabase
-      .from('household_members')
-      .select('household_id, role, households(name)')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle()
+    getActiveHouseholdHelper(user.id),
   ])
 
   const profile = profileResult.data
-  const membership = membershipResult.data
+  const { activeMembership, allMemberships, activeHouseholdId } = householdContext
 
-  const hasHousehold = !!membership
-  const householdId = membership?.household_id || null
-  const householdName = membership?.households
-    ? (membership.households as any).name
-    : null
+  const hasHousehold = !!activeMembership
+  const householdId = activeHouseholdId
   const isSuperAdmin = profile?.is_super_admin ?? false
 
   return (
     <SidebarProvider>
       {/* Sidebar de la aplicación */}
       <Sidebar variant="sidebar" collapsible="icon">
-        <SidebarHeader className="border-b border-sidebar-border/50 py-4 px-4">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center rounded-lg text-primary-foreground">
-              <SidebarBrandLogo />
-            </div>
-            <div className="flex flex-col truncate group-data-[collapsible=icon]:hidden">
-              <span className="font-semibold leading-none text-foreground font-heading">
-                {householdName || 'Sin hogar asignado'}
-              </span>
-              {hasHousehold && (
-                <span className="text-[10px] text-muted-foreground mt-0.5 uppercase tracking-wider font-semibold">
-                  Rol: {membership.role === 'owner' ? 'Propietario' : 'Miembro'}
-                </span>
-              )}
-            </div>
-          </div>
+        <SidebarHeader className="border-b border-sidebar-border/50 py-3.5 px-4">
+          <HouseholdSwitcher
+            activeHouseholdId={activeHouseholdId}
+            memberships={allMemberships}
+          />
         </SidebarHeader>
 
         <SidebarContent className="py-2">

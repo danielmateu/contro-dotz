@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { SettingsViewClient } from '@/components/settings/settings-view-client'
 
 export const metadata: Metadata = {
@@ -23,26 +24,21 @@ export default async function SettingsPage() {
     redirect('/login')
   }
 
-  // Cargar perfil actual y membresía del hogar en paralelo
-  const [profileRes, membershipRes] = await Promise.all([
+  // Cargar perfil actual y hogar activo en paralelo
+  const [profileRes, householdContext] = await Promise.all([
     supabase
       .from('profiles')
       .select('display_name, email, avatar_url, status')
       .eq('id', user.id)
       .single(),
-    supabase
-      .from('household_members')
-      .select('household_id, monthly_income, monthly_contribution')
-      .eq('user_id', user.id)
-      .limit(1)
-      .maybeSingle(),
+    getActiveHouseholdHelper(user.id),
   ])
 
   const profile = profileRes.data
-  const membership = membershipRes.data
-  const householdId = membership?.household_id || null
-  const monthlyIncome = Number(membership?.monthly_income || 0)
-  const monthlyContribution = Number(membership?.monthly_contribution || 0)
+  const { activeMembership, activeHouseholdId } = householdContext
+  const householdId = activeHouseholdId
+  const monthlyIncome = Number(activeMembership?.monthly_income || 0)
+  const monthlyContribution = Number(activeMembership?.monthly_contribution || 0)
 
   // Cargar ingresos mensuales específicos del usuario logueado en este hogar
   let memberIncomes: any[] = []

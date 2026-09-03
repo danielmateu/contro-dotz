@@ -3,8 +3,43 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { householdSchema, inviteSchema } from '@/lib/validations'
 import { sendInvitationEmail } from '@/lib/mail'
+
+/**
+ * Cambia el hogar activo del usuario guardando el ID en la cookie 'active_household_id'
+ */
+export async function setActiveHouseholdAction(householdId: string) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  // Comprobar que el usuario pertenece al hogar al que intenta cambiar
+  const { data: member } = await supabase
+    .from('household_members')
+    .select('id')
+    .eq('household_id', householdId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!member) {
+    return { error: 'No tienes acceso a este hogar.' }
+  }
+
+  const cookieStore = await cookies()
+  cookieStore.set('active_household_id', householdId, {
+    path: '/',
+    maxAge: 365 * 24 * 60 * 60, // 1 año
+    sameSite: 'lax',
+  })
+
+  revalidatePath('/', 'layout')
+  return { success: true }
+}
 
 /**
  * Crea un nuevo hogar y asocia al usuario como creador (owner)

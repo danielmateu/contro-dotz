@@ -75,61 +75,58 @@ export function HouseholdViewClient({
         </p>
       </div>
 
+      {/* Tarjeta Destacada de Invitaciones Recibidas Pendientes (siempre visible si hay invitaciones) */}
+      {receivedInvitations.length > 0 && (
+        <Card className="border-primary/40 bg-linear-to-r from-primary/10 via-background to-violet-500/10 shadow-lg">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Mail className="h-5 w-5 text-primary animate-bounce" />
+              {locale === 'en' ? 'Pending Received Invitations' : locale === 'ca' ? 'Invitacions Rebudes Pendents' : 'Invitaciones Recibidas Pendientes'}
+            </CardTitle>
+            <CardDescription>
+              {locale === 'en'
+                ? 'You have been invited to join a new household. Accept or decline below.'
+                : locale === 'ca'
+                ? 'T\'han convidat a una nova llar. Accepta o rebutja a continuació.'
+                : 'Te han invitado a unirte a un nuevo grupo familiar. Acepta o rechaza la invitación.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {receivedInvitations.map((inv) => (
+                <div
+                  key={inv.id}
+                  className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-xl bg-card/80 gap-4 shadow-sm"
+                >
+                  <div className="space-y-1">
+                    <p className="text-base font-bold text-foreground font-heading">
+                      {(inv.households as any)?.name || 'Hogar Invitado'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {locale === 'en' ? 'Invited by:' : locale === 'ca' ? 'Convidat per:' : 'Invitado por:'}{' '}
+                      <span className="font-semibold text-foreground">
+                        {(inv.profiles as any)?.display_name || 'Un miembro'}
+                      </span>
+                    </p>
+                    <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <Calendar className="h-3 w-3" />
+                      {format(new Date(inv.created_at), "d 'de' MMMM, yyyy", {
+                        locale: dateLocale,
+                      })}
+                    </p>
+                  </div>
+                  <InvitationActions invitationId={inv.id} />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {!hasHousehold ? (
         <div className="grid gap-6 md:grid-cols-2">
           {/* Create Form */}
           <CreateHouseholdForm />
-
-          {/* Received Invitations */}
-          <Card className="border-slate-200/50 shadow-md">
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Mail className="h-5 w-5 text-primary" />
-                {locale === 'en' ? 'Received Invitations' : locale === 'ca' ? 'Invitacions Rebudes' : 'Invitaciones Recibidas'}
-              </CardTitle>
-              <CardDescription>
-                {locale === 'en' ? 'Households that invited you to join.' : locale === 'ca' ? 'Llares que m\'han convidat a unir-m\'hi.' : 'Hogares que te han invitado a unirte a ellos.'}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {receivedInvitations.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
-                  <Mail className="h-10 w-10 stroke-1 mb-2 text-slate-400" />
-                  <p className="text-sm">
-                    {locale === 'en' ? 'No pending invitations.' : locale === 'ca' ? 'No tens invitacions pendents.' : 'No tienes invitaciones pendientes.'}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {receivedInvitations.map((inv) => (
-                    <div
-                      key={inv.id}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-xl bg-muted/30 gap-4"
-                    >
-                      <div className="space-y-1">
-                        <p className="text-sm font-semibold text-foreground">
-                          {(inv.households as any)?.name || 'Hogar Invitado'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {locale === 'en' ? 'Invited by:' : locale === 'ca' ? 'Convidat per:' : 'Invitado por:'}{' '}
-                          <span className="font-medium">
-                            {(inv.profiles as any)?.display_name || 'Alguien'}
-                          </span>
-                        </p>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {format(new Date(inv.created_at), "d 'de' MMMM, yyyy", {
-                            locale: dateLocale,
-                          })}
-                        </p>
-                      </div>
-                      <InvitationActions invitationId={inv.id} />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
         </div>
       ) : (
         <Tabs defaultValue="members" className="w-full space-y-6">

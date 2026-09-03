@@ -15,8 +15,15 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Users, Smile, MessageSquare, AlertCircle } from 'lucide-react'
+import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/i18n-context'
+import {
+  getPushNotificationState,
+  subscribeUserToPush,
+  unsubscribeUserFromPush,
+} from '@/lib/push-notifications'
+import { sendHouseholdChatPushAction } from '@/app/actions/push'
+import { toast } from '@/components/ui/toast'
 
 interface Member {
   user_id: string
@@ -57,9 +64,54 @@ export function ChatWindow({
   const [isBotTyping, setIsBotTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Estado de notificaciones Push PWA
+  const [pushState, setPushState] = useState<{
+    isSupported: boolean
+    permission: string
+    isSubscribed: boolean
+  }>({ isSupported: false, permission: 'default', isSubscribed: false })
+  const [isPushLoading, setIsPushLoading] = useState(false)
+
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
+
+  // Comprobar estado de notificaciones push al cargar el chat
+  useEffect(() => {
+    getPushNotificationState().then(setPushState)
+  }, [])
+
+  const handleTogglePush = async () => {
+    setIsPushLoading(true)
+    if (pushState.isSubscribed) {
+      const res = await unsubscribeUserFromPush()
+      if (res.success) {
+        setPushState((prev) => ({ ...prev, isSubscribed: false }))
+        toast.add({
+          title: 'Notificaciones Push desactivadas',
+          description: 'Ya no recibirás notificaciones en este dispositivo.',
+          type: 'info',
+        })
+      }
+    } else {
+      const res = await subscribeUserToPush()
+      if (res.success) {
+        setPushState((prev) => ({ ...prev, isSubscribed: true, permission: 'granted' }))
+        toast.add({
+          title: '¡Notificaciones Push activadas! 🔔',
+          description: 'Recibirás notificaciones en tu pantalla cuando la familia escriba en el chat.',
+          type: 'success',
+        })
+      } else if (res.error) {
+        toast.add({
+          title: 'Error al activar notificaciones',
+          description: res.error,
+          type: 'error',
+        })
+      }
+    }
+    setIsPushLoading(false)
+  }
 
   const handleActivateGemini = () => {
     setInputMessage((prev) => {
@@ -176,6 +228,16 @@ export function ChatWindow({
           if (prev.some((m) => m.id === createdMessage.id)) return prev
           return [...prev, createdMessage]
         })
+
+        // Disparar Notificación Push a los miembros del hogar en segundo plano
+        const myProfile = members.find((m) => m.user_id === userId)
+        const senderName = myProfile?.display_name || 'Miembro del Hogar'
+        sendHouseholdChatPushAction({
+          householdId,
+          senderId: userId,
+          senderName,
+          text: messageText,
+        }).catch((err) => console.error('Error enviando push notification:', err))
       }
     } catch (err: any) {
       console.error('Error al enviar el mensaje:', err)
@@ -271,38 +333,75 @@ export function ChatWindow({
           </div>
         </div>
 
-        {/* Lista de avatares de miembros en la cabecera */}
-        <div className="flex items-center gap-1.5 self-start sm:self-center overflow-x-auto scrollbar-none max-w-full py-1">
-          <div className="text-[10px] text-muted-foreground flex items-center gap-1 mr-1 font-semibold uppercase tracking-wider">
-            <Users className="h-3.5 w-3.5" />
-            Familia:
-          </div>
-          {members.map((m) => (
-            <div
-              key={m.user_id}
-              className="relative group"
-              title={`${m.display_name} ${m.status ? `(${m.status})` : ''}`}
+        {/* Toggle de Notificaciones Push y lista de miembros */}
+        <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-center">
+          {pushState.isSupported && (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={isPushLoading || pushState.permission === 'denied'}
+              onClick={handleTogglePush}
+              className={`h-8 px-2.5 rounded-xl text-xs gap-1.5 border transition-all ${
+                pushState.isSubscribed
+                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold'
+                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
+              }`}
+              title={
+                pushState.permission === 'denied'
+                  ? 'Permiso de notificaciones denegado en el navegador'
+                  : pushState.isSubscribed
+                  ? 'Desactivar notificaciones push en este dispositivo'
+                  : 'Activar notificaciones push en este dispositivo'
+              }
             >
-              <Avatar className="h-7 w-7 border-2 border-background shadow-xs hover:scale-105 transition-transform duration-200">
-                {m.avatar_url ? (
-                  <AvatarImage src={m.avatar_url} alt={m.display_name} className="object-cover" />
-                ) : null}
-                <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                  {m.display_name.substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              {/* Indicador de estado si tiene */}
-              {m.status && (
-                <span className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 border border-background h-2 w-2 rounded-full" />
+              {pushState.isSubscribed ? (
+                <>
+                  <BellRing className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />
+                  <span className="hidden sm:inline font-bold">Push Activas</span>
+                </>
+              ) : (
+                <>
+                  <Bell className="h-3.5 w-3.5" />
+                  <span className="hidden sm:inline">Activar Push</span>
+                </>
               )}
+            </Button>
+          )}
 
-              {/* Tooltip personalizado */}
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden bg-slate-950 text-white text-[10px] px-2 py-1 rounded-md shadow-lg whitespace-nowrap z-50">
-                <p className="font-bold">{m.display_name}</p>
-                {m.status && <p className="text-slate-300 italic mt-0.5">{m.status}</p>}
-              </div>
+          {/* Lista de avatares de miembros en la cabecera */}
+          <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full py-1">
+            <div className="text-[10px] text-muted-foreground flex items-center gap-1 mr-1 font-semibold uppercase tracking-wider hidden xs:flex">
+              <Users className="h-3.5 w-3.5" />
+              Familia:
             </div>
-          ))}
+            {members.map((m) => (
+              <div
+                key={m.user_id}
+                className="relative group"
+                title={`${m.display_name} ${m.status ? `(${m.status})` : ''}`}
+              >
+                <Avatar className="h-7 w-7 border-2 border-background shadow-xs hover:scale-105 transition-transform duration-200">
+                  {m.avatar_url ? (
+                    <AvatarImage src={m.avatar_url} alt={m.display_name} className="object-cover" />
+                  ) : null}
+                  <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                    {m.display_name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Indicador de estado si tiene */}
+                {m.status && (
+                  <span className="absolute -bottom-0.5 -right-0.5 bg-emerald-500 border border-background h-2 w-2 rounded-full" />
+                )}
+
+                {/* Tooltip personalizado */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden bg-slate-950 text-white text-[10px] px-2 py-1 rounded-md shadow-lg whitespace-nowrap z-50">
+                  <p className="font-bold">{m.display_name}</p>
+                  {m.status && <p className="text-slate-300 italic mt-0.5">{m.status}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
