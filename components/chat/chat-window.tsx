@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { askGeminiAction } from '@/app/actions/gemini'
-import { sendMessageAction } from '@/app/actions/chat'
+import { sendMessageAction, updateMessageAction, deleteMessageAction } from '@/app/actions/chat'
 import {
   MessageGroup,
   Message,
@@ -15,7 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing } from 'lucide-react'
+import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   getPushNotificationState,
@@ -39,6 +39,8 @@ interface ChatMessage {
   content: string
   created_at: string
   created_by: string | null
+  updated_at?: string | null
+  is_deleted?: boolean | null
   is_bot?: boolean
 }
 
@@ -63,6 +65,11 @@ export function ChatWindow({
   const [isSending, setIsSending] = useState(false)
   const [isBotTyping, setIsBotTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Estados para Edición de Mensajes
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
+  const [editingContent, setEditingContent] = useState<string>('')
+  const [isUpdating, setIsUpdating] = useState<boolean>(false)
 
   // Estado de notificaciones Push PWA
   const [pushState, setPushState] = useState<{
@@ -144,7 +151,7 @@ export function ChatWindow({
     scrollToBottom('smooth')
   }, [messages])
 
-  // Suscribirse a los mensajes en tiempo real
+  // Suscribirse a los mensajes en tiempo real (INSERT, UPDATE, DELETE)
   useEffect(() => {
     const channel = supabase
       .channel(`chat_messages_${householdId}`)
@@ -162,10 +169,48 @@ export function ChatWindow({
             setIsBotTyping(false)
           }
           setMessages((prev) => {
-            // Evitar duplicados si el mensaje ya fue insertado optimistamente
             if (prev.some((m) => m.id === newMessage.id)) return prev
             return [...prev, newMessage]
           })
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'messages',
+          filter: `household_id=eq.${householdId}`,
+        },
+        (payload) => {
+          const updated = payload.new as ChatMessage
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === updated.id
+                ? {
+                    ...m,
+                    content: updated.content,
+                    updated_at: updated.updated_at,
+                    is_deleted: updated.is_deleted,
+                  }
+                : m
+            )
+          )
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'messages',
+          filter: `household_id=eq.${householdId}`,
+        },
+        (payload) => {
+          const deletedId = payload.old.id
+          setMessages((prev) =>
+            prev.map((m) => (m.id === deletedId ? { ...m, is_deleted: true } : m))
+          )
         }
       )
       .subscribe()
@@ -174,6 +219,70 @@ export function ChatWindow({
       supabase.removeChannel(channel)
     }
   }, [householdId, supabase])
+
+  const handleStartEdit = (msg: ChatMessage) => {
+    setEditingMessageId(msg.id)
+    setEditingContent(msg.content)
+  }
+
+  const handleCancelEdit = () => {
+    setEditingMessageId(null)
+    setEditingContent('')
+  }
+
+  const handleSaveEdit = async (messageId: string) => {
+    if (!editingContent.trim() || isUpdating) return
+    const trimmed = editingContent.trim()
+    const now = new Date().toISOString()
+    setIsUpdating(true)
+
+    // Actualización optimista
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId ? { ...m, content: trimmed, updated_at: now } : m
+      )
+    )
+    setEditingMessageId(null)
+
+    const res = await updateMessageAction(messageId, trimmed)
+    if (res.error) {
+      toast.add({
+        title: 'Error al editar mensaje',
+        description: res.error,
+        type: 'error',
+      })
+    } else {
+      toast.add({
+        title: 'Mensaje actualizado',
+        type: 'success',
+      })
+    }
+    setIsUpdating(false)
+  }
+
+  const handleDeleteMessage = async (messageId: string) => {
+    const now = new Date().toISOString()
+    // Eliminación optimista mostrando estado "Este mensaje fue eliminado"
+    setMessages((prev) =>
+      prev.map((m) =>
+        m.id === messageId ? { ...m, is_deleted: true, updated_at: now } : m
+      )
+    )
+
+    const res = await deleteMessageAction(messageId)
+    if (res.error) {
+      toast.add({
+        title: 'Error al eliminar mensaje',
+        description: res.error,
+        type: 'error',
+      })
+    } else {
+      toast.add({
+        title: 'Mensaje eliminado',
+        type: 'info',
+      })
+    }
+  }
 
   const handleSendSuggestedQuestion = async (questionText: string) => {
     if (isSending || isBotTyping) return
@@ -433,9 +542,10 @@ export function ChatWindow({
                   const isBot = msg.is_bot || msg.created_by === '00000000-0000-0000-0000-000000000000' || msg.content?.startsWith('🤖')
                   const isMe = !isBot && msg.created_by === userId
                   const sender = getMemberProfile(msg.created_by, isBot)
+                  const isEditing = editingMessageId === msg.id
 
                   return (
-                    <Message key={msg.id} align={isMe ? 'end' : 'start'} className="px-1">
+                    <Message key={msg.id} align={isMe ? 'end' : 'start'} className="px-1 group/msg relative">
                       <MessageAvatar>
                         <Avatar className="h-8 w-8 border border-border/35 shadow-xs">
                           {sender.avatar_url ? (
@@ -461,17 +571,82 @@ export function ChatWindow({
                               ({sender.status})
                             </span>
                           )}
-                          <span className="text-[10px] text-muted-foreground/80 font-normal">
+                          <span className="text-[10px] text-muted-foreground/80 font-normal flex items-center gap-1">
                             {formatMessageTime(msg.created_at)}
+                            {msg.updated_at && !msg.is_deleted && (
+                              <span className="italic text-[9px] text-muted-foreground/60 font-medium">(editado)</span>
+                            )}
                           </span>
                         </MessageHeader>
-                        <div
-                          className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] wrap-break-word shadow-xs border ${isMe
-                            ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
-                            : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
-                            }`}
-                        >
-                          {msg.content}
+
+                        <div className="flex items-center gap-1.5 group/bubble">
+                          {/* Botones de acción para el creador del mensaje (Edición / Eliminación) */}
+                          {isMe && !isEditing && !msg.is_deleted && (
+                            <div className="opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleStartEdit(msg)}
+                                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                                title="Editar mensaje"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteMessage(msg.id)}
+                                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                title="Eliminar mensaje"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          )}
+
+                          {msg.is_deleted ? (
+                            <div className="px-3 py-1.5 text-xs italic text-muted-foreground/70 bg-muted/30 border border-border/20 rounded-2xl flex items-center gap-1.5 select-none">
+                              <Trash2 className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                              <span>Este mensaje fue eliminado</span>
+                            </div>
+                          ) : isEditing ? (
+                            <div className="flex items-center gap-1.5 bg-background border border-primary/40 p-1.5 rounded-2xl shadow-md w-full max-w-xs sm:max-w-md">
+                              <input
+                                type="text"
+                                value={editingContent}
+                                onChange={(e) => setEditingContent(e.target.value)}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveEdit(msg.id)
+                                  if (e.key === 'Escape') handleCancelEdit()
+                                }}
+                                autoFocus
+                                className="flex-1 bg-transparent px-2.5 py-1 text-sm outline-none text-foreground"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveEdit(msg.id)}
+                                className="p-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
+                                title="Guardar cambios"
+                              >
+                                <Check className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                type="button"
+                                onClick={handleCancelEdit}
+                                className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                title="Cancelar"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          ) : (
+                            <div
+                              className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] wrap-break-word shadow-xs border ${isMe
+                                ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
+                                : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
+                                }`}
+                            >
+                              {msg.content}
+                            </div>
+                          )}
                         </div>
                       </MessageContent>
                     </Message>
