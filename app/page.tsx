@@ -48,7 +48,7 @@ export default async function LandingPage() {
       {/* Header */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-6 h-20 flex items-center justify-between border-b border-slate-200/20 dark:border-slate-800/30 backdrop-blur-xs">
         <div className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
+          <div className="hidden  sm:flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20">
             <ShieldCheck className="h-5 w-5" />
           </div>
           <span className="font-extrabold text-xl tracking-tight font-heading">
@@ -112,7 +112,7 @@ export default async function LandingPage() {
                 {/* Botón Principal */}
                 <span className="relative px-8 py-4 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-2xl flex items-center gap-3 text-white font-bold text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
                   <Rocket className="w-5 h-5 text-indigo-200" />
-                  Crear cuenta gratis
+                  Crear cuenta
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
                 </span>
               </Link>

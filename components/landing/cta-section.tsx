@@ -71,7 +71,7 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
                   'w-full sm:w-auto px-8 py-6 rounded-xl text-base font-bold bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-xl shadow-indigo-500/20 transition-all duration-200 flex items-center justify-center'
                 )}
               >
-                Crear cuenta gratis
+                Crear cuenta
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
             </motion.div>

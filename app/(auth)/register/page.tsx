@@ -38,7 +38,7 @@ export default function RegisterPage() {
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
-    document.title = 'Crear cuenta gratis | Control Dotz'
+    document.title = 'Crear cuenta | Control Dotz'
   }, [])
 
   return (
@@ -188,7 +188,7 @@ export default function RegisterPage() {
                       spring="snappy"
                       className="w-4.5 h-4.5 text-violet-200"
                     />
-                    <span>{pending ? 'Registrando cuenta...' : 'Crear cuenta gratis'}</span>
+                    <span>{pending ? 'Registrando cuenta...' : 'Crear cuenta'}</span>
                   </Button>
                 </div>
               )}
