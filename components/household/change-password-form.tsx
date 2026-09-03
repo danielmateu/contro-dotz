@@ -68,7 +68,7 @@ export function ChangePasswordForm() {
             type="button"
             onClick={togglePasswordVisibility}
             className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground focus:outline-hidden"
-            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+            aria-label={showPassword ? 'Ocultar clave' : 'Mostrar clave'}
           >
             <MorphIcon
               icon={showPassword ? EyeOffData : EyeData}
@@ -97,7 +97,7 @@ export function ChangePasswordForm() {
             onClick={toggleConfirmPasswordVisibility}
             className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground focus:outline-hidden"
             aria-label={
-              showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+              showConfirmPassword ? 'Ocultar clave' : 'Mostrar clave'
             }
           >
             <MorphIcon

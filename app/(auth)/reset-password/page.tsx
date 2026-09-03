@@ -271,7 +271,7 @@ function ResetPasswordContent() {
                       type="button"
                       onClick={togglePasswordVisibility}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                      aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      aria-label={showPassword ? 'Ocultar clave' : 'Mostrar clave'}
                     >
                       <MorphIcon
                         icon={showPassword ? EyeOffData : EyeData}
@@ -301,7 +301,7 @@ function ResetPasswordContent() {
                       type="button"
                       onClick={toggleConfirmPasswordVisibility}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                      aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      aria-label={showConfirmPassword ? 'Ocultar clave' : 'Mostrar clave'}
                     >
                       <MorphIcon
                         icon={showConfirmPassword ? EyeOffData : EyeData}
