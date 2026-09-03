@@ -40,6 +40,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle'
 import { ActiveRouteName } from '@/components/dashboard/active-route-name'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { FeatureBaseWidget } from '@/components/feedback/featurebase-widget'
+import { ShareAppModal } from '@/components/share-app-modal'
 
 interface PrivateLayoutProps {
   children: React.ReactNode
@@ -175,7 +176,8 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
             <ActiveRouteName />
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ShareAppModal />
             <FeatureBaseWidget userEmail={profile?.email} userName={profile?.display_name || undefined} />
             <LocaleSwitcher />
             <ModeToggle />

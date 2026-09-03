@@ -7,6 +7,7 @@ import { SendReportButton } from '@/components/household/send-report-button'
 import { MemberIncomeForm } from '@/components/household/member-income-form'
 import { MonthlyIncomesListForm } from '@/components/household/monthly-incomes-list-form'
 import { ChangePasswordForm } from '@/components/household/change-password-form'
+import { ShareAppModal } from '@/components/share-app-modal'
 import {
   Card,
   CardContent,
@@ -16,7 +17,7 @@ import {
 } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { Mail } from 'lucide-react'
+import { Mail, Share2 } from 'lucide-react'
 
 interface SettingsViewClientProps {
   userId: string
@@ -184,7 +185,7 @@ export function SettingsViewClient({
             </Card>
           )}
 
-          <Card className="border-slate-200/50 shadow-md">
+          <Card className="border-slate-200/50 dark:border-slate-800/50 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg">
                 {locale === 'en' ? 'Account Security' : locale === 'ca' ? 'Seguretat del Compte' : 'Seguridad de la Cuenta'}
@@ -199,6 +200,26 @@ export function SettingsViewClient({
             </CardHeader>
             <CardContent>
               <ChangePasswordForm />
+            </CardContent>
+          </Card>
+
+          {/* Share App Card */}
+          <Card className="border-primary/20 bg-linear-to-br from-primary/5 via-background to-violet-500/5 shadow-md">
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Share2 className="h-5 w-5 text-primary" />
+                {locale === 'en' ? 'Share Control Dotz' : locale === 'ca' ? 'Compartir Control Dotz' : 'Compartir Control Dotz'}
+              </CardTitle>
+              <CardDescription>
+                {locale === 'en'
+                  ? 'Recommend Control Dotz to your family and friends so they can manage their household expenses.'
+                  : locale === 'ca'
+                  ? 'Recomana Control Dotz a familiars i amics per a coordinar les despeses del seu hogar.'
+                  : 'Recomienda Control Dotz a tus familiares y conocidos para que coordinen los gastos de su hogar.'}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <ShareAppModal size="default" variant="default" className="w-full sm:w-auto font-bold gap-2 rounded-xl" />
             </CardContent>
           </Card>
         </div>
