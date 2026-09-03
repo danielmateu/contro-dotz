@@ -71,5 +71,17 @@
     "light": "Clar",
     "dark": "Fosc",
     "system": "Sistema"
+  },
+  "notFound": {
+    "badge": "404 • Registre no trobat",
+    "title": "Vaja! Aquest moviment no està als registres",
+    "subtitle": "La pàgina que cerques no existeix, s'ha traslladat o l'enllaç introduït no és vàlid.",
+    "backHome": "Anar al Panell Principal",
+    "goBack": "Tornar enrere",
+    "quickLinks": "Dreceres recomanades",
+    "dashboard": "Panell Principal",
+    "expenses": "Despeses",
+    "budgets": "Pressupostos",
+    "savingGoals": "Guardioles d'Estalvi"
   }
 }

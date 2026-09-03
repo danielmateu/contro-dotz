@@ -71,5 +71,17 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "notFound": {
+    "badge": "404 • Entry not found",
+    "title": "Oops! This entry is not in our records",
+    "subtitle": "The page you are looking for doesn't exist, was moved, or the URL is invalid.",
+    "backHome": "Go to Dashboard",
+    "goBack": "Go back",
+    "quickLinks": "Recommended links",
+    "dashboard": "Dashboard",
+    "expenses": "Expenses",
+    "budgets": "Budgets",
+    "savingGoals": "Piggy Banks"
   }
 }

@@ -71,5 +71,17 @@
     "light": "Claro",
     "dark": "Oscuro",
     "system": "Sistema"
+  },
+  "notFound": {
+    "badge": "404 • Registro no encontrado",
+    "title": "¡Ups! Este movimiento no está en los registros",
+    "subtitle": "La página que buscas no existe, se ha trasladado o el enlace introducido no es válido.",
+    "backHome": "Ir al Panel Principal",
+    "goBack": "Volver atrás",
+    "quickLinks": "Accesos recomendados",
+    "dashboard": "Panel Principal",
+    "expenses": "Gastos",
+    "budgets": "Presupuestos",
+    "savingGoals": "Huchas de Ahorro"
   }
 }
