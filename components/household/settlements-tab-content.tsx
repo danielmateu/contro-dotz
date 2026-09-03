@@ -30,6 +30,8 @@ interface MemberBalance {
   fairShare: number
   balance: number
   contribution?: number
+  income?: number
+  weight?: number
 }
 
 interface Debt {
@@ -103,10 +105,15 @@ export function SettlementsTabContent({
                     className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border rounded-xl bg-muted/20 gap-4"
                   >
                     <div className="space-y-1">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold">{b.name}</p>
+                        {b.weight !== undefined && b.weight > 0 ? (
+                          <Badge variant="outline" className="text-[10px] bg-indigo-50/50 text-indigo-600 border-indigo-500/30 dark:bg-indigo-950/30 dark:text-indigo-400">
+                            Reparto: {b.weight}%
+                          </Badge>
+                        ) : null}
                         {b.contribution && b.contribution > 0 ? (
-                          <Badge variant="outline" className="text-[10px] bg-emerald-50/50 text-emerald-600 border-emerald-500/30">
+                          <Badge variant="outline" className="text-[10px] bg-emerald-50/50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
                             Cuota: {b.contribution.toFixed(2)}€
                           </Badge>
                         ) : null}
@@ -121,13 +128,12 @@ export function SettlementsTabContent({
                     <div className="flex items-center gap-3">
                       <div className="text-right">
                         <p
-                          className={`text-sm font-bold ${
-                            isPositive
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : isNegative
+                          className={`text-sm font-bold ${isPositive
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : isNegative
                               ? 'text-rose-600 dark:text-rose-400'
                               : 'text-muted-foreground'
-                          }`}
+                            }`}
                         >
                           {isPositive ? '+' : ''}
                           {b.balance.toFixed(2)}€
@@ -136,8 +142,8 @@ export function SettlementsTabContent({
                           {isPositive
                             ? 'Se le debe'
                             : isNegative
-                            ? 'Debe'
-                            : 'Al día'}
+                              ? 'Debe'
+                              : 'Al día'}
                         </p>
                       </div>
                     </div>

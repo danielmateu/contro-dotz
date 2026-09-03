@@ -55,6 +55,8 @@ export interface MemberBalance {
   fairShare: number
   balance: number
   contribution?: number
+  income?: number
+  weight?: number
 }
 
 export interface Debt {
@@ -106,8 +108,9 @@ export function calculateBalances(
     }
   })
 
-  // Calcular la cuota justa basada en aportaciones si están configuradas, sino división equitativa
+  // Calcular la cuota justa basada en aportaciones o ingresos si están configurados, sino división equitativa
   const totalContributions = members.reduce((sum, m) => sum + Number(m.monthly_contribution || 0), 0)
+  const totalIncomes = members.reduce((sum, m) => sum + Number(m.monthly_income || 0), 0)
   const numMembers = members.length
 
   return members.map((m) => {
@@ -115,15 +118,18 @@ export function calculateBalances(
     const paid = paidMap.get(m.user_id) || 0
     const received = receivedMap.get(m.user_id) || 0
     const contribution = Number(m.monthly_contribution || 0)
+    const income = Number(m.monthly_income || 0)
 
-    let memberFairShare = 0
+    let memberWeight = 0
     if (totalContributions > 0) {
-      const weight = contribution / totalContributions
-      memberFairShare = totalSpent * weight
+      memberWeight = contribution / totalContributions
+    } else if (totalIncomes > 0) {
+      memberWeight = income / totalIncomes
     } else {
-      memberFairShare = numMembers > 0 ? totalSpent / numMembers : 0
+      memberWeight = numMembers > 0 ? 1 / numMembers : 0
     }
 
+    const memberFairShare = totalSpent * memberWeight
     const balance = spent + paid - received - memberFairShare
 
     return {
@@ -136,6 +142,8 @@ export function calculateBalances(
       fairShare: Math.round(memberFairShare * 100) / 100,
       balance: Math.round(balance * 100) / 100, // Redondear a 2 decimales
       contribution,
+      income,
+      weight: Math.round(memberWeight * 10000) / 100,
     }
   })
 }

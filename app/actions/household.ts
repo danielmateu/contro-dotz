@@ -313,7 +313,7 @@ export async function sendHouseholdReportAction(
       supabase.from('households').select('name').eq('id', householdId).single(),
       supabase
         .from('household_members')
-        .select('user_id, role, profiles(display_name, email)')
+        .select('user_id, role, monthly_income, monthly_contribution, profiles(display_name, email)')
         .eq('household_id', householdId),
       supabase
         .from('expenses')
@@ -347,6 +347,8 @@ export async function sendHouseholdReportAction(
       const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
       return {
         user_id: m.user_id,
+        monthly_income: Number(m.monthly_income || 0),
+        monthly_contribution: Number(m.monthly_contribution || 0),
         profiles: {
           display_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
           email: prof?.email || '',

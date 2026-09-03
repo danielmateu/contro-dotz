@@ -184,7 +184,7 @@ export async function askGeminiAction(
       // A. Miembros del hogar
       supabase
         .from('household_members')
-        .select('user_id, role, monthly_income, profiles(display_name, email)')
+        .select('user_id, role, monthly_income, monthly_contribution, profiles(display_name, email)')
         .eq('household_id', householdId),
       // B. Gastos del mes actual
       supabase
@@ -212,7 +212,7 @@ export async function askGeminiAction(
       // F. Ingresos específicos del mes
       supabase
         .from('member_incomes')
-        .select('user_id, amount')
+        .select('user_id, amount, contribution')
         .eq('household_id', householdId)
         .eq('month', currentMonthStr),
     ])
@@ -222,12 +222,21 @@ export async function askGeminiAction(
     const currentBudgets = budgetsRes.data || []
     const settlementsList = settlementsRes.data || []
     const allExpenses = allExpensesRes.data || []
+    const monthlyIncomes = memberIncomesRes.data || []
 
     // Formatear miembros y calcular balances
     const formattedMembers = membersList.map((m) => {
       const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+      const specificIncome = monthlyIncomes.find((inc) => inc.user_id === m.user_id)
+      const income = specificIncome ? Number(specificIncome.amount) : Number(m.monthly_income || 0)
+      const contribution = specificIncome && specificIncome.contribution !== null && specificIncome.contribution !== undefined
+        ? Number(specificIncome.contribution)
+        : Number(m.monthly_contribution || 0)
+
       return {
         user_id: m.user_id,
+        monthly_income: income,
+        monthly_contribution: contribution,
         profiles: {
           display_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
           email: prof?.email || '',
@@ -290,7 +299,6 @@ export async function askGeminiAction(
     }))
 
     const totalSpent = currentExpenses.reduce((sum, exp) => sum + Number(exp.amount), 0)
-    const monthlyIncomes = memberIncomesRes.data || []
 
     // Obtener los ingresos reales aplicables para el mes en curso (nómina específica o base)
     const membersIncomeList = membersList.map((m) => {

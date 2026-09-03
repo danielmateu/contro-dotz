@@ -142,5 +142,34 @@ describe('Saldos y Deudas', () => {
     expect(pareja!.fairShare).toBe(900)
     expect(pareja!.balance).toBe(100) // Le deben 100€
   })
+
+  it('debe calcular la cuota justa proporcional basada en ingresos (39.72% / 60.28%) cuando no hay aportación fija', () => {
+    const familyMembers = [
+      { user_id: 'papi', monthly_income: 2011, profiles: { display_name: 'Papi Dotz', email: 'papi@test.com' } },
+      { user_id: 'mamona', monthly_income: 3052, profiles: { display_name: 'Mamona', email: 'mamona@test.com' } },
+    ]
+    const expenses = [
+      { created_by: 'papi', amount: 161.58, is_personal: false },
+      { created_by: 'mamona', amount: 218.06 + 670.75, is_personal: false },
+    ]
+    const settlements: any[] = []
+
+    const balances = calculateBalances(familyMembers, expenses, settlements)
+
+    const papi = balances.find((b: any) => b.user_id === 'papi')
+    const mamona = balances.find((b: any) => b.user_id === 'mamona')
+
+    // Gastos totales = 161.58 + 888.81 = 1050.39€
+    // Ingresos totales = 2011 + 3052 = 5063€
+    // Papi peso = 2011 / 5063 = 39.72%
+    // Mamona peso = 3052 / 5063 = 60.28%
+    expect(papi!.weight).toBe(39.72)
+    expect(mamona!.weight).toBe(60.28)
+
+    // Cuota justa Papi = 1050.39 * (2011 / 5063) = 417.21€
+    // Cuota justa Mamona = 1050.39 * (3052 / 5063) = 633.18€
+    expect(papi!.fairShare).toBe(417.21)
+    expect(mamona!.fairShare).toBe(633.18)
+  })
 })
 
