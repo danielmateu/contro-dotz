@@ -25,6 +25,10 @@ import { MorphIcon } from 'morphicons/react'
 import { __iconNode as UserPlusData } from 'lucide-react/dist/esm/icons/user-plus.mjs'
 // @ts-ignore
 import { __iconNode as RocketData } from 'lucide-react/dist/esm/icons/rocket.mjs'
+// @ts-ignore
+import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
+// @ts-ignore
+import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
 
 type FormState = {
   error?: string
@@ -36,6 +40,8 @@ const initialState: FormState = {}
 export default function RegisterPage() {
   const [state, formAction, pending] = useActionState(signUpAction, initialState)
   const [isHovered, setIsHovered] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     document.title = 'Crear cuenta | Control Dotz'
@@ -148,10 +154,22 @@ export default function RegisterPage() {
                       <Input
                         id="password"
                         name="password"
-                        type="password"
+                        type={showPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
+                        className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
+                        aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        <MorphIcon
+                          icon={showPassword ? EyeOffData : EyeData}
+                          spring="snappy"
+                          className="h-4 w-4"
+                        />
+                      </button>
                     </div>
                   </div>
 
@@ -162,10 +180,22 @@ export default function RegisterPage() {
                       <Input
                         id="confirmPassword"
                         name="confirmPassword"
-                        type="password"
+                        type={showConfirmPassword ? 'text' : 'password'}
                         required
-                        className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
+                        className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
+                        aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      >
+                        <MorphIcon
+                          icon={showConfirmPassword ? EyeOffData : EyeData}
+                          spring="snappy"
+                          className="h-4 w-4"
+                        />
+                      </button>
                     </div>
                   </div>
                 </>

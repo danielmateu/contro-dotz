@@ -254,7 +254,7 @@ function ResetPasswordContent() {
 
                 {/* Campo: Nueva Contraseña */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="password font-semibold text-xs text-foreground">
+                  <Label htmlFor="password" className="font-semibold text-xs text-foreground">
                     Nueva contraseña
                   </Label>
                   <div className="relative">
@@ -270,7 +270,7 @@ function ResetPasswordContent() {
                     <button
                       type="button"
                       onClick={togglePasswordVisibility}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
                       aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
                       <MorphIcon
@@ -284,7 +284,7 @@ function ResetPasswordContent() {
 
                 {/* Campo: Confirmar Contraseña */}
                 <div className="space-y-1.5">
-                  <Label htmlFor="confirmPassword font-semibold text-xs text-foreground">
+                  <Label htmlFor="confirmPassword" className="font-semibold text-xs text-foreground">
                     Confirmar nueva contraseña
                   </Label>
                   <div className="relative">
@@ -300,7 +300,7 @@ function ResetPasswordContent() {
                     <button
                       type="button"
                       onClick={toggleConfirmPasswordVisibility}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden"
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
                       aria-label={showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                     >
                       <MorphIcon
