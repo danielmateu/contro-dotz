@@ -440,7 +440,7 @@ export function AdminDashboardClient() {
               {/* Filters Control Bar */}
               <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-2">
                 {/* Status Tabs Filter */}
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
+                <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 scrollbar-none">
                   <button
                     type="button"
                     onClick={() => setFeedbackStatusFilter('all')}
