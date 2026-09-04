@@ -118,16 +118,16 @@ export function TamagotchiShopModal({
             <TabsList className="grid grid-cols-2 rounded-2xl bg-muted/60 p-1 shrink-0">
               <TabsTrigger value="shop" className="rounded-xl font-bold text-xs gap-1.5 sm:gap-2 px-2">
                 <ShoppingBag className="w-4 h-4 shrink-0" />
-                <span className="truncate">{isCatalan ? 'Botiga 🛒' : 'Tienda 🛒'}</span>
+                <span className="truncate">{isCatalan ? 'Botiga' : 'Tienda'}</span>
               </TabsTrigger>
               <TabsTrigger value="wardrobe" className="rounded-xl font-bold text-xs gap-1.5 sm:gap-2 px-2">
                 <Shirt className="w-4 h-4 shrink-0" />
-                <span className="truncate">{isCatalan ? 'Armari 👗' : 'Armario 👗'}</span>
+                <span className="truncate">{isCatalan ? 'Armari' : 'Armario'}</span>
               </TabsTrigger>
             </TabsList>
 
             {/* Contenido Tienda */}
-            <TabsContent value="shop" className="space-y-2.5 pt-3 max-h-[280px] sm:max-h-[340px] overflow-y-auto pr-1 flex-1">
+            <TabsContent value="shop" className="space-y-2.5 pt-3 max-h-70 sm:max-h-85 overflow-y-auto pr-1 flex-1">
               {SHOP_ITEMS.map((item) => {
                 const isUnlocked = gameState.unlockedItems.includes(item.id)
                 const isEquipped = gameState.equippedAccessory === item.id

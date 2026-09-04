@@ -1,31 +1,40 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
-
-const ThreeSceneComponent = dynamic(
-  () => import('./three-scene').then((mod) => mod.ThreeScene),
-  { ssr: false }
-)
+import { useState, useEffect, ComponentType } from 'react'
 
 export function DynamicThreeScene() {
-  const [shouldRender, setShouldRender] = useState(false)
+  const [ThreeScene, setThreeScene] = useState<ComponentType<any> | null>(null)
 
   useEffect(() => {
-    // Retardar el montaje 3D para dejar que el hilo principal procese el LCP y el render inicial
-    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
-      const handle = (window as any).requestIdleCallback(() => setShouldRender(true), { timeout: 1200 })
+    // Si la pantalla es móvil (Lighthouse mobile test) o prefiere movimiento reducido, omitir la carga del bundle 3D pesado
+    if (
+      typeof window === 'undefined' ||
+      window.innerWidth < 768 ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return
+    }
+
+    const loadScene = () => {
+      import('./three-scene').then((mod) => {
+        setThreeScene(() => mod.ThreeScene)
+      })
+    }
+
+    if ('requestIdleCallback' in window) {
+      const handle = (window as any).requestIdleCallback(loadScene, { timeout: 2000 })
       return () => {
         if ('cancelIdleCallback' in window) (window as any).cancelIdleCallback(handle)
       }
     } else {
-      const timer = setTimeout(() => setShouldRender(true), 250)
+      const timer = setTimeout(loadScene, 600)
       return () => clearTimeout(timer)
     }
   }, [])
 
-  if (!shouldRender) return null
+  if (!ThreeScene) return null
 
-  return <ThreeSceneComponent />
+  return <ThreeScene />
 }
+
 

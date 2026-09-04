@@ -169,7 +169,7 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-2 sm:px-3 h-8 sm:h-9"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Botiga 🛒' : 'Tienda 🛒'}</span>
+              <span className="truncate">{isCatalan ? 'Botiga' : 'Tienda'}</span>
             </Button>
 
             <Button
@@ -179,13 +179,13 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-2 sm:px-3 h-8 sm:h-9"
             >
               <Target className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Missions 🎯' : 'Misiones 🎯'}</span>
+              <span className="truncate">{isCatalan ? 'Missions' : 'Misiones'}</span>
             </Button>
 
             <Link href="/expenses" className="w-full">
               <Button variant="default" size="sm" className="w-full rounded-xl font-semibold gap-1 sm:gap-1.5 text-[11px] sm:text-xs shadow-xs px-2 sm:px-3 h-8 sm:h-9">
                 <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{isCatalan ? '+ Despesa' : '+ Gasto'}</span>
+                <span className="truncate">{isCatalan ? 'Despesa' : 'Gasto'}</span>
               </Button>
             </Link>
 

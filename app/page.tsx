@@ -8,7 +8,7 @@ export const metadata = {
   description: 'La aplicación colaborativa y premium para gestionar los gastos del hogar, presupuestos mensuales y liquidar deudas familiares con facilidad y escáner de tickets con IA.',
 }
 import { MouseGlow } from '@/components/landing/mouse-glow'
-import { DynamicThreeScene } from '@/components/landing/dynamic-three-scene'
+import { HeroPiggyBackground } from '@/components/landing/hero-piggy-background'
 import { InteractiveShowcase } from '@/components/landing/interactive-showcase'
 import { FeaturesGrid } from '@/components/landing/features-grid'
 import { CTASection } from '@/components/landing/cta-section'
@@ -35,8 +35,8 @@ export default async function LandingPage() {
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
 
-      {/* Escena 3D interactiva de finanzas (Solo Cerditos) */}
-      <DynamicThreeScene />
+      {/* Fondo ilustrativo ligero con animación flotante CSS */}
+      <HeroPiggyBackground />
 
       {/* Background glow structures */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
@@ -56,18 +56,18 @@ export default async function LandingPage() {
           </span>
         </div>
 
-        <nav className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <nav aria-label="Navegación principal" className="flex items-center gap-2 sm:gap-3 shrink-0">
           {isAuthenticated ? (
-            <Link href="/dashboard" className={buttonVariants({ size: 'sm', className: 'rounded-xl text-xs sm:text-sm px-3 sm:px-4' })}>
+            <Link href="/dashboard" aria-label="Ir al Dashboard principal" className={buttonVariants({ size: 'sm', className: 'rounded-xl text-xs sm:text-sm px-3 sm:px-4' })}>
               Ir al Dashboard
               <ArrowRight className="ml-1.5 sm:ml-2 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Link>
           ) : (
             <>
-              <Link href="/login" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'rounded-xl text-xs sm:text-sm px-2.5 sm:px-3' })}>
+              <Link href="/login" aria-label="Iniciar sesión en la aplicación" className={buttonVariants({ variant: 'ghost', size: 'sm', className: 'rounded-xl text-xs sm:text-sm px-2.5 sm:px-3 text-slate-800 dark:text-slate-100 font-semibold' })}>
                 Iniciar sesión
               </Link>
-              <Link href="/register" className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'rounded-xl shadow-xs text-xs sm:text-sm px-3 sm:px-4' })}>
+              <Link href="/register" aria-label="Registrar una nueva cuenta" className={buttonVariants({ variant: 'secondary', size: 'sm', className: 'rounded-xl shadow-xs text-xs sm:text-sm px-3 sm:px-4' })}>
                 Registrarse
               </Link>
             </>
@@ -82,7 +82,7 @@ export default async function LandingPage() {
           Controla tus gastos diarios en familia con total claridad
         </h1>
 
-        <p className="text-base sm:text-xl text-muted-foreground max-w-3xl leading-relaxed font-medium px-2 sm:px-0">
+        <p className="text-base sm:text-xl text-slate-700 dark:text-slate-200 max-w-3xl leading-relaxed font-medium px-2 sm:px-0">
           Una aplicación colaborativa para registrar gastos en el hogar, supervisar presupuestos mensuales y potenciar el ahorro familiar de forma segura.
         </p>
 
@@ -90,6 +90,7 @@ export default async function LandingPage() {
           {isAuthenticated ? (
             <Link
               href="/dashboard"
+              aria-label="Ir a mi Dashboard"
               className="group relative inline-flex items-center justify-center w-full sm:w-auto"
             >
               {/* Resplandor de fondo */}
@@ -105,6 +106,7 @@ export default async function LandingPage() {
             <>
               <Link
                 href="/register"
+                aria-label="Crear una cuenta gratis"
                 className="group relative inline-flex items-center justify-center w-full sm:w-auto"
               >
                 {/* Resplandor de fondo */}
@@ -119,6 +121,7 @@ export default async function LandingPage() {
 
               <Link
                 href="/login"
+                aria-label="Iniciar sesión"
                 className="w-full sm:w-auto px-6 sm:px-7 py-3.5 sm:py-4 rounded-2xl font-semibold text-sm sm:text-base border border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur-md hover:bg-slate-100 dark:hover:bg-slate-800/80 text-slate-800 dark:text-slate-100 transition-all duration-200 hover:scale-[1.01] active:scale-95 shadow-xs flex items-center justify-center"
               >
                 Iniciar sesión
@@ -152,7 +155,7 @@ export default async function LandingPage() {
       </main>
 
       {/* Footer */}
-      <footer className="relative z-10 w-full border-t border-slate-200/50 dark:border-slate-800/50 py-6 sm:py-8 text-center text-xs text-muted-foreground mt-12 sm:mt-16 bg-background/30 backdrop-blur-md">
+      <footer aria-label="Pie de página" className="relative z-10 w-full border-t border-slate-200/50 dark:border-slate-800/50 py-6 sm:py-8 text-center text-xs text-slate-700 dark:text-slate-300 font-medium mt-12 sm:mt-16 bg-background/30 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
           <p>© 2026 Control Dotz. Todos los derechos reservados.</p>
           <p className="flex items-center justify-center gap-1.5 font-medium text-center">
