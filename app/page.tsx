@@ -21,14 +21,20 @@ import {
 } from 'lucide-react'
 
 export default async function LandingPage() {
-  const supabase = await createClient()
+  let isAuthenticated = false
 
-  // Comprobar si el usuario tiene sesión activa
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  try {
+    const supabase = await createClient()
 
-  const isAuthenticated = !!user
+    // Comprobar si el usuario tiene sesión activa
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    isAuthenticated = !!user
+  } catch (error) {
+    console.error('Error comprobando sesión en LandingPage:', error)
+  }
 
   return (
     <div className="min-h-screen bg-radial from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 text-slate-800 dark:text-slate-100 flex flex-col justify-between overflow-x-hidden relative">

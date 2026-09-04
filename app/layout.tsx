@@ -63,7 +63,7 @@ export const metadata: Metadata = {
   },
 }
 
-const robotoHeading = Roboto({ subsets: ['latin'], variable: '--font-heading' })
+const robotoHeading = Roboto({ subsets: ['latin'], weight: ['400', '500', '700', '900'], variable: '--font-heading' })
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
 const fontMono = Geist_Mono({
   subsets: ["latin"],
