@@ -69,7 +69,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   let dbQuery = supabase
     .from('expenses')
     .select(
-      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name, avatar_url)',
+      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, is_personal, categories(name, color, icon), profiles:created_by(display_name, avatar_url)',
       { count: 'exact' }
     )
     .eq('household_id', householdId)

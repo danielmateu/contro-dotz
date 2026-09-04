@@ -165,6 +165,7 @@ export async function createExpenseAction(
         .select('amount')
         .eq('household_id', householdId)
         .eq('category_id', category_id)
+        .eq('is_personal', false)
         .gte('expense_date', currentStartDate)
         .lte('expense_date', currentEndDate)
 

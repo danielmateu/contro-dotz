@@ -67,6 +67,7 @@ export default async function BudgetsPage({ searchParams }: BudgetsPageProps) {
       .from('expenses')
       .select('amount, category_id')
       .eq('household_id', householdId)
+      .eq('is_personal', false)
       .gte('expense_date', `${month}-01`)
       .lte('expense_date', endDate)
   ])

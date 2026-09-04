@@ -29,7 +29,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { Edit2, Receipt, Calendar, CreditCard, Tag } from 'lucide-react'
+import { Edit2, Receipt, Calendar, CreditCard, Tag, User } from 'lucide-react'
 
 interface ExpensesViewClientProps {
   householdId: string
@@ -224,8 +224,14 @@ export function ExpensesViewClient({
                       {/* Description / Notes */}
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-semibold text-foreground flex items-center gap-1.5">
+                          <span className="font-semibold text-foreground flex items-center gap-1.5 flex-wrap">
                             {expense.description}
+                            {expense.is_personal && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                                <User className="h-2.5 w-2.5" />
+                                {locale === 'en' ? 'Personal' : locale === 'ca' ? 'Personal' : 'Personal'}
+                              </span>
+                            )}
                             {expense.receipt_path && (
                               <ReceiptButton receiptPath={expense.receipt_path} />
                             )}
@@ -295,6 +301,7 @@ export function ExpensesViewClient({
                               notes: expense.notes,
                               receipt_path: expense.receipt_path,
                               created_by: expense.created_by,
+                              is_personal: expense.is_personal,
                             }}
                             members={mappedMembers}
                             currentUserId={currentUserId}
