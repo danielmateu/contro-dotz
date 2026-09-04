@@ -18,6 +18,7 @@ export interface CalculatePetStatsParams {
   daysPassed: number
   totalDaysInMonth?: number
   totalHouseholdFund?: number
+  totalSavingsThisMonth?: number
   locale?: string
 }
 
@@ -27,6 +28,7 @@ export function calculatePetStats({
   daysPassed,
   totalDaysInMonth = 30,
   totalHouseholdFund = 0,
+  totalSavingsThisMonth = 0,
   locale = 'es',
 }: CalculatePetStatsParams): PetStats {
   const isCatalan = locale === 'ca'
@@ -78,19 +80,19 @@ export function calculatePetStats({
     paceStatus = 'critical'
   }
 
-  // Ajuste fino por ritmo (máximo +/- 10 puntos a la salud base)
-  let paceAdjustment = 0
+  // Ajuste fino por ritmo y bonificación por ahorro activo (+5 salud por tener ahorros guardados este mes)
+  let paceAdjustment = totalSavingsThisMonth > 0 ? 5 : 0
   if (!isEarlyMonthBuffer) {
-    if (paceStatus === 'excellent') paceAdjustment = 5
-    else if (paceStatus === 'warning') paceAdjustment = -8
-    else if (paceStatus === 'critical') paceAdjustment = -15
+    if (paceStatus === 'excellent') paceAdjustment += 5
+    else if (paceStatus === 'warning') paceAdjustment -= 8
+    else if (paceStatus === 'critical') paceAdjustment -= 15
   }
 
   const health = Math.min(100, Math.max(10, Math.round(baseHealth + paceAdjustment)))
 
   // Determinar estado de ánimo (mood)
   let mood: PetMood = 'happy'
-  if (health >= 88 && (paceStatus === 'excellent' || spentPercentage <= 40)) {
+  if (health >= 88 && (paceStatus === 'excellent' || spentPercentage <= 40 || totalSavingsThisMonth > 0)) {
     mood = 'super_hero'
   } else if (health >= 70) {
     mood = 'happy'
@@ -104,7 +106,7 @@ export function calculatePetStats({
   const baseLevel = 3
   const levelBonus = health >= 90 ? 2 : health >= 75 ? 1 : 0
   const level = baseLevel + levelBonus
-  const xp = Math.min(100, Math.round(health * 0.95 + (paceStatus === 'excellent' ? 5 : 0)))
+  const xp = Math.min(100, Math.round(health * 0.95 + (paceStatus === 'excellent' ? 5 : 0) + (totalSavingsThisMonth > 0 ? 5 : 0)))
   const streakDays = health >= 70 ? Math.min(30, effectiveDays) : Math.max(1, Math.floor(effectiveDays / 2))
 
   // Generar títulos y frases dinámicas según estado e idioma
@@ -115,13 +117,17 @@ export function calculatePetStats({
     switch (mood) {
       case 'super_hero':
         moodTitle = 'Súper Estalviador!'
-        dialogue = spentPercentage < 50
-          ? 'Increïble ritme d’estalvi! El teu patrimoni està volant alt avui! 🚀'
-          : 'Ets un mestre de les finances! Segueixes molt per sota del teu límit.'
+        dialogue = totalSavingsThisMonth > 0
+          ? 'Quina meravella d’estalvis! La teva guardiola i jo estem plens d’energia! 🐷✨'
+          : spentPercentage < 50
+            ? 'Increïble ritme d’estalvi! El teu patrimoni està volant alt avui! 🚀'
+            : 'Ets un mestre de les finances! Segueixes molt per sota del teu límit.'
         break
       case 'happy':
         moodTitle = 'En plena forma'
-        dialogue = 'Tot sota control! Les finances de la llar estan en equilibri perfecte. 🌱'
+        dialogue = totalSavingsThisMonth > 0
+          ? 'M\'encanta veure créixer les teves guardioles! Cada aportació compta. 💰'
+          : 'Tot sota control! Les finances de la llar estan en equilibri perfecte. 🌱'
         break
       case 'warning':
         moodTitle = 'Atenció al despesa'
@@ -137,13 +143,17 @@ export function calculatePetStats({
     switch (mood) {
       case 'super_hero':
         moodTitle = '¡Súper Ahorrador!'
-        dialogue = spentPercentage < 50
-          ? '¡Increíble ritmo de ahorro! ¡Tu salud financiera está volando alto hoy! 🚀'
-          : '¡Eres un maestro de las finanzas! Te mantienes muy por debajo de tu límite.'
+        dialogue = totalSavingsThisMonth > 0
+          ? '¡Qué maravilla de ahorros! ¡Mi hucha y yo estamos llenos de energía! 🐷✨'
+          : spentPercentage < 50
+            ? '¡Increíble ritmo de ahorro! ¡Tu salud financiera está volando alto hoy! 🚀'
+            : '¡Eres un maestro de las finanzas! Te mantienes muy por debajo de tu límite.'
         break
       case 'happy':
         moodTitle = 'En plena forma'
-        dialogue = '¡Todo bajo control! Las finanzas del hogar están en perfecto equilibrio. 🌱'
+        dialogue = totalSavingsThisMonth > 0
+          ? '¡Me encanta ver crecer tus huchas! Cada aportación cuenta para el futuro. 💰'
+          : '¡Todo bajo control! Las finanzas del hogar están en perfecto equilibrio. 🌱'
         break
       case 'warning':
         moodTitle = 'Alerta de gasto'

@@ -16,7 +16,7 @@ export interface QuestItem {
   rewardCoins: number
   rewardXp: number
   icon: string
-  conditionType: 'budget_ok' | 'streak' | 'has_budget' | 'super_hero'
+  conditionType: 'budget_ok' | 'streak' | 'has_budget' | 'super_hero' | 'saving_contribution'
 }
 
 export const SHOP_ITEMS: ShopItem[] = [
@@ -106,6 +106,15 @@ export const GAME_QUESTS: QuestItem[] = [
     conditionType: 'has_budget',
   },
   {
+    id: 'quest_saving_contribution',
+    title: { es: 'Ahorrador Activo', ca: 'Estalviador Actiu' },
+    description: { es: 'Añade fondos a una hucha de ahorro', ca: 'Afegeix fons a una guardiola d’estalvi' },
+    rewardCoins: 50,
+    rewardXp: 40,
+    icon: '🐷',
+    conditionType: 'saving_contribution',
+  },
+  {
     id: 'quest_streak_master',
     title: { es: 'Racha Imparable', ca: 'Racha Imparable' },
     description: { es: 'Consigue 3 o más días seguidos de racha positiva', ca: 'Aconsegueix 3 o més dies seguits de racha positiva' },
@@ -123,7 +132,6 @@ export const GAME_QUESTS: QuestItem[] = [
     icon: '⚡',
     conditionType: 'super_hero',
   }
-
 ]
 
 export interface UserGameState {

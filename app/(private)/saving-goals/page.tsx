@@ -50,16 +50,29 @@ export default async function SavingGoalsPage() {
         saving_goals (name)
       `)
       .order('created_at', { ascending: false })
-      .limit(20),
+      .limit(50),
     supabase
       .from('household_members')
-      .select('user_id, role, profiles(display_name, email, avatar_url)')
+      .select('user_id, role, monthly_income, profiles(display_name, email, avatar_url)')
       .eq('household_id', householdId),
   ])
 
   const goals = goalsRes.data || []
   const rawContributions = contributionsRes.data || []
   const membersList = membersRes.data || []
+
+  // Calcular salario mensual total del hogar
+  const totalMonthlySalary = membersList.reduce((acc: number, m: any) => acc + Number(m.monthly_income || 0), 0)
+
+  // Calcular total guardado acumulado en huchas
+  const totalHouseholdSaved = goals.reduce((acc: number, g: any) => acc + Number(g.current_amount || 0), 0)
+
+  // Calcular aportaciones del mes en curso
+  const now = new Date()
+  const currentMonthPrefix = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+  const currentMonthSavings = rawContributions
+    .filter((c: any) => c.created_at && c.created_at.startsWith(currentMonthPrefix))
+    .reduce((acc: number, c: any) => acc + Number(c.amount || 0), 0)
 
   // Limpiar aportaciones para pasarlas al cliente de forma segura
   const contributions = rawContributions.map((c: any) => {
@@ -95,6 +108,9 @@ export default async function SavingGoalsPage() {
       initialGoals={goals}
       initialContributions={contributions}
       members={members}
+      totalMonthlySalary={totalMonthlySalary}
+      totalHouseholdSaved={totalHouseholdSaved}
+      currentMonthSavings={currentMonthSavings}
     />
   )
 }

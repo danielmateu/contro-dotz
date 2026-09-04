@@ -19,9 +19,12 @@ export async function createSavingGoalAction(
     return { error: 'El nombre de la meta es obligatorio.' }
   }
 
-  const target_amount = parseFloat(target_amount_str.replace(',', '.'))
-  if (isNaN(target_amount) || target_amount <= 0) {
-    return { error: 'El importe objetivo debe ser un número mayor que 0.' }
+  let target_amount = 0
+  if (target_amount_str && target_amount_str.trim() !== '') {
+    target_amount = parseFloat(target_amount_str.replace(',', '.'))
+    if (isNaN(target_amount) || target_amount < 0) {
+      return { error: 'El importe objetivo debe ser un número válido mayor o igual a 0.' }
+    }
   }
 
   const supabase = await createClient()
@@ -50,10 +53,14 @@ export async function createSavingGoalAction(
   try {
     const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single()
     const userName = profile?.display_name || 'Miembro'
+    const goalText = target_amount > 0 
+      ? `🎯 **Nueva meta creada**: **${userName}** ha propuesto la meta de ahorro **"${name.trim()}"** con un objetivo de **${target_amount.toFixed(2)}€**`
+      : `🐷 **Nueva hucha libre creada**: **${userName}** ha abierto la hucha libre **"${name.trim()}"** (ahorro sin meta fija) 💰`
+    
     await supabase.from('messages').insert({
       household_id: householdId,
       created_by: user.id,
-      content: `🎯 **Nueva meta creada**: **${userName}** ha propuesto la meta de ahorro **"${name.trim()}"** con un objetivo de **${target_amount.toFixed(2)}€**`,
+      content: goalText,
     })
   } catch (chatError) {
     console.error(chatError)
@@ -62,7 +69,7 @@ export async function createSavingGoalAction(
   revalidatePath('/saving-goals')
   revalidatePath('/dashboard')
   revalidatePath('/chat')
-  return { success: 'Meta de ahorro registrada con éxito.' }
+  return { success: 'Hucha de ahorro registrada con éxito.' }
 }
 
 /**

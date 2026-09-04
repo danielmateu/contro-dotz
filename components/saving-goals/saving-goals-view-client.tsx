@@ -11,6 +11,9 @@ interface SavingGoalsViewClientProps {
   initialGoals: any[]
   initialContributions: any[]
   members: any[]
+  totalMonthlySalary?: number
+  totalHouseholdSaved?: number
+  currentMonthSavings?: number
 }
 
 export function SavingGoalsViewClient({
@@ -20,6 +23,9 @@ export function SavingGoalsViewClient({
   initialGoals,
   initialContributions,
   members,
+  totalMonthlySalary = 0,
+  totalHouseholdSaved = 0,
+  currentMonthSavings = 0,
 }: SavingGoalsViewClientProps) {
   const { t, locale } = useI18n()
 
@@ -28,17 +34,17 @@ export function SavingGoalsViewClient({
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading">
           {locale === 'en'
-            ? 'Collaborative Savings Goals'
+            ? 'Collaborative Savings & Piggy Banks'
             : locale === 'ca'
-              ? 'Guardioles d\'Estalvi Col·lectiu'
-              : 'Huchas de Ahorro Colectivo'}
+              ? 'Guardioles i Estalvis Col·lectius'
+              : 'Huchas y Ahorro Colectivo'}
         </h1>
         <p className="text-muted-foreground">
           {locale === 'en'
-            ? 'Set collaborative financial goals with your family, make contributions and track your savings progress in real time.'
+            ? 'Track how much of your salary is allocated to savings, define flexible piggy banks or goals, and level up your Tamagotchi together.'
             : locale === 'ca'
-              ? 'Defineix fites financeres col·laboratives amb la teva família, fes aportacions i segueix el progrés en temps real.'
-              : 'Define metas financieras colaborativas con tu familia, realiza aportaciones y sigue el progreso de vuestro ahorro en tiempo real.'}
+              ? 'Segueix quin percentatge del salari destines a l\'estalvi, crea guardioles lliures o metas, i fa evolucionar el teu Tamagotchi.'
+              : 'Analiza qué porcentaje de tu salario destinas al ahorro, crea huchas libres u objetivos, y evoluciona a tu Tamagotchi ahorrando juntos.'}
         </p>
       </div>
 
@@ -49,6 +55,9 @@ export function SavingGoalsViewClient({
         initialGoals={initialGoals}
         initialContributions={initialContributions}
         members={members}
+        totalMonthlySalary={totalMonthlySalary}
+        totalHouseholdSaved={totalHouseholdSaved}
+        currentMonthSavings={currentMonthSavings}
       />
     </div>
   )
