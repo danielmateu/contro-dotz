@@ -95,7 +95,7 @@ export function HeaderTamagotchiTrigger({ householdId }: HeaderTamagotchiTrigger
       <PopoverContent
         align="end"
         sideOffset={8}
-        className="w-[calc(100vw-2rem)] sm:w-[460px] max-w-[calc(100vw-1rem)] p-0 border-0 rounded-3xl overflow-hidden shadow-2xl bg-transparent max-h-[85vh] overflow-y-auto"
+        className="w-[calc(100vw-2rem)] sm:w-115 max-w-[calc(100vw-1rem)] p-0 border-0 rounded-3xl overflow-hidden shadow-2xl bg-transparent max-h-[85vh] overflow-y-auto"
       >
         <TamagotchiCard
           stats={stats}

@@ -3,7 +3,8 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { PetMood } from '@/lib/game/fin-pet-engine'
-import { Sparkles, Heart, Zap, AlertTriangle } from 'lucide-react'
+import { Sparkles, Heart, Zap, AlertTriangle, Coins } from 'lucide-react'
+import { useGameState } from '@/lib/game/game-context'
 
 interface TamagotchiAvatarProps {
   mood?: PetMood
@@ -24,16 +25,25 @@ export function TamagotchiAvatar({
   equippedAccessory = 'none',
   onClick,
 }: TamagotchiAvatarProps) {
+  const { registerTap } = useGameState()
   const [isTapped, setIsTapped] = useState(false)
-  const [hearts, setHearts] = useState<{ id: number; x: number }[]>([])
+  const [tapPopups, setTapPopups] = useState<{ id: number; x: number; isCoinReward?: boolean; bonusCoins?: number }[]>([])
 
-  const handleTap = () => {
+  const handleTap = async () => {
     if (!interactive) return
     setIsTapped(true)
 
-    // Crear animación de corazones/estrellas flotantes al tocar
-    const newHeart = { id: Date.now(), x: (Math.random() - 0.5) * 40 }
-    setHearts((prev) => [...prev.slice(-4), newHeart])
+    // Registrar toque en el estado global
+    const result = await registerTap()
+
+    // Crear animación flotante (+1 toque o recompensa de monedas si alcanza un hito)
+    const newPopup = {
+      id: Date.now(),
+      x: (Math.random() - 0.5) * 40,
+      isCoinReward: result.earnedCoins,
+      bonusCoins: result.bonusCoins,
+    }
+    setTapPopups((prev) => [...prev.slice(-5), newPopup])
 
     setTimeout(() => setIsTapped(false), 400)
     if (onClick) onClick()
@@ -130,18 +140,28 @@ export function TamagotchiAvatar({
         )}
       </AnimatePresence>
 
-      {/* Corazones/estrellas flotantes al hacer tap */}
+      {/* Animaciones flotantes al hacer tap (+1 toque y +5 Coins cada 20 toques) */}
       <AnimatePresence>
-        {hearts.map((h) => (
+        {tapPopups.map((p) => (
           <motion.div
-            key={h.id}
-            initial={{ opacity: 1, y: 0, x: h.x, scale: 0.6 }}
-            animate={{ opacity: 0, y: dim.heartOffset, scale: 1.2 }}
+            key={p.id}
+            initial={{ opacity: 1, y: 0, x: p.x, scale: p.isCoinReward ? 0.8 : 0.6 }}
+            animate={{ opacity: 0, y: dim.heartOffset - (p.isCoinReward ? 15 : 0), scale: p.isCoinReward ? 1.3 : 1.1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="absolute top-0 z-30 pointer-events-none text-rose-500"
+            transition={{ duration: p.isCoinReward ? 1.2 : 0.8, ease: 'easeOut' }}
+            className="absolute top-0 z-30 pointer-events-none flex items-center gap-1 font-extrabold"
           >
-            {mood === 'super_hero' ? <Sparkles className="w-4 h-4 fill-amber-400 text-amber-500" /> : <Heart className="w-4 h-4 fill-rose-500" />}
+            {p.isCoinReward ? (
+              <span className="bg-amber-500 text-slate-950 text-[11px] px-2 py-0.5 rounded-full shadow-lg border border-white flex items-center gap-1 animate-bounce">
+                <Coins className="w-3.5 h-3.5 fill-current" />
+                +{p.bonusCoins || 5} Coins! 🪙
+              </span>
+            ) : (
+              <span className="text-rose-500 text-xs flex items-center gap-0.5 drop-shadow-md">
+                <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
+                +1
+              </span>
+            )}
           </motion.div>
         ))}
       </AnimatePresence>

@@ -139,6 +139,7 @@ export interface UserGameState {
   equippedAccessory: string
   unlockedItems: string[]
   completedQuests: string[]
+  tapCount: number
 }
 
 const LOCAL_STORAGE_KEY = 'dotzi_user_game_state'
@@ -148,6 +149,7 @@ export const DEFAULT_GAME_STATE: UserGameState = {
   equippedAccessory: 'none',
   unlockedItems: ['none'],
   completedQuests: [],
+  tapCount: 0,
 }
 
 export function getLocalGameState(): UserGameState {
@@ -181,7 +183,7 @@ export async function fetchUserGameState(): Promise<UserGameState> {
 
     const { data, error } = await supabase
       .from('user_game_state')
-      .select('coins, equipped_accessory, unlocked_items, completed_quests')
+      .select('coins, equipped_accessory, unlocked_items, completed_quests, tap_count')
       .eq('user_id', user.id)
       .single()
 
@@ -194,6 +196,7 @@ export async function fetchUserGameState(): Promise<UserGameState> {
       equippedAccessory: data.equipped_accessory ?? local.equippedAccessory,
       unlockedItems: Array.isArray(data.unlocked_items) ? data.unlocked_items : local.unlockedItems,
       completedQuests: Array.isArray(data.completed_quests) ? data.completed_quests : local.completedQuests,
+      tapCount: data.tap_count ?? local.tapCount ?? 0,
     }
 
     setLocalGameState(state)
@@ -220,6 +223,7 @@ export async function saveUserGameState(state: UserGameState): Promise<void> {
         equipped_accessory: state.equippedAccessory,
         unlocked_items: state.unlockedItems,
         completed_quests: state.completedQuests,
+        tap_count: state.tapCount,
         updated_at: new Date().toISOString(),
       })
   } catch (err) {
