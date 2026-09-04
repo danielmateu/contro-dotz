@@ -63,11 +63,12 @@ export const metadata: Metadata = {
   },
 }
 
-const robotoHeading = Roboto({ subsets: ['latin'], weight: ['400', '500', '700', '900'], variable: '--font-heading' })
-const inter = Inter({ subsets: ['latin'], variable: '--font-sans' })
+const robotoHeading = Roboto({ subsets: ['latin'], weight: ['400', '500', '700', '900'], variable: '--font-heading', display: 'swap' })
+const inter = Inter({ subsets: ['latin'], variable: '--font-sans', display: 'swap' })
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: 'swap',
 })
 
 export default function RootLayout({
