@@ -67,12 +67,15 @@ export function HeroPiggyBackground() {
         }
         .animate-float-slow {
           animation: floatSlow 7s ease-in-out infinite;
+          will-change: transform;
         }
         .animate-float-medium {
           animation: floatMedium 5.5s ease-in-out infinite;
+          will-change: transform;
         }
         .animate-float-delayed {
           animation: floatDelayed 6.5s ease-in-out 1.5s infinite;
+          will-change: transform;
         }
       `}</style>
     </div>
