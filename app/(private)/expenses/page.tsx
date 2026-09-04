@@ -19,6 +19,7 @@ interface ExpensesPageProps {
     categoryId?: string
     memberId?: string
     sortBy?: string
+    page?: string
   }>
 }
 
@@ -30,6 +31,11 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   const categoryId = query.categoryId || ''
   const memberId = query.memberId || ''
   const sortBy = query.sortBy || 'date_desc'
+
+  const pageSize = 40
+  const currentPage = Math.max(1, parseInt(query.page || '1', 10) || 1)
+  const from = (currentPage - 1) * pageSize
+  const to = currentPage * pageSize - 1
 
   const supabase = await createClient()
 
@@ -59,22 +65,39 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
     .select('user_id, profiles(display_name)')
     .eq('household_id', householdId)
 
-  // 3. Preparar consulta de gastos con filtros y ordenación
+  // 3. Preparar consulta de gastos con filtros, ordenación y paginación
   let dbQuery = supabase
     .from('expenses')
     .select(
-      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
+      'id, amount, category_id, description, expense_date, payment_method, notes, created_by, receipt_path, categories(name, color, icon), profiles:created_by(display_name, avatar_url)',
+      { count: 'exact' }
     )
     .eq('household_id', householdId)
 
-  if (startDate) dbQuery = dbQuery.gte('expense_date', startDate)
-  if (endDate) dbQuery = dbQuery.lte('expense_date', endDate)
-  if (categoryId) dbQuery = dbQuery.eq('category_id', categoryId)
+  let totalAmountQuery = supabase
+    .from('expenses')
+    .select('amount')
+    .eq('household_id', householdId)
+
+  if (startDate) {
+    dbQuery = dbQuery.gte('expense_date', startDate)
+    totalAmountQuery = totalAmountQuery.gte('expense_date', startDate)
+  }
+  if (endDate) {
+    dbQuery = dbQuery.lte('expense_date', endDate)
+    totalAmountQuery = totalAmountQuery.lte('expense_date', endDate)
+  }
+  if (categoryId) {
+    dbQuery = dbQuery.eq('category_id', categoryId)
+    totalAmountQuery = totalAmountQuery.eq('category_id', categoryId)
+  }
   if (memberId) {
     if (memberId === 'shared') {
       dbQuery = dbQuery.is('created_by', null)
+      totalAmountQuery = totalAmountQuery.is('created_by', null)
     } else {
       dbQuery = dbQuery.eq('created_by', memberId)
+      totalAmountQuery = totalAmountQuery.eq('created_by', memberId)
     }
   }
 
@@ -92,10 +115,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       .order('created_at', { ascending: false })
   }
 
-  const [categoriesRes, membersRes, expensesRes] = await Promise.all([
+  // Aplicar rango de paginación
+  dbQuery = dbQuery.range(from, to)
+
+  const [categoriesRes, membersRes, expensesRes, totalAmountRes] = await Promise.all([
     categoriesPromise,
     membersPromise,
-    dbQuery
+    dbQuery,
+    totalAmountQuery
   ])
 
   if (expensesRes.error) {
@@ -104,7 +131,14 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   const categories = categoriesRes.data
   const members = membersRes.data
-  const expenses = expensesRes.data
+  const expenses = expensesRes.data || []
+  const totalCount = expensesRes.count || 0
+  const totalPages = Math.ceil(totalCount / pageSize) || 1
+
+  const totalExpensesAmount = (totalAmountRes.data || []).reduce(
+    (sum, exp) => sum + Number(exp.amount || 0),
+    0
+  )
 
   const mappedMembers = (members || []).map((m: any) => {
     const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
@@ -123,7 +157,12 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
       categories={categories || []}
       members={(members as any) || []}
       mappedMembers={mappedMembers}
-      expenses={expenses || []}
+      expenses={expenses}
+      totalCount={totalCount}
+      currentPage={currentPage}
+      totalPages={totalPages}
+      pageSize={pageSize}
+      totalExpensesAmount={totalExpensesAmount}
       startDate={startDate}
       endDate={endDate}
       categoryId={categoryId}
