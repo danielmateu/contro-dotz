@@ -363,7 +363,7 @@ export async function saveUserGameState(state: UserGameState): Promise<void> {
 
     if (!user) return
 
-    await supabase
+    const { error } = await supabase
       .from('user_game_state')
       .upsert({
         user_id: user.id,
@@ -376,6 +376,20 @@ export async function saveUserGameState(state: UserGameState): Promise<void> {
         tap_count: state.tapCount,
         updated_at: new Date().toISOString(),
       })
+
+    // Si Supabase devuelve error (ej. si la migración de skin_color/hairstyle aún no se ha ejecutado), hacemos fallback a las columnas base
+    if (error) {
+      await supabase
+        .from('user_game_state')
+        .upsert({
+          user_id: user.id,
+          coins: state.coins,
+          equipped_accessory: state.equippedAccessory,
+          unlocked_items: state.unlockedItems,
+          completed_quests: state.completedQuests,
+          updated_at: new Date().toISOString(),
+        })
+    }
   } catch (err) {
     console.warn('Could not sync game state to Supabase, saved locally:', err)
   }
