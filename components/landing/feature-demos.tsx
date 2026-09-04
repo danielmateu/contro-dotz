@@ -179,12 +179,7 @@ export function EscanerIADemo() {
         {scanState === 'scanning' && (
           <div className="relative flex flex-col items-center justify-center h-full py-4 space-y-2">
             {/* Línea de escaneo láser */}
-            <motion.div
-              initial={{ top: '0%' }}
-              animate={{ top: '100%' }}
-              transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
-              className="absolute left-0 right-0 h-0.5 bg-emerald-500/80 shadow-md shadow-emerald-500 z-10 pointer-events-none"
-            />
+            <div className="absolute left-0 right-0 h-0.5 bg-emerald-500/80 shadow-md shadow-emerald-500 z-10 pointer-events-none animate-scan-laser" />
             {/* <span className="text-2xl animate-pulse">🧾</span> */}
             <span className="text-2xl select-none">
               <Loader2

@@ -181,21 +181,21 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
 
   // Variantes de entrada vertical segura para el bloque de información
   const infoVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring' as const, stiffness: 70, damping: 14 },
+      transition: { duration: 0.4, ease: 'easeOut' as const },
     },
   }
 
   // Variantes de entrada vertical segura para el bloque de la demo interactiva
   const demoVariants = {
-    hidden: { opacity: 0, y: 30 },
+    hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: 'spring' as const, stiffness: 70, damping: 14, delay: 0.15 },
+      transition: { duration: 0.4, ease: 'easeOut' as const, delay: 0.1 },
     },
   }
 

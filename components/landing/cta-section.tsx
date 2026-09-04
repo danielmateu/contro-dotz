@@ -13,10 +13,10 @@ interface CTASectionProps {
 export function CTASection({ isAuthenticated }: CTASectionProps) {
   return (
     <motion.section
-      initial={{ opacity: 0, y: 40, scale: 0.98 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: '-50px' }}
-      transition={{ type: 'spring', stiffness: 50, damping: 15 }}
+      transition={{ duration: 0.5, ease: 'easeOut' }}
       className="w-full max-w-5xl mx-auto mt-16 sm:mt-24 p-5 sm:p-8 md:p-14 rounded-2xl sm:rounded-[32px] border border-slate-200/35 dark:border-slate-800/80 bg-slate-200/10 dark:bg-slate-900/30 backdrop-blur-md relative overflow-hidden flex flex-col items-center text-center space-y-5 sm:space-y-7 shadow-2xl"
     >
       {/* Elementos decorativos de fondo de luz radial */}

@@ -104,10 +104,10 @@ export function InteractiveShowcase() {
 
               {/* Proyección predictiva Badge */}
               <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
+                initial={{ opacity: 0, scale: 0.9 }}
                 whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: 0.4, type: 'spring', stiffness: 100 }}
+                transition={{ delay: 0.3, duration: 0.3, ease: 'easeOut' }}
                 className="mt-3.5 text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-2 py-1 rounded-lg inline-flex items-center gap-1 select-none"
               >
                 <TrendingUp className="h-3.5 w-3.5 animate-bounce" />
@@ -169,7 +169,7 @@ export function InteractiveShowcase() {
                       initial={{ opacity: 0, y: -10 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ delay: 1.5, type: 'spring', stiffness: 120 }}
+                      transition={{ delay: 1.2, duration: 0.3, ease: 'easeOut' }}
                       className="text-xs text-rose-600 dark:text-rose-400 font-bold absolute"
                     >
                       ⚠️ ¡Presupuesto superado!
@@ -204,10 +204,10 @@ export function InteractiveShowcase() {
                 {chatStep >= 1 && (
                   <motion.div
                     key="msg1"
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="flex flex-col items-start gap-0.5"
                   >
                     <span className="text-[10px] text-foreground font-bold">Mateu</span>
@@ -220,10 +220,10 @@ export function InteractiveShowcase() {
                 {chatStep >= 2 && (
                   <motion.div
                     key="msg2"
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="flex flex-col items-start gap-0.5 w-full"
                   >
                     <span className="text-[10px] text-foreground font-bold flex items-center gap-1">
@@ -238,10 +238,10 @@ export function InteractiveShowcase() {
                 {chatStep >= 3 && (
                   <motion.div
                     key="msg3"
-                    initial={{ opacity: 0, y: 15, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                    transition={{ type: 'spring', stiffness: 120, damping: 14 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, transition: { duration: 0.15 } }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="flex flex-col items-end gap-0.5 w-full align-self-end"
                   >
                     <span className="text-[10px] text-primary font-bold flex items-center gap-1">
