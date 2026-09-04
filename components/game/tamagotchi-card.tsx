@@ -109,6 +109,8 @@ export function TamagotchiCard({
                 mood={stats.mood}
                 size={variant === 'hero' ? 'lg' : 'md'}
                 equippedAccessory={gameState.equippedAccessory}
+                skinColor={gameState.skinColor}
+                hairstyle={gameState.hairstyle}
                 interactive={true}
               />
             </div>
@@ -163,13 +165,13 @@ export function TamagotchiCard({
             </div>
           </div>
 
-          {/* Acciones Rápidas (Tienda, Misiones, Gasto, Presupuesto) */}
-          <div className="pt-1 sm:pt-2 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5">
+          {/* Acciones Rápidas (Charlar, Alimentar, Tienda, Misiones, Gasto) */}
+          <div className="pt-1 sm:pt-2 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setChatOpen(true)}
-              className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 px-2 sm:px-3 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 px-2 h-8 sm:h-9"
             >
               <MessageCircle className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">{isCatalan ? 'Xerrar 💬' : 'Charlar 💬'}</span>
@@ -179,7 +181,17 @@ export function TamagotchiCard({
               variant="outline"
               size="sm"
               onClick={() => setShopOpen(true)}
-              className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-2 sm:px-3 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20 px-2 h-8 sm:h-9"
+            >
+              <span className="text-xs">🍕</span>
+              <span className="truncate">{isCatalan ? 'Menjar 🍕' : 'Comer 🍕'}</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShopOpen(true)}
+              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-2 h-8 sm:h-9"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">{isCatalan ? 'Botiga 🛒' : 'Tienda 🛒'}</span>
@@ -189,14 +201,14 @@ export function TamagotchiCard({
               variant="outline"
               size="sm"
               onClick={() => setQuestsOpen(true)}
-              className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-2 sm:px-3 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-2 h-8 sm:h-9"
             >
               <Target className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate">{isCatalan ? 'Missions 🎯' : 'Misiones 🎯'}</span>
             </Button>
 
-            <Link href="/expenses" className="w-full">
-              <Button variant="default" size="sm" className="w-full rounded-xl font-semibold gap-1 sm:gap-1.5 text-[11px] sm:text-xs shadow-xs px-2 sm:px-3 h-8 sm:h-9">
+            <Link href="/expenses" className="w-full col-span-2 sm:col-span-1">
+              <Button variant="default" size="sm" className="w-full rounded-xl font-semibold gap-1 text-[11px] sm:text-xs shadow-xs px-2 h-8 sm:h-9">
                 <PlusCircle className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{isCatalan ? 'Despesa' : 'Gasto'}</span>
               </Button>

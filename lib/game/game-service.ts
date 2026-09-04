@@ -6,7 +6,9 @@ export interface ShopItem {
   description: { es: string; ca: string }
   price: number
   icon: string
-  category: 'head' | 'eyes' | 'body' | 'hand'
+  category: 'head' | 'eyes' | 'body' | 'hand' | 'skin' | 'hair' | 'food'
+  restoreHealth?: number
+  rewardXp?: number
 }
 
 export interface QuestItem {
@@ -20,6 +22,7 @@ export interface QuestItem {
 }
 
 export const SHOP_ITEMS: ShopItem[] = [
+  // --- ACCESORIOS Y ROPA ---
   {
     id: 'beer',
     name: { es: 'Cerveza Fresca', ca: 'Cervesa Fresca' },
@@ -82,8 +85,147 @@ export const SHOP_ITEMS: ShopItem[] = [
     description: { es: '¡Para celebrar un capricho dentro de presupuesto!', ca: 'Per celebrar un capritx!' },
     price: 75,
     icon: '🍕',
-    category: 'hand', // 'head' | 'eyes' | 'body' | 'hand'
-  }
+    category: 'hand',
+  },
+
+  // --- COLORES / PIEL ---
+  {
+    id: 'skin_indigo',
+    name: { es: 'Menta Clásico', ca: 'Menta Clàssic' },
+    description: { es: 'El color verde suave original de Dotzi', ca: 'El color verd suau original de Dotzi' },
+    price: 0,
+    icon: '🟩',
+    category: 'skin',
+  },
+  {
+    id: 'skin_purple',
+    name: { es: 'Púrpura Cíber', ca: 'Púrpura Cíber' },
+    description: { es: 'Un tono morado neón futurista', ca: 'Un to lila neó futurista' },
+    price: 50,
+    icon: '🟪',
+    category: 'skin',
+  },
+  {
+    id: 'skin_cyan',
+    name: { es: 'Cian Océano', ca: 'Cian Oceà' },
+    description: { es: 'Color azul turquesa brillante y fresco', ca: 'Color blau turquesa brillant i fresc' },
+    price: 60,
+    icon: '🟦',
+    category: 'skin',
+  },
+  {
+    id: 'skin_amber',
+    name: { es: 'Dorado Ahorrador', ca: 'Daurat Estalviador' },
+    description: { es: '¡Destaca como una hucha de oro puro!', ca: 'Destaca com una guardiola d’or pur!' },
+    price: 100,
+    icon: '🟨',
+    category: 'skin',
+  },
+  {
+    id: 'skin_rose',
+    name: { es: 'Rosa Coquette', ca: 'Rosa Coquette' },
+    description: { es: 'Estilo pastel súper dulce y entrañable', ca: 'Estil pastel súper dolç i entranyable' },
+    price: 50,
+    icon: '🌸',
+    category: 'skin',
+  },
+
+  // --- PEINADOS ---
+  {
+    id: 'hair_none',
+    name: { es: 'Sin Peinado', ca: 'Sense Capell' },
+    description: { es: 'Suave y redondito al natural', ca: 'Suau i rodonet al natural' },
+    price: 0,
+    icon: '👶',
+    category: 'hair',
+  },
+  {
+    id: 'hair_copete',
+    name: { es: 'Copete Cool', ca: 'Tufeig Cool' },
+    description: { es: 'Un peinado elegante y con mucho estilo', ca: 'Un peinat elegant i amb molt d’estil' },
+    price: 40,
+    icon: '💇‍♂️',
+    category: 'hair',
+  },
+  {
+    id: 'hair_cresta',
+    name: { es: 'Cresta Punk', ca: 'Cresta Punk' },
+    description: { es: '¡Actitud rebelde contra las compras compulsivas!', ca: 'Actitud rebel contra les compres compulsives!' },
+    price: 60,
+    icon: '🧑‍🎤',
+    category: 'hair',
+  },
+  {
+    id: 'hair_afro',
+    name: { es: 'Afro Retro', ca: 'Afro Retro' },
+    description: { es: 'Volumen esponjoso y ritmo setentero', ca: 'Volum esponjós i ritme setenter' },
+    price: 70,
+    icon: '🧑‍🦱',
+    category: 'hair',
+  },
+  {
+    id: 'hair_bow',
+    name: { es: 'Lazo Coquette', ca: 'Llaç Coquette' },
+    description: { es: 'Un lacito coqueto en la cabeza', ca: 'Un llaç bonic al cap' },
+    price: 50,
+    icon: '🎀',
+    category: 'hair',
+  },
+  {
+    id: 'hair_spikes',
+    name: { es: 'Picos Anime', ca: 'Panti Anime' },
+    description: { es: 'Peinado de protagonista de anime', ca: 'Peinat de protagonista d’anime' },
+    price: 80,
+    icon: '⚡',
+    category: 'hair',
+  },
+
+  // --- COMIDAS / ALIMENTACIÓN ---
+  {
+    id: 'food_pizza',
+    name: { es: 'Porción de Pizza 🍕', ca: 'Porció de Pizza 🍕' },
+    description: { es: 'Alimenta a Dotzi y aumenta su felicidad (+15 XP)', ca: 'Alimenta en Dotzi i augmenta la seva felicitat (+15 XP)' },
+    price: 15,
+    icon: '🍕',
+    category: 'food',
+    rewardXp: 15,
+  },
+  {
+    id: 'food_salad',
+    name: { es: 'Ensalada Fresca 🥗', ca: 'Amanida Fresca 🥗' },
+    description: { es: 'Comida equilibrada para mantener a Dotzi sano (+10 XP)', ca: 'Menjar equilibrat per mantenir en Dotzi sa (+10 XP)' },
+    price: 10,
+    icon: '🥗',
+    category: 'food',
+    rewardXp: 10,
+  },
+  {
+    id: 'food_ramen',
+    name: { es: 'Ramen Calientito 🍜', ca: 'Ramen Calentet 🍜' },
+    description: { es: 'Un tazón reconfortante lleno de energía (+20 XP)', ca: 'Un bol reconfortant ple d’energia (+20 XP)' },
+    price: 20,
+    icon: '🍜',
+    category: 'food',
+    rewardXp: 20,
+  },
+  {
+    id: 'food_icecream',
+    name: { es: 'Helado Delicioso 🍦', ca: 'Gelat Deliciós 🍦' },
+    description: { es: 'Un capricho dulce irresistible (+12 XP)', ca: 'Un capritx dolç irresistible (+12 XP)' },
+    price: 12,
+    icon: '🍦',
+    category: 'food',
+    rewardXp: 12,
+  },
+  {
+    id: 'food_donut',
+    name: { es: 'Donut Glaseado 🍩', ca: 'Donut Glassejat 🍩' },
+    description: { es: 'Energía azucarada instantánea (+12 XP)', ca: 'Energia sucrejada instantània (+12 XP)' },
+    price: 12,
+    icon: '🍩',
+    category: 'food',
+    rewardXp: 12,
+  },
 ]
 
 export const GAME_QUESTS: QuestItem[] = [
@@ -137,6 +279,8 @@ export const GAME_QUESTS: QuestItem[] = [
 export interface UserGameState {
   coins: number
   equippedAccessory: string
+  skinColor: string
+  hairstyle: string
   unlockedItems: string[]
   completedQuests: string[]
   tapCount: number
@@ -147,7 +291,9 @@ const LOCAL_STORAGE_KEY = 'dotzi_user_game_state'
 export const DEFAULT_GAME_STATE: UserGameState = {
   coins: 120, // Bonificación inicial de bienvenida
   equippedAccessory: 'none',
-  unlockedItems: ['none'],
+  skinColor: 'skin_indigo',
+  hairstyle: 'hair_none',
+  unlockedItems: ['none', 'skin_indigo', 'hair_none'],
   completedQuests: [],
   tapCount: 0,
 }
@@ -183,7 +329,7 @@ export async function fetchUserGameState(): Promise<UserGameState> {
 
     const { data, error } = await supabase
       .from('user_game_state')
-      .select('coins, equipped_accessory, unlocked_items, completed_quests, tap_count')
+      .select('coins, equipped_accessory, skin_color, hairstyle, unlocked_items, completed_quests, tap_count')
       .eq('user_id', user.id)
       .single()
 
@@ -194,6 +340,8 @@ export async function fetchUserGameState(): Promise<UserGameState> {
     const state: UserGameState = {
       coins: data.coins ?? local.coins,
       equippedAccessory: data.equipped_accessory ?? local.equippedAccessory,
+      skinColor: data.skin_color ?? local.skinColor ?? 'skin_indigo',
+      hairstyle: data.hairstyle ?? local.hairstyle ?? 'hair_none',
       unlockedItems: Array.isArray(data.unlocked_items) ? data.unlocked_items : local.unlockedItems,
       completedQuests: Array.isArray(data.completed_quests) ? data.completed_quests : local.completedQuests,
       tapCount: data.tap_count ?? local.tapCount ?? 0,
@@ -221,6 +369,8 @@ export async function saveUserGameState(state: UserGameState): Promise<void> {
         user_id: user.id,
         coins: state.coins,
         equipped_accessory: state.equippedAccessory,
+        skin_color: state.skinColor,
+        hairstyle: state.hairstyle,
         unlocked_items: state.unlockedItems,
         completed_quests: state.completedQuests,
         tap_count: state.tapCount,

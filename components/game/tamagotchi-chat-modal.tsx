@@ -168,6 +168,8 @@ export function TamagotchiChatModal({
               mood={petStats.mood}
               size="sm"
               equippedAccessory={gameState.equippedAccessory}
+              skinColor={gameState.skinColor}
+              hairstyle={gameState.hairstyle}
               interactive={false}
             />
             <div className="flex flex-col text-left">
@@ -197,6 +199,8 @@ export function TamagotchiChatModal({
                     mood={petStats.mood}
                     size="sm"
                     equippedAccessory={gameState.equippedAccessory}
+                    skinColor={gameState.skinColor}
+                    hairstyle={gameState.hairstyle}
                     interactive={false}
                   />
                 </div>
@@ -230,6 +234,8 @@ export function TamagotchiChatModal({
                 mood={petStats.mood}
                 size="sm"
                 equippedAccessory={gameState.equippedAccessory}
+                skinColor={gameState.skinColor}
+                hairstyle={gameState.hairstyle}
                 interactive={false}
               />
               <div className="bg-muted p-2.5 rounded-2xl rounded-bl-none flex items-center gap-1.5">

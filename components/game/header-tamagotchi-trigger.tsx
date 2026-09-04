@@ -84,7 +84,14 @@ export function HeaderTamagotchiTrigger({ householdId }: HeaderTamagotchiTrigger
             className="relative h-9 w-9 rounded-full hover:bg-accent/50 transition-transform active:scale-95"
             aria-label="Ver Tamagotchi Financiero Dotzi"
           >
-            <TamagotchiAvatar mood={stats.mood} size="sm" equippedAccessory={gameState.equippedAccessory} interactive={false} />
+            <TamagotchiAvatar
+              mood={stats.mood}
+              size="sm"
+              equippedAccessory={gameState.equippedAccessory}
+              skinColor={gameState.skinColor}
+              hairstyle={gameState.hairstyle}
+              interactive={false}
+            />
             {stats.health < 50 && (
               <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-background animate-pulse" />
             )}

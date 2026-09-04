@@ -36,8 +36,11 @@ export function TamagotchiShopModal({
   locale = 'es',
 }: TamagotchiShopModalProps) {
   const isCatalan = locale === 'ca'
-  const [activeTab, setActiveTab] = useState<'shop' | 'wardrobe'>('shop')
+  const [activeTab, setActiveTab] = useState<'shop' | 'wardrobe' | 'style' | 'food'>('shop')
   const [previewAccessory, setPreviewAccessory] = useState<string>(gameState.equippedAccessory)
+  const [previewSkin, setPreviewSkin] = useState<string>(gameState.skinColor || 'skin_indigo')
+  const [previewHair, setPreviewHair] = useState<string>(gameState.hairstyle || 'hair_none')
+  const [eatingFood, setEatingFood] = useState<string | null>(null)
 
   const handleBuy = async (item: ShopItem) => {
     if (gameState.coins < item.price) return
@@ -46,25 +49,65 @@ export function TamagotchiShopModal({
     const newCoins = gameState.coins - item.price
     const newUnlocked = [...gameState.unlockedItems, item.id]
 
+    let newAccessory = gameState.equippedAccessory
+    let newSkin = gameState.skinColor || 'skin_indigo'
+    let newHair = gameState.hairstyle || 'hair_none'
+
+    if (item.category === 'skin') {
+      newSkin = item.id
+      setPreviewSkin(item.id)
+    } else if (item.category === 'hair') {
+      newHair = item.id
+      setPreviewHair(item.id)
+    } else {
+      newAccessory = item.id
+      setPreviewAccessory(item.id)
+    }
+
     const newState: UserGameState = {
       ...gameState,
       coins: newCoins,
       unlockedItems: newUnlocked,
-      equippedAccessory: item.id, // Equipar automáticamente tras comprar
+      equippedAccessory: newAccessory,
+      skinColor: newSkin,
+      hairstyle: newHair,
     }
 
-    setPreviewAccessory(item.id)
     onStateChange(newState)
     await saveUserGameState(newState)
   }
 
-  const handleEquip = async (itemId: string) => {
-    const newState: UserGameState = {
-      ...gameState,
-      equippedAccessory: itemId,
+  const handleEquip = async (itemId: string, category: 'accessory' | 'skin' | 'hair') => {
+    let newState: UserGameState = { ...gameState }
+
+    if (category === 'skin') {
+      newState.skinColor = itemId
+      setPreviewSkin(itemId)
+    } else if (category === 'hair') {
+      newState.hairstyle = itemId
+      setPreviewHair(itemId)
+    } else {
+      newState.equippedAccessory = itemId
+      setPreviewAccessory(itemId)
     }
 
-    setPreviewAccessory(itemId)
+    onStateChange(newState)
+    await saveUserGameState(newState)
+  }
+
+  const handleFeed = async (foodItem: ShopItem) => {
+    if (gameState.coins < foodItem.price) return
+
+    const newCoins = gameState.coins - foodItem.price
+    const newState: UserGameState = {
+      ...gameState,
+      coins: newCoins,
+    }
+
+    // Disparar animación de comida
+    setEatingFood(foodItem.icon)
+    setTimeout(() => setEatingFood(null), 1500)
+
     onStateChange(newState)
     await saveUserGameState(newState)
   }
@@ -77,7 +120,7 @@ export function TamagotchiShopModal({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle className="text-lg sm:text-xl font-extrabold flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-indigo-500 shrink-0" />
-              <span>{isCatalan ? 'Botiga i Armari de Dotzi' : 'Tienda y Armario de Dotzi'}</span>
+              <span>{isCatalan ? 'Botiga, Armari i Menjar de Dotzi' : 'Tienda, Armario y Comida de Dotzi'}</span>
             </DialogTitle>
 
             <Badge className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-extrabold px-2.5 sm:px-3 py-1 text-xs gap-1.5 rounded-xl shrink-0">
@@ -87,8 +130,8 @@ export function TamagotchiShopModal({
           </div>
           <DialogDescription className="text-xs text-muted-foreground">
             {isCatalan
-              ? 'Personalitza el teu Tamagotchi amb barrets, ulleres i la cervesa fresca.'
-              : 'Personaliza tu Tamagotchi con gorros, gafas y la cerveza fresca.'}
+              ? 'Personalitza la pell, el peinat, els accesoris i alimenta en Dotzi.'
+              : 'Personaliza la piel, el peinado, los accesorios y alimenta a Dotzi.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -101,34 +144,47 @@ export function TamagotchiShopModal({
                 mood="happy"
                 size="lg"
                 equippedAccessory={previewAccessory}
+                skinColor={previewSkin}
+                hairstyle={previewHair}
+                eatingFood={eatingFood}
                 interactive={true}
               />
             </div>
             <div className="text-left sm:text-center min-w-0">
               <span className="text-[11px] sm:text-xs text-muted-foreground font-semibold block line-clamp-2">
-                {previewAccessory === 'none'
-                  ? isCatalan ? 'Sense accessori equipat' : 'Sin accesorio equipado'
-                  : SHOP_ITEMS.find((i) => i.id === previewAccessory)?.name[isCatalan ? 'ca' : 'es']}
+                {eatingFood ? (
+                  <span className="text-emerald-500 font-bold">{isCatalan ? 'Menjant feliç! 😋' : '¡Comiendo feliz! 😋'}</span>
+                ) : (
+                  SHOP_ITEMS.find((i) => i.id === previewAccessory)?.name[isCatalan ? 'ca' : 'es'] || (isCatalan ? 'Sense accessori' : 'Sin accesorio')
+                )}
               </span>
             </div>
           </div>
 
-          {/* Pestañas: Tienda vs Armario */}
+          {/* Pestañas: Tienda vs Armario vs Estilo vs Comida */}
           <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="sm:col-span-8 flex flex-col min-h-0 h-full w-full">
-            <TabsList className="grid grid-cols-2 rounded-2xl bg-muted/60 p-1 shrink-0">
-              <TabsTrigger value="shop" className="rounded-xl font-bold text-xs gap-1.5 sm:gap-2 px-2">
-                <ShoppingBag className="w-4 h-4 shrink-0" />
+            <TabsList className="grid grid-cols-4 rounded-2xl bg-muted/60 p-1 shrink-0">
+              <TabsTrigger value="shop" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
+                <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{isCatalan ? 'Botiga' : 'Tienda'}</span>
               </TabsTrigger>
-              <TabsTrigger value="wardrobe" className="rounded-xl font-bold text-xs gap-1.5 sm:gap-2 px-2">
-                <Shirt className="w-4 h-4 shrink-0" />
+              <TabsTrigger value="wardrobe" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
+                <Shirt className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate">{isCatalan ? 'Armari' : 'Armario'}</span>
+              </TabsTrigger>
+              <TabsTrigger value="style" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
+                <span className="text-xs">🎨</span>
+                <span className="truncate">{isCatalan ? 'Estil' : 'Estilo'}</span>
+              </TabsTrigger>
+              <TabsTrigger value="food" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
+                <span className="text-xs">🍕</span>
+                <span className="truncate">{isCatalan ? 'Menjar' : 'Comida'}</span>
               </TabsTrigger>
             </TabsList>
 
-            {/* Contenido Tienda */}
+            {/* Contenido Tienda (Accesorios) */}
             <TabsContent value="shop" className="space-y-2.5 pt-3 max-h-70 sm:max-h-85 overflow-y-auto pr-1 flex-1">
-              {SHOP_ITEMS.map((item) => {
+              {SHOP_ITEMS.filter((i) => i.category !== 'skin' && i.category !== 'hair' && i.category !== 'food').map((item) => {
                 const isUnlocked = gameState.unlockedItems.includes(item.id)
                 const isEquipped = gameState.equippedAccessory === item.id
                 const canAfford = gameState.coins >= item.price
@@ -160,7 +216,7 @@ export function TamagotchiShopModal({
                         <Button
                           size="sm"
                           variant={isEquipped ? 'default' : 'outline'}
-                          onClick={() => handleEquip(item.id)}
+                          onClick={() => handleEquip(item.id, 'accessory')}
                           className="rounded-xl text-xs font-bold gap-1 h-8 px-2.5 sm:px-3"
                         >
                           {isEquipped ? (
@@ -190,9 +246,8 @@ export function TamagotchiShopModal({
               })}
             </TabsContent>
 
-            {/* Contenido Armario */}
+            {/* Contenido Armario (Accesorios Desbloqueados) */}
             <TabsContent value="wardrobe" className="space-y-2.5 pt-3 max-h-[280px] sm:max-h-[340px] overflow-y-auto pr-1 flex-1">
-              {/* Opción Sin Accesorio */}
               <div
                 className={`p-2.5 sm:p-3 rounded-2xl border transition-all flex items-center justify-between gap-2 sm:gap-3 cursor-pointer ${gameState.equippedAccessory === 'none'
                   ? 'border-primary bg-primary/10'
@@ -210,7 +265,7 @@ export function TamagotchiShopModal({
                   <Button
                     size="sm"
                     variant={gameState.equippedAccessory === 'none' ? 'default' : 'outline'}
-                    onClick={() => handleEquip('none')}
+                    onClick={() => handleEquip('none', 'accessory')}
                     className="rounded-xl text-xs font-bold h-8 px-2.5 sm:px-3"
                   >
                     {gameState.equippedAccessory === 'none'
@@ -220,7 +275,7 @@ export function TamagotchiShopModal({
                 </div>
               </div>
 
-              {SHOP_ITEMS.filter((i) => gameState.unlockedItems.includes(i.id)).map((item) => {
+              {SHOP_ITEMS.filter((i) => gameState.unlockedItems.includes(i.id) && i.category !== 'skin' && i.category !== 'hair' && i.category !== 'food').map((item) => {
                 const isEquipped = gameState.equippedAccessory === item.id
 
                 return (
@@ -241,12 +296,154 @@ export function TamagotchiShopModal({
                       <Button
                         size="sm"
                         variant={isEquipped ? 'default' : 'outline'}
-                        onClick={() => handleEquip(item.id)}
+                        onClick={() => handleEquip(item.id, 'accessory')}
                         className="rounded-xl text-xs font-bold h-8 px-2.5 sm:px-3"
                       >
                         {isEquipped
                           ? isCatalan ? 'Equipat' : 'Equipado'
                           : isCatalan ? 'Equipar' : 'Equipar'}
+                      </Button>
+                    </div>
+                  </div>
+                )
+              })}
+            </TabsContent>
+
+            {/* Contenido Estilo (Colores de Piel & Peinados) */}
+            <TabsContent value="style" className="space-y-3 pt-3 max-h-[280px] sm:max-h-[340px] overflow-y-auto pr-1 flex-1">
+              <div>
+                <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-2">
+                  {isCatalan ? '🎨 Color de Pell' : '🎨 Color de Piel'}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {SHOP_ITEMS.filter((i) => i.category === 'skin').map((item) => {
+                    const isUnlocked = gameState.unlockedItems.includes(item.id) || item.price === 0
+                    const isEquipped = (gameState.skinColor || 'skin_indigo') === item.id
+                    const canAfford = gameState.coins >= item.price
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-2 sm:p-2.5 rounded-2xl border transition-all flex items-center justify-between gap-2 cursor-pointer ${isEquipped ? 'border-primary bg-primary/10' : 'border-border/60 bg-muted/30 hover:bg-muted/50'
+                          }`}
+                        onClick={() => setPreviewSkin(item.id)}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-lg shrink-0">{item.icon}</span>
+                          <span className="text-xs font-bold truncate">{isCatalan ? item.name.ca : item.name.es}</span>
+                        </div>
+                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                          {isUnlocked ? (
+                            <Button
+                              size="sm"
+                              variant={isEquipped ? 'default' : 'outline'}
+                              onClick={() => handleEquip(item.id, 'skin')}
+                              className="rounded-xl text-[11px] font-bold h-7 px-2"
+                            >
+                              {isEquipped ? (isCatalan ? 'Actiu' : 'Activo') : (isCatalan ? 'Posar' : 'Usar')}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={!canAfford}
+                              onClick={() => handleBuy(item)}
+                              className="rounded-xl text-[11px] font-bold gap-1 h-7 px-2 bg-amber-500 text-slate-950"
+                            >
+                              <Coins className="w-3 h-3 fill-current" />
+                              <span>{item.price}</span>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div>
+                <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-2 pt-2">
+                  {isCatalan ? '💇‍♂️ Peinats i Capells' : '💇‍♂️ Peinados y Capello'}
+                </h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {SHOP_ITEMS.filter((i) => i.category === 'hair').map((item) => {
+                    const isUnlocked = gameState.unlockedItems.includes(item.id) || item.price === 0
+                    const isEquipped = (gameState.hairstyle || 'hair_none') === item.id
+                    const canAfford = gameState.coins >= item.price
+
+                    return (
+                      <div
+                        key={item.id}
+                        className={`p-2 sm:p-2.5 rounded-2xl border transition-all flex items-center justify-between gap-2 cursor-pointer ${isEquipped ? 'border-primary bg-primary/10' : 'border-border/60 bg-muted/30 hover:bg-muted/50'
+                          }`}
+                        onClick={() => setPreviewHair(item.id)}
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="text-lg shrink-0">{item.icon}</span>
+                          <span className="text-xs font-bold truncate">{isCatalan ? item.name.ca : item.name.es}</span>
+                        </div>
+                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
+                          {isUnlocked ? (
+                            <Button
+                              size="sm"
+                              variant={isEquipped ? 'default' : 'outline'}
+                              onClick={() => handleEquip(item.id, 'hair')}
+                              className="rounded-xl text-[11px] font-bold h-7 px-2"
+                            >
+                              {isEquipped ? (isCatalan ? 'Actiu' : 'Activo') : (isCatalan ? 'Posar' : 'Usar')}
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              disabled={!canAfford}
+                              onClick={() => handleBuy(item)}
+                              className="rounded-xl text-[11px] font-bold gap-1 h-7 px-2 bg-amber-500 text-slate-950"
+                            >
+                              <Coins className="w-3 h-3 fill-current" />
+                              <span>{item.price}</span>
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Contenido Comida (Alimentar a Dotzi) */}
+            <TabsContent value="food" className="space-y-2.5 pt-3 max-h-[280px] sm:max-h-[340px] overflow-y-auto pr-1 flex-1">
+              {SHOP_ITEMS.filter((i) => i.category === 'food').map((item) => {
+                const canAfford = gameState.coins >= item.price
+
+                return (
+                  <div
+                    key={item.id}
+                    className="p-2.5 sm:p-3 rounded-2xl border border-border/60 bg-muted/30 hover:bg-muted/50 transition-all flex items-center justify-between gap-2 sm:gap-3"
+                  >
+                    <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                      <span className="text-2xl shrink-0 select-none bg-background p-2 rounded-xl border border-border/40 shadow-2xs">
+                        {item.icon}
+                      </span>
+                      <div className="space-y-0.5 min-w-0">
+                        <h4 className="text-xs font-extrabold text-foreground truncate">
+                          {isCatalan ? item.name.ca : item.name.es}
+                        </h4>
+                        <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-1">
+                          {isCatalan ? item.description.ca : item.description.es}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="shrink-0">
+                      <Button
+                        size="sm"
+                        disabled={!canAfford}
+                        onClick={() => handleFeed(item)}
+                        className={`rounded-xl text-xs font-bold gap-1.5 h-8 px-2.5 sm:px-3 ${canAfford ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-xs' : ''
+                          }`}
+                      >
+                        <Coins className="w-3.5 h-3.5 fill-current shrink-0" />
+                        <span>{isCatalan ? `Alimentar (${item.price})` : `Dar (${item.price})`}</span>
                       </Button>
                     </div>
                   </div>
@@ -259,4 +456,5 @@ export function TamagotchiShopModal({
     </Dialog>
   )
 }
+
 
