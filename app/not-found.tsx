@@ -14,7 +14,6 @@ import {
   Search,
   Sparkles,
   FileQuestion,
-  ShieldAlert
 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import { Button } from '@/components/ui/button'

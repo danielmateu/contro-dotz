@@ -13,8 +13,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Send, Bot, Sparkles, MessageCircle, RefreshCw } from 'lucide-react'
+import { Send, Sparkles } from 'lucide-react'
 
 interface Message {
   id: string
@@ -62,7 +61,7 @@ export function TamagotchiChatModal({
         },
       ])
     }
-  }, [open, isCatalan, petStats])
+  }, [open, isCatalan, petStats, messages.length])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -76,11 +75,14 @@ export function TamagotchiChatModal({
     const query = textToSend || input
     if (!query.trim() || loading) return
 
+    const now = new Date()
+    const msgId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(now.getTime())
+
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: msgId,
       sender: 'user',
       text: query.trim(),
-      timestamp: new Date(),
+      timestamp: now,
     }
 
     setMessages((prev) => [...prev, userMessage])
@@ -105,37 +107,43 @@ export function TamagotchiChatModal({
         locale,
       })
 
+      const replyNow = new Date()
+      const replyId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(replyNow.getTime() + 1)
+
       if (res.error) {
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: replyId,
             sender: 'dotzi',
             text: isCatalan
               ? 'Uf... he tingut un petit tall de connexió! Torna a provar en un moment.'
               : 'Uf... ¡he tenido un pequeño despiste! Prueba a preguntarme otra vez.',
-            timestamp: new Date(),
+            timestamp: replyNow,
           },
         ])
       } else if (res.reply) {
         setMessages((prev) => [
           ...prev,
           {
-            id: (Date.now() + 1).toString(),
+            id: replyId,
             sender: 'dotzi',
             text: res.reply!,
-            timestamp: new Date(),
+            timestamp: replyNow,
           },
         ])
       }
     } catch {
+      const errNow = new Date()
+      const errId = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(errNow.getTime() + 2)
+
       setMessages((prev) => [
         ...prev,
         {
-          id: (Date.now() + 1).toString(),
+          id: errId,
           sender: 'dotzi',
           text: '¡Ups! No he podido conectarme en este instante.',
-          timestamp: new Date(),
+          timestamp: errNow,
         },
       ])
     } finally {

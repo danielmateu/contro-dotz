@@ -78,7 +78,7 @@ export function TamagotchiShopModal({
   }
 
   const handleEquip = async (itemId: string, category: 'accessory' | 'skin' | 'hair') => {
-    let newState: UserGameState = { ...gameState }
+    const newState: UserGameState = { ...gameState }
 
     if (category === 'skin') {
       newState.skinColor = itemId

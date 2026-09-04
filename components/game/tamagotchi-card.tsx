@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import Link from 'next/link'
 import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
 import { TamagotchiShopModal } from '@/components/game/tamagotchi-shop-modal'
@@ -16,7 +16,6 @@ import {
   Heart,
   Trophy,
   PlusCircle,
-  PiggyBank,
   Sparkles,
   ShoppingBag,
   Coins,
