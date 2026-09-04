@@ -23,7 +23,7 @@ export function ActiveRouteName() {
   const displayName = routeKeyMap[pathname] || (pathname === '/' ? 'Inicio' : pathname.replace(/^\//, '').replace(/-/g, ' '))
 
   return (
-    <span className="text-sm font-semibold text-muted-foreground capitalize">
+    <span className="hidden sm:block text-sm font-semibold text-muted-foreground capitalize">
       {displayName}
     </span>
   )
