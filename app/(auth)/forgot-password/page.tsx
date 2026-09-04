@@ -16,7 +16,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { MouseGlow } from '@/components/landing/mouse-glow'
-import { DynamicThreeScene } from '@/components/landing/dynamic-three-scene'
+import { HeroPiggyBackground } from '@/components/landing/hero-piggy-background'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle, ShieldCheck, Mail } from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
@@ -48,8 +48,8 @@ export default function ForgotPasswordPage() {
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
 
-      {/* Escena 3D interactiva de finanzas (Solo Cerditos) */}
-      <DynamicThreeScene />
+      {/* Fondo flotante ligero de cerditos, monedas y tarjetas */}
+      <HeroPiggyBackground />
 
       {/* Background patterns */}
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-size-[14px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>

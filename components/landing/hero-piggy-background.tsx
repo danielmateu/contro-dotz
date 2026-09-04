@@ -51,6 +51,17 @@ export function HeroPiggyBackground() {
         </div>
       </div>
 
+      {/* Tarjeta de Crédito Flotante (Superior Centro-Izquierda) */}
+      <div className="absolute top-[28%] left-[7%] sm:left-[12%] opacity-35 dark:opacity-45 animate-float-medium hidden md:block">
+        <div className="p-3 rounded-2xl bg-gradient-to-br from-indigo-500/20 via-purple-500/15 to-pink-500/10 border border-indigo-500/25 backdrop-blur-xs shadow-xl transform -rotate-12 flex items-center gap-2">
+          <span className="text-xl sm:text-2xl">💳</span>
+          <div className="flex flex-col text-[10px] font-bold text-indigo-400 dark:text-indigo-300 leading-tight">
+            <span>•••• 4829</span>
+            <span className="text-[8px] opacity-70">Control Dotz</span>
+          </div>
+        </div>
+      </div>
+
       {/* Estilos CSS Inline de Flotación Ultra-Fluida */}
       <style jsx global>{`
         @keyframes floatSlow {
