@@ -223,7 +223,7 @@ function ResetPasswordContent() {
                   href="/dashboard"
                   className={cn(
                     buttonVariants({ variant: 'default' }),
-                    "w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center border-0"
+                    "w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center border-0"
                   )}
                 >
                   Ir al panel de control

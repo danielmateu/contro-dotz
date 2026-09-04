@@ -241,7 +241,7 @@ export function SavingGoalsClient({
       {/* Widget Superior: Ratio de Ahorro sobre Salario e Interacción Tamagotchi */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card 1: Salario y Porcentaje Ahorrado */}
-        <Card className="md:col-span-2 border-primary/20 bg-gradient-to-br from-card via-card to-primary/5 shadow-md relative overflow-hidden">
+        <Card className="md:col-span-2 border-primary/20 bg-linear-to-br from-card via-card to-primary/5 shadow-md relative overflow-hidden">
           <div className="absolute -top-6 -right-6 p-8 opacity-[0.04] pointer-events-none">
             <Percent className="w-48 h-48 text-primary" />
           </div>
@@ -263,19 +263,18 @@ export function SavingGoalsClient({
 
               <Badge
                 variant="outline"
-                className={`text-xs font-extrabold px-3 py-1 rounded-xl shadow-2xs ${
-                  salarySavingsPercent >= 20
-                    ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                    : salarySavingsPercent >= 10
+                className={`text-xs font-extrabold px-3 py-1 rounded-xl shadow-2xs ${salarySavingsPercent >= 20
+                  ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
+                  : salarySavingsPercent >= 10
                     ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30'
                     : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
-                }`}
+                  }`}
               >
                 {salarySavingsPercent >= 20
                   ? '🚀 Ahorro Excelente (≥20%)'
                   : salarySavingsPercent >= 10
-                  ? '📈 Buen Ritmo (10-20%)'
-                  : '💡 Ahorro Moderado (<10%)'}
+                    ? '📈 Buen Ritmo (10-20%)'
+                    : '💡 Ahorro Moderado (<10%)'}
               </Badge>
             </div>
           </CardHeader>
@@ -318,7 +317,7 @@ export function SavingGoalsClient({
               </div>
               <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-border/40">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 via-primary to-emerald-500 rounded-full transition-all duration-700"
+                  className="h-full bg-linear-to-r from-indigo-500 via-primary to-emerald-500 rounded-full transition-all duration-700"
                   style={{ width: `${Math.min(100, salarySavingsPercent)}%` }}
                 />
               </div>
@@ -336,7 +335,7 @@ export function SavingGoalsClient({
         </Card>
 
         {/* Card 2: Tamagotchi Dotzi Booster */}
-        <Card className="border-amber-500/20 bg-gradient-to-br from-amber-500/5 via-card to-card shadow-md flex flex-col justify-between">
+        <Card className="border-amber-500/20 bg-linear-to-br from-amber-500/5 via-card to-card shadow-md flex flex-col justify-between">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
@@ -569,13 +568,12 @@ export function SavingGoalsClient({
                           {/* Barra de progreso */}
                           <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/60 rounded-full overflow-hidden relative">
                             <div
-                              className={`h-full rounded-full transition-all duration-700 ${
-                                isFree
-                                  ? 'bg-gradient-to-r from-indigo-500 to-emerald-500'
-                                  : isCompleted
+                              className={`h-full rounded-full transition-all duration-700 ${isFree
+                                ? 'bg-linear-to-r from-indigo-500 to-emerald-500'
+                                : isCompleted
                                   ? 'bg-emerald-500'
                                   : 'bg-primary'
-                              }`}
+                                }`}
                               style={{ width: isFree ? '100%' : `${progressPercentage}%` }}
                             />
                           </div>
@@ -587,9 +585,8 @@ export function SavingGoalsClient({
                               </span>
                             ) : (
                               <span
-                                className={`font-semibold ${
-                                  isCompleted ? 'text-emerald-500' : 'text-primary'
-                                }`}
+                                className={`font-semibold ${isCompleted ? 'text-emerald-500' : 'text-primary'
+                                  }`}
                               >
                                 {progressPercentage}% completado
                               </span>
@@ -606,8 +603,8 @@ export function SavingGoalsClient({
                                 {daysRemaining < 0
                                   ? 'Excedido'
                                   : daysRemaining === 0
-                                  ? '¡Hoy es el último día!'
-                                  : `Quedan ${daysRemaining} días`}
+                                    ? '¡Hoy es el último día!'
+                                    : `Quedan ${daysRemaining} días`}
                               </span>
                             )}
                           </div>

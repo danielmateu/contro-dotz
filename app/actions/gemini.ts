@@ -431,3 +431,96 @@ Instrucciones para responder:
   }
 }
 
+export interface ChatWithDotziParams {
+  householdId: string
+  userPrompt: string
+  petStats: {
+    health: number
+    moodTitle: string
+    level: number
+    streakDays: number
+    spentPercentage: number
+  }
+  gameState: {
+    coins: number
+    equippedAccessory: string
+  }
+  locale?: string
+}
+
+/**
+ * Server Action para charlar con Dotzi usando Gemini AI y su personalidad de Tamagotchi Financiero
+ */
+export async function chatWithDotziAction({
+  householdId,
+  userPrompt,
+  petStats,
+  gameState,
+  locale = 'es',
+}: ChatWithDotziParams): Promise<{ reply?: string; error?: string }> {
+  const apiKey = process.env.GEMINI_API_KEY
+  if (!apiKey) {
+    return {
+      error: 'Falta configurar la clave API de Gemini en el servidor.',
+    }
+  }
+
+  try {
+    const isCatalan = locale === 'ca'
+    const systemPrompt = `Eres "Dotzi", el Tamagotchi y mascota financiera oficial de la aplicación contro-dotz.
+Tu trabajo es ser el compañero interactivo, empático, simpático y muy motivador del usuario.
+Hablas siempre en ${isCatalan ? 'catalán' : 'español'}.
+
+Tu personalidad:
+- Eres alegre, cariñoso, cercano y usas emojis de forma divertida.
+- Te interesas genuinamente por la salud económica del hogar y te encantan tus accesorios.
+- Respondes en 1 o 2 párrafos cortos (máximo 60-70 palabras) para que sea súper cómodo de leer en pantalla móvil.
+- Usas negritas de markdown para resaltar datos importantes o consejos.
+
+Tu estado actual:
+- Salud Financiera: ${petStats.health}% (${petStats.moodTitle})
+- Nivel: ${petStats.level} | Racha: ${petStats.streakDays} días en verde
+- Presupuesto consumido del mes: ${petStats.spentPercentage}%
+- Accesorio equipado actual: "${gameState.equippedAccessory}"
+- Saldo de DotzCoins: ${gameState.coins}
+
+El usuario te dice: "${userPrompt.trim()}"
+
+Responde como Dotzi con tu toque único, empático y personalizado:`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: systemPrompt }],
+            },
+          ],
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      console.error('Gemini API HTTP Error in Dotzi Chat:', await response.text())
+      return { error: 'Error al conectar con la personalidad de Dotzi.' }
+    }
+
+    const resJson = await response.json()
+    const botReply = resJson?.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!botReply) {
+      return { error: 'Dotzi se ha quedado pensativo. ¡Prueba otra vez!' }
+    }
+
+    return { reply: botReply.trim() }
+  } catch (err: any) {
+    console.error('chatWithDotziAction Error:', err)
+    return { error: 'Error al hablar con Dotzi.' }
+  }
+}
+

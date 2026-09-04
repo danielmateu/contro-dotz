@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
 import { TamagotchiShopModal } from '@/components/game/tamagotchi-shop-modal'
 import { TamagotchiQuestsModal } from '@/components/game/tamagotchi-quests-modal'
+import { TamagotchiChatModal } from '@/components/game/tamagotchi-chat-modal'
 import { PetStats } from '@/lib/game/fin-pet-engine'
 import { useGameState } from '@/lib/game/game-context'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -20,6 +21,7 @@ import {
   ShoppingBag,
   Coins,
   Target,
+  MessageCircle,
   X,
 } from 'lucide-react'
 
@@ -40,6 +42,7 @@ export function TamagotchiCard({
   const { gameState, updateGameState } = useGameState()
   const [shopOpen, setShopOpen] = useState(false)
   const [questsOpen, setQuestsOpen] = useState(false)
+  const [chatOpen, setChatOpen] = useState(false)
 
   // Color de la barra de salud según el valor
   const getHealthColor = (health: number) => {
@@ -53,7 +56,7 @@ export function TamagotchiCard({
     <>
       <Card className="border-border/80 bg-card/95 backdrop-blur-md text-card-foreground rounded-3xl overflow-hidden shadow-xl transition-all duration-300">
         {/* Header con gradiente decorativo */}
-        <CardHeader className="relative border-b border-border/40 pb-3 sm:pb-4 pt-4 sm:pt-5 px-4 sm:px-6 bg-gradient-to-r from-violet-500/10 via-indigo-500/5 to-emerald-500/10">
+        <CardHeader className="relative border-b border-border/40 pb-3 sm:pb-4 pt-4 sm:pt-5 px-4 sm:px-6 bg-linear-to-r from-violet-500/10 via-indigo-500/5 to-emerald-500/10">
           <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 pr-6 sm:pr-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Badge variant="outline" className="bg-background/80 border-primary/30 text-primary font-bold px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs rounded-xl shadow-2xs">
@@ -153,7 +156,7 @@ export function TamagotchiCard({
               </div>
               <div className="h-2 sm:h-2.5 w-full bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-500 rounded-full"
+                  className="h-full bg-linear-to-r from-indigo-500 to-violet-500 transition-all duration-500 rounded-full"
                   style={{ width: `${stats.xp}%` }}
                 />
               </div>
@@ -165,11 +168,21 @@ export function TamagotchiCard({
             <Button
               variant="outline"
               size="sm"
+              onClick={() => setChatOpen(true)}
+              className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 px-2 sm:px-3 h-8 sm:h-9"
+            >
+              <MessageCircle className="w-3.5 h-3.5 shrink-0" />
+              <span className="truncate">{isCatalan ? 'Xerrar 💬' : 'Charlar 💬'}</span>
+            </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
               onClick={() => setShopOpen(true)}
               className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-2 sm:px-3 h-8 sm:h-9"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Botiga' : 'Tienda'}</span>
+              <span className="truncate">{isCatalan ? 'Botiga 🛒' : 'Tienda 🛒'}</span>
             </Button>
 
             <Button
@@ -179,7 +192,7 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 sm:gap-1.5 text-[11px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-2 sm:px-3 h-8 sm:h-9"
             >
               <Target className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Missions' : 'Misiones'}</span>
+              <span className="truncate">{isCatalan ? 'Missions 🎯' : 'Misiones 🎯'}</span>
             </Button>
 
             <Link href="/expenses" className="w-full">
@@ -188,18 +201,11 @@ export function TamagotchiCard({
                 <span className="truncate">{isCatalan ? 'Despesa' : 'Gasto'}</span>
               </Button>
             </Link>
-
-            <Link href="/budgets" className="w-full">
-              <Button variant="outline" size="sm" className="w-full rounded-xl font-semibold gap-1 sm:gap-1.5 text-[11px] sm:text-xs border-border/80 px-2 sm:px-3 h-8 sm:h-9">
-                <PiggyBank className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
-                <span className="truncate">{isCatalan ? 'Pressupost' : 'Presupuesto'}</span>
-              </Button>
-            </Link>
           </div>
         </CardContent>
       </Card>
 
-      {/* Modales de Tienda y Misiones */}
+      {/* Modales de Tienda, Misiones y Chat */}
       <TamagotchiShopModal
         open={shopOpen}
         onOpenChange={setShopOpen}
@@ -214,6 +220,14 @@ export function TamagotchiCard({
         gameState={gameState}
         onStateChange={updateGameState}
         petStats={stats}
+        locale={locale}
+      />
+
+      <TamagotchiChatModal
+        open={chatOpen}
+        onOpenChange={setChatOpen}
+        petStats={stats}
+        gameState={gameState}
         locale={locale}
       />
     </>

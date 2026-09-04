@@ -71,7 +71,7 @@ export function TamagotchiShopModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-4 sm:p-6 rounded-3xl border-border shadow-2xl sm:max-w-xl md:max-w-2xl w-full max-h-[90vh] sm:max-h-[85vh] flex flex-col gap-4 overflow-hidden">
+      <DialogContent className="p-3.5 sm:p-6 rounded-3xl border-border shadow-2xl sm:max-w-xl md:max-w-2xl w-[calc(100vw-1.5rem)] max-h-[90vh] sm:max-h-[85vh] flex flex-col gap-3 sm:gap-4 overflow-hidden">
         {/* Cabecera con Saldo de Monedas */}
         <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-3 sm:pb-4 pr-8 sm:pr-6 shrink-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
@@ -95,7 +95,7 @@ export function TamagotchiShopModal({
         {/* Contenido Principal Grid: Vista previa + Catálogo */}
         <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 sm:gap-4 items-start min-h-0 flex-1 overflow-y-auto sm:overflow-hidden">
           {/* Vista Previa de Dotzi */}
-          <div className="sm:col-span-4 flex flex-row sm:flex-col items-center justify-center bg-gradient-to-b from-muted/50 to-muted/20 p-3 sm:p-4 rounded-2xl border border-border/50 relative overflow-hidden gap-3 sm:gap-2 shrink-0">
+          <div className="sm:col-span-4 flex flex-row sm:flex-col items-center justify-center bg-linear-to-b from-muted/50 to-muted/20 p-3 sm:p-4 rounded-2xl border border-border/50 relative overflow-hidden gap-3 sm:gap-2 shrink-0">
             <div className="shrink-0">
               <TamagotchiAvatar
                 mood="happy"

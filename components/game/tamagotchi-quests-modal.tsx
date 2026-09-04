@@ -71,10 +71,10 @@ export function TamagotchiQuestsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md p-6 rounded-3xl bg-card border-border shadow-2xl">
-        <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-4">
-          <DialogTitle className="text-xl font-extrabold flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
+      <DialogContent className="w-[calc(100vw-1.5rem)] sm:max-w-md p-4 sm:p-6 rounded-3xl bg-card border-border shadow-2xl max-h-[88vh] flex flex-col overflow-hidden">
+        <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-3 sm:pb-4 pr-6 shrink-0">
+          <DialogTitle className="text-lg sm:text-xl font-extrabold flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-500 shrink-0" />
             <span>{isCatalan ? 'Missions i Assoliments' : 'Misiones y Logros'}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
@@ -84,7 +84,7 @@ export function TamagotchiQuestsModal({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3.5 py-4 max-h-[360px] overflow-y-auto pr-1">
+        <div className="space-y-3 sm:space-y-3.5 py-3 sm:py-4 overflow-y-auto pr-1 flex-1 min-h-0">
           {GAME_QUESTS.map((quest) => {
             const isCompleted = gameState.completedQuests.includes(quest.id)
             const canClaim = !isCompleted && isQuestUnlocked(quest.conditionType)

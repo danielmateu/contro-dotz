@@ -132,7 +132,7 @@ export function TamagotchiAvatar({
             initial={{ opacity: 0, y: 10, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="absolute -top-16 z-20 max-w-[220px] bg-card text-card-foreground border border-border shadow-xl rounded-2xl p-2.5 text-xs font-medium text-center backdrop-blur-md"
+            className="absolute -top-16 z-20 max-w-55 bg-card text-card-foreground border border-border shadow-xl rounded-2xl p-2.5 text-xs font-medium text-center backdrop-blur-md"
           >
             {speechText}
             <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-card border-r border-b border-border rotate-45" />

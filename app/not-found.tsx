@@ -4,12 +4,12 @@ import React from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { 
-  Home, 
-  ArrowLeft, 
-  Receipt, 
-  LayoutDashboard, 
-  PieChart, 
+import {
+  Home,
+  ArrowLeft,
+  Receipt,
+  LayoutDashboard,
+  PieChart,
   PiggyBank,
   Search,
   Sparkles,
@@ -54,8 +54,8 @@ export default function NotFound() {
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background px-4 py-12 text-foreground">
       {/* Background Decorative Ambient Glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute -top-[20%] left-1/2 -translate-x-1/2 size-[600px] rounded-full bg-gradient-to-tr from-primary/20 via-purple-500/10 to-emerald-500/20 blur-3xl opacity-70 dark:opacity-50 animate-pulse" />
-        <div className="absolute -bottom-[20%] right-[-10%] size-[500px] rounded-full bg-gradient-to-br from-indigo-500/15 via-emerald-500/15 to-transparent blur-3xl opacity-60" />
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 size-150 rounded-full bg-linear-to-tr from-primary/20 via-purple-500/10 to-emerald-500/20 blur-3xl opacity-70 dark:opacity-50 animate-pulse" />
+        <div className="absolute bottom-[-20%] right-[-10%] size-125 rounded-full bg-linear-to-br from-indigo-500/15 via-emerald-500/15 to-transparent blur-3xl opacity-60" />
       </div>
 
       {/* Main Glass Container */}
@@ -95,7 +95,7 @@ export default function NotFound() {
             {/* Ticket Center Badge */}
             <div className="my-auto flex flex-col items-center gap-1">
               <div className="relative flex items-center justify-center">
-                <span className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary via-purple-500 to-emerald-500 bg-clip-text text-transparent">
+                <span className="text-4xl font-extrabold tracking-tight bg-linear-to-r from-primary via-purple-500 to-emerald-500 bg-clip-text text-transparent">
                   404
                 </span>
                 <Sparkles className="absolute -top-2 -right-4 size-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />
@@ -120,8 +120,8 @@ export default function NotFound() {
           className="space-y-3"
         >
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            {t('notFound.title') !== 'notFound.title' 
-              ? t('notFound.title') 
+            {t('notFound.title') !== 'notFound.title'
+              ? t('notFound.title')
               : '¡Ups! Este movimiento no está en los registros'}
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto leading-relaxed">
@@ -146,8 +146,8 @@ export default function NotFound() {
             >
               <Home className="size-4" />
               <span>
-                {t('notFound.backHome') !== 'notFound.backHome' 
-                  ? t('notFound.backHome') 
+                {t('notFound.backHome') !== 'notFound.backHome'
+                  ? t('notFound.backHome')
                   : 'Ir al Panel Principal'}
               </span>
             </Button>
@@ -161,8 +161,8 @@ export default function NotFound() {
           >
             <ArrowLeft className="size-4" />
             <span>
-              {t('notFound.goBack') !== 'notFound.goBack' 
-                ? t('notFound.goBack') 
+              {t('notFound.goBack') !== 'notFound.goBack'
+                ? t('notFound.goBack')
                 : 'Volver atrás'}
             </span>
           </Button>
@@ -176,8 +176,8 @@ export default function NotFound() {
           className="mt-10 pt-6 border-t border-border/50"
         >
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
-            {t('notFound.quickLinks') !== 'notFound.quickLinks' 
-              ? t('notFound.quickLinks') 
+            {t('notFound.quickLinks') !== 'notFound.quickLinks'
+              ? t('notFound.quickLinks')
               : 'Accesos recomendados'}
           </p>
 
@@ -186,7 +186,7 @@ export default function NotFound() {
               const Icon = link.icon
               return (
                 <Link key={link.href} href={link.href}>
-                  <div className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border bg-gradient-to-b ${link.color} transition-all duration-200 hover:scale-105 hover:shadow-md group cursor-pointer`}>
+                  <div className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border bg-linear-to-b ${link.color} transition-all duration-200 hover:scale-105 hover:shadow-md group cursor-pointer`}>
                     <Icon className="size-5 transition-transform group-hover:scale-110" />
                     <span className="text-xs font-medium text-foreground/90 group-hover:text-foreground">
                       {link.label}
