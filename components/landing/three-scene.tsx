@@ -347,30 +347,25 @@ export function ThreeScene() {
   }, [])
 
   return (
-    <div className="fixed inset-0 w-full h-full z-0 overflow-hidden bg-transparent pointer-events-none">
-      {/* Indicador flotante sutil para invitar a hacer clic */}
-      {/* <div className="absolute top-24 left-1/2 -translate-x-1/2 pointer-events-none select-none z-10 hidden sm:flex flex-col items-center gap-1 opacity-45 hover:opacity-85 transition-opacity">
-        <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground bg-slate-500/5 dark:bg-slate-500/10 border border-slate-200/20 dark:border-slate-800/40 px-3.5 py-1.5 rounded-full backdrop-blur-xs pointer-events-auto cursor-pointer">
-          {hasModel === null && "Buscando hucha.glb..."}
-          {hasModel !== null && "Interactuar: Pasa el cursor o haz clic sobre los cerditos"}
-        </span>
-      </div> */}
-
+    <div
+      aria-hidden="true"
+      className="fixed inset-0 w-full h-full z-0 overflow-hidden bg-transparent pointer-events-none"
+    >
       <Canvas
         shadows
         eventSource={eventSource}
         camera={{ position: [0, 0, 13], fov: 45 }}
-        gl={{ alpha: true, antialias: true, preserveDrawingBuffer: true }}
+        gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
         style={{ pointerEvents: 'none', background: 'transparent' }}
       >
         <ambientLight intensity={theme === 'dark' ? 0.8 : 1.2} />
 
-        {/* Luz principal direccional para proyectar sombras hermosas */}
+        {/* Luz principal direccional para proyectar sombras optimizadas */}
         <directionalLight
           castShadow
           position={[6, 12, 5]}
           intensity={1.8}
-          shadow-mapSize={[1024, 1024]}
+          shadow-mapSize={[512, 512]}
           shadow-camera-far={30}
           shadow-camera-left={-6}
           shadow-camera-right={6}

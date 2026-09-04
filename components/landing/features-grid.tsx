@@ -242,7 +242,7 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
           {feature.description}
         </p>
 
-        <div className="pt-1 sm:pt-2 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 select-none">
+        <div className="pt-1 sm:pt-2 flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 select-none">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
           <span>Prueba el demo interactivo en vivo</span>
         </div>
@@ -269,10 +269,10 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
 
 export function FeaturesGrid() {
   return (
-    <div className="flex flex-col w-full relative z-10 space-y-6 mt-12">
+    <section className="flex flex-col w-full relative z-10 space-y-6 mt-12" aria-label="Características de la aplicación">
       {features.map((feature, idx) => (
         <FeatureSection key={feature.id} feature={feature} index={idx} />
       ))}
-    </div>
+    </section>
   )
 }

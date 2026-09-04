@@ -7,14 +7,27 @@ export function MouseGlow() {
   const wrapperRef = React.useRef<HTMLDivElement>(null)
 
   React.useEffect(() => {
+    // Si es pantalla táctil o el usuario prefiere movimiento reducido, no activar el listener de ratón
+    if (
+      typeof window === 'undefined' ||
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      return
+    }
+
     const glow = glowRef.current
     const wrapper = wrapperRef.current
     if (!glow || !wrapper) return
 
+    let rafId: number | null = null
+
     const handleMouseMove = (e: MouseEvent) => {
-      // Usar requestAnimationFrame para alinear la actualización de la GPU con el refresco de pantalla
-      requestAnimationFrame(() => {
-        glow.style.transform = `translate3d(${e.clientX - 175}px, ${e.clientY - 175}px, 0)`
+      if (rafId) cancelAnimationFrame(rafId)
+      rafId = requestAnimationFrame(() => {
+        if (glow) {
+          glow.style.transform = `translate3d(${e.clientX - 175}px, ${e.clientY - 175}px, 0)`
+        }
       })
       if (wrapper.style.opacity !== '1') {
         wrapper.style.opacity = '1'
@@ -22,18 +35,19 @@ export function MouseGlow() {
     }
 
     const handleMouseLeave = () => {
-      wrapper.style.opacity = '0'
+      if (wrapper) wrapper.style.opacity = '0'
     }
 
     const handleMouseEnter = () => {
-      wrapper.style.opacity = '1'
+      if (wrapper) wrapper.style.opacity = '1'
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
     document.addEventListener('mouseleave', handleMouseLeave)
     document.addEventListener('mouseenter', handleMouseEnter)
 
     return () => {
+      if (rafId) cancelAnimationFrame(rafId)
       window.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseleave', handleMouseLeave)
       document.removeEventListener('mouseenter', handleMouseEnter)
@@ -43,7 +57,8 @@ export function MouseGlow() {
   return (
     <div
       ref={wrapperRef}
-      className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-500"
+      aria-hidden="true"
+      className="pointer-events-none fixed inset-0 z-0 transition-opacity duration-500 hidden sm:block"
       style={{ opacity: 0 }}
     >
       <div

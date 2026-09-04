@@ -29,6 +29,7 @@ import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { FeatureBaseWidget } from '@/components/feedback/featurebase-widget'
 import { ShareAppModal } from '@/components/share-app-modal'
 import { HeaderTamagotchiTrigger } from '@/components/game/header-tamagotchi-trigger'
+import { GameStateProvider } from '@/lib/game/game-context'
 
 interface PrivateLayoutProps {
   children: React.ReactNode
@@ -64,7 +65,8 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const isSuperAdmin = profile?.is_super_admin ?? false
 
   return (
-    <SidebarProvider>
+    <GameStateProvider>
+      <SidebarProvider>
       {/* Sidebar de la aplicación */}
       <Sidebar variant="sidebar" collapsible="icon">
         <SidebarHeader className="border-b border-sidebar-border/50 py-3.5 px-4">
@@ -160,5 +162,6 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
         </main>
       </SidebarInset>
     </SidebarProvider>
+    </GameStateProvider>
   )
 }

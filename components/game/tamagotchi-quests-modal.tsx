@@ -62,6 +62,8 @@ export function TamagotchiQuestsModal({
         return petStats.spentPercentage <= 100
       case 'streak':
         return petStats.streakDays >= 3
+      case 'super_hero':
+        return petStats.mood === 'super_hero'
       default:
         return true
     }
@@ -90,13 +92,12 @@ export function TamagotchiQuestsModal({
             return (
               <div
                 key={quest.id}
-                className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
-                  isCompleted
-                    ? 'bg-emerald-500/10 border-emerald-500/30'
-                    : canClaim
+                className={`p-4 rounded-2xl border transition-all flex items-center justify-between gap-3 ${isCompleted
+                  ? 'bg-emerald-500/10 border-emerald-500/30'
+                  : canClaim
                     ? 'bg-amber-500/10 border-amber-500/40 shadow-xs'
                     : 'bg-muted/40 border-border/60 opacity-80'
-                }`}
+                  }`}
               >
                 <div className="flex items-start gap-3 min-w-0">
                   <span className="text-2xl shrink-0 select-none">{quest.icon}</span>

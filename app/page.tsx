@@ -128,15 +128,18 @@ export default async function LandingPage() {
         </div>
 
         {/* Micro-Badges de Confianza */}
-        <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs text-muted-foreground/80 font-medium pt-1">
-          <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs text-slate-700 dark:text-slate-300 font-semibold pt-1">
+          <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-bold">
             <ShieldCheck className="w-4 h-4 shrink-0" /> 100% Gratis para tu hogar
           </span>
-          <span className="hidden sm:inline text-muted-foreground/30">•</span>
+          <span className="hidden sm:inline text-muted-foreground/40">•</span>
           <span className="flex items-center gap-1.5">
-            <Lock className="w-3.5 h-3.5 shrink-0" /> Sin necesidad de tarjeta de crédito
+            <Lock className="w-3.5 h-3.5 shrink-0 text-primary" /> Sin necesidad de tarjeta de crédito
           </span>
         </div>
+
+        {/* Encabezado accesible para tecnología asistiva */}
+        <h2 className="sr-only">Demostración interactiva y características principales de Control Dotz</h2>
 
         {/* Mock UI Showcase de la aplicación */}
         <InteractiveShowcase />

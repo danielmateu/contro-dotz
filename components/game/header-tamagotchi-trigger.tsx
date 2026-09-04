@@ -6,7 +6,7 @@ import { TamagotchiCard } from '@/components/game/tamagotchi-card'
 import { calculatePetStats, PetStats } from '@/lib/game/fin-pet-engine'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { createClient } from '@/lib/supabase/client'
-import { fetchUserGameState } from '@/lib/game/game-service'
+import { useGameState } from '@/lib/game/game-context'
 import { Button } from '@/components/ui/button'
 
 interface HeaderTamagotchiTriggerProps {
@@ -15,7 +15,7 @@ interface HeaderTamagotchiTriggerProps {
 
 export function HeaderTamagotchiTrigger({ householdId }: HeaderTamagotchiTriggerProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [equippedAccessory, setEquippedAccessory] = useState('none')
+  const { gameState } = useGameState()
   const [stats, setStats] = useState<PetStats>(() =>
     calculatePetStats({
       currentTotalSpent: 0,
@@ -27,9 +27,6 @@ export function HeaderTamagotchiTrigger({ householdId }: HeaderTamagotchiTrigger
   useEffect(() => {
     async function loadMonthlyData() {
       try {
-        const gameState = await fetchUserGameState()
-        setEquippedAccessory(gameState.equippedAccessory)
-
         const supabase = createClient()
         const now = new Date()
         const currentYear = now.getFullYear()
@@ -87,7 +84,7 @@ export function HeaderTamagotchiTrigger({ householdId }: HeaderTamagotchiTrigger
             className="relative h-9 w-9 rounded-full hover:bg-accent/50 transition-transform active:scale-95"
             aria-label="Ver Tamagotchi Financiero Dotzi"
           >
-            <TamagotchiAvatar mood={stats.mood} size="sm" equippedAccessory={equippedAccessory} interactive={false} />
+            <TamagotchiAvatar mood={stats.mood} size="sm" equippedAccessory={gameState.equippedAccessory} interactive={false} />
             {stats.health < 50 && (
               <span className="absolute top-0 right-0 h-2.5 w-2.5 rounded-full bg-rose-500 ring-2 ring-background animate-pulse" />
             )}

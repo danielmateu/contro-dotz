@@ -6,11 +6,7 @@ import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
 import { TamagotchiShopModal } from '@/components/game/tamagotchi-shop-modal'
 import { TamagotchiQuestsModal } from '@/components/game/tamagotchi-quests-modal'
 import { PetStats } from '@/lib/game/fin-pet-engine'
-import {
-  UserGameState,
-  fetchUserGameState,
-  DEFAULT_GAME_STATE,
-} from '@/lib/game/game-service'
+import { useGameState } from '@/lib/game/game-context'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -41,17 +37,9 @@ export function TamagotchiCard({
   onClose,
 }: TamagotchiCardProps) {
   const isCatalan = locale === 'ca'
-  const [gameState, setGameState] = useState<UserGameState>(DEFAULT_GAME_STATE)
+  const { gameState, updateGameState } = useGameState()
   const [shopOpen, setShopOpen] = useState(false)
   const [questsOpen, setQuestsOpen] = useState(false)
-
-  useEffect(() => {
-    async function loadState() {
-      const state = await fetchUserGameState()
-      setGameState(state)
-    }
-    loadState()
-  }, [])
 
   // Color de la barra de salud según el valor
   const getHealthColor = (health: number) => {
@@ -216,7 +204,7 @@ export function TamagotchiCard({
         open={shopOpen}
         onOpenChange={setShopOpen}
         gameState={gameState}
-        onStateChange={setGameState}
+        onStateChange={updateGameState}
         locale={locale}
       />
 
@@ -224,7 +212,7 @@ export function TamagotchiCard({
         open={questsOpen}
         onOpenChange={setQuestsOpen}
         gameState={gameState}
-        onStateChange={setGameState}
+        onStateChange={updateGameState}
         petStats={stats}
         locale={locale}
       />
