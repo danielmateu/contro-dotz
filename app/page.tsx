@@ -97,9 +97,9 @@ export default async function LandingPage() {
               <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-600 to-cyan-500 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
               {/* Botón Principal */}
               <span className="relative w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-slate-900 dark:bg-slate-950 border border-violet-500/30 rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-sm sm:text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
-                <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5 text-violet-300" />
+                <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 Ir a mi Dashboard
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-violet-400 group-hover:translate-x-1.5 transition-transform duration-200" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1.5 transition-transform duration-200" />
               </span>
             </Link>
           ) : (
@@ -113,9 +113,9 @@ export default async function LandingPage() {
                 <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
                 {/* Botón Principal */}
                 <span className="relative w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-sm sm:text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
-                  <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-200" />
+                  <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   Crear cuenta
-                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1.5 transition-transform duration-200" />
+                  <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1.5 transition-transform duration-200" />
                 </span>
               </Link>
 
@@ -131,8 +131,8 @@ export default async function LandingPage() {
         </div>
 
         {/* Micro-Badges de Confianza */}
-        <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs text-slate-700 dark:text-slate-300 font-semibold pt-1">
-          <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-300 font-bold">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs text-slate-800 dark:text-slate-100 font-bold pt-1">
+          <span className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-200 font-bold">
             <ShieldCheck className="w-4 h-4 shrink-0" /> 100% Gratis para tu hogar
           </span>
           <span className="hidden sm:inline text-muted-foreground/40">•</span>
