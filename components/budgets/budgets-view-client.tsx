@@ -41,8 +41,8 @@ export function BudgetsViewClient({
             {locale === 'en'
               ? 'Set and control monthly spending limits for each category.'
               : locale === 'ca'
-              ? 'Estableix i controla els límits de despesa mensual per a cada categoria.'
-              : 'Establece y controla los límites de gasto mensual para cada categoría.'}
+                ? 'Estableix i controla els límits de despesa mensual per a cada categoria.'
+                : 'Establece y controla los límites de gasto mensual para cada categoría.'}
           </p>
         </div>
 
@@ -50,9 +50,9 @@ export function BudgetsViewClient({
         <MonthSelector defaultMonth={month} />
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3">
         {/* Save Form Sidebar */}
-        <div className="md:col-span-1">
+        <div className="lg:col-span-1">
           <SaveBudgetForm
             categories={categories || []}
             month={month}
@@ -61,7 +61,7 @@ export function BudgetsViewClient({
         </div>
 
         {/* List & Progress */}
-        <div className="md:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6">
           <Card className="border-slate-200/50 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg capitalize">
@@ -71,8 +71,8 @@ export function BudgetsViewClient({
                 {locale === 'en'
                   ? 'Expense overview against established limit for this month.'
                   : locale === 'ca'
-                  ? 'Resum de despeses enfront del límit establert per a aquest mes.'
-                  : 'Resumen de gastos frente al límite establecido para este mes.'}
+                    ? 'Resum de despeses enfront del límit establert per a aquest mes.'
+                    : 'Resumen de gastos frente al límite establecido para este mes.'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -86,8 +86,8 @@ export function BudgetsViewClient({
                     {locale === 'en'
                       ? 'Set budgets for your expense categories in the left panel.'
                       : locale === 'ca'
-                      ? 'Estableix pressupostos per a les teves categories en el formulari de l\'esquerra.'
-                      : 'Establece presupuestos para tus categorías de gastos en el formulario de la izquierda.'}
+                        ? 'Estableix pressupostos per a les teves categories en el formulari de l\'esquerra.'
+                        : 'Establece presupuestos para tus categorías de gastos en el formulario de la izquierda.'}
                   </p>
                 </div>
               ) : (
@@ -180,8 +180,8 @@ export function BudgetsViewClient({
                               {locale === 'en'
                                 ? `Budget exceeded! You have spent ${formatCurrency(spent - limit)} extra.`
                                 : locale === 'ca'
-                                ? `Pressupost superat! Has gastat ${formatCurrency(spent - limit)} de més.`
-                                : `¡Presupuesto superado! Has gastado ${formatCurrency(spent - limit)} de más.`}
+                                  ? `Pressupost superat! Has gastat ${formatCurrency(spent - limit)} de més.`
+                                  : `¡Presupuesto superado! Has gastado ${formatCurrency(spent - limit)} de más.`}
                             </div>
                           ) : percent >= 80 ? (
                             <div className="flex items-center gap-1 text-[11px] text-amber-600 dark:text-amber-400 font-medium pt-1">
@@ -189,8 +189,8 @@ export function BudgetsViewClient({
                               {locale === 'en'
                                 ? 'Warning: You are about to exceed this category limit.'
                                 : locale === 'ca'
-                                ? 'Atenció: Estàs a punt de superar el límit d\'aquesta categoria.'
-                                : 'Atención: Estás a punto de superar el límite de esta categoría.'}
+                                  ? 'Atenció: Estàs a punt de superar el límit d\'aquesta categoria.'
+                                  : 'Atención: Estás a punto de superar el límite de esta categoría.'}
                             </div>
                           ) : (
                             <div className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-1">
@@ -198,8 +198,8 @@ export function BudgetsViewClient({
                               {locale === 'en'
                                 ? 'Budget under control.'
                                 : locale === 'ca'
-                                ? 'Pressupost sota control.'
-                                : 'Presupuesto bajo control.'}
+                                  ? 'Pressupost sota control.'
+                                  : 'Presupuesto bajo control.'}
                             </div>
                           )}
                         </div>

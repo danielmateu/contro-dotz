@@ -36,11 +36,11 @@ export function InviteMemberForm({ householdId }: InviteMemberFormProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold tracking-tight text-foreground font-heading">
+      {/* <h3 className="text-sm font-semibold tracking-tight text-foreground font-heading">
         Invitar a un nuevo miembro
-      </h3>
+      </h3> */}
 
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-2 ">
         {state?.error && (
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
@@ -83,6 +83,7 @@ export function InviteMemberForm({ householdId }: InviteMemberFormProps) {
             </Select>
           </div>
         </div>
+
 
         <Button type="submit" disabled={pending} className="w-full sm:w-auto">
           <MailPlus className="mr-2 h-4 w-4" />

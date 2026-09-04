@@ -87,8 +87,8 @@ export function HouseholdViewClient({
               {locale === 'en'
                 ? 'You have been invited to join a new household. Accept or decline below.'
                 : locale === 'ca'
-                ? 'T\'han convidat a una nova llar. Accepta o rebutja a continuació.'
-                : 'Te han invitado a unirte a un nuevo grupo familiar. Acepta o rechaza la invitación.'}
+                  ? 'T\'han convidat a una nova llar. Accepta o rebutja a continuació.'
+                  : 'Te han invitado a unirte a un nuevo grupo familiar. Acepta o rechaza la invitación.'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -124,7 +124,7 @@ export function HouseholdViewClient({
       )}
 
       {!hasHousehold ? (
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 md:grid-cols-1">
           {/* Create Form */}
           <CreateHouseholdForm />
         </div>
@@ -142,9 +142,9 @@ export function HouseholdViewClient({
           </TabsList>
 
           <TabsContent value="members" className="space-y-6 outline-none">
-            <div className="grid gap-6 lg:grid-cols-3">
+            <div className="grid gap-6">
               {/* Members List */}
-              <div className="lg:col-span-2 space-y-6">
+              <div className="space-y-6">
                 <Card className="border-slate-200/50 shadow-md">
                   <CardHeader className="flex flex-row items-center justify-between pb-4">
                     <div className="space-y-1">
@@ -323,8 +323,8 @@ export function HouseholdViewClient({
                       {locale === 'en'
                         ? 'Only the household owner can manage invitations and members.'
                         : locale === 'ca'
-                        ? 'Només el propietari de la llar pot gestionar invitacions.'
-                        : 'Solo el propietario del hogar puede gestionar las invitaciones y miembros adicionales.'}
+                          ? 'Només el propietari de la llar pot gestionar invitacions.'
+                          : 'Solo el propietario del hogar puede gestionar las invitaciones y miembros adicionales.'}
                     </CardContent>
                   </Card>
                 )}
