@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from 'next/navigation'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import { ExpenseFilters } from '@/components/expenses/expense-filters'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
+import { BankImportDialog } from '@/components/expenses/bank-import-dialog'
 import { DeleteExpenseButton } from '@/components/expenses/delete-expense-button'
 import { ReceiptButton } from '@/components/expenses/receipt-button'
 import { PayerSelectorInline } from '@/components/expenses/payer-selector-inline'
@@ -29,7 +30,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination'
-import { Edit2, Receipt, Calendar, CreditCard, Tag, User } from 'lucide-react'
+import { Edit2, Receipt, Calendar, CreditCard, Tag, User, FileSpreadsheet } from 'lucide-react'
 
 interface ExpensesViewClientProps {
   householdId: string
@@ -115,13 +116,32 @@ export function ExpensesViewClient({
           </p>
         </div>
 
-        <ExpenseDialog
-          householdId={householdId}
-          categories={categories || []}
-          members={mappedMembers}
-          currentUserId={currentUserId}
-          isOwner={isOwner}
-        />
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <BankImportDialog
+            householdId={householdId}
+            categories={categories || []}
+            members={mappedMembers}
+            currentUserId={currentUserId}
+            isOwner={isOwner}
+            trigger={
+              <Button
+                variant="outline"
+                className="font-bold gap-2 text-xs h-9 rounded-xl border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 shadow-xs"
+              >
+                <FileSpreadsheet className="w-4 h-4 text-indigo-500" />
+                <span>Importar Extracto</span>
+              </Button>
+            }
+          />
+
+          <ExpenseDialog
+            householdId={householdId}
+            categories={categories || []}
+            members={mappedMembers}
+            currentUserId={currentUserId}
+            isOwner={isOwner}
+          />
+        </div>
       </div>
 
       {/* Expense Filters Component */}

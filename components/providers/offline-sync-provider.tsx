@@ -133,10 +133,22 @@ export function OfflineSyncProvider({ children }: { children: React.ReactNode })
   )
 }
 
+const defaultContext: OfflineSyncContextType = {
+  isOnline: true,
+  pendingCount: 0,
+  isSyncing: false,
+  lastSyncedAt: null,
+  syncNow: async () => {},
+  enqueueAction: async () => {
+    throw new Error('OfflineSyncProvider no está disponible')
+  },
+  refreshPendingCount: async () => 0,
+}
+
 export function useOfflineSync() {
   const context = useContext(OfflineSyncContext)
   if (!context) {
-    throw new Error('useOfflineSync debe usarse dentro de un OfflineSyncProvider')
+    return defaultContext
   }
   return context
 }

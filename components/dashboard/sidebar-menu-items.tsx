@@ -21,6 +21,8 @@ import { __iconNode as TagsData } from 'lucide-react/dist/esm/icons/tags.mjs'
 // @ts-ignore
 import { __iconNode as FolderOpenData } from 'lucide-react/dist/esm/icons/folder-open.mjs'
 // @ts-ignore
+import { __iconNode as CalendarCheckData } from 'lucide-react/dist/esm/icons/calendar-check.mjs'
+// @ts-ignore
 import { __iconNode as PiggyBankData } from 'lucide-react/dist/esm/icons/piggy-bank.mjs'
 // @ts-ignore
 import { __iconNode as ScaleData } from 'lucide-react/dist/esm/icons/scale.mjs'
@@ -137,6 +139,13 @@ export function SidebarMenuItems({
       url: '/saving-goals',
       icon: WalletData,
       activeIcon: TargetData,
+      disabled: !hasHousehold,
+    },
+    {
+      title: 'Previsión Saldo',
+      url: '/cashflow',
+      icon: CalendarCheckData,
+      activeIcon: TrendingUpData,
       disabled: !hasHousehold,
     },
     {

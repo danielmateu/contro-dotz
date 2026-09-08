@@ -62,7 +62,7 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
   // 2. Preparar consulta de miembros del hogar
   const membersPromise = supabase
     .from('household_members')
-    .select('user_id, profiles(display_name)')
+    .select('user_id, profiles(display_name, email, avatar_url)')
     .eq('household_id', householdId)
 
   // 3. Preparar consulta de gastos con filtros, ordenación y paginación
@@ -142,9 +142,18 @@ export default async function ExpensesPage({ searchParams }: ExpensesPageProps) 
 
   const mappedMembers = (members || []).map((m: any) => {
     const profile = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
+    const rawName = profile?.display_name || (profile?.email ? profile.email.split('@')[0] : '')
+    const isUuid = rawName && /^[0-9a-f]{8}-[0-9a-f]{4}/i.test(rawName)
+    const isCurrentUser = m.user_id === user.id
+    
+    let cleanName = isUuid ? (profile?.email ? profile.email.split('@')[0] : (isCurrentUser ? 'Yo' : 'Miembro')) : (rawName || (isCurrentUser ? 'Yo' : 'Miembro'))
+    if (isCurrentUser && !cleanName.includes('(Tú)')) {
+      cleanName = `${cleanName} (Tú)`
+    }
+
     return {
       id: m.user_id,
-      name: profile?.display_name || profile?.email?.split('@')[0] || 'Miembro',
+      name: cleanName,
       avatarUrl: profile?.avatar_url || null,
     }
   })

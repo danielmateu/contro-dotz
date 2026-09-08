@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { getRecentActivityAction } from '@/app/actions/activity'
+import { fetchCashflowDataAction } from '@/app/actions/cashflow'
 import { calculateDailyAverage, calculatePercentageChange } from '@/lib/finance-utils'
 import { DashboardViewClient } from '@/components/dashboard/dashboard-view-client'
 
@@ -61,6 +62,7 @@ export default async function DashboardPage() {
   let memberIncomesRes: any = { data: [] }
   let activities: any[] = []
   let allExpensesRes: any = { data: [] }
+  let cashflowData: any = { projectedEndBalance: 0, pendingBillsAmount: 0, isDeficitRisk: false }
 
   try {
     const results = await Promise.all([
@@ -102,7 +104,8 @@ export default async function DashboardPage() {
         .from('expenses')
         .select('id, amount, description, expense_date, category_id, created_by, is_personal')
         .eq('household_id', householdId)
-        .order('expense_date', { ascending: true })
+        .order('expense_date', { ascending: true }),
+      fetchCashflowDataAction(householdId, currentMonthStr),
     ])
 
     categoriesRes = results[0] || { data: [] }
@@ -113,6 +116,7 @@ export default async function DashboardPage() {
     memberIncomesRes = results[5] || { data: [] }
     activities = results[6] || []
     allExpensesRes = results[7] || { data: [] }
+    cashflowData = results[8] || { projectedEndBalance: 0, pendingBillsAmount: 0, isDeficitRisk: false }
   } catch (err) {
     console.warn('[DashboardPage] Carga offline de datos del dashboard falló:', err)
   }
@@ -355,6 +359,7 @@ export default async function DashboardPage() {
       latestExpenses={latestExpenses}
       activities={activities}
       allExpenses={allExpensesRes.data || []}
+      cashflowData={cashflowData}
     />
   )
 }

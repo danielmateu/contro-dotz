@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import { DashboardCharts } from '@/components/dashboard/dashboard-charts'
 import { ActivityFeed } from '@/components/dashboard/activity-feed'
+import { CashflowWidget } from '@/components/dashboard/cashflow-widget'
 import { ExpenseDialog } from '@/components/expenses/expense-dialog'
 import { SendReportButton } from '@/components/household/send-report-button'
 import { formatCurrency } from '@/lib/format'
@@ -50,6 +51,7 @@ interface DashboardViewClientProps {
   latestExpenses: any[]
   activities: any[]
   allExpenses?: any[]
+  cashflowData?: any
 }
 
 export function DashboardViewClient({
@@ -75,6 +77,7 @@ export function DashboardViewClient({
   latestExpenses,
   activities,
   allExpenses = [],
+  cashflowData,
 }: DashboardViewClientProps) {
   const { t, locale } = useI18n()
 
@@ -88,6 +91,13 @@ export function DashboardViewClient({
     totalHouseholdFund,
     locale,
   })
+
+  // Próxima factura por vencer para el CashflowWidget
+  const todayDay = new Date().getDate()
+  const upcomingBills = (cashflowData?.recurringExpenses || [])
+    .filter((b: any) => b.day_of_month >= todayDay)
+    .sort((a: any, b: any) => a.day_of_month - b.day_of_month)
+  const nextBill = upcomingBills[0] || cashflowData?.recurringExpenses?.[0]
 
   return (
     <div className="space-y-6">
@@ -117,12 +127,26 @@ export function DashboardViewClient({
         </div>
       </div>
 
-      {/* Hero Widget: Tamagotchi Dotzi */}
-      <TamagotchiCard
-        stats={petStats}
-        locale={locale}
-        variant="hero"
-      />
+      {/* Hero Grid: Tamagotchi Dotzi + Cashflow Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-stretch">
+        <div className="lg:col-span-2">
+          <TamagotchiCard
+            stats={petStats}
+            locale={locale}
+            variant="hero"
+          />
+        </div>
+        <div className="lg:col-span-1">
+          <CashflowWidget
+            projectedEndBalance={cashflowData?.projectedEndBalance || 0}
+            pendingBillsAmount={cashflowData?.pendingBillsAmount || 0}
+            isDeficitRisk={cashflowData?.isDeficitRisk || false}
+            nextBillName={nextBill?.name}
+            nextBillAmount={nextBill?.amount}
+            nextBillDay={nextBill?.day_of_month}
+          />
+        </div>
+      </div>
 
       {/* KPI Cards Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
