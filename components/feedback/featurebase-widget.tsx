@@ -97,35 +97,39 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
               <Label className="text-xs font-semibold">Tipo de Petición</Label>
               <div className="grid grid-cols-3 gap-2">
                 <Button
-                  variant='outline'
                   type="button"
+                  variant={category === 'feature' ? 'default' : 'outline'}
                   onClick={() => setCategory('feature')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'feature'
-                    ? 'bg-violet-600 text-white border-violet-500'
-                    : ' border-slate-700'
-                    }`}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    category === 'feature'
+                      ? 'bg-violet-600 hover:bg-violet-500 text-white border-violet-500 shadow-md font-bold'
+                      : 'border-slate-700/80 bg-transparent text-muted-foreground hover:text-foreground hover:bg-slate-800/50'
+                  }`}
                 >
+                  <Sparkles className="h-3.5 w-3.5 mr-1" />
                   Nueva Idea
                 </Button>
                 <Button
                   type="button"
-                  variant='outline'
+                  variant={category === 'bug' ? 'default' : 'outline'}
                   onClick={() => setCategory('bug')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'bug'
-                    ? 'bg-rose-600 text-white border-rose-500'
-                    : ' border-slate-700  '
-                    }`}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    category === 'bug'
+                      ? 'bg-rose-600 hover:bg-rose-500 text-white border-rose-500 shadow-md font-bold'
+                      : 'border-slate-700/80 bg-transparent text-muted-foreground hover:text-foreground hover:bg-slate-800/50'
+                  }`}
                 >
                   Error / Bug
                 </Button>
                 <Button
-                  variant='outline'
                   type="button"
+                  variant={category === 'other' ? 'default' : 'outline'}
                   onClick={() => setCategory('other')}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${category === 'other'
-                    ? 'bg-slate-600 text-white border-slate-500'
-                    : ' border-slate-700'
-                    }`}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    category === 'other'
+                      ? 'bg-slate-600 hover:bg-slate-500 text-white border-slate-500 shadow-md font-bold'
+                      : 'border-slate-700/80 bg-transparent text-muted-foreground hover:text-foreground hover:bg-slate-800/50'
+                  }`}
                 >
                   Otro
                 </Button>
