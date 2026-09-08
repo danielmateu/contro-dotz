@@ -180,6 +180,9 @@ export async function askGeminiAction(
       settlementsRes,
       allExpensesRes,
       memberIncomesRes,
+      categoriesRes,
+      savingGoalsRes,
+      shoppingItemsRes,
     ] = await Promise.all([
       // A. Miembros del hogar
       supabase
@@ -215,6 +218,22 @@ export async function askGeminiAction(
         .select('user_id, amount, contribution')
         .eq('household_id', householdId)
         .eq('month', currentMonthStr),
+      // G. Categorías de gastos
+      supabase
+        .from('categories')
+        .select('id, name')
+        .eq('household_id', householdId),
+      // H. Huchas / Metas de ahorro
+      supabase
+        .from('saving_goals')
+        .select('id, name, target_amount, current_amount')
+        .eq('household_id', householdId),
+      // I. Lista de la compra activa
+      supabase
+        .from('shopping_list')
+        .select('id, name, quantity, bought')
+        .eq('household_id', householdId)
+        .eq('bought', false),
     ])
 
     const membersList = membersRes.data || []
@@ -223,6 +242,9 @@ export async function askGeminiAction(
     const settlementsList = settlementsRes.data || []
     const allExpenses = allExpensesRes.data || []
     const monthlyIncomes = memberIncomesRes.data || []
+    const categoriesList = categoriesRes.data || []
+    const savingGoalsList = savingGoalsRes.data || []
+    const shoppingListItems = shoppingItemsRes.data || []
 
     // Formatear miembros y calcular balances
     const formattedMembers = membersList.map((m) => {
@@ -347,7 +369,26 @@ export async function askGeminiAction(
 
     const householdContext = {
       mes_actual: currentMonthStr,
-      miembros: formattedMembers.map((m) => m.profiles?.display_name),
+      miembros: formattedMembers.map((m) => ({
+        user_id: m.user_id,
+        nombre: m.profiles?.display_name,
+        email: m.profiles?.email,
+      })),
+      categorias_disponibles: categoriesList.map((c) => ({
+        id: c.id,
+        nombre: c.name,
+      })),
+      huchas_de_ahorro: savingGoalsList.map((g) => ({
+        id: g.id,
+        nombre: g.name,
+        objetivo: Number(g.target_amount || 0),
+        actual: Number(g.current_amount || 0),
+      })),
+      lista_compra_pendiente: shoppingListItems.map((item) => ({
+        id: item.id,
+        nombre: item.name,
+        cantidad: item.quantity,
+      })),
       gastos_del_mes: expensesContext,
       presupuestos_del_mes: budgetsContext,
       balances_y_cuentas: {
@@ -357,24 +398,43 @@ export async function askGeminiAction(
       ingresos_y_analisis_proporcional: {
         ingresos_totales_hogar: totalHouseholdIncome,
         reparto_proporcional: analisisProporcional,
-      }
+      },
     }
 
     // 3. Crear el prompt estructurado para Gemini
-    const systemPrompt = `Actúas como Gemini AI, el asistente financiero inteligente del hogar.
-Tu objetivo es ayudar a los miembros de la familia a entender sus gastos, balances y cuentas.
-Te facilito el contexto financiero del hogar actual en formato JSON para el mes de ${currentMonthStr}:
+    const systemPrompt = `Actúas como Gemini AI, el asistente financiero e integrador del hogar inteligente contro-dotz.
+Tu objetivo es ayudar a los miembros de la familia a entender sus gastos, saldos, huchas y lista de la compra, así como proponer o realizar acciones en los distintos módulos del hogar (Gastos, Huchas de Ahorro, Lista de la Compra, Presupuestos y Avisos entre miembros).
+
+A continuación tienes el contexto del hogar actual en formato JSON para el mes de ${currentMonthStr}:
 ${JSON.stringify(householdContext, null, 2)}
 
-Instrucciones para responder:
-- Responde a la consulta del usuario de forma familiar, cercana y muy concisa (no más de 3 párrafos).
-- Utiliza negritas en markdown para resaltar importes, nombres de personas o categorías.
-- No muestres código JSON en tu respuesta. Tradúcelo todo a un formato de texto amigable en español.
-- Si te preguntan sobre quién le debe a quién, fíjate en "transferencias_sugeridas" en el JSON, ya que están optimizadas matemáticamente.
-- Sé preciso con los datos del JSON. Si no tienes datos sobre lo que te preguntan, indícalo con amabilidad.
-- Analiza si el reparto de gastos es justo de acuerdo con la proporción de ingresos de cada miembro ("reparto_proporcional"). Si un miembro aporta más o menos de lo correspondiente proporcionalmente a sus ingresos (diferencia positiva o negativa), ofréceles consejos constructivos y empáticos sobre cómo equilibrar las cuentas del hogar.
-- Compara los gastos totales del mes con los ingresos del hogar para aconsejarles sobre su nivel de ahorro y darles recomendaciones personalizadas de mejora para el día a día.
-- La pregunta del usuario fue: "${userPrompt.replace(/@gemini/gi, '').trim()}"`
+INSTRUCCIONES DE RESPUESTA:
+1. CONSULTAS DE LECTURA (ej. "¿cuánto hemos gastado?", "¿qué hay en la lista de compra?", "¿cómo van las huchas?", "dame un consejo de ahorro", "proponer reducir presupuesto"):
+   - Responde de forma cercana, concisa (máximo 3 párrafos) y formateada con negritas en markdown.
+   - NO incluyas ninguna etiqueta PENDING_ACTION.
+
+2. ACCIONES QUE MODIFICAN DATOS (ej. "Crear una hucha...", "Añadir X a la lista de la compra", "Registra un gasto de...", "Avisar a Laura...", "Añadir 50€ a la hucha..."):
+   - DEBES redactar una confirmación clara y explicativa al usuario en el texto.
+   - Ejemplos de texto de confirmación:
+     - "Voy a crear una hucha llamada **\"Vacaciones\"** con un objetivo de **1.500 €**.\n¿Quieres continuar?"
+     - "Voy a añadir **Leche** y **Huevos** a la lista de la compra.\n¿Quieres continuar?"
+     - "Voy a registrar un gasto de **45,00 €** en la categoría *Suministros* para \"Recibo de internet\".\n¿Quieres continuar?"
+     - "Voy a avisar a **Laura** de que \"El seguro vence el viernes\".\n¿Quieres continuar?"
+     - "Voy a añadir **50,00 €** a la hucha **\"Vacaciones\"**.\n¿Quieres continuar?"
+   - Y al FINAL OBLIGATORIAMENTE de tu mensaje, añade una sola línea con la estructura JSON delimitada:
+
+   Ejemplos exactos de la etiqueta al final (en una única línea):
+   <!--PENDING_ACTION:{"action":"create_saving_goal","params":{"name":"Vacaciones","target_amount":1500},"status":"pending"}-->
+   <!--PENDING_ACTION:{"action":"add_shopping_items","params":{"items":[{"name":"Leche","quantity":1},{"name":"Huevos","quantity":1}]},"status":"pending"}-->
+   <!--PENDING_ACTION:{"action":"add_expense","params":{"amount":45,"description":"Recibo de internet","category_id":"ID_CATEGORIA_SI_EXISTE_O_NULL","category_name":"Suministros"},"status":"pending"}-->
+   <!--PENDING_ACTION:{"action":"add_saving_contribution","params":{"goal_id":"ID_HUCHA_SI_EXISTE_O_NULL","goal_name":"Vacaciones","amount":50},"status":"pending"}-->
+   <!--PENDING_ACTION:{"action":"send_member_reminder","params":{"target_user_id":"ID_USUARIO_SI_EXISTE_O_NULL","target_user_name":"Laura","reminder_text":"El seguro vence el viernes"},"status":"pending"}-->
+
+REGLAS CRÍTICAS:
+- En las acciones de modificación, NUNCA olvides incluir la etiqueta <!--PENDING_ACTION:...--> al final del texto.
+- Sé preciso asociando los IDs del JSON cuando coincidan los nombres (para categorías, miembros o huchas). Si no coinciden exactamente, pon null en el ID.
+- Si te preguntan sobre quién le debe a quién, fíjate en "transferencias_sugeridas".
+- La pregunta o instrucción del usuario fue: "${userPrompt.replace(/@gemini/gi, '').trim()}"`
 
     // 4. Llamar a la API de Gemini
     const response = await fetch(

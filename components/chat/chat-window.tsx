@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { askGeminiAction } from '@/app/actions/gemini'
-import { sendMessageAction, updateMessageAction, deleteMessageAction } from '@/app/actions/chat'
+import { sendMessageAction, updateMessageAction, deleteMessageAction, confirmChatAction, cancelChatAction } from '@/app/actions/chat'
 import {
   MessageGroup,
   Message,
@@ -15,7 +15,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X } from 'lucide-react'
+import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2 } from 'lucide-react'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   getPushNotificationState,
@@ -52,6 +52,149 @@ interface ChatWindowProps {
   members: Member[]
 }
 
+interface PendingActionPayload {
+  action: string
+  params: any
+  status: 'pending' | 'confirmed' | 'cancelled'
+}
+
+function parsePendingAction(content: string): { text: string; actionData: PendingActionPayload | null } {
+  if (!content) return { text: '', actionData: null }
+  const match = content.match(/<!--PENDING_ACTION:(.*?)-->/)
+  if (!match) return { text: content, actionData: null }
+
+  const text = content.replace(/<!--PENDING_ACTION:.*?-->/g, '').trim()
+  try {
+    const actionData = JSON.parse(match[1]) as PendingActionPayload
+    return { text, actionData }
+  } catch (e) {
+    return { text, actionData: null }
+  }
+}
+
+function renderFormattedText(text: string) {
+  if (!text) return null
+  const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g)
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>
+    }
+    if (part.startsWith('*') && part.endsWith('*')) {
+      return <em key={index} className="italic">{part.slice(1, -1)}</em>
+    }
+    return part
+  })
+}
+
+function ActionConfirmationCard({
+  actionData,
+  isExecuting,
+  onConfirm,
+  onCancel,
+}: {
+  actionData: PendingActionPayload
+  isExecuting: boolean
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  const getActionIcon = () => {
+    switch (actionData.action) {
+      case 'create_saving_goal':
+      case 'add_saving_contribution':
+        return <PiggyBank className="w-4 h-4 text-emerald-500" />
+      case 'add_shopping_items':
+        return <ShoppingCart className="w-4 h-4 text-amber-500" />
+      case 'add_expense':
+        return <CreditCard className="w-4 h-4 text-blue-500" />
+      case 'send_member_reminder':
+        return <Bell className="w-4 h-4 text-violet-500" />
+      default:
+        return <Check className="w-4 h-4 text-primary" />
+    }
+  }
+
+  const getActionTitle = () => {
+    switch (actionData.action) {
+      case 'create_saving_goal':
+        return `Crear Hucha: "${actionData.params?.name || 'Ahorro'}"`
+      case 'add_saving_contribution':
+        return `Aportar a Hucha: ${actionData.params?.amount || 0}€`
+      case 'add_shopping_items':
+        return `Añadir a la Compra: ${actionData.params?.items?.map((i: any) => i.name || i).join(', ') || ''}`
+      case 'add_expense':
+        return `Registrar Gasto: ${actionData.params?.amount || 0}€ - ${actionData.params?.description || ''}`
+      case 'send_member_reminder':
+        return `Enviar Aviso a ${actionData.params?.target_user_name || 'Miembro'}`
+      default:
+        return 'Confirmar Acción'
+    }
+  }
+
+  if (actionData.status === 'confirmed') {
+    return (
+      <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5">
+        <Check className="w-3.5 h-3.5" />
+        <span>Acción confirmada y ejecutada con éxito</span>
+      </div>
+    )
+  }
+
+  if (actionData.status === 'cancelled') {
+    return (
+      <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-muted/50 border border-border/40 text-muted-foreground text-xs font-medium flex items-center gap-1.5">
+        <X className="w-3.5 h-3.5" />
+        <span>Acción cancelada</span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="mt-3 p-3 rounded-2xl bg-background/95 border border-primary/30 shadow-md flex flex-col gap-2.5 transition-all text-foreground">
+      <div className="flex items-center gap-2">
+        <div className="p-1.5 rounded-lg bg-primary/10 flex items-center justify-center">
+          {getActionIcon()}
+        </div>
+        <span className="text-xs font-bold font-heading">
+          {getActionTitle()}
+        </span>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground leading-relaxed">
+        ¿Deseas confirmar la ejecución de esta acción en tu hogar?
+      </p>
+
+      <div className="flex items-center gap-2 pt-1">
+        <Button
+          type="button"
+          size="sm"
+          disabled={isExecuting}
+          onClick={onConfirm}
+          className="h-8 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold gap-1 shadow-sm active:scale-95 transition-all cursor-pointer"
+        >
+          {isExecuting ? (
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+          ) : (
+            <Check className="w-3.5 h-3.5" />
+          )}
+          <span>Confirmar</span>
+        </Button>
+
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          disabled={isExecuting}
+          onClick={onCancel}
+          className="h-8 px-3 rounded-xl text-xs text-muted-foreground hover:text-destructive border-border hover:border-destructive/30 transition-all cursor-pointer"
+        >
+          <X className="w-3.5 h-3.5 mr-1" />
+          <span>Cancelar</span>
+        </Button>
+      </div>
+    </div>
+  )
+}
+
 export function ChatWindow({
   householdId,
   householdName,
@@ -70,6 +213,62 @@ export function ChatWindow({
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
   const [editingContent, setEditingContent] = useState<string>('')
   const [isUpdating, setIsUpdating] = useState<boolean>(false)
+
+  // Estado para ejecución de acciones propuestas por Gemini
+  const [executingActionId, setExecutingActionId] = useState<string | null>(null)
+
+  const handleConfirmAction = async (msgId: string, actionData: any) => {
+    if (executingActionId) return
+    setExecutingActionId(msgId)
+    try {
+      const res = await confirmChatAction(msgId, actionData)
+      if (res.error) {
+        toast.add({
+          title: 'Error al confirmar la acción',
+          description: res.error,
+          type: 'error',
+        })
+      } else {
+        toast.add({
+          title: '¡Acción ejecutada!',
+          description: res.resultMessage || 'La operación se ha realizado con éxito.',
+          type: 'success',
+        })
+      }
+    } catch (err: any) {
+      toast.add({
+        title: 'Error',
+        description: err.message || 'No se pudo confirmar la acción.',
+        type: 'error',
+      })
+    } finally {
+      setExecutingActionId(null)
+    }
+  }
+
+  const handleCancelAction = async (msgId: string) => {
+    if (executingActionId) return
+    setExecutingActionId(msgId)
+    try {
+      const res = await cancelChatAction(msgId)
+      if (res.error) {
+        toast.add({
+          title: 'Error al cancelar la acción',
+          description: res.error,
+          type: 'error',
+        })
+      } else {
+        toast.add({
+          title: 'Acción cancelada',
+          type: 'info',
+        })
+      }
+    } catch (err: any) {
+      console.error(err)
+    } finally {
+      setExecutingActionId(null)
+    }
+  }
 
   // Estado de notificaciones Push PWA
   const [pushState, setPushState] = useState<{
@@ -188,11 +387,11 @@ export function ChatWindow({
             prev.map((m) =>
               m.id === updated.id
                 ? {
-                    ...m,
-                    content: updated.content,
-                    updated_at: updated.updated_at,
-                    is_deleted: updated.is_deleted,
-                  }
+                  ...m,
+                  content: updated.content,
+                  updated_at: updated.updated_at,
+                  is_deleted: updated.is_deleted,
+                }
                 : m
             )
           )
@@ -451,17 +650,16 @@ export function ChatWindow({
               size="sm"
               disabled={isPushLoading || pushState.permission === 'denied'}
               onClick={handleTogglePush}
-              className={`h-8 px-2.5 rounded-xl text-xs gap-1.5 border transition-all ${
-                pushState.isSubscribed
-                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold'
-                  : 'bg-background border-border text-muted-foreground hover:text-foreground'
-              }`}
+              className={`h-8 px-2.5 rounded-xl text-xs gap-1.5 border transition-all ${pushState.isSubscribed
+                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold'
+                : 'bg-background border-border text-muted-foreground hover:text-foreground'
+                }`}
               title={
                 pushState.permission === 'denied'
                   ? 'Permiso de notificaciones denegado en el navegador'
                   : pushState.isSubscribed
-                  ? 'Desactivar notificaciones push en este dispositivo'
-                  : 'Activar notificaciones push en este dispositivo'
+                    ? 'Desactivar notificaciones push en este dispositivo'
+                    : 'Activar notificaciones push en este dispositivo'
               }
             >
               {pushState.isSubscribed ? (
@@ -543,6 +741,7 @@ export function ChatWindow({
                   const isMe = !isBot && msg.created_by === userId
                   const sender = getMemberProfile(msg.created_by, isBot)
                   const isEditing = editingMessageId === msg.id
+                  const { text: cleanText, actionData } = parsePendingAction(msg.content)
 
                   return (
                     <Message key={msg.id} align={isMe ? 'end' : 'start'} className="px-1 group/msg relative">
@@ -639,12 +838,20 @@ export function ChatWindow({
                             </div>
                           ) : (
                             <div
-                              className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[75%] sm:max-w-[60%] wrap-break-word shadow-xs border ${isMe
+                              className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[85%] sm:max-w-[70%] wrap-break-word shadow-xs border ${isMe
                                 ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
                                 : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
                                 }`}
                             >
-                              {msg.content}
+                              <div className="whitespace-pre-wrap">{renderFormattedText(cleanText)}</div>
+                              {actionData && (
+                                <ActionConfirmationCard
+                                  actionData={actionData}
+                                  isExecuting={executingActionId === msg.id}
+                                  onConfirm={() => handleConfirmAction(msg.id, actionData)}
+                                  onCancel={() => handleCancelAction(msg.id)}
+                                />
+                              )}
                             </div>
                           )}
                         </div>
@@ -692,11 +899,43 @@ export function ChatWindow({
           </button>
           <button
             type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini Crear una hucha para las vacaciones con un objetivo de 1500 €')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+          >
+            + Hucha Vacaciones
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini Añadir leche y huevos a la lista de compra')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+          >
+            + Lista Compra
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini He añadido el recibo de internet de 45€')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+          >
+            + Recibo Internet
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSendSuggestedQuestion('@gemini Avisar a la familia de que el seguro vence el viernes')}
+            disabled={isSending || isBotTyping}
+            className="text-xs bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+          >
+            + Enviar Aviso
+          </button>
+          <button
+            type="button"
             onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo van nuestros límites y presupuestos de este mes?')}
             disabled={isSending || isBotTyping}
             className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
           >
-            📊 Presupuestos
+            Presupuestos
           </button>
           <button
             type="button"
@@ -704,7 +943,7 @@ export function ChatWindow({
             disabled={isSending || isBotTyping}
             className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
           >
-            💸 Saldar Deudas
+            Saldar Deudas
           </button>
           <button
             type="button"
@@ -712,7 +951,7 @@ export function ChatWindow({
             disabled={isSending || isBotTyping}
             className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
           >
-            💡 Consejo Ahorro
+            Consejo Ahorro
           </button>
           <button
             type="button"
@@ -720,7 +959,7 @@ export function ChatWindow({
             disabled={isSending || isBotTyping}
             className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
           >
-            📈 Top Categorías
+            Top Categorías
           </button>
           <button
             type="button"
@@ -728,7 +967,7 @@ export function ChatWindow({
             disabled={isSending || isBotTyping}
             className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
           >
-            🗓️ Resumen Semanal
+            Resumen Semanal
           </button>
         </div>
 
