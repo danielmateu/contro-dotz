@@ -39,6 +39,7 @@ import {
   ChevronUp,
 } from 'lucide-react'
 import { PAYMENT_METHODS } from '@/lib/validations'
+import { useOfflineSync } from '@/components/providers/offline-sync-provider'
 
 interface Member {
   user_id: string
@@ -139,6 +140,8 @@ export function ShoppingListWindow({
     }
   }, [householdId, supabase])
 
+  const { isOnline, enqueueAction } = useOfflineSync()
+
   // Añadir artículo
   const handleAddItem = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -147,13 +150,38 @@ export function ShoppingListWindow({
     setIsAdding(true)
     setAddError(null)
 
+    const newItemName = itemName.trim()
+    const newItemQuantity = itemQuantity.trim() || null
+
+    if (!navigator.onLine || !isOnline) {
+      const tempItem: ShoppingItem = {
+        id: `offline_${Date.now()}`,
+        name: newItemName,
+        quantity: newItemQuantity,
+        bought: false,
+        created_by: userId,
+        created_at: new Date().toISOString(),
+      }
+      setItems((prev) => [...prev, tempItem])
+      await enqueueAction('ADD_SHOPPING_ITEM', {
+        householdId,
+        name: newItemName,
+        quantity: newItemQuantity,
+        userId,
+      })
+      setItemName('')
+      setItemQuantity('')
+      setIsAdding(false)
+      return
+    }
+
     try {
       const { data, error } = await supabase
         .from('shopping_list')
         .insert({
           household_id: householdId,
-          name: itemName.trim(),
-          quantity: itemQuantity.trim() || null,
+          name: newItemName,
+          quantity: newItemQuantity,
           bought: false,
           created_by: userId,
         })
@@ -177,17 +205,23 @@ export function ShoppingListWindow({
 
   // Cambiar estado comprado/pendiente
   const handleToggleBought = async (itemId: string, currentBoughtState: boolean) => {
+    const nextBoughtState = !currentBoughtState
+    setItems((prev) =>
+      prev.map((i) => (i.id === itemId ? { ...i, bought: nextBoughtState } : i))
+    )
+
+    if (!navigator.onLine || !isOnline) {
+      await enqueueAction('TOGGLE_SHOPPING_ITEM', { itemId, bought: nextBoughtState })
+      return
+    }
+
     try {
       const { error } = await supabase
         .from('shopping_list')
-        .update({ bought: !currentBoughtState })
+        .update({ bought: nextBoughtState })
         .eq('id', itemId)
 
       if (error) throw error
-
-      setItems((prev) =>
-        prev.map((i) => (i.id === itemId ? { ...i, bought: !currentBoughtState } : i))
-      )
     } catch (err) {
       console.error('Error toggling bought state:', err)
     }
@@ -195,6 +229,13 @@ export function ShoppingListWindow({
 
   // Eliminar artículo
   const handleDeleteItem = async (itemId: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== itemId))
+
+    if (!navigator.onLine || !isOnline) {
+      await enqueueAction('DELETE_SHOPPING_ITEM', { itemId })
+      return
+    }
+
     try {
       const { error } = await supabase
         .from('shopping_list')
@@ -202,8 +243,6 @@ export function ShoppingListWindow({
         .eq('id', itemId)
 
       if (error) throw error
-
-      setItems((prev) => prev.filter((i) => i.id !== itemId))
     } catch (err) {
       console.error('Error deleting shopping item:', err)
     }

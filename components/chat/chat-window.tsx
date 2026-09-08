@@ -24,6 +24,7 @@ import {
 } from '@/lib/push-notifications'
 import { sendHouseholdChatPushAction } from '@/app/actions/push'
 import { toast } from '@/components/ui/toast'
+import { useOfflineSync } from '@/components/providers/offline-sync-provider'
 
 interface Member {
   user_id: string
@@ -511,6 +512,8 @@ export function ChatWindow({
     }
   }
 
+  const { isOnline, enqueueAction } = useOfflineSync()
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputMessage.trim() || isSending) return
@@ -523,6 +526,22 @@ export function ChatWindow({
       setIsBotTyping(true)
     }
     setError(null)
+
+    // Manejo cuando se está offline sin conexión a internet
+    if (!navigator.onLine || !isOnline) {
+      const tempId = `temp_msg_${Date.now()}`
+      const offlineMsg: ChatMessage = {
+        id: tempId,
+        content: `${messageText} (Pendiente de envío ⚡)`,
+        created_at: new Date().toISOString(),
+        created_by: userId,
+      }
+      setMessages((prev) => [...prev, offlineMsg])
+      await enqueueAction('SEND_CHAT_MESSAGE', { householdId, content: messageText })
+      setIsSending(false)
+      setIsBotTyping(false)
+      return
+    }
 
     try {
       const res = await sendMessageAction(householdId, messageText)

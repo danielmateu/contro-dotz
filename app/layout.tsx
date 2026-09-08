@@ -8,6 +8,8 @@ import { I18nProvider } from "@/lib/i18n/i18n-context"
 import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toast"
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
+import { OfflineSyncProvider } from "@/components/providers/offline-sync-provider"
+import { OfflineBanner } from "@/components/offline/offline-banner"
 
 export const viewport: Viewport = {
   themeColor: '#09090b',
@@ -86,9 +88,12 @@ export default function RootLayout({
         <PostHogProvider>
           <I18nProvider>
             <ThemeProvider>
-              {children}
-              <Toaster />
-              <PWAInstallPrompt />
+              <OfflineSyncProvider>
+                <OfflineBanner />
+                {children}
+                <Toaster />
+                <PWAInstallPrompt />
+              </OfflineSyncProvider>
             </ThemeProvider>
           </I18nProvider>
         </PostHogProvider>

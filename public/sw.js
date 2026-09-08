@@ -1,40 +1,85 @@
-const CACHE_NAME = 'control-dotz-v1';
+const CACHE_NAME = 'control-dotz-v2'
+const PRECACHE_ASSETS = [
+  '/',
+  '/manifest.json',
+  '/icon-192.png',
+  '/icon-512.png',
+  '/icon.svg',
+  '/apple-touch-icon.png',
+]
 
-// Installation: immediate activation
+// Instalación: precargar recursos esenciales y tomar control inmediato
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
-});
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(PRECACHE_ASSETS)
+    })
+  )
+  self.skipWaiting()
+})
 
-// Activation: claim clients
+// Activación: limpiar cachés antiguas y reclamar clientes
 self.addEventListener('activate', (event) => {
-  event.waitUntil(self.clients.claim());
-});
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
+      )
+    }).then(() => self.clients.claim())
+  )
+})
 
-// Fetch event listener (Required for Chrome Desktop PWA Installability Criteria)
+// Manejo de peticiones de red (Estrategia Network-First con fallback a Caché)
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests
-  if (event.request.method !== 'GET') return;
+  if (event.request.method !== 'GET') return
 
-  // Ignorar archivos internos de desarrollo Next.js y endpoints API
-  const url = event.request.url;
-  if (url.includes('/_next/') || url.includes('webpack') || url.includes('/api/')) return;
+  const url = event.request.url
+
+  // Omitir endpoints API dinámicos o hot-reloading de desarrollo
+  if (url.includes('/_next/webpack-hmr') || url.includes('/api/auth')) return
 
   event.respondWith(
-    fetch(event.request).catch(async () => {
-      const cached = await caches.match(event.request);
-      if (cached) return cached;
-      return new Response('Network error', { status: 503, headers: { 'Content-Type': 'text/plain' } });
-    })
-  );
-});
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (
+          networkResponse &&
+          networkResponse.status === 200 &&
+          networkResponse.type === 'basic'
+        ) {
+          const responseToCache = networkResponse.clone()
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache)
+          })
+        }
+        return networkResponse
+      })
+      .catch(async () => {
+        const cachedResponse = await caches.match(event.request)
+        if (cachedResponse) return cachedResponse
+
+        // Si es una navegación HTML y no hay red ni caché específica, intentar responder con /
+        if (event.request.headers.get('accept')?.includes('text/html')) {
+          const rootCache = await caches.match('/')
+          if (rootCache) return rootCache
+        }
+
+        return new Response('Modo Offline: Sin conexión a internet.', {
+          status: 503,
+          headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+        })
+      })
+  )
+})
 
 // Listener de Notificaciones Push PWA
 self.addEventListener('push', (event) => {
-  if (!event.data) return;
+  if (!event.data) return
 
   try {
-    const payload = event.data.json();
-    const title = payload.title || 'Control Dotz';
+    const payload = event.data.json()
+    const title = payload.title || 'Control Dotz'
     const options = {
       body: payload.body || 'Nuevo mensaje recibido',
       icon: payload.icon || '/icon-192.png',
@@ -44,30 +89,30 @@ self.addEventListener('push', (event) => {
       data: {
         url: payload.url || '/chat',
       },
-    };
+    }
 
-    event.waitUntil(self.registration.showNotification(title, options));
+    event.waitUntil(self.registration.showNotification(title, options))
   } catch (err) {
-    console.error('Error al procesar evento Push:', err);
+    console.error('Error al procesar evento Push:', err)
   }
-});
+})
 
 // Manejador al hacer clic en la notificación nativa
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
+  event.notification.close()
 
-  const targetUrl = (event.notification.data && event.notification.data.url) || '/chat';
+  const targetUrl = (event.notification.data && event.notification.data.url) || '/chat'
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
         if (client.url.includes('/chat') || client.url.includes(targetUrl)) {
-          return client.focus();
+          return client.focus()
         }
       }
       if (self.clients.openWindow) {
-        return self.clients.openWindow(targetUrl);
+        return self.clients.openWindow(targetUrl)
       }
     })
-  );
-});
+  )
+})

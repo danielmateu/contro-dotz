@@ -42,6 +42,7 @@ import { __iconNode as PlusData } from 'lucide-react/dist/esm/icons/plus.mjs'
 import { __iconNode as SaveData } from 'lucide-react/dist/esm/icons/save.mjs'
 import { PAYMENT_METHODS } from '@/lib/validations'
 import { predictCategory } from '@/lib/category-predictor'
+import { useOfflineSync } from '@/components/providers/offline-sync-provider'
 
 interface Category {
   id: string
@@ -192,8 +193,41 @@ export function ExpenseDialog({
     }
   }
 
+  const { isOnline, enqueueAction } = useOfflineSync()
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setIsSavingExpense(true)
+
+    // Si estamos offline o sin red, guardar en la cola IndexedDB local
+    if (!navigator.onLine || !isOnline) {
+      try {
+        const fields = {
+          amount,
+          category_id: categoryId,
+          description,
+          expense_date: expenseDate,
+          payment_method: paymentMethod,
+          notes: notes || undefined,
+          is_personal: isPersonal,
+          created_by: createdBy,
+        }
+
+        if (expense) {
+          await enqueueAction('UPDATE_EXPENSE', { expenseId: expense.id, fields })
+        } else {
+          await enqueueAction('CREATE_EXPENSE', { householdId, fields })
+        }
+
+        setFormState({ success: 'Gasto guardado localmente (Modo Offline). Se subirá al conectar.' })
+      } catch (err) {
+        setFormState({ error: 'Error al guardar el gasto localmente.' })
+      } finally {
+        setIsSavingExpense(false)
+      }
+      return
+    }
+
     const formData = new FormData(e.currentTarget)
     formData.append('is_personal', isPersonal ? 'true' : 'false')
     if (selectedFile) {
@@ -202,7 +236,6 @@ export function ExpenseDialog({
     if (deleteReceipt) {
       formData.append('delete_receipt', 'true')
     }
-    setIsSavingExpense(true)
     const startTime = Date.now()
 
     try {
