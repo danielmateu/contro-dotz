@@ -13,7 +13,8 @@ import {
   sendHouseholdInteraction,
 } from '@/lib/game/game-service'
 import { motion, AnimatePresence } from 'motion/react'
-import { Heart, Sparkles, Home, Hand, Cookie, ShowerHead, RefreshCw } from 'lucide-react'
+import { Heart, Sparkles, Home, Hand, Cookie, ShowerHead, RefreshCw, Trophy } from 'lucide-react'
+import { HouseholdChallengesModal } from '@/components/game/household-challenges-modal'
 
 interface HouseholdDotziRoomProps {
   householdId: string
@@ -33,6 +34,7 @@ export function HouseholdDotziRoom({
   const [interactionPopup, setInteractionPopup] = useState<{ id: number; targetUserId: string; text: string }[]>([])
   const [animatingBathUser, setAnimatingBathUser] = useState<string | null>(null)
   const [activeReactions, setActiveReactions] = useState<Record<string, { text: string; actionType: string }>>({})
+  const [challengesOpen, setChallengesOpen] = useState(false)
 
   const loadHouseholdDotzis = async (showLoader = false) => {
     if (showLoader || dotziMembers.length === 0) {
@@ -206,16 +208,28 @@ export function HouseholdDotziRoom({
           </CardDescription>
         </div>
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => loadHouseholdDotzis(true)}
-          disabled={isLoading}
-          className="h-8 rounded-xl text-xs gap-1"
-        >
-          <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">{isCatalan ? 'Actualitzar' : 'Refrescar'}</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setChallengesOpen(true)}
+            className="h-8 rounded-xl text-xs gap-1.5 border-amber-500/40 bg-amber-500/10 text-amber-600 dark:text-amber-400 hover:bg-amber-500/20 font-bold shadow-xs"
+          >
+            <Trophy className="w-3.5 h-3.5 fill-amber-500 text-amber-500 animate-pulse" />
+            <span>{isCatalan ? 'Reptes' : 'Retos'}</span>
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => loadHouseholdDotzis(true)}
+            disabled={isLoading}
+            className="h-8 rounded-xl text-xs gap-1"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLoading ? 'animate-spin' : ''}`} />
+            <span className="hidden sm:inline">{isCatalan ? 'Actualitzar' : 'Refrescar'}</span>
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent className="p-4 sm:p-6 space-y-6">
@@ -382,6 +396,14 @@ export function HouseholdDotziRoom({
           )}
         </div>
       </CardContent>
+
+      <HouseholdChallengesModal
+        open={challengesOpen}
+        onOpenChange={setChallengesOpen}
+        householdId={householdId}
+        userId={currentUserId}
+        locale={locale}
+      />
     </Card>
   )
 }

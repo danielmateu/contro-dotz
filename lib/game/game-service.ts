@@ -559,3 +559,206 @@ export async function sendHouseholdInteraction(
   }
 }
 
+// --------------------------------------------------
+// RETOS FAMILIARES DE AHORRO (HOUSEHOLD CHALLENGES)
+// --------------------------------------------------
+
+export interface HouseholdChallenge {
+  id: string
+  icon: string
+  title: { es: string; ca: string; en: string }
+  description: { es: string; ca: string; en: string }
+  targetValue: number
+  currentValue: number
+  rewardCoins: number
+  rewardXp: number
+  isCompleted: boolean
+  isClaimed: boolean
+}
+
+export const HOUSEHOLD_CHALLENGES_DEF = [
+  {
+    id: 'dotzi_family_love',
+    icon: '❤️',
+    title: {
+      es: 'Cariño Familiar',
+      ca: 'Afecte Familiar',
+      en: 'Family Love',
+    },
+    description: {
+      es: 'Realizad al menos 5 interacciones con las mascotas familiares.',
+      ca: 'Feu almenys 5 interaccions amb les meves familiars.',
+      en: 'Perform at least 5 interactions with household pets.',
+    },
+    targetValue: 5,
+    rewardCoins: 150,
+    rewardXp: 50,
+  },
+  {
+    id: 'saving_hero',
+    icon: '🐖',
+    title: {
+      es: 'Superahorradores del Hogar',
+      ca: 'Superestalviadors de la Llar',
+      en: 'Household Saving Heroes',
+    },
+    description: {
+      es: 'Tener al menos 1 meta de ahorro activa en el hogar.',
+      ca: 'Tenir almenys 1 meta d\'estalvi activa a la llar.',
+      en: 'Have at least 1 active saving goal in the household.',
+    },
+    targetValue: 1,
+    rewardCoins: 200,
+    rewardXp: 75,
+  },
+  {
+    id: 'pantry_master',
+    icon: '🛒',
+    title: {
+      es: 'Despensa Organizada',
+      ca: 'Despensa Organitzada',
+      en: 'Organized Pantry',
+    },
+    description: {
+      es: 'Añadir al menos 3 artículos a la lista de la compra del hogar.',
+      ca: 'Afegir almenys 3 articles a la llista de la compra de la llar.',
+      en: 'Add at least 3 items to the household shopping list.',
+    },
+    targetValue: 3,
+    rewardCoins: 120,
+    rewardXp: 40,
+  },
+]
+
+export async function fetchHouseholdChallenges(
+  householdId: string,
+  userId: string
+): Promise<HouseholdChallenge[]> {
+  try {
+    const supabase = createClient()
+
+    // 1. Obtener miembros del hogar
+    const { data: members } = await supabase
+      .from('household_members')
+      .select('user_id')
+      .eq('household_id', householdId)
+
+    const userIds = members?.map((m: any) => m.user_id) || []
+
+    let interactionsCount = 0
+    if (userIds.length > 0) {
+      const { count } = await supabase
+        .from('dotzi_interactions')
+        .select('*', { count: 'exact', head: true })
+        .in('receiver_id', userIds)
+
+      interactionsCount = count || 0
+    }
+
+    // 2. Obtener metas de ahorro del hogar
+    const { count: goalsCount } = await supabase
+      .from('saving_goals')
+      .select('*', { count: 'exact', head: true })
+      .eq('household_id', householdId)
+
+    // 3. Obtener lista de la compra del hogar
+    const { count: shoppingCount } = await supabase
+      .from('shopping_list')
+      .select('*', { count: 'exact', head: true })
+      .eq('household_id', householdId)
+
+    // 4. Obtener reclamaciones del usuario actual
+    const { data: claims } = await supabase
+      .from('household_challenge_claims')
+      .select('challenge_key')
+      .eq('household_id', householdId)
+      .eq('user_id', userId)
+
+    const claimedKeys = new Set((claims || []).map((c: any) => c.challenge_key))
+
+    return HOUSEHOLD_CHALLENGES_DEF.map((def) => {
+      let currentValue = 0
+      if (def.id === 'dotzi_family_love') currentValue = interactionsCount
+      else if (def.id === 'saving_hero') currentValue = goalsCount || 0
+      else if (def.id === 'pantry_master') currentValue = shoppingCount || 0
+
+      const isCompleted = currentValue >= def.targetValue
+      const isClaimed = claimedKeys.has(def.id)
+
+      return {
+        id: def.id,
+        icon: def.icon,
+        title: def.title,
+        description: def.description,
+        targetValue: def.targetValue,
+        currentValue: Math.min(currentValue, def.targetValue),
+        rewardCoins: def.rewardCoins,
+        rewardXp: def.rewardXp,
+        isCompleted,
+        isClaimed,
+      }
+    })
+  } catch (err) {
+    console.error('Error fetching household challenges:', err)
+    return []
+  }
+}
+
+export async function claimHouseholdChallengeReward(
+  householdId: string,
+  challengeId: string,
+  userId: string,
+  rewardCoins: number
+): Promise<boolean> {
+  try {
+    const supabase = createClient()
+
+    // 1. Insertar reclamación
+    const { error: claimError } = await supabase
+      .from('household_challenge_claims')
+      .insert({
+        challenge_key: challengeId,
+        household_id: householdId,
+        user_id: userId,
+      })
+
+    if (claimError) {
+      console.error('Error inserting challenge claim:', claimError)
+      return false
+    }
+
+    // 2. Sumar monedas al estado del usuario
+    const { data: gs } = await supabase
+      .from('user_game_state')
+      .select('coins')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    const currentCoins = gs?.coins ?? 100
+    const newCoins = currentCoins + rewardCoins
+
+    if (gs) {
+      await supabase
+        .from('user_game_state')
+        .update({
+          coins: newCoins,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', userId)
+    } else {
+      await supabase
+        .from('user_game_state')
+        .upsert({
+          user_id: userId,
+          coins: newCoins,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' })
+    }
+
+    return true
+  } catch (err) {
+    console.error('Error claiming household challenge reward:', err)
+    return false
+  }
+}
+
