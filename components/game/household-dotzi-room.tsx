@@ -31,6 +31,7 @@ export function HouseholdDotziRoom({
   const [selectedMember, setSelectedMember] = useState<HouseholdDotziMember | null>(null)
   const [interactionPopup, setInteractionPopup] = useState<{ id: number; targetUserId: string; text: string }[]>([])
   const [animatingBathUser, setAnimatingBathUser] = useState<string | null>(null)
+  const [activeReactions, setActiveReactions] = useState<Record<string, { text: string; actionType: string }>>({})
 
   const loadHouseholdDotzis = async () => {
     setIsLoading(true)
@@ -57,12 +58,21 @@ export function HouseholdDotziRoom({
     if (result.success) {
       const actionText =
         actionType === 'treat'
-          ? '¡Golosina enviada! (+15 pts Amistad)'
+          ? '¡Golosina enviada! (+15 pts)'
           : actionType === 'pet'
-          ? '¡Caricia cariñosa! (+10 pts Amistad)'
-          : actionType === 'wash'
-          ? '¡Mascota lavada con éxito!'
-          : '¡Saludo enviado!'
+            ? '¡Caricia enviada! (+10 pts)'
+            : actionType === 'wash'
+              ? '¡Dotzi bañado con éxito!'
+              : '¡Saludo enviado!'
+
+      const reactionDialogue =
+        actionType === 'treat'
+          ? (isCatalan ? '¡Nyam! ¡Gràcies per la llaminadura! 🍬 (+15 pts)' : '¡Mmm! ¡Gracias por la golosina! 🍬 (+15 pts)')
+          : actionType === 'pet'
+            ? (isCatalan ? '¡Aww! ¡Quina carícia més dolça! ❤️ (+10 pts)' : '¡Aww! ¡Qué caricia más suave! ❤️ (+10 pts)')
+            : actionType === 'wash'
+              ? (isCatalan ? '¡Quina frescor! ¡Estic ben net! 🧼' : '¡Qué fresquit@ y limpi@ he quedado! 🧼')
+              : (isCatalan ? '¡Hola amic! ¡Quin goig veure\'t! ✋' : '¡Hola amigo! ¡Qué alegría verte por aquí! ✋')
 
       if (actionType === 'wash') {
         setAnimatingBathUser(targetUserId)
@@ -73,6 +83,19 @@ export function HouseholdDotziRoom({
         ...prev.slice(-4),
         { id: Date.now(), targetUserId, text: actionText },
       ])
+
+      setActiveReactions((prev) => ({
+        ...prev,
+        [targetUserId]: { text: reactionDialogue, actionType },
+      }))
+
+      setTimeout(() => {
+        setActiveReactions((prev) => {
+          const next = { ...prev }
+          delete next[targetUserId]
+          return next
+        })
+      }, 4500)
 
       // Actualizar visualmente los puntos de amistad en estado local
       setDotziMembers((prev) =>
@@ -184,31 +207,42 @@ export function HouseholdDotziRoom({
                     className="relative flex flex-col items-center group cursor-pointer"
                     onClick={() => setSelectedMember(member)}
                   >
-                    {/* Popups flotantes de interacción */}
+                    {/* Popups flotantes de interacción (flotan por encima del bocadillo) */}
                     <AnimatePresence>
                       {popups.map((p) => (
                         <motion.div
                           key={p.id}
                           initial={{ opacity: 1, y: 0, scale: 0.8 }}
-                          animate={{ opacity: 0, y: -45, scale: 1.1 }}
+                          animate={{ opacity: 0, y: -50, scale: 1.1 }}
                           exit={{ opacity: 0 }}
-                          transition={{ duration: 1.4, ease: 'easeOut' }}
-                          className="absolute -top-12 z-30 pointer-events-none bg-rose-500 text-white font-extrabold text-[11px] px-2.5 py-1 rounded-full shadow-lg border border-white"
+                          transition={{ duration: 1.6, ease: 'easeOut' }}
+                          className="absolute -top-24 sm:-top-28 z-40 pointer-events-none whitespace-nowrap bg-linear-to-r from-rose-500 via-amber-500 to-emerald-500 text-white font-black text-xs px-3 py-1.5 rounded-full shadow-xl border border-white/80"
                         >
                           {p.text}
                         </motion.div>
                       ))}
                     </AnimatePresence>
 
-                    {/* Burbuja de diálogo de convivencia */}
+                    {/* Burbuja de diálogo de convivencia con reacción dinámica */}
                     <motion.div
-                      initial={{ y: 5, opacity: 0.9 }}
-                      animate={{ y: [0, -3, 0] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                      className="mb-2 max-w-[160px] sm:max-w-[190px] bg-card/95 text-card-foreground border border-border/80 shadow-md rounded-2xl p-2 text-[11px] font-medium text-center backdrop-blur-md relative"
+                      key={activeReactions[member.userId] ? `reaction-${activeReactions[member.userId].text}` : 'default'}
+                      initial={{ scale: activeReactions[member.userId] ? 0.9 : 1, opacity: 0.95 }}
+                      animate={{ y: [0, -4, 0], scale: 1 }}
+                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                      className={`mb-3 max-w-[200px] sm:max-w-[250px] w-auto border shadow-lg rounded-2xl p-2.5 sm:p-3 text-xs font-semibold text-center backdrop-blur-md relative z-20 transition-all duration-300 ${activeReactions[member.userId]
+                        ? 'bg-linear-to-r from-emerald-500/20 via-amber-500/20 to-rose-500/20 border-amber-500/60 text-foreground ring-2 ring-amber-500/40 shadow-amber-500/10'
+                        : 'bg-card/95 text-card-foreground border-border/80'
+                        }`}
                     >
-                      <span>{getGreetingDialogue(member.gameState.personality, member.displayName, member.gameState.petName)}</span>
-                      <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2.5 h-2.5 bg-card border-r border-b border-border/80 rotate-45" />
+                      <span className="leading-snug block whitespace-normal break-words">
+                        {activeReactions[member.userId]
+                          ? activeReactions[member.userId].text
+                          : getGreetingDialogue(member.gameState.personality, member.displayName, member.gameState.petName)}
+                      </span>
+                      <div
+                        className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 rotate-45 border-r border-b ${activeReactions[member.userId] ? 'bg-amber-500/20 border-amber-500/60' : 'bg-card border-border/80'
+                          }`}
+                      />
                     </motion.div>
 
                     {/* Avatar de Dotzi de la mascota */}

@@ -387,21 +387,24 @@ export function TamagotchiAvatar({
           {/* Burbujas de jabón al Bañar */}
           {isBathing && (
             <>
-              <motion.circle
-                cx="30" cy="80" r="6" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5"
-                animate={{ cy: [80, 20], opacity: [1, 0], scale: [0.8, 1.3] }}
+              <motion.g
+                animate={{ y: [0, -60], opacity: [1, 0], scale: [0.8, 1.3] }}
                 transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
-              />
-              <motion.circle
-                cx="65" cy="85" r="8" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5"
-                animate={{ cy: [85, 15], opacity: [1, 0], scale: [0.8, 1.4] }}
+              >
+                <circle cx="30" cy="80" r="6" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5" />
+              </motion.g>
+              <motion.g
+                animate={{ y: [0, -70], opacity: [1, 0], scale: [0.8, 1.4] }}
                 transition={{ duration: 1.5, repeat: Infinity, delay: 0.3, ease: "easeOut" }}
-              />
-              <motion.circle
-                cx="48" cy="90" r="5" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5"
-                animate={{ cy: [90, 25], opacity: [1, 0], scale: [0.8, 1.2] }}
+              >
+                <circle cx="65" cy="85" r="8" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5" />
+              </motion.g>
+              <motion.g
+                animate={{ y: [0, -65], opacity: [1, 0], scale: [0.8, 1.2] }}
                 transition={{ duration: 1.1, repeat: Infinity, delay: 0.6, ease: "easeOut" }}
-              />
+              >
+                <circle cx="48" cy="90" r="5" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5" />
+              </motion.g>
             </>
           )}
 
