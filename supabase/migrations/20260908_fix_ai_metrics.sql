@@ -2,17 +2,7 @@
 -- MIGRACIÓN: FIX METRICAS DE USO DE GEMINI AI
 -- ==========================================
 
--- 1. Actualizar la política RLS en messages para permitir insertar mensajes con la identidad del Bot Gemini
-DROP POLICY IF EXISTS "Los miembros del hogar pueden enviar mensajes" ON public.messages;
-
-CREATE POLICY "Los miembros del hogar pueden enviar mensajes"
-  ON public.messages FOR INSERT
-  WITH CHECK (
-    household_id IN (SELECT public.get_user_households())
-    AND (created_by = auth.uid() OR created_by = '00000000-0000-0000-0000-000000000000')
-  );
-
--- 2. Actualizar la función get_superadmin_metrics para contar mensajes creados por el bot o con formato de respuesta 🤖
+-- Actualizar la función get_superadmin_metrics para contar respuestas del asistente Gemini AI (mensajes con prefijo 🤖)
 CREATE OR REPLACE FUNCTION public.get_superadmin_metrics()
 RETURNS jsonb AS $$
 DECLARE
@@ -34,7 +24,7 @@ BEGIN
     'totalExpenses', (SELECT count(*) FROM public.expenses),
     'totalAmountTracked', COALESCE((SELECT sum(amount) FROM public.expenses), 0),
     'totalChatMessages', (SELECT count(*) FROM public.messages),
-    'totalAiResponses', (SELECT count(*) FROM public.messages WHERE created_by = '00000000-0000-0000-0000-000000000000' OR content LIKE '🤖%'),
+    'totalAiResponses', (SELECT count(*) FROM public.messages WHERE content LIKE '🤖%' OR created_by = '00000000-0000-0000-0000-000000000000'),
     'recentUsers', (
       SELECT COALESCE(jsonb_agg(u), '[]'::jsonb)
       FROM (

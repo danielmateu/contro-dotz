@@ -407,13 +407,13 @@ Instrucciones para responder:
       throw new Error('Respuesta de bot vacía')
     }
 
-    // 5. Insertar la respuesta del bot en la tabla de mensajes con la identidad oficial del Bot Gemini
+    // 5. Insertar la respuesta del bot en la tabla de mensajes (formateado con 🤖 para métricas e interfaz)
     const botText = botReply.trim()
     const content = botText.startsWith('🤖') ? botText : `🤖 ${botText}`
 
     const { error: insertBotErr } = await supabase.from('messages').insert({
       household_id: householdId,
-      created_by: '00000000-0000-0000-0000-000000000000',
+      created_by: user.id,
       content,
     })
 
