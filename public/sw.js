@@ -37,6 +37,9 @@ self.addEventListener('fetch', (event) => {
 
   const url = event.request.url
 
+  // Ignorar esquemas no soportados por la Cache API (chrome-extension://, moz-extension://, etc.)
+  if (!url.startsWith('http://') && !url.startsWith('https://')) return
+
   // Omitir endpoints API dinámicos o hot-reloading de desarrollo
   if (url.includes('/_next/webpack-hmr') || url.includes('/api/auth')) return
 
@@ -46,11 +49,11 @@ self.addEventListener('fetch', (event) => {
         if (
           networkResponse &&
           networkResponse.status === 200 &&
-          networkResponse.type === 'basic'
+          (networkResponse.type === 'basic' || networkResponse.type === 'cors')
         ) {
           const responseToCache = networkResponse.clone()
           caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache)
+            cache.put(event.request, responseToCache).catch(() => {})
           })
         }
         return networkResponse

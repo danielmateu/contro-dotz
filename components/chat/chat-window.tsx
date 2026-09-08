@@ -15,7 +15,8 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2 } from 'lucide-react'
+import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   getPushNotificationState,
@@ -217,6 +218,29 @@ export function ChatWindow({
 
   // Estado para ejecución de acciones propuestas por Gemini
   const [executingActionId, setExecutingActionId] = useState<string | null>(null)
+
+  // Estado de visibilidad de accesos directos IA de Gemini (colapsable a voluntad)
+  const [showShortcuts, setShowShortcuts] = useState<boolean>(false)
+
+  // Sincronizar la preferencia en cliente tras la hidratación SSR
+  useEffect(() => {
+    const saved = localStorage.getItem('control_dotz_chat_show_shortcuts')
+    if (saved !== null) {
+      setShowShortcuts(saved === 'true')
+    } else if (window.innerWidth >= 768) {
+      setShowShortcuts(true)
+    }
+  }, [])
+
+  const toggleShortcuts = () => {
+    setShowShortcuts((prev) => {
+      const next = !prev
+      try {
+        localStorage.setItem('control_dotz_chat_show_shortcuts', String(next))
+      } catch (_) {}
+      return next
+    })
+  }
 
   const handleConfirmAction = async (msgId: string, actionData: any) => {
     if (executingActionId) return
@@ -906,88 +930,121 @@ export function ChatWindow({
 
       {/* Barra de Entrada de Texto */}
       <div className="p-4 border-t border-border/60 bg-muted/10">
-        {/* Preguntas sugeridas a Gemini AI */}
-        <div className="mb-3.5 flex flex-wrap gap-2 items-center">
-          <button
-            type="button"
-            onClick={handleActivateGemini}
-            className="text-[10px] uppercase font-bold tracking-widest text-primary/80 hover:text-primary dark:text-violet-400 dark:hover:text-violet-300 select-none mr-1 flex items-center gap-1 cursor-pointer transition-colors"
-            title="Haz clic para mencionar a @gemini y empezar a escribir"
-          >
-            🤖 Consultar a Gemini:
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini Crear una hucha para las vacaciones con un objetivo de 1500 €')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
-          >
-            + Hucha Vacaciones
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini Añadir leche y huevos a la lista de compra')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
-          >
-            + Lista Compra
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini He añadido el recibo de internet de 45€')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
-          >
-            + Recibo Internet
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini Avisar a la familia de que el seguro vence el viernes')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
-          >
-            + Enviar Aviso
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo van nuestros límites y presupuestos de este mes?')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
-          >
-            Presupuestos
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini ¿quién debe dinero a quién y cuánto en nuestro hogar?')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
-          >
-            Saldar Deudas
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini dame un consejo financiero para ahorrar este mes')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
-          >
-            Consejo Ahorro
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini ¿en qué categoría hemos gastado más dinero este mes?')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
-          >
-            Top Categorías
-          </button>
-          <button
-            type="button"
-            onClick={() => handleSendSuggestedQuestion('@gemini hazme un resumen rápido de las finanzas familiares de la última semana')}
-            disabled={isSending || isBotTyping}
-            className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
-          >
-            Resumen Semanal
-          </button>
+        {/* Cabecera y Preguntas sugeridas a Gemini AI (Colapsable a voluntad) */}
+        <div className="mb-2">
+          <div className="flex items-center justify-between gap-2 py-0.5">
+            <button
+              type="button"
+              onClick={handleActivateGemini}
+              className="text-[10px] uppercase font-bold tracking-widest text-primary/80 hover:text-primary dark:text-violet-400 dark:hover:text-violet-300 select-none flex items-center gap-1.5 cursor-pointer transition-colors"
+              title="Haz clic para mencionar a @gemini y empezar a escribir"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
+              <span>🤖 Consultar a Gemini</span>
+            </button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={toggleShortcuts}
+              className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground font-semibold rounded-lg flex items-center gap-1 hover:bg-muted/50 cursor-pointer"
+            >
+              <span>{showShortcuts ? 'Ocultar sugerencias' : 'Ver accesos IA (9)'}</span>
+              {showShortcuts ? (
+                <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+              )}
+            </Button>
+          </div>
+
+          <AnimatePresence initial={false}>
+            {showShortcuts && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="overflow-hidden pt-2 pb-1"
+              >
+                <div className="flex flex-wrap gap-2 items-center">
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini Crear una hucha para las vacaciones con un objetivo de 1500 €')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                  >
+                    + Hucha Vacaciones
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini Añadir leche y huevos a la lista de compra')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                  >
+                    + Lista Compra
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini He añadido el recibo de internet de 45€')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                  >
+                    + Recibo Internet
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini Avisar a la familia de que el seguro vence el viernes')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                  >
+                    + Enviar Aviso
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo van nuestros límites y presupuestos de este mes?')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+                  >
+                    Presupuestos
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini ¿quién debe dinero a quién y cuánto en nuestro hogar?')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+                  >
+                    Saldar Deudas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini dame un consejo financiero para ahorrar este mes')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+                  >
+                    Consejo Ahorro
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini ¿en qué categoría hemos gastado más dinero este mes?')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+                  >
+                    Top Categorías
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini hazme un resumen rápido de las finanzas familiares de la última semana')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-muted/60 hover:bg-muted dark:bg-slate-900/60 dark:hover:bg-slate-800 border border-border/40 text-foreground px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-medium"
+                  >
+                    Resumen Semanal
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
