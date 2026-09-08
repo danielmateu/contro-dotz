@@ -979,6 +979,14 @@ export function ChatWindow({
                   </button>
                   <button
                     type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo están nuestras huchas de ahorro y cómo está nuestra mascota Dotzi?')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-pink-500/10 hover:bg-pink-500/20 text-pink-600 dark:text-pink-400 border border-pink-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                  >
+                    🐷 Estado Dotzi y Huchas
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => handleSendSuggestedQuestion('@gemini Añadir leche y huevos a la lista de compra')}
                     disabled={isSending || isBotTyping}
                     className="text-xs bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"

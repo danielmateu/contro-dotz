@@ -183,6 +183,7 @@ export async function askGeminiAction(
       categoriesRes,
       savingGoalsRes,
       shoppingItemsRes,
+      gameStateRes,
     ] = await Promise.all([
       // A. Miembros del hogar
       supabase
@@ -234,6 +235,12 @@ export async function askGeminiAction(
         .select('id, name, quantity, bought')
         .eq('household_id', householdId)
         .eq('bought', false),
+      // J. Estado del juego de la mascota Dotzi
+      supabase
+        .from('user_game_state')
+        .select('coins, cleanliness, pet_name, personality, friendship_points')
+        .eq('user_id', user.id)
+        .maybeSingle(),
     ])
 
     const membersList = membersRes.data || []
@@ -245,6 +252,7 @@ export async function askGeminiAction(
     const categoriesList = categoriesRes.data || []
     const savingGoalsList = savingGoalsRes.data || []
     const shoppingListItems = shoppingItemsRes.data || []
+    const petGameState = gameStateRes.data
 
     // Formatear miembros y calcular balances
     const formattedMembers = membersList.map((m) => {
@@ -384,6 +392,12 @@ export async function askGeminiAction(
         objetivo: Number(g.target_amount || 0),
         actual: Number(g.current_amount || 0),
       })),
+      dotzi_mascota: {
+        nombre: petGameState?.pet_name || 'Dotzi',
+        monedas: petGameState?.coins ?? 100,
+        limpieza: petGameState?.cleanliness ?? 100,
+        puntos_amistad: petGameState?.friendship_points ?? 0,
+      },
       lista_compra_pendiente: shoppingListItems.map((item) => ({
         id: item.id,
         nombre: item.name,

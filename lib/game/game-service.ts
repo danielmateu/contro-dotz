@@ -755,6 +755,22 @@ export async function claimHouseholdChallengeReward(
         }, { onConflict: 'user_id' })
     }
 
+    // 3. Notificar logro en el chat familiar
+    try {
+      const challengeDef = HOUSEHOLD_CHALLENGES_DEF.find((c) => c.id === challengeId)
+      const challengeTitle = challengeDef?.title?.es || 'Reto Familiar'
+      const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', userId).single()
+      const userName = profile?.display_name || 'Miembro'
+
+      await supabase.from('messages').insert({
+        household_id: householdId,
+        created_by: userId,
+        content: `🏆 **¡Reto Familiar Completado!** **${userName}** ha reclamado el premio del reto **"${challengeTitle}"** (+${rewardCoins} Monedas Dotzi) 💰🐷`,
+      })
+    } catch (chatErr) {
+      console.error('Error posting challenge claim chat message:', chatErr)
+    }
+
     return true
   } catch (err) {
     console.error('Error claiming household challenge reward:', err)

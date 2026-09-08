@@ -96,6 +96,18 @@ export async function addSavingContributionAction(
   } = await supabase.auth.getUser()
   if (!user) return { error: 'Sesión no iniciada.' }
 
+  // Obtener estado actual de la meta antes de la aportación para verificar si se completa al 100%
+  const { data: goalData } = await supabase
+    .from('saving_goals')
+    .select('name, target_amount, current_amount')
+    .eq('id', goalId)
+    .single()
+
+  const prevAmount = Number(goalData?.current_amount || 0)
+  const targetAmount = Number(goalData?.target_amount || 0)
+  const goalName = goalData?.name || 'Hucha'
+  const isGoalCompleted100 = targetAmount > 0 && prevAmount < targetAmount && (prevAmount + amount) >= targetAmount
+
   // Insertar aportación (el trigger de la base de datos actualizará el current_amount en la meta)
   const { error } = await supabase.from('saving_contributions').insert({
     goal_id: goalId,
@@ -110,17 +122,23 @@ export async function addSavingContributionAction(
 
   // Notificación en el chat familiar
   try {
-    const [profileRes, goalRes] = await Promise.all([
-      supabase.from('profiles').select('display_name').eq('id', user.id).single(),
-      supabase.from('saving_goals').select('name').eq('id', goalId).single(),
-    ])
-    const userName = profileRes.data?.display_name || 'Miembro'
-    const goalName = goalRes.data?.name || 'Hucha'
-    await supabase.from('messages').insert({
-      household_id: householdId,
-      created_by: user.id,
-      content: `🐷 **Aportación al ahorro**: **${userName}** ha añadido **${amount.toFixed(2)}€** a la hucha **"${goalName}"** 💰`,
-    })
+    const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', user.id).single()
+    const userName = profile?.display_name || 'Miembro'
+
+    if (isGoalCompleted100) {
+      // Mensaje de gran logro en el chat
+      await supabase.from('messages').insert({
+        household_id: householdId,
+        created_by: user.id,
+        content: `🎉 **¡META DE AHORRO ALCANZADA AL 100%!** 🏆 **${userName}** ha realizado la aportación definitiva a la meta **"${goalName}"** alcanzando los **${targetAmount.toFixed(2)}€**. ¡Dotzi gana **+100 Monedas Dotzi** de celebración! 🐷✨`,
+      })
+    } else {
+      await supabase.from('messages').insert({
+        household_id: householdId,
+        created_by: user.id,
+        content: `🐷 **Aportación al ahorro**: **${userName}** ha añadido **${amount.toFixed(2)}€** a la hucha **"${goalName}"** 💰`,
+      })
+    }
   } catch (chatError) {
     console.error(chatError)
   }
@@ -128,7 +146,12 @@ export async function addSavingContributionAction(
   revalidatePath('/saving-goals')
   revalidatePath('/dashboard')
   revalidatePath('/chat')
-  return { success: 'Aportación registrada con éxito.' }
+  return {
+    success: 'Aportación registrada con éxito.',
+    isGoalCompleted100,
+    goalName,
+    targetAmount,
+  }
 }
 
 /**

@@ -99,6 +99,9 @@ interface RewardCelebration {
   amount: number
   coinsEarned: number
   questCompleted: boolean
+  isGoalCompleted100?: boolean
+  goalName?: string
+  targetAmount?: number
 }
 
 export function SavingGoalsClient({
@@ -194,12 +197,16 @@ export function SavingGoalsClient({
       } else {
         setContributionSuccess(res.success)
 
-        // Otorgar recompensa al Tamagotchi
+        const isGoalCompleted100 = res.isGoalCompleted100 ?? false
+
+        // Otorgar recompensa al Tamagotchi (base 15 + 100 bonus por meta 100% completada)
         const isQuestDone = gameState.completedQuests.includes('quest_saving_contribution')
         const newCompletedQuests = isQuestDone
           ? gameState.completedQuests
           : [...gameState.completedQuests, 'quest_saving_contribution']
-        const coinsEarned = isQuestDone ? 15 : 65
+        
+        const baseCoins = isQuestDone ? 15 : 65
+        const coinsEarned = isGoalCompleted100 ? baseCoins + 100 : baseCoins
 
         await updateGameState({
           ...gameState,
@@ -218,6 +225,9 @@ export function SavingGoalsClient({
             amount: addedAmount,
             coinsEarned,
             questCompleted: !isQuestDone,
+            isGoalCompleted100,
+            goalName: res.goalName,
+            targetAmount: res.targetAmount,
           })
 
           router.refresh()
@@ -782,13 +792,24 @@ export function SavingGoalsClient({
           <DialogContent className="sm:max-w-md text-center">
             <DialogHeader className="items-center text-center space-y-2">
               <div className="p-3.5 bg-amber-500/15 text-amber-500 rounded-full animate-bounce">
-                <PartyPopper className="h-8 w-8" />
+                <PartyPopper className="h-8 w-8 text-amber-500" />
               </div>
               <DialogTitle className="text-xl font-extrabold text-foreground font-heading">
-                ¡Dotzi está súper feliz! 🎉
+                {rewardCelebration.isGoalCompleted100
+                  ? '🏆 ¡META COMPLETADA AL 100%! 🏆'
+                  : '¡Dotzi está súper feliz! 🎉'}
               </DialogTitle>
               <DialogDescription className="text-sm">
-                Has ingresado <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(rewardCelebration.amount)}</strong> en tus ahorros.
+                {rewardCelebration.isGoalCompleted100 ? (
+                  <span>
+                    ¡Enhorabuena! Habéis alcanzado el objetivo de la meta{' '}
+                    <strong className="text-foreground font-bold">&quot;{rewardCelebration.goalName}&quot;</strong>.
+                  </span>
+                ) : (
+                  <span>
+                    Has ingresado <strong className="text-emerald-600 dark:text-emerald-400">{formatCurrency(rewardCelebration.amount)}</strong> en tus ahorros.
+                  </span>
+                )}
               </DialogDescription>
             </DialogHeader>
 
@@ -796,17 +817,24 @@ export function SavingGoalsClient({
               <TamagotchiAvatar mood="super_hero" size="lg" equippedAccessory={gameState.equippedAccessory} />
 
               <div className="flex flex-wrap items-center justify-center gap-2 pt-2">
-                <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-xs font-extrabold px-3 py-1 gap-1.5 rounded-xl">
+                <Badge className="bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30 text-xs font-extrabold px-3 py-1 gap-1.5 rounded-xl shadow-2xs">
                   <Coins className="w-4 h-4 fill-amber-500 text-amber-500" />
                   +{rewardCelebration.coinsEarned} Monedas
                 </Badge>
-                <Badge className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 text-xs font-extrabold px-3 py-1 gap-1.5 rounded-xl">
+                <Badge className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 text-xs font-extrabold px-3 py-1 gap-1.5 rounded-xl shadow-2xs">
                   <Sparkles className="w-4 h-4 text-indigo-500" />
-                  +20 XP Dotzi
+                  +{rewardCelebration.isGoalCompleted100 ? '100' : '20'} XP Dotzi
                 </Badge>
               </div>
 
-              {rewardCelebration.questCompleted && (
+              {rewardCelebration.isGoalCompleted100 && (
+                <div className="flex items-center gap-1.5 text-xs font-extrabold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/30 mt-1">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span>¡+100 Monedas Bonus por Meta Alcanzada! 🐷✨</span>
+                </div>
+              )}
+
+              {rewardCelebration.questCompleted && !rewardCelebration.isGoalCompleted100 && (
                 <div className="flex items-center gap-1.5 text-xs font-extrabold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 mt-1">
                   <CheckCircle2 className="w-4 h-4" />
                   <span>¡Misión &quot;Ahorrador Activo&quot; Completada!</span>
@@ -816,7 +844,7 @@ export function SavingGoalsClient({
 
             <DialogFooter className="sm:justify-center">
               <Button onClick={() => setRewardCelebration(null)} className="w-full font-bold">
-                ¡Genial, a seguir ahorrando! 🚀
+                {rewardCelebration.isGoalCompleted100 ? '¡Celebrar en la Familia! 🎉' : '¡Genial, a seguir ahorrando! 🚀'}
               </Button>
             </DialogFooter>
           </DialogContent>
