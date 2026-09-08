@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
+import { cache } from 'react'
 
 export interface HouseholdMembershipItem {
   id: string
@@ -13,7 +14,7 @@ export interface HouseholdMembershipItem {
   }
 }
 
-export async function getActiveHouseholdHelper(userId: string) {
+export const getActiveHouseholdHelper = cache(async (userId: string) => {
   const supabase = await createClient()
 
   // 1. Obtener todas las membresías a hogares del usuario
@@ -62,4 +63,4 @@ export async function getActiveHouseholdHelper(userId: string) {
     allMemberships,
     activeHouseholdId: activeMembership.household_id,
   }
-}
+})
