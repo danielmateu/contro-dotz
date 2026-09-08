@@ -80,14 +80,14 @@ export function SaveBudgetForm({
       {/* Mes oculto pre-seleccionado */}
       <input type="hidden" name="month" value={month} />
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="space-y-3">
         {/* Categoría */}
         <div className="space-y-1">
           <Label htmlFor="category_id" className="text-xs">
             Categoría
           </Label>
           <Select name="category_id" defaultValue="" items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}>
-            <SelectTrigger id="category_id" className="w-full bg-muted/40 h-9">
+            <SelectTrigger id="category_id" className="w-full bg-muted/40 h-9 text-xs">
               <SelectValue placeholder="-- Selecciona categoría --" />
             </SelectTrigger>
             <SelectContent>
@@ -112,7 +112,7 @@ export function SaveBudgetForm({
             inputMode="decimal"
             placeholder="Ej: 200,00"
             required
-            className="bg-muted/40 focus:bg-background h-9"
+            className="bg-muted/40 focus:bg-background h-9 text-xs"
           />
         </div>
       </div>
