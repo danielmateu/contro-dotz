@@ -116,7 +116,7 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
     // Procesar Mensajes
     const messages = messagesRes.data || []
     messages.forEach((m: any) => {
-      const isBot = m.created_by === '00000000-0000-0000-0000-000000000000' || m.is_bot
+      const isBot = m.created_by === '00000000-0000-0000-0000-000000000000' || m.is_bot || m.content?.startsWith('🤖')
       if (isBot) {
         events.push({
           id: m.id,

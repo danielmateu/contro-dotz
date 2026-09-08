@@ -111,7 +111,7 @@ export async function getAdminMetricsAction(): Promise<{
     supabase
       .from('messages')
       .select('*', { count: 'exact', head: true })
-      .eq('created_by', '00000000-0000-0000-0000-000000000000'),
+      .or('created_by.eq.00000000-0000-0000-0000-000000000000,content.ilike.🤖%'),
     supabase
       .from('profiles')
       .select('id, email, display_name, created_at, is_super_admin')
