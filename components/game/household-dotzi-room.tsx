@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
+import { createClient } from '@/lib/supabase/client'
 import {
   HouseholdDotziMember,
   fetchHouseholdDotzis,
@@ -33,8 +34,10 @@ export function HouseholdDotziRoom({
   const [animatingBathUser, setAnimatingBathUser] = useState<string | null>(null)
   const [activeReactions, setActiveReactions] = useState<Record<string, { text: string; actionType: string }>>({})
 
-  const loadHouseholdDotzis = async () => {
-    setIsLoading(true)
+  const loadHouseholdDotzis = async (showLoader = false) => {
+    if (showLoader || dotziMembers.length === 0) {
+      setIsLoading(true)
+    }
     try {
       const data = await fetchHouseholdDotzis(householdId)
       setDotziMembers(data)
@@ -43,9 +46,93 @@ export function HouseholdDotziRoom({
     }
   }
 
+  const triggerVisualReaction = (
+    targetUserId: string,
+    actionType: 'pet' | 'treat' | 'greet' | 'wash',
+    isSelfSender: boolean = false
+  ) => {
+    const actionText =
+      actionType === 'treat'
+        ? isSelfSender ? '¡Golosina enviada! (+15 pts)' : '¡Golosina recibida! (+15 pts)'
+        : actionType === 'pet'
+          ? isSelfSender ? '¡Caricia enviada! (+10 pts)' : '¡Caricia recibida! (+10 pts)'
+          : actionType === 'wash'
+            ? '¡Dotzi bañado con éxito!'
+            : '¡Saludo recibido!'
+
+    const reactionDialogue =
+      actionType === 'treat'
+        ? (isCatalan ? '¡Nyam! ¡Gràcies per la llaminadura! 🍬 (+15 pts)' : '¡Mmm! ¡Gracias por la golosina! 🍬 (+15 pts)')
+        : actionType === 'pet'
+          ? (isCatalan ? '¡Aww! ¡Quina carícia més dolça! ❤️ (+10 pts)' : '¡Aww! ¡Qué caricia más suave! ❤️ (+10 pts)')
+          : actionType === 'wash'
+            ? (isCatalan ? '¡Quina frescor! ¡Estic ben net! 🧼' : '¡Qué fresquit@ y limpi@ he quedado! 🧼')
+            : (isCatalan ? '¡Hola amic! ¡Quin goig veure\'t! ✋' : '¡Hola amigo! ¡Qué alegría verte por aquí! ✋')
+
+    if (actionType === 'wash') {
+      setAnimatingBathUser(targetUserId)
+      setTimeout(() => setAnimatingBathUser(null), 2000)
+    }
+
+    setInteractionPopup((prev) => [
+      ...prev.slice(-4),
+      { id: Date.now(), targetUserId, text: actionText },
+    ])
+
+    setActiveReactions((prev) => ({
+      ...prev,
+      [targetUserId]: { text: reactionDialogue, actionType },
+    }))
+
+    setTimeout(() => {
+      setActiveReactions((prev) => {
+        const next = { ...prev }
+        delete next[targetUserId]
+        return next
+      })
+    }, 4500)
+  }
+
+  // Carga inicial y suscripción a Supabase Realtime para interacciones y estado de juego
   useEffect(() => {
-    if (householdId) {
-      loadHouseholdDotzis()
+    if (!householdId) return
+
+    loadHouseholdDotzis(dotziMembers.length === 0)
+
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`household_room_${householdId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'dotzi_interactions',
+        },
+        (payload) => {
+          const { sender_id, receiver_id, interaction_type } = payload.new
+          // Si el evento viene de otro usuario, activar la reacción visual
+          if (sender_id !== currentUserId) {
+            triggerVisualReaction(receiver_id, interaction_type as any, false)
+          }
+          loadHouseholdDotzis(false)
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'user_game_state',
+        },
+        () => {
+          loadHouseholdDotzis(false)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
     }
   }, [householdId])
 
@@ -56,46 +143,7 @@ export function HouseholdDotziRoom({
     const result = await sendHouseholdInteraction(targetUserId, actionType)
 
     if (result.success) {
-      const actionText =
-        actionType === 'treat'
-          ? '¡Golosina enviada! (+15 pts)'
-          : actionType === 'pet'
-            ? '¡Caricia enviada! (+10 pts)'
-            : actionType === 'wash'
-              ? '¡Dotzi bañado con éxito!'
-              : '¡Saludo enviado!'
-
-      const reactionDialogue =
-        actionType === 'treat'
-          ? (isCatalan ? '¡Nyam! ¡Gràcies per la llaminadura! 🍬 (+15 pts)' : '¡Mmm! ¡Gracias por la golosina! 🍬 (+15 pts)')
-          : actionType === 'pet'
-            ? (isCatalan ? '¡Aww! ¡Quina carícia més dolça! ❤️ (+10 pts)' : '¡Aww! ¡Qué caricia más suave! ❤️ (+10 pts)')
-            : actionType === 'wash'
-              ? (isCatalan ? '¡Quina frescor! ¡Estic ben net! 🧼' : '¡Qué fresquit@ y limpi@ he quedado! 🧼')
-              : (isCatalan ? '¡Hola amic! ¡Quin goig veure\'t! ✋' : '¡Hola amigo! ¡Qué alegría verte por aquí! ✋')
-
-      if (actionType === 'wash') {
-        setAnimatingBathUser(targetUserId)
-        setTimeout(() => setAnimatingBathUser(null), 2000)
-      }
-
-      setInteractionPopup((prev) => [
-        ...prev.slice(-4),
-        { id: Date.now(), targetUserId, text: actionText },
-      ])
-
-      setActiveReactions((prev) => ({
-        ...prev,
-        [targetUserId]: { text: reactionDialogue, actionType },
-      }))
-
-      setTimeout(() => {
-        setActiveReactions((prev) => {
-          const next = { ...prev }
-          delete next[targetUserId]
-          return next
-        })
-      }, 4500)
+      triggerVisualReaction(targetUserId, actionType, true)
 
       // Actualizar visualmente los puntos de amistad en estado local
       setDotziMembers((prev) =>
@@ -161,7 +209,7 @@ export function HouseholdDotziRoom({
         <Button
           variant="outline"
           size="sm"
-          onClick={loadHouseholdDotzis}
+          onClick={() => loadHouseholdDotzis(true)}
           disabled={isLoading}
           className="h-8 rounded-xl text-xs gap-1"
         >

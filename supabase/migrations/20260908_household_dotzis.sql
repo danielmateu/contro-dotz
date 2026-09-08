@@ -51,3 +51,29 @@ CREATE POLICY "Users can insert interactions"
     ON public.dotzi_interactions
     FOR INSERT
     WITH CHECK (auth.uid() = sender_id);
+
+-- Políticas RLS: Los miembros de un mismo hogar pueden actualizar e insertar el estado de juego de sus compañeros
+CREATE POLICY "Household members can update game state"
+    ON public.user_game_state
+    FOR UPDATE
+    USING (
+        auth.uid() = user_id
+        OR user_id IN (
+            SELECT user_id 
+            FROM public.household_members 
+            WHERE household_id IN (SELECT public.get_user_households())
+        )
+    );
+
+CREATE POLICY "Household members can insert game state"
+    ON public.user_game_state
+    FOR INSERT
+    WITH CHECK (
+        auth.uid() = user_id
+        OR user_id IN (
+            SELECT user_id 
+            FROM public.household_members 
+            WHERE household_id IN (SELECT public.get_user_households())
+        )
+    );
+

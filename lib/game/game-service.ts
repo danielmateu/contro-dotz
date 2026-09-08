@@ -509,17 +509,23 @@ export async function sendHouseholdInteraction(
     })
 
     // Incrementar puntos de amistad del destinatario
-    const { data: targetGs } = await supabase
+    const { data: targetGs, error: selectErr } = await supabase
       .from('user_game_state')
       .select('friendship_points, cleanliness')
       .eq('user_id', receiverUserId)
-      .single()
+      .maybeSingle()
+
+    if (selectErr) {
+      console.error('Error fetching target game state:', selectErr)
+    }
+
+    const currentPoints = targetGs?.friendship_points || 0
+    const currentCleanliness = targetGs?.cleanliness ?? 100
+    const newPoints = currentPoints + friendshipGained
+    const newCleanliness = interactionType === 'wash' ? 100 : currentCleanliness
 
     if (targetGs) {
-      const newPoints = (targetGs.friendship_points || 0) + friendshipGained
-      const newCleanliness = interactionType === 'wash' ? 100 : targetGs.cleanliness
-
-      await supabase
+      const { error: updateErr } = await supabase
         .from('user_game_state')
         .update({
           friendship_points: newPoints,
@@ -527,6 +533,23 @@ export async function sendHouseholdInteraction(
           updated_at: new Date().toISOString(),
         })
         .eq('user_id', receiverUserId)
+
+      if (updateErr) {
+        console.error('Error updating target game state:', updateErr)
+      }
+    } else {
+      const { error: upsertErr } = await supabase
+        .from('user_game_state')
+        .upsert({
+          user_id: receiverUserId,
+          friendship_points: newPoints,
+          cleanliness: newCleanliness,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id' })
+
+      if (upsertErr) {
+        console.error('Error upserting target game state:', upsertErr)
+      }
     }
 
     return { success: true, friendshipGained }
