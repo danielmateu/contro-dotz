@@ -237,7 +237,7 @@ export function ChatWindow({
       const next = !prev
       try {
         localStorage.setItem('control_dotz_chat_show_shortcuts', String(next))
-      } catch (_) {}
+      } catch (_) { }
       return next
     })
   }
@@ -977,14 +977,7 @@ export function ChatWindow({
                   >
                     + Hucha Vacaciones
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo están nuestras huchas de ahorro y cómo está nuestra mascota Dotzi?')}
-                    disabled={isSending || isBotTyping}
-                    className="text-xs bg-pink-500/10 hover:bg-pink-500/20 text-pink-600 dark:text-pink-400 border border-pink-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
-                  >
-                    🐷 Estado Dotzi y Huchas
-                  </button>
+
                   <button
                     type="button"
                     onClick={() => handleSendSuggestedQuestion('@gemini Añadir leche y huevos a la lista de compra')}
@@ -1008,6 +1001,14 @@ export function ChatWindow({
                     className="text-xs bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
                   >
                     + Enviar Aviso
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSendSuggestedQuestion('@gemini ¿cómo están nuestras huchas de ahorro y cómo está nuestra mascota Dotzi?')}
+                    disabled={isSending || isBotTyping}
+                    className="text-xs bg-pink-500/10 hover:bg-pink-500/20 text-pink-600 dark:text-pink-400 border border-pink-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                  >
+                    Estado Dotzi y Huchas
                   </button>
                   <button
                     type="button"
