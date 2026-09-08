@@ -60,7 +60,8 @@ export default async function DashboardPage() {
     currentBudgetsRes,
     householdMembersRes,
     memberIncomesRes,
-    activities
+    activities,
+    allExpensesRes
   ] = await Promise.all([
     supabase
       .from('categories')
@@ -95,7 +96,12 @@ export default async function DashboardPage() {
       .select('user_id, amount, contribution')
       .eq('household_id', householdId)
       .eq('month', currentMonthStr),
-    getRecentActivityAction(householdId)
+    getRecentActivityAction(householdId),
+    supabase
+      .from('expenses')
+      .select('id, amount, description, expense_date, category_id, created_by, is_personal')
+      .eq('household_id', householdId)
+      .order('expense_date', { ascending: true })
   ])
 
   const categories = categoriesRes.data
@@ -335,6 +341,7 @@ export default async function DashboardPage() {
       budgetsAlert={budgetsAlert || []}
       latestExpenses={latestExpenses}
       activities={activities}
+      allExpenses={allExpensesRes.data || []}
     />
   )
 }

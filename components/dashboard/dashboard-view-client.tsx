@@ -49,6 +49,7 @@ interface DashboardViewClientProps {
   budgetsAlert: any[]
   latestExpenses: any[]
   activities: any[]
+  allExpenses?: any[]
 }
 
 export function DashboardViewClient({
@@ -73,6 +74,7 @@ export function DashboardViewClient({
   budgetsAlert,
   latestExpenses,
   activities,
+  allExpenses = [],
 }: DashboardViewClientProps) {
   const { t, locale } = useI18n()
 
@@ -239,6 +241,9 @@ export function DashboardViewClient({
         stackedData={stackedChartData}
         memberNames={memberNames}
         membersIncomeAndSpent={membersIncomeAndSpent}
+        allExpenses={allExpenses}
+        mappedMembers={mappedMembers}
+        currentUserId={userId}
       />
 
       {/* Bottom Grid */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   ResponsiveContainer,
   PieChart,
@@ -20,7 +20,19 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/format'
-import { LayoutDashboard, Users2, Landmark, TrendingUp, BarChart3, PieChartIcon } from 'lucide-react'
+import {
+  LayoutDashboard,
+  Users2,
+  Landmark,
+  TrendingUp,
+  BarChart3,
+  PieChartIcon,
+  Calendar,
+  Globe,
+  Home,
+  User,
+  Check,
+} from 'lucide-react'
 
 // Colores consistentes y alegres para las áreas apiladas de los miembros
 const MEMBER_COLORS = [
@@ -57,6 +69,21 @@ interface MemberIncomeAndSpent {
   spent: number
 }
 
+interface MemberInfo {
+  id: string
+  name: string
+}
+
+interface ExpenseItem {
+  id: string
+  amount: number | string
+  expense_date: string
+  created_by: string | null
+  is_personal: boolean
+  category_id?: string
+  description?: string
+}
+
 interface DashboardChartsProps {
   pieData: PieData[]
   lineData: LineData[]
@@ -64,6 +91,9 @@ interface DashboardChartsProps {
   stackedData: any[]
   memberNames: string[]
   membersIncomeAndSpent?: MemberIncomeAndSpent[]
+  allExpenses?: ExpenseItem[]
+  mappedMembers?: MemberInfo[]
+  currentUserId?: string
 }
 
 export function DashboardCharts({
@@ -73,9 +103,276 @@ export function DashboardCharts({
   stackedData,
   memberNames,
   membersIncomeAndSpent = [],
+  allExpenses = [],
+  mappedMembers = [],
+  currentUserId,
 }: DashboardChartsProps) {
   const [isMounted, setIsMounted] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
+
+  type TimeframeMode = 'acumulado' | 'diario' | 'mensual' | 'anual'
+  type ScopeMode = 'all' | 'shared' | 'personal'
+
+  const [timeframe, setTimeframe] = useState<TimeframeMode>('acumulado')
+  const [scopeFilter, setScopeFilter] = useState<ScopeMode>('all')
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([])
+
+  // Opción de lista unificada de miembros para el filtro multiselección
+  const memberOptions = useMemo(() => {
+    const list: { id: string; name: string }[] = []
+    if (mappedMembers && mappedMembers.length > 0) {
+      mappedMembers.forEach(m => list.push({ id: m.id, name: m.name }))
+    } else if (memberNames && memberNames.length > 0) {
+      memberNames.filter(n => n !== 'Compartido').forEach(n => list.push({ id: n, name: n }))
+    }
+    list.push({ id: 'shared', name: 'Compartido' })
+    return list
+  }, [mappedMembers, memberNames])
+
+  // Lista de miembros activos con su color asignado
+  const activeMembersList = useMemo(() => {
+    const active = selectedUserIds.length === 0
+      ? memberOptions
+      : memberOptions.filter(opt => selectedUserIds.includes(opt.id))
+
+    return active.map((m, idx) => {
+      const globalIdx = memberOptions.findIndex(o => o.id === m.id)
+      const color = MEMBER_COLORS[(globalIdx >= 0 ? globalIdx : idx) % MEMBER_COLORS.length]
+      return {
+        ...m,
+        color,
+      }
+    })
+  }, [memberOptions, selectedUserIds])
+
+  const toggleUserSelection = (userId: string) => {
+    if (userId === 'all') {
+      setSelectedUserIds([])
+      return
+    }
+    if (selectedUserIds.includes(userId)) {
+      setSelectedUserIds(selectedUserIds.filter(id => id !== userId))
+    } else {
+      setSelectedUserIds([...selectedUserIds, userId])
+    }
+  }
+
+  // Filtrado de la lista allExpenses según Ámbito y Multiselección de Miembros
+  const filteredExpenses = useMemo(() => {
+    if (!allExpenses || allExpenses.length === 0) return []
+
+    return allExpenses.filter(exp => {
+      // 1. Ámbito (Hogar, Personal, Todos)
+      if (scopeFilter === 'shared' && exp.is_personal) return false
+      if (scopeFilter === 'personal' && !exp.is_personal) return false
+
+      // 2. Multiselección de Usuarios (si hay usuarios activos seleccionados)
+      if (selectedUserIds.length > 0) {
+        const creator = exp.created_by || 'shared'
+        if (!selectedUserIds.includes(creator)) return false
+      }
+
+      return true
+    })
+  }, [allExpenses, scopeFilter, selectedUserIds])
+
+  // Generar dataset según el marco temporal activo con desglose por cada miembro
+  const chartDataResult = useMemo(() => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() // 0..11
+    const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
+
+    const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+
+    if (timeframe === 'acumulado' || timeframe === 'diario') {
+      // Mapa por id de miembro y por día
+      const memberDayMap: Record<string, Record<number, number>> = {}
+      activeMembersList.forEach(m => {
+        memberDayMap[m.id] = {}
+        for (let d = 1; d <= lastDayOfMonth; d++) {
+          memberDayMap[m.id][d] = 0
+        }
+      })
+
+      if (allExpenses && allExpenses.length > 0) {
+        filteredExpenses.forEach(exp => {
+          const dateObj = new Date(exp.expense_date)
+          if (dateObj.getFullYear() === year && dateObj.getMonth() === month) {
+            const dayNum = dateObj.getDate()
+            const creatorId = exp.created_by || 'shared'
+            if (memberDayMap[creatorId] !== undefined) {
+              memberDayMap[creatorId][dayNum] = (memberDayMap[creatorId][dayNum] || 0) + Number(exp.amount)
+            }
+          }
+        })
+      } else if (scopeFilter === 'all' && selectedUserIds.length === 0) {
+        // Fallback básico si no hay allExpenses
+        const fallbackMember = activeMembersList[0]?.name || 'Total'
+        let prev = 0
+        const res = []
+        for (let d = 1; d <= lastDayOfMonth; d++) {
+          const item = lineData.find(l => parseInt(l.day) === d)
+          const cumVal = item ? item.Gasto : prev
+          const dayVal = Math.max(0, cumVal - prev)
+          prev = cumVal
+          const val = timeframe === 'acumulado' ? cumVal : dayVal
+          res.push({
+            label: `${d}`,
+            [fallbackMember]: parseFloat(val.toFixed(2)),
+            Total: parseFloat(val.toFixed(2))
+          })
+        }
+        return res
+      }
+
+      const memberRunningCum: Record<string, number> = {}
+      activeMembersList.forEach(m => { memberRunningCum[m.id] = 0 })
+
+      const res = []
+      for (let d = 1; d <= lastDayOfMonth; d++) {
+        const point: Record<string, any> = { label: `${d}` }
+        let dayTotalSpent = 0
+
+        activeMembersList.forEach(m => {
+          const dayAmount = memberDayMap[m.id]?.[d] || 0
+          memberRunningCum[m.id] += dayAmount
+
+          const val = timeframe === 'acumulado' ? memberRunningCum[m.id] : dayAmount
+          point[m.name] = parseFloat(val.toFixed(2))
+          dayTotalSpent += val
+        })
+
+        point.Total = parseFloat(dayTotalSpent.toFixed(2))
+        res.push(point)
+      }
+      return res
+    } else if (timeframe === 'mensual') {
+      const memberMonthMap: Record<string, Record<number, number>> = {}
+      activeMembersList.forEach(m => {
+        memberMonthMap[m.id] = {}
+        for (let mIdx = 0; mIdx < 12; mIdx++) {
+          memberMonthMap[m.id][mIdx] = 0
+        }
+      })
+
+      filteredExpenses.forEach(exp => {
+        const dateObj = new Date(exp.expense_date)
+        if (dateObj.getFullYear() === year) {
+          const mIdx = dateObj.getMonth()
+          const creatorId = exp.created_by || 'shared'
+          if (memberMonthMap[creatorId] !== undefined) {
+            memberMonthMap[creatorId][mIdx] = (memberMonthMap[creatorId][mIdx] || 0) + Number(exp.amount)
+          }
+        }
+      })
+
+      return MONTH_LABELS.map((name, mIdx) => {
+        const point: Record<string, any> = { label: name }
+        let monthTotal = 0
+        activeMembersList.forEach(m => {
+          const val = memberMonthMap[m.id]?.[mIdx] || 0
+          point[m.name] = parseFloat(val.toFixed(2))
+          monthTotal += val
+        })
+        point.Total = parseFloat(monthTotal.toFixed(2))
+        return point
+      })
+    } else {
+      // Anual
+      const yearsSet = new Set<string>()
+      yearsSet.add(year.toString())
+      filteredExpenses.forEach(exp => {
+        const yStr = new Date(exp.expense_date).getFullYear().toString()
+        if (yStr && !isNaN(Number(yStr))) yearsSet.add(yStr)
+      })
+
+      const sortedYears = Array.from(yearsSet).sort()
+
+      const memberYearMap: Record<string, Record<string, number>> = {}
+      activeMembersList.forEach(m => {
+        memberYearMap[m.id] = {}
+        sortedYears.forEach(y => { memberYearMap[m.id][y] = 0 })
+      })
+
+      filteredExpenses.forEach(exp => {
+        const yStr = new Date(exp.expense_date).getFullYear().toString()
+        const creatorId = exp.created_by || 'shared'
+        if (memberYearMap[creatorId] && memberYearMap[creatorId][yStr] !== undefined) {
+          memberYearMap[creatorId][yStr] = (memberYearMap[creatorId][yStr] || 0) + Number(exp.amount)
+        }
+      })
+
+      return sortedYears.map(yStr => {
+        const point: Record<string, any> = { label: yStr }
+        let yearTotal = 0
+        activeMembersList.forEach(m => {
+          const val = memberYearMap[m.id]?.[yStr] || 0
+          point[m.name] = parseFloat(val.toFixed(2))
+          yearTotal += val
+        })
+        point.Total = parseFloat(yearTotal.toFixed(2))
+        return point
+      })
+    }
+  }, [timeframe, filteredExpenses, allExpenses, lineData, scopeFilter, selectedUserIds, activeMembersList])
+
+  // Micro-métricas de resumen
+  const totalInView = useMemo(() => {
+    if (chartDataResult.length === 0) return 0
+    if (timeframe === 'acumulado') {
+      return chartDataResult[chartDataResult.length - 1]?.Total || 0
+    }
+    return chartDataResult.reduce((sum, item) => sum + (item.Total || 0), 0)
+  }, [chartDataResult, timeframe])
+
+  const avgInView = useMemo(() => {
+    if (chartDataResult.length === 0) return 0
+    return totalInView / chartDataResult.length
+  }, [totalInView, chartDataResult])
+
+  const maxInView = useMemo(() => {
+    if (chartDataResult.length === 0) return 0
+    return Math.max(...chartDataResult.map(i => i.Total || 0))
+  }, [chartDataResult])
+
+  // Tooltip dinámico para la gráfica desglosada por miembros
+  const CustomStackedDynamicTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload
+      let titleLabel = ''
+      if (timeframe === 'acumulado') titleLabel = `Día ${data.label} (Acumulado)`
+      else if (timeframe === 'diario') titleLabel = `Día ${data.label}`
+      else if (timeframe === 'mensual') titleLabel = `Mes: ${data.label}`
+      else titleLabel = `Año ${data.label}`
+
+      const totalVal = data.Total !== undefined ? data.Total : payload.reduce((sum: number, p: any) => sum + Number(p.value || 0), 0)
+
+      return (
+        <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-2 min-w-48">
+          <div className="font-bold border-b pb-1.5 text-foreground flex justify-between items-center">
+            <span>{titleLabel}</span>
+            <span className="text-primary font-extrabold">{formatCurrency(totalVal)}</span>
+          </div>
+          <div className="space-y-1 pt-0.5">
+            {payload.map((item: any) => {
+              if (item.value === undefined || item.value === null) return null
+              return (
+                <div key={item.name} className="flex justify-between items-center gap-4">
+                  <span className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: item.color }} />
+                    <span className="font-medium text-foreground">{item.name}:</span>
+                  </span>
+                  <span className="font-semibold text-foreground">{formatCurrency(item.value)}</span>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )
+    }
+    return null
+  }
 
   useEffect(() => {
     setIsMounted(true)
@@ -276,52 +573,211 @@ export function DashboardCharts({
         {activeTab === 'overview' && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             <Card className="border-slate-200/50 shadow-md md:col-span-2">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  Evolución de Gastos (Acumulado)
-                </CardTitle>
-                <CardDescription>
-                  Historial del gasto familiar diario acumulado durante el mes actual.
-                </CardDescription>
+              <CardHeader className="space-y-4 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      {timeframe === 'acumulado' && <TrendingUp className="h-5 w-5 text-primary" />}
+                      {timeframe === 'diario' && <Calendar className="h-5 w-5 text-indigo-500" />}
+                      {timeframe === 'mensual' && <BarChart3 className="h-5 w-5 text-emerald-500" />}
+                      {timeframe === 'anual' && <Landmark className="h-5 w-5 text-amber-500" />}
+                      {timeframe === 'acumulado' && 'Evolución de Gastos (Acumulado)'}
+                      {timeframe === 'diario' && 'Gastos Diarios (Mes Actual)'}
+                      {timeframe === 'mensual' && 'Gastos Mensuales (Año Actual)'}
+                      {timeframe === 'anual' && 'Gastos Anuales (Histórico)'}
+                    </CardTitle>
+                    <CardDescription>
+                      {timeframe === 'acumulado' && 'Historial acumulado del período seleccionado.'}
+                      {timeframe === 'diario' && 'Desglose de importe gastado día por día.'}
+                      {timeframe === 'mensual' && 'Evolución total gastada en cada mes del año.'}
+                      {timeframe === 'anual' && 'Consolidado anual de gastos registrados.'}
+                    </CardDescription>
+                  </div>
+
+                  {/* Selector de Marco Temporal */}
+                  <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60 shrink-0">
+                    {[
+                      { id: 'acumulado', label: 'Acumulado', icon: TrendingUp },
+                      { id: 'diario', label: 'Diario', icon: Calendar },
+                      { id: 'mensual', label: 'Mensual', icon: BarChart3 },
+                      { id: 'anual', label: 'Anual', icon: Landmark },
+                    ].map((tf) => {
+                      const Icon = tf.icon
+                      const isActive = timeframe === tf.id
+                      return (
+                        <button
+                          key={tf.id}
+                          onClick={() => setTimeframe(tf.id as any)}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                            isActive
+                              ? 'bg-background text-foreground shadow-xs border border-border/60'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                          }`}
+                        >
+                          <Icon className={`h-3.5 w-3.5 ${isActive ? 'text-primary' : ''}`} />
+                          {tf.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Filtros Secundarios: Ámbito y Multiselección de Usuarios */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-border/40">
+                  {/* Selector de Ámbito */}
+                  <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
+                    {[
+                      { id: 'all', label: 'Todos', icon: Globe },
+                      { id: 'shared', label: 'Hogar', icon: Home },
+                      { id: 'personal', label: 'Personal', icon: User },
+                    ].map((sc) => {
+                      const Icon = sc.icon
+                      const isActive = scopeFilter === sc.id
+                      return (
+                        <button
+                          key={sc.id}
+                          onClick={() => setScopeFilter(sc.id as any)}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-all ${
+                            isActive
+                              ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" />
+                          {sc.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Multiselección de Miembros */}
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="text-[11px] font-medium text-muted-foreground mr-0.5 flex items-center gap-1">
+                      <Users2 className="h-3.5 w-3.5 text-primary" /> Miembros:
+                    </span>
+
+                    <button
+                      onClick={() => toggleUserSelection('all')}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border ${
+                        selectedUserIds.length === 0
+                          ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-semibold'
+                          : 'bg-muted/30 border-transparent text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      Todos
+                    </button>
+
+                    {memberOptions.map((mem) => {
+                      const isSelected = selectedUserIds.includes(mem.id)
+                      const activeMem = activeMembersList.find(a => a.id === mem.id)
+                      const memColor = activeMem?.color || '#64748b'
+
+                      return (
+                        <button
+                          key={mem.id}
+                          onClick={() => toggleUserSelection(mem.id)}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border ${
+                            isSelected
+                              ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-semibold shadow-2xs'
+                              : 'bg-muted/30 border-transparent text-muted-foreground hover:text-foreground'
+                          }`}
+                        >
+                          <span className="h-2 w-2 rounded-full shrink-0" style={{ backgroundColor: memColor }} />
+                          {isSelected && <Check className="h-3 w-3 text-emerald-500 shrink-0" />}
+                          {mem.name}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent className="h-87.5">
-                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                  <AreaChart
-                    data={lineData}
-                    margin={{ top: 10, right: 10, left: -8, bottom: 0 }}
-                  >
-                    <defs>
-                      <linearGradient id="colorGasto" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary)" stopOpacity={0.25} />
-                        <stop offset="95%" stopColor="var(--primary)" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
-                    <XAxis
-                      dataKey="day"
-                      tickLine={false}
-                      axisLine={false}
-                      className="text-[10px] fill-muted-foreground font-medium"
-                    />
-                    <YAxis
-                      tickLine={false}
-                      axisLine={false}
-                      className="text-[10px] fill-muted-foreground font-medium"
-                      tickFormatter={(val) => `${val}€`}
-                    />
-                    <Tooltip content={<CustomAreaTooltip />} />
-                    <Area
-                      type="monotone"
-                      dataKey="Gasto"
-                      name="Total Gastado"
-                      stroke="var(--primary)"
-                      strokeWidth={2}
-                      fillOpacity={1}
-                      fill="url(#colorGasto)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+
+              <CardContent className="space-y-4">
+                {/* Micro Estadísticas de la Vista */}
+                <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/40 text-xs">
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Total Período</span>
+                    <span className="text-sm font-extrabold text-foreground">{formatCurrency(totalInView)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Promedio</span>
+                    <span className="text-sm font-bold text-foreground">{formatCurrency(avgInView)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Pico Máximo</span>
+                    <span className="text-sm font-bold text-primary">{formatCurrency(maxInView)}</span>
+                  </div>
+                </div>
+
+                <div className="h-75">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                    {timeframe === 'acumulado' ? (
+                      <AreaChart
+                        data={chartDataResult}
+                        margin={{ top: 10, right: 10, left: -8, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                        <XAxis
+                          dataKey="label"
+                          tickLine={false}
+                          axisLine={false}
+                          className="text-[10px] fill-muted-foreground font-medium"
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          className="text-[10px] fill-muted-foreground font-medium"
+                          tickFormatter={(val) => `${val}€`}
+                        />
+                        <Tooltip content={<CustomStackedDynamicTooltip />} />
+                        <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+                        {activeMembersList.map((mem) => (
+                          <Area
+                            key={mem.id}
+                            type="monotone"
+                            dataKey={mem.name}
+                            name={mem.name}
+                            stackId="1"
+                            stroke={mem.color}
+                            fill={mem.color}
+                            fillOpacity={0.35}
+                          />
+                        ))}
+                      </AreaChart>
+                    ) : (
+                      <BarChart
+                        data={chartDataResult}
+                        margin={{ top: 10, right: 10, left: -8, bottom: 0 }}
+                      >
+                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted/30" />
+                        <XAxis
+                          dataKey="label"
+                          tickLine={false}
+                          axisLine={false}
+                          className="text-[10px] fill-muted-foreground font-medium"
+                        />
+                        <YAxis
+                          tickLine={false}
+                          axisLine={false}
+                          className="text-[10px] fill-muted-foreground font-medium"
+                          tickFormatter={(val) => `${val}€`}
+                        />
+                        <Tooltip content={<CustomStackedDynamicTooltip />} />
+                        <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '11px' }} />
+                        {activeMembersList.map((mem, idx) => (
+                          <Bar
+                            key={mem.id}
+                            dataKey={mem.name}
+                            name={mem.name}
+                            stackId="1"
+                            fill={mem.color}
+                            radius={idx === activeMembersList.length - 1 ? [4, 4, 0, 0] : [0, 0, 0, 0]}
+                          />
+                        ))}
+                      </BarChart>
+                    )}
+                  </ResponsiveContainer>
+                </div>
               </CardContent>
             </Card>
 
