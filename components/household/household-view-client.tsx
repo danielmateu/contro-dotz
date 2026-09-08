@@ -29,6 +29,7 @@ import { es, enUS, ca } from 'date-fns/locale'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { SettlementsTabContent } from '@/components/household/settlements-tab-content'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
+import { HouseholdDotziRoom } from '@/components/game/household-dotzi-room'
 
 interface HouseholdViewClientProps {
   hasHousehold: boolean
@@ -142,6 +143,15 @@ export function HouseholdViewClient({
           </TabsList>
 
           <TabsContent value="members" className="space-y-6 outline-none">
+            {/* El Hogar de los Dotzis (Convivencia e interacciones entre mascotas familiares) */}
+            {householdId && (
+              <HouseholdDotziRoom
+                householdId={householdId}
+                currentUserId={currentUserId}
+                locale={locale}
+              />
+            )}
+
             <div className="grid gap-6">
               {/* Members List */}
               <div className="space-y-6">

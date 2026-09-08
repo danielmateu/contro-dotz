@@ -6,6 +6,7 @@ import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
 import { TamagotchiShopModal } from '@/components/game/tamagotchi-shop-modal'
 import { TamagotchiQuestsModal } from '@/components/game/tamagotchi-quests-modal'
 import { TamagotchiChatModal } from '@/components/game/tamagotchi-chat-modal'
+import { TamagotchiRpgCreatorModal } from '@/components/game/tamagotchi-rpg-creator-modal'
 import { PetStats } from '@/lib/game/fin-pet-engine'
 import { useGameState } from '@/lib/game/game-context'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
@@ -22,6 +23,13 @@ import {
   Target,
   MessageCircle,
   X,
+  Wand2,
+  ShowerHead,
+  Shield,
+  Utensils,
+  Compass,
+  Sun,
+  PartyPopper,
 } from 'lucide-react'
 
 interface TamagotchiCardProps {
@@ -42,6 +50,8 @@ export function TamagotchiCard({
   const [shopOpen, setShopOpen] = useState(false)
   const [questsOpen, setQuestsOpen] = useState(false)
   const [chatOpen, setChatOpen] = useState(false)
+  const [rpgOpen, setRpgOpen] = useState(false)
+  const [isBathing, setIsBathing] = useState(false)
 
   // Color de la barra de salud según el valor
   const getHealthColor = (health: number) => {
@@ -50,6 +60,33 @@ export function TamagotchiCard({
     if (health >= 45) return 'bg-amber-500'
     return 'bg-rose-500'
   }
+
+  // Acción de Bañar / Limpiar 🧼
+  const handleBath = async () => {
+    if (isBathing) return
+    setIsBathing(true)
+
+    // Restablecer higiene al 100% y dar un pequeño bonus de XP
+    const newState = {
+      ...gameState,
+      cleanliness: 100,
+    }
+
+    await updateGameState(newState)
+
+    setTimeout(() => {
+      setIsBathing(false)
+    }, 2000)
+  }
+
+  const getWeightLabel = (w: number) => {
+    if (w > 65) return { text: isCatalan ? 'Gordet' : 'Gordito', color: 'bg-amber-500/10 text-amber-600 border-amber-500/30' }
+    if (w < 35) return { text: isCatalan ? 'Prima' : 'Delgado', color: 'bg-sky-500/10 text-sky-600 border-sky-500/30' }
+    return { text: isCatalan ? 'Equilibrat' : 'Equilibrado', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' }
+  }
+
+  const weightInfo = getWeightLabel(gameState.weight ?? 50)
+  const cleanliness = gameState.cleanliness ?? 100
 
   return (
     <>
@@ -68,6 +105,18 @@ export function TamagotchiCard({
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
+              {/* Botón de Creador RPG */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setRpgOpen(true)}
+                className="h-7 rounded-xl bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-extrabold text-[11px] sm:text-xs px-2 sm:px-2.5 gap-1 hover:bg-purple-500/20"
+                title="Creador de Personaje RPG"
+              >
+                <Wand2 className="w-3.5 h-3.5 text-purple-500" />
+                <span>RPG</span>
+              </Button>
+
               {/* Botón de Monedas & Tienda */}
               <Button
                 variant="outline"
@@ -110,16 +159,30 @@ export function TamagotchiCard({
                 equippedAccessory={gameState.equippedAccessory}
                 skinColor={gameState.skinColor}
                 hairstyle={gameState.hairstyle}
+                weight={gameState.weight}
+                cleanliness={cleanliness}
+                isBathing={isBathing}
                 interactive={true}
               />
             </div>
 
-            <div className="space-y-1 sm:space-y-2 text-left flex-1 min-w-0">
-              <div className="flex items-center justify-start gap-2">
+            <div className="space-y-1.5 sm:space-y-2 text-left flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h3 className="font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-1.5">
-                  <span>Dotzi</span>
+                  <span>{gameState.petName || 'Dotzi'}</span>
                   <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-500" />
                 </h3>
+                <div className="flex items-center gap-1">
+                  <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${weightInfo.color}`}>
+                    {weightInfo.text}
+                  </Badge>
+                  {gameState.friendshipPoints > 0 && (
+                    <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-rose-500/10 text-rose-600 border-rose-500/30 flex items-center gap-1">
+                      <Heart className="w-3 h-3 text-rose-500 fill-rose-500" />
+                      <span>{gameState.friendshipPoints} pts</span>
+                    </Badge>
+                  )}
+                </div>
               </div>
               <p className="text-[11px] sm:text-xs text-muted-foreground leading-relaxed italic line-clamp-3">
                 "{stats.dialogue}"
@@ -127,18 +190,18 @@ export function TamagotchiCard({
             </div>
           </div>
 
-          {/* Barras de Estado (Salud & XP) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-4">
+          {/* Barras de Estado (Salud, XP e Higiene) */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
             {/* Salud Financiera */}
-            <div className="space-y-1.5 bg-background/60 p-3 sm:p-3.5 rounded-2xl border border-border/40">
+            <div className="space-y-1.5 bg-background/60 p-3 rounded-2xl border border-border/40">
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                   <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 shrink-0" />
-                  <span className="truncate">{isCatalan ? 'Salut Financera' : 'Salud Financiera'}</span>
+                  <span className="truncate">{isCatalan ? 'Salut' : 'Salud'}</span>
                 </span>
                 <span className="font-bold text-foreground ml-1 shrink-0">{stats.health}%</span>
               </div>
-              <div className="h-2 sm:h-2.5 w-full bg-muted rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div
                   className={`h-full transition-all duration-500 rounded-full ${getHealthColor(stats.health)}`}
                   style={{ width: `${stats.health}%` }}
@@ -146,16 +209,33 @@ export function TamagotchiCard({
               </div>
             </div>
 
+            {/* Higiene (Sucio / Limpio + Botón Bañar) */}
+            <div className="space-y-1.5 bg-background/60 p-3 rounded-2xl border border-border/40">
+              <div className="flex items-center justify-between text-xs font-semibold">
+                <span className="flex items-center gap-1 text-muted-foreground min-w-0">
+                  <ShowerHead className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
+                  <span className="truncate">{isCatalan ? 'Higiene' : 'Higiene'}</span>
+                </span>
+                <span className="font-bold text-foreground ml-1 shrink-0">{cleanliness}%</span>
+              </div>
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-cyan-500 transition-all duration-500 rounded-full"
+                  style={{ width: `${cleanliness}%` }}
+                />
+              </div>
+            </div>
+
             {/* Experiencia (XP) */}
-            <div className="space-y-1.5 bg-background/60 p-3 sm:p-3.5 rounded-2xl border border-border/40">
+            <div className="space-y-1.5 bg-background/60 p-3 rounded-2xl border border-border/40">
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                   <Trophy className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                  <span className="truncate">{isCatalan ? 'Experiència (XP)' : 'Experiencia (XP)'}</span>
+                  <span className="truncate">{isCatalan ? 'XP' : 'XP'}</span>
                 </span>
                 <span className="font-bold text-foreground ml-1 shrink-0">{stats.xp}/100</span>
               </div>
-              <div className="h-2 sm:h-2.5 w-full bg-muted rounded-full overflow-hidden">
+              <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div
                   className="h-full bg-linear-to-r from-indigo-500 to-violet-500 transition-all duration-500 rounded-full"
                   style={{ width: `${stats.xp}%` }}
@@ -164,59 +244,60 @@ export function TamagotchiCard({
             </div>
           </div>
 
-          {/* Acciones Rápidas (Charlar, Alimentar, Tienda, Misiones, Gasto) */}
-          <div className="pt-1 sm:pt-2 grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-2">
+          {/* Acciones Rápidas (Charlar, Bañar, Tienda, Misiones, Gasto) */}
+          <div className="pt-1 sm:pt-2 grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setChatOpen(true)}
-              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 px-2 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <MessageCircle className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Xerrar 💬' : 'Charlar 💬'}</span>
+              <span className="whitespace-nowrap">{isCatalan ? 'Xerrar' : 'Charlar'}</span>
             </Button>
 
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShopOpen(true)}
-              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20 px-2 h-8 sm:h-9"
+              onClick={handleBath}
+              disabled={isBathing || cleanliness >= 98}
+              className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
-              <span className="text-xs">🍕</span>
-              <span className="truncate">{isCatalan ? 'Menjar 🍕' : 'Comer 🍕'}</span>
+              <ShowerHead className="w-3.5 h-3.5 shrink-0 animate-bounce" />
+              <span className="whitespace-nowrap">{isBathing ? 'Bañando...' : isCatalan ? 'Banyar' : 'Bañar'}</span>
             </Button>
 
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShopOpen(true)}
-              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-2 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Botiga 🛒' : 'Tienda 🛒'}</span>
+              <span className="whitespace-nowrap">{isCatalan ? 'Botiga' : 'Tienda'}</span>
             </Button>
 
             <Button
               variant="outline"
               size="sm"
               onClick={() => setQuestsOpen(true)}
-              className="rounded-xl font-bold gap-1 text-[11px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-2 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <Target className="w-3.5 h-3.5 shrink-0" />
-              <span className="truncate">{isCatalan ? 'Missions 🎯' : 'Misiones 🎯'}</span>
+              <span className="whitespace-nowrap">{isCatalan ? 'Missions' : 'Misiones'}</span>
             </Button>
 
             <Link href="/expenses" className="w-full col-span-2 sm:col-span-1">
-              <Button variant="default" size="sm" className="w-full rounded-xl font-semibold gap-1 text-[11px] sm:text-xs shadow-xs px-2 h-8 sm:h-9">
+              <Button variant="default" size="sm" className="w-full rounded-xl font-semibold gap-1 text-[10px] sm:text-xs shadow-xs px-1 sm:px-2 h-8 sm:h-9">
                 <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{isCatalan ? 'Despesa' : 'Gasto'}</span>
+                <span className="whitespace-nowrap">{isCatalan ? 'Despesa' : 'Gasto'}</span>
               </Button>
             </Link>
           </div>
         </CardContent>
       </Card>
 
-      {/* Modales de Tienda, Misiones y Chat */}
+      {/* Modales de Tienda, Misiones, Chat y RPG Creator */}
       <TamagotchiShopModal
         open={shopOpen}
         onOpenChange={setShopOpen}
@@ -241,6 +322,15 @@ export function TamagotchiCard({
         gameState={gameState}
         locale={locale}
       />
+
+      <TamagotchiRpgCreatorModal
+        open={rpgOpen}
+        onOpenChange={setRpgOpen}
+        gameState={gameState}
+        onStateChange={updateGameState}
+        locale={locale}
+      />
     </>
   )
 }
+

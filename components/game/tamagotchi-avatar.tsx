@@ -16,6 +16,9 @@ interface TamagotchiAvatarProps {
   skinColor?: string
   hairstyle?: string
   eatingFood?: string | null
+  weight?: number // 0-100 (50 normal, >65 gordito, <35 delgado)
+  cleanliness?: number // 0-100 (100 limpio, <40 sucio)
+  isBathing?: boolean
   onClick?: () => void
 }
 
@@ -29,6 +32,9 @@ export function TamagotchiAvatar({
   skinColor = 'skin_indigo',
   hairstyle = 'hair_none',
   eatingFood = null,
+  weight = 50,
+  cleanliness = 100,
+  isBathing = false,
   onClick,
 }: TamagotchiAvatarProps) {
   const { registerTap } = useGameState()
@@ -314,25 +320,90 @@ export function TamagotchiAvatar({
 
           {/* ACCESORIO: Capa (Superhéroe o equipada) */}
           {(mood === 'super_hero' || equippedAccessory === 'cape') && (
-            <motion.path
-              d="M 22 45 C 10 55, 12 85, 30 82 C 40 80, 26 55, 25 45 Z"
-              fill={equippedAccessory === 'cape' ? '#ef4444' : '#fbbf24'}
-              animate={{ d: ["M 22 45 C 10 55, 12 85, 30 82 C 40 80, 26 55, 25 45 Z", "M 22 45 C 5 60, 8 90, 32 84 C 42 82, 26 55, 25 45 Z", "M 22 45 C 10 55, 12 85, 30 82 C 40 80, 26 55, 25 45 Z"] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            />
+            <motion.g
+              animate={{ rotate: [-2, 4, -2] }}
+              transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ transformOrigin: '25px 45px' }}
+            >
+              <path
+                d="M 22 45 C 10 55, 12 85, 30 82 C 40 80, 26 55, 25 45 Z"
+                fill={equippedAccessory === 'cape' ? '#ef4444' : '#fbbf24'}
+              />
+            </motion.g>
           )}
 
-          {/* Cuerpo Principal de Dotzi */}
-          <rect
-            x="12"
-            y="14"
-            width="76"
-            height="72"
-            rx="36"
-            fill={style.body}
-            stroke="#ffffff"
-            strokeWidth="3.5"
-          />
+          {/* Cuerpo Principal de Dotzi con escala según Peso */}
+          <g transform={weight > 65 ? "scale(1.15, 0.94)" : weight < 35 ? "scale(0.86, 1.06)" : undefined} style={{ transformOrigin: '50px 50px' }}>
+            <rect
+              x="12"
+              y="14"
+              width="76"
+              height="72"
+              rx="36"
+              fill={style.body}
+              stroke="#ffffff"
+              strokeWidth="3.5"
+            />
+
+            {/* Mofletes gorditos si está rellenito */}
+            {weight > 65 && (
+              <>
+                <path d="M 12 56 C 8 62 16 68 20 64" stroke="#7c2d12" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.3" />
+                <path d="M 88 56 C 92 62 84 68 80 64" stroke="#7c2d12" strokeWidth="2" strokeLinecap="round" fill="none" opacity="0.3" />
+              </>
+            )}
+
+            {/* Manchas de suciedad si cleanliness < 40 */}
+            {cleanliness < 40 && (
+              <g opacity={cleanliness < 20 ? "0.85" : "0.55"}>
+                <ellipse cx="28" cy="70" rx="6" ry="3.5" fill="#78350f" />
+                <ellipse cx="70" cy="74" rx="7" ry="4" fill="#78350f" />
+                <circle cx="34" cy="32" r="3" fill="#78350f" />
+                <circle cx="68" cy="28" r="4" fill="#78350f" />
+              </g>
+            )}
+          </g>
+
+          {/* Moscas volando alrededor si está muy sucio (cleanliness < 25) */}
+          {cleanliness < 25 && (
+            <>
+              <motion.g
+                animate={{ x: [0, 8, -4, 0], y: [0, -6, 4, 0] }}
+                transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <circle cx="16" cy="30" r="2.5" fill="#18181b" />
+                <path d="M 14 27 C 12 24, 18 24, 16 27 Z" fill="#9ca3af" opacity="0.7" />
+              </motion.g>
+              <motion.g
+                animate={{ x: [0, -6, 6, 0], y: [0, 5, -5, 0] }}
+                transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <circle cx="82" cy="36" r="2.5" fill="#18181b" />
+                <path d="M 80 33 C 78 30, 84 30, 82 33 Z" fill="#9ca3af" opacity="0.7" />
+              </motion.g>
+            </>
+          )}
+
+          {/* Burbujas de jabón al Bañar */}
+          {isBathing && (
+            <>
+              <motion.circle
+                cx="30" cy="80" r="6" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5"
+                animate={{ cy: [80, 20], opacity: [1, 0], scale: [0.8, 1.3] }}
+                transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+              />
+              <motion.circle
+                cx="65" cy="85" r="8" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5"
+                animate={{ cy: [85, 15], opacity: [1, 0], scale: [0.8, 1.4] }}
+                transition={{ duration: 1.5, repeat: Infinity, delay: 0.3, ease: "easeOut" }}
+              />
+              <motion.circle
+                cx="48" cy="90" r="5" fill="#38bdf8" fillOpacity="0.6" stroke="#ffffff" strokeWidth="1.5"
+                animate={{ cy: [90, 25], opacity: [1, 0], scale: [0.8, 1.2] }}
+                transition={{ duration: 1.1, repeat: Infinity, delay: 0.6, ease: "easeOut" }}
+              />
+            </>
+          )}
 
           {/* Brillo especular superior */}
           <ellipse cx="34" cy="28" rx="14" ry="7" fill="#ffffff" fillOpacity="0.35" transform="rotate(-20 34 28)" />

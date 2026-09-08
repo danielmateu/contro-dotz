@@ -276,7 +276,23 @@ export const GAME_QUESTS: QuestItem[] = [
   }
 ]
 
+export type DotziGender = 'boy' | 'girl' | 'neutral'
+export type DotziPersonality = 'saver' | 'foodie' | 'adventurer' | 'zen' | 'party'
+
+export interface HouseholdDotziMember {
+  userId: string
+  displayName: string
+  avatarUrl: string | null
+  gameState: UserGameState
+}
+
 export interface UserGameState {
+  petName: string
+  gender: DotziGender
+  personality: DotziPersonality
+  weight: number // 0 to 100, 50 is balanced, >70 is chubby, <30 is slim
+  cleanliness: number // 0 to 100, 100 is squeaky clean, <40 dirty
+  friendshipPoints: number
   coins: number
   equippedAccessory: string
   skinColor: string
@@ -289,6 +305,12 @@ export interface UserGameState {
 const LOCAL_STORAGE_KEY = 'dotzi_user_game_state'
 
 export const DEFAULT_GAME_STATE: UserGameState = {
+  petName: 'Dotzi',
+  gender: 'neutral',
+  personality: 'saver',
+  weight: 50,
+  cleanliness: 100,
+  friendshipPoints: 0,
   coins: 120, // Bonificación inicial de bienvenida
   equippedAccessory: 'none',
   skinColor: 'skin_indigo',
@@ -329,7 +351,7 @@ export async function fetchUserGameState(): Promise<UserGameState> {
 
     const { data, error } = await supabase
       .from('user_game_state')
-      .select('coins, equipped_accessory, skin_color, hairstyle, unlocked_items, completed_quests, tap_count')
+      .select('coins, equipped_accessory, skin_color, hairstyle, unlocked_items, completed_quests, tap_count, pet_name, gender, personality, weight, cleanliness, friendship_points')
       .eq('user_id', user.id)
       .single()
 
@@ -338,6 +360,12 @@ export async function fetchUserGameState(): Promise<UserGameState> {
     }
 
     const state: UserGameState = {
+      petName: data.pet_name ?? local.petName ?? 'Dotzi',
+      gender: (data.gender as DotziGender) ?? local.gender ?? 'neutral',
+      personality: (data.personality as DotziPersonality) ?? local.personality ?? 'saver',
+      weight: data.weight ?? local.weight ?? 50,
+      cleanliness: data.cleanliness ?? local.cleanliness ?? 100,
+      friendshipPoints: data.friendship_points ?? local.friendshipPoints ?? 0,
       coins: data.coins ?? local.coins,
       equippedAccessory: data.equipped_accessory ?? local.equippedAccessory,
       skinColor: data.skin_color ?? local.skinColor ?? 'skin_indigo',
@@ -363,30 +391,41 @@ export async function saveUserGameState(state: UserGameState): Promise<void> {
 
     if (!user) return
 
+    const payload = {
+      user_id: user.id,
+      coins: state.coins,
+      equipped_accessory: state.equippedAccessory,
+      skin_color: state.skinColor,
+      hairstyle: state.hairstyle,
+      unlocked_items: state.unlockedItems,
+      completed_quests: state.completedQuests,
+      tap_count: state.tapCount,
+      pet_name: state.petName,
+      gender: state.gender,
+      personality: state.personality,
+      weight: state.weight,
+      cleanliness: state.cleanliness,
+      friendship_points: state.friendshipPoints,
+      updated_at: new Date().toISOString(),
+    }
+
     const { error } = await supabase
       .from('user_game_state')
-      .upsert({
-        user_id: user.id,
-        coins: state.coins,
-        equipped_accessory: state.equippedAccessory,
-        skin_color: state.skinColor,
-        hairstyle: state.hairstyle,
-        unlocked_items: state.unlockedItems,
-        completed_quests: state.completedQuests,
-        tap_count: state.tapCount,
-        updated_at: new Date().toISOString(),
-      })
+      .upsert(payload)
 
-    // Si Supabase devuelve error (ej. si la migración de skin_color/hairstyle aún no se ha ejecutado), hacemos fallback a las columnas base
     if (error) {
+      // Fallback si algunas columnas nuevas no existen en BD previa
       await supabase
         .from('user_game_state')
         .upsert({
           user_id: user.id,
           coins: state.coins,
           equipped_accessory: state.equippedAccessory,
+          skin_color: state.skinColor,
+          hairstyle: state.hairstyle,
           unlocked_items: state.unlockedItems,
           completed_quests: state.completedQuests,
+          tap_count: state.tapCount,
           updated_at: new Date().toISOString(),
         })
     }
@@ -394,3 +433,106 @@ export async function saveUserGameState(state: UserGameState): Promise<void> {
     console.warn('Could not sync game state to Supabase, saved locally:', err)
   }
 }
+
+export async function fetchHouseholdDotzis(householdId: string): Promise<HouseholdDotziMember[]> {
+  try {
+    const supabase = createClient()
+    
+    // Obtener todos los miembros del hogar con su perfil
+    const { data: members, error: membersError } = await supabase
+      .from('household_members')
+      .select('user_id, profiles(display_name, avatar_url)')
+      .eq('household_id', householdId)
+
+    if (membersError || !members) return []
+
+    const userIds = members.map((m: any) => m.user_id)
+    
+    // Obtener los estados de juego de estos usuarios
+    const { data: gameStates } = await supabase
+      .from('user_game_state')
+      .select('*')
+      .in('user_id', userIds)
+
+    const gameStateMap = new Map<string, any>()
+    if (gameStates) {
+      gameStates.forEach((gs: any) => gameStateMap.set(gs.user_id, gs))
+    }
+
+    return members.map((m: any) => {
+      const gs = gameStateMap.get(m.user_id)
+      const parsedGameState: UserGameState = gs ? {
+        petName: gs.pet_name || 'Dotzi',
+        gender: gs.gender || 'neutral',
+        personality: gs.personality || 'saver',
+        weight: gs.weight ?? 50,
+        cleanliness: gs.cleanliness ?? 100,
+        friendshipPoints: gs.friendship_points ?? 0,
+        coins: gs.coins ?? 100,
+        equippedAccessory: gs.equipped_accessory || 'none',
+        skinColor: gs.skin_color || 'skin_indigo',
+        hairstyle: gs.hairstyle || 'hair_none',
+        unlockedItems: Array.isArray(gs.unlocked_items) ? gs.unlocked_items : ['none'],
+        completedQuests: Array.isArray(gs.completed_quests) ? gs.completed_quests : [],
+        tapCount: gs.tap_count ?? 0,
+      } : { ...DEFAULT_GAME_STATE }
+
+      return {
+        userId: m.user_id,
+        displayName: m.profiles?.display_name || 'Familiar',
+        avatarUrl: m.profiles?.avatar_url || null,
+        gameState: parsedGameState,
+      }
+    })
+  } catch (err) {
+    console.error('Error fetching household dotzis:', err)
+    return []
+  }
+}
+
+export async function sendHouseholdInteraction(
+  receiverUserId: string,
+  interactionType: 'pet' | 'treat' | 'greet' | 'wash'
+): Promise<{ success: boolean; friendshipGained: number }> {
+  try {
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return { success: false, friendshipGained: 0 }
+
+    const friendshipGained = interactionType === 'treat' ? 15 : interactionType === 'pet' ? 10 : 5
+
+    // Registrar interacción en BD
+    await supabase.from('dotzi_interactions').insert({
+      sender_id: user.id,
+      receiver_id: receiverUserId,
+      interaction_type: interactionType,
+    })
+
+    // Incrementar puntos de amistad del destinatario
+    const { data: targetGs } = await supabase
+      .from('user_game_state')
+      .select('friendship_points, cleanliness')
+      .eq('user_id', receiverUserId)
+      .single()
+
+    if (targetGs) {
+      const newPoints = (targetGs.friendship_points || 0) + friendshipGained
+      const newCleanliness = interactionType === 'wash' ? 100 : targetGs.cleanliness
+
+      await supabase
+        .from('user_game_state')
+        .update({
+          friendship_points: newPoints,
+          cleanliness: newCleanliness,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('user_id', receiverUserId)
+    }
+
+    return { success: true, friendshipGained }
+  } catch (err) {
+    console.error('Error sending household interaction:', err)
+    return { success: false, friendshipGained: 0 }
+  }
+}
+
