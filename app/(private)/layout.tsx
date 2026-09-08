@@ -35,29 +35,40 @@ interface PrivateLayoutProps {
   children: React.ReactNode
 }
 
-export default async function PrivateLayout({ children }: PrivateLayoutProps) {
-  const supabase = await createClient()
+import { getAuthenticatedUser } from '@/lib/supabase/get-authenticated-user'
 
-  // Obtener usuario autenticado
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+export default async function PrivateLayout({ children }: PrivateLayoutProps) {
+  const user = await getAuthenticatedUser()
 
   if (!user) {
     redirect('/login')
   }
 
-  // Cargar perfil y contexto multihogar
-  const [profileResult, householdContext] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select('display_name, email, avatar_url, status, is_super_admin')
-      .eq('id', user.id)
-      .single(),
-    getActiveHouseholdHelper(user.id),
-  ])
+  const supabase = await createClient()
 
-  const profile = profileResult.data
+  // Cargar perfil y contexto multihogar con resiliencia offline
+  let profile: any = null
+  let householdContext: any = {
+    activeMembership: null,
+    allMemberships: [],
+    activeHouseholdId: null,
+  }
+
+  try {
+    const [profileResult, hhContext] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('display_name, email, avatar_url, status, is_super_admin')
+        .eq('id', user.id)
+        .maybeSingle(),
+      getActiveHouseholdHelper(user.id),
+    ])
+    profile = profileResult?.data || null
+    if (hhContext) householdContext = hhContext
+  } catch (err) {
+    console.warn('[Layout] Fallo al cargar perfil/hogares offline:', err)
+  }
+
   const { activeMembership, allMemberships, activeHouseholdId } = householdContext
 
   const hasHousehold = !!activeMembership

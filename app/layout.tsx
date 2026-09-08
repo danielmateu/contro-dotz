@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Toaster } from "@/components/ui/toast"
 import { PWAInstallPrompt } from "@/components/pwa-install-prompt"
 import { OfflineSyncProvider } from "@/components/providers/offline-sync-provider"
+import { ServiceWorkerRegister } from "@/components/providers/sw-register"
 import { OfflineBanner } from "@/components/offline/offline-banner"
 
 export const viewport: Viewport = {
@@ -89,6 +90,7 @@ export default function RootLayout({
           <I18nProvider>
             <ThemeProvider>
               <OfflineSyncProvider>
+                <ServiceWorkerRegister />
                 <OfflineBanner />
                 {children}
                 <Toaster />

@@ -31,7 +31,7 @@ export function OfflineBanner() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-          className="fixed top-3 left-1/2 -translate-x-1/2 z-50 max-w-md w-[92%] sm:w-auto"
+          className="fixed top-3 right-3 sm:right-6 z-50 max-w-[calc(100vw-2rem)] sm:max-w-md w-auto pointer-events-auto"
         >
           {!isOnline ? (
             // Estado 1: Sin Conexión (Offline)

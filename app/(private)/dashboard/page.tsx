@@ -14,14 +14,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function DashboardPage() {
-  const supabase = await createClient()
+import { getAuthenticatedUser } from '@/lib/supabase/get-authenticated-user'
 
-  // Verificar sesión
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+export default async function DashboardPage() {
+  // Verificar sesión con soporte offline
+  const user = await getAuthenticatedUser()
   if (!user) redirect('/login')
+
+  const supabase = await createClient()
 
   // Cargar hogar activo
   const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
@@ -52,64 +52,77 @@ export default async function DashboardPage() {
   const prevStartDate = `${prevMonthStr}-01`
   const prevEndDate = `${prevMonthStr}-${prevLastDay.toString().padStart(2, '0')}`
 
-  // Cargar todos los datos requeridos para el Dashboard en paralelo
-  const [
-    categoriesRes,
-    currentExpensesRes,
-    prevExpensesRes,
-    currentBudgetsRes,
-    householdMembersRes,
-    memberIncomesRes,
-    activities,
-    allExpensesRes
-  ] = await Promise.all([
-    supabase
-      .from('categories')
-      .select('id, name')
-      .eq('household_id', householdId)
-      .order('name'),
-    supabase
-      .from('expenses')
-      .select(
-        'id, amount, description, expense_date, category_id, created_by, is_personal, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
-      )
-      .eq('household_id', householdId)
-      .gte('expense_date', currentStartDate)
-      .lte('expense_date', currentEndDate),
-    supabase
-      .from('expenses')
-      .select('amount, is_personal')
-      .eq('household_id', householdId)
-      .gte('expense_date', prevStartDate)
-      .lte('expense_date', prevEndDate),
-    supabase
-      .from('budgets')
-      .select('id, amount, category_id, categories(name, color, icon)')
-      .eq('household_id', householdId)
-      .eq('month', currentMonthStr),
-    supabase
-      .from('household_members')
-      .select('user_id, role, monthly_income, monthly_contribution, profiles(display_name, email, avatar_url, status)')
-      .eq('household_id', householdId),
-    supabase
-      .from('member_incomes')
-      .select('user_id, amount, contribution')
-      .eq('household_id', householdId)
-      .eq('month', currentMonthStr),
-    getRecentActivityAction(householdId),
-    supabase
-      .from('expenses')
-      .select('id, amount, description, expense_date, category_id, created_by, is_personal')
-      .eq('household_id', householdId)
-      .order('expense_date', { ascending: true })
-  ])
+  // Cargar todos los datos requeridos para el Dashboard en paralelo con resiliencia offline
+  let categoriesRes: any = { data: [] }
+  let currentExpensesRes: any = { data: [] }
+  let prevExpensesRes: any = { data: [] }
+  let currentBudgetsRes: any = { data: [] }
+  let householdMembersRes: any = { data: [] }
+  let memberIncomesRes: any = { data: [] }
+  let activities: any[] = []
+  let allExpensesRes: any = { data: [] }
 
-  const categories = categoriesRes.data
-  const currentExpenses = currentExpensesRes.data || []
-  const prevExpenses = prevExpensesRes.data || []
-  const currentBudgets = currentBudgetsRes.data
-  const householdMembers = householdMembersRes.data
-  const monthlyIncomes = memberIncomesRes.data || []
+  try {
+    const results = await Promise.all([
+      supabase
+        .from('categories')
+        .select('id, name')
+        .eq('household_id', householdId)
+        .order('name'),
+      supabase
+        .from('expenses')
+        .select(
+          'id, amount, description, expense_date, category_id, created_by, is_personal, categories(name, color, icon), profiles:created_by(display_name, avatar_url)'
+        )
+        .eq('household_id', householdId)
+        .gte('expense_date', currentStartDate)
+        .lte('expense_date', currentEndDate),
+      supabase
+        .from('expenses')
+        .select('amount, is_personal')
+        .eq('household_id', householdId)
+        .gte('expense_date', prevStartDate)
+        .lte('expense_date', prevEndDate),
+      supabase
+        .from('budgets')
+        .select('id, amount, category_id, categories(name, color, icon)')
+        .eq('household_id', householdId)
+        .eq('month', currentMonthStr),
+      supabase
+        .from('household_members')
+        .select('user_id, role, monthly_income, monthly_contribution, profiles(display_name, email, avatar_url, status)')
+        .eq('household_id', householdId),
+      supabase
+        .from('member_incomes')
+        .select('user_id, amount, contribution')
+        .eq('household_id', householdId)
+        .eq('month', currentMonthStr),
+      getRecentActivityAction(householdId),
+      supabase
+        .from('expenses')
+        .select('id, amount, description, expense_date, category_id, created_by, is_personal')
+        .eq('household_id', householdId)
+        .order('expense_date', { ascending: true })
+    ])
+
+    categoriesRes = results[0] || { data: [] }
+    currentExpensesRes = results[1] || { data: [] }
+    prevExpensesRes = results[2] || { data: [] }
+    currentBudgetsRes = results[3] || { data: [] }
+    householdMembersRes = results[4] || { data: [] }
+    memberIncomesRes = results[5] || { data: [] }
+    activities = results[6] || []
+    allExpensesRes = results[7] || { data: [] }
+  } catch (err) {
+    console.warn('[DashboardPage] Carga offline de datos del dashboard falló:', err)
+  }
+
+  const categories: any[] = categoriesRes?.data || []
+  const currentExpenses: any[] = currentExpensesRes?.data || []
+  const prevExpenses: any[] = prevExpensesRes?.data || []
+  const currentBudgets: any[] = currentBudgetsRes?.data || []
+  const householdMembers: any[] = householdMembersRes?.data || []
+  const monthlyIncomes: any[] = memberIncomesRes?.data || []
 
   const membersList = householdMembers || []
   const memberNames = [

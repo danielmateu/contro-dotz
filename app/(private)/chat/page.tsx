@@ -12,17 +12,16 @@ export const metadata: Metadata = {
   },
 }
 
-export default async function ChatPage() {
-  const supabase = await createClient()
+import { getAuthenticatedUser } from '@/lib/supabase/get-authenticated-user'
 
-  // Verificar sesión del usuario
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+export default async function ChatPage() {
+  const user = await getAuthenticatedUser()
 
   if (!user) {
     redirect('/login')
   }
+
+  const supabase = await createClient()
 
   // Cargar hogar activo
   const { activeMembership, activeHouseholdId } = await getActiveHouseholdHelper(user.id)
@@ -31,22 +30,28 @@ export default async function ChatPage() {
   const householdId = activeHouseholdId
   const householdName = activeMembership.households.name
 
-  // Cargar miembros del hogar y últimos 50 mensajes en paralelo
-  const [membersRes, messagesRes] = await Promise.all([
-    supabase
-      .from('household_members')
-      .select('user_id, role, profiles(display_name, email, avatar_url, status)')
-      .eq('household_id', householdId),
-    supabase
-      .from('messages')
-      .select('id, content, created_at, created_by, updated_at, is_deleted')
-      .eq('household_id', householdId)
-      .order('created_at', { ascending: false })
-      .limit(100)
-  ])
+  let membersList: any[] = []
+  let initialMessages: any[] = []
 
-  const membersList = membersRes.data || []
-  const initialMessages = [...(messagesRes.data || [])].reverse()
+  try {
+    // Cargar miembros del hogar y últimos 100 mensajes en paralelo
+    const [membersRes, messagesRes] = await Promise.all([
+      supabase
+        .from('household_members')
+        .select('user_id, role, profiles(display_name, email, avatar_url, status)')
+        .eq('household_id', householdId),
+      supabase
+        .from('messages')
+        .select('id, content, created_at, created_by, updated_at, is_deleted')
+        .eq('household_id', householdId)
+        .order('created_at', { ascending: false })
+        .limit(100)
+    ])
+    membersList = membersRes?.data || []
+    initialMessages = [...(messagesRes?.data || [])].reverse()
+  } catch (err) {
+    console.warn('[ChatPage] Carga offline de mensajes/miembros falló:', err)
+  }
 
   // Mapear miembros para tener una lista limpia
   const members = membersList.map((m) => {

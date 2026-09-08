@@ -42,5 +42,13 @@ export async function updateSession(request: NextRequest) {
     console.error('Error en proxy updateSession:', err)
   }
 
+  // Fallback offline: si no hay respuesta de red, intentar leer la sesión JWT local
+  if (!user) {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession()
+      user = sessionData?.session?.user ?? null
+    } catch (_) {}
+  }
+
   return { response, user }
 }

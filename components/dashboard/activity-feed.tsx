@@ -145,7 +145,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                     </p>
 
                     <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">
-                      <span>{formatActivityDate(activity.date)}</span>
+                      <span suppressHydrationWarning>{formatActivityDate(activity.date)}</span>
                     </div>
                   </div>
 
