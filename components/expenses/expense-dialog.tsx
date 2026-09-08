@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, Check, Save, Sparkles, Receipt, X } from 'lucide-react'
+import { AlertCircle, Check, Save, Sparkles, Receipt, X, Camera, ImageIcon } from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
 import { createClient } from '@/lib/supabase/client'
 // @ts-ignore
@@ -326,43 +326,74 @@ export function ExpenseDialog({
             <input
               type="file"
               accept="image/*"
+              capture="environment"
               className="hidden"
-              id="receipt-upload"
+              id="receipt-upload-camera"
               onChange={handleReceiptScan}
               disabled={isScanning || isSavingExpense}
             />
-            <Button
-              type="button"
-              variant="outline"
-              className={`w-full border-dashed flex items-center justify-center gap-2 py-6 text-sm transition-all duration-300 ${scanSuccess
-                ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
-                : scanError
-                  ? 'border-rose-500 bg-rose-50/30 text-rose-600 dark:bg-rose-950/10'
-                  : 'border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400'
-                }`}
-              onClick={() => document.getElementById('receipt-upload')?.click()}
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              id="receipt-upload-gallery"
+              onChange={handleReceiptScan}
               disabled={isScanning || isSavingExpense}
-            >
-              <MorphIcon
-                icon={isScanning ? ClockData : scanSuccess ? CheckData : scanError ? AlertCircleData : SparklesData}
-                spring="snappy"
-                className={`h-4 w-4 ${isScanning
-                  ? 'text-emerald-500 animate-spin'
-                  : scanSuccess
-                    ? 'text-emerald-600 dark:text-emerald-400'
-                    : scanError
-                      ? 'text-rose-500'
-                      : 'text-emerald-500 animate-pulse'
+            />
+
+            {isScanning || scanSuccess ? (
+              <Button
+                type="button"
+                variant="outline"
+                className={`w-full border-dashed flex items-center justify-center gap-2 py-5 text-xs font-medium transition-all duration-300 ${
+                  scanSuccess
+                    ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
+                    : 'border-emerald-500/50 hover:bg-emerald-500/5 text-emerald-600 dark:text-emerald-400'
+                }`}
+                disabled={isScanning || isSavingExpense}
+              >
+                <MorphIcon
+                  icon={isScanning ? ClockData : scanSuccess ? CheckData : SparklesData}
+                  spring="snappy"
+                  className={`h-4 w-4 ${
+                    isScanning
+                      ? 'text-emerald-500 animate-spin'
+                      : scanSuccess
+                        ? 'text-emerald-600 dark:text-emerald-400'
+                        : 'text-emerald-500'
                   }`}
-              />
-              {isScanning
-                ? 'Analizando ticket con IA...'
-                : scanSuccess
-                  ? '¡Ticket analizado con éxito!'
-                  : scanError
-                    ? 'Error al escanear. Reintentar'
-                    : 'Rellenar subiendo ticket (IA)'}
-            </Button>
+                />
+                {isScanning
+                  ? 'Analizando ticket con IA...'
+                  : scanSuccess
+                    ? '¡Ticket analizado con éxito!'
+                    : ''}
+              </Button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-dashed border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center gap-1.5 py-5 text-xs font-medium transition-all duration-300"
+                  onClick={() => document.getElementById('receipt-upload-camera')?.click()}
+                  disabled={isScanning || isSavingExpense}
+                >
+                  <Camera className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <span>Cámara (IA)</span>
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="border-dashed border-emerald-500/50 hover:bg-emerald-500/5 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center gap-1.5 py-5 text-xs font-medium transition-all duration-300"
+                  onClick={() => document.getElementById('receipt-upload-gallery')?.click()}
+                  disabled={isScanning || isSavingExpense}
+                >
+                  <ImageIcon className="h-4 w-4 text-emerald-500 shrink-0" />
+                  <span>Galería (IA)</span>
+                </Button>
+              </div>
+            )}
+
             {scanError && (
               <Alert variant="destructive" className="mt-2 py-2">
                 <AlertCircle className="h-4 w-4" />
