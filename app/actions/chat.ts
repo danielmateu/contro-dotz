@@ -170,7 +170,8 @@ export async function confirmChatAction(
       }
 
       case 'add_saving_contribution': {
-        let { goal_id, goal_name, amount } = actionData.params || {}
+        const { goal_name, amount } = actionData.params || {}
+        let goal_id = actionData.params?.goal_id
         if (!goal_id && goal_name) {
           const { data: matchedGoal } = await supabase
             .from('saving_goals')
