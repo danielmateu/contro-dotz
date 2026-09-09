@@ -196,3 +196,72 @@ export async function sendHouseholdChatPushAction({
     return { error: err.message || 'Error enviando notificaciones push.' }
   }
 }
+
+/**
+ * Envía notificación Push global a todos los usuarios suscritos sobre una nueva actualización
+ */
+export async function sendAppUpdatePushNotificationAction({
+  title,
+  text,
+  version,
+}: {
+  title: string
+  text: string
+  version?: string
+}) {
+  try {
+    if (!ensureVapidDetails()) {
+      return { success: false, reason: 'VAPID keys no configuradas.' }
+    }
+
+    const supabase = await createClient()
+
+    const { data: subscriptions, error: subErr } = await supabase
+      .from('push_subscriptions')
+      .select('id, user_id, endpoint, p256dh, auth')
+
+    if (subErr || !subscriptions || subscriptions.length === 0) {
+      return { success: true, count: 0 }
+    }
+
+    const payload = JSON.stringify({
+      title: `✨ ${version ? `[${version}] ` : ''}${title}`,
+      body: text.length > 120 ? `${text.substring(0, 120)}...` : text,
+      icon: '/icon-192.png',
+      url: '/dashboard',
+      tag: 'app-update',
+    })
+
+    const expiredSubIds: string[] = []
+
+    await Promise.all(
+      subscriptions.map(async (sub) => {
+        const pushSubscription = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
+        }
+
+        try {
+          await webpush.sendNotification(pushSubscription, payload)
+        } catch (err: any) {
+          if (err.statusCode === 410 || err.statusCode === 404) {
+            expiredSubIds.push(sub.id)
+          }
+        }
+      })
+    )
+
+    if (expiredSubIds.length > 0) {
+      await supabase.from('push_subscriptions').delete().in('id', expiredSubIds)
+    }
+
+    return { success: true, sentCount: subscriptions.length - expiredSubIds.length }
+  } catch (err: any) {
+    console.error('Error enviando push de actualización:', err)
+    return { error: err.message || 'Error enviando notificación Push.' }
+  }
+}
+
