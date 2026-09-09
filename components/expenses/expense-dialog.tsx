@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { AlertCircle, Check, Save, Sparkles, Receipt, X, Camera, ImageIcon } from 'lucide-react'
+import { AlertCircle, Check, Save, Sparkles, Receipt, X, Camera, ImageIcon, HouseHeartIcon, UserSquareIcon } from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
 import { createClient } from '@/lib/supabase/client'
 // @ts-ignore
@@ -159,9 +159,9 @@ export function ExpenseDialog({
       setSelectedFile(null)
       setDeleteReceipt(false)
       setShowOptionalFields(!!expense?.notes || !!expense?.receipt_path)
-      
-      const initialCreatedBy = expense?.created_by === null 
-        ? 'shared' 
+
+      const initialCreatedBy = expense?.created_by === null
+        ? 'shared'
         : (expense?.created_by || currentUserId || '')
       setCreatedBy(initialCreatedBy)
     }
@@ -380,23 +380,21 @@ export function ExpenseDialog({
               <Button
                 type="button"
                 variant="outline"
-                className={`w-full border-dashed flex items-center justify-center gap-2 py-5 text-xs font-medium transition-all duration-300 ${
-                  scanSuccess
-                    ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
-                    : 'border-emerald-500/50 hover:bg-emerald-500/5 text-emerald-600 dark:text-emerald-400'
-                }`}
+                className={`w-full border-dashed flex items-center justify-center gap-2 py-5 text-xs font-medium transition-all duration-300 ${scanSuccess
+                  ? 'border-emerald-500 bg-emerald-50/30 text-emerald-600 dark:bg-emerald-950/10'
+                  : 'border-emerald-500/50 hover:bg-emerald-500/5 text-emerald-600 dark:text-emerald-400'
+                  }`}
                 disabled={isScanning || isSavingExpense}
               >
                 <MorphIcon
                   icon={isScanning ? ClockData : scanSuccess ? CheckData : SparklesData}
                   spring="snappy"
-                  className={`h-4 w-4 ${
-                    isScanning
-                      ? 'text-emerald-500 animate-spin'
-                      : scanSuccess
-                        ? 'text-emerald-600 dark:text-emerald-400'
-                        : 'text-emerald-500'
-                  }`}
+                  className={`h-4 w-4 ${isScanning
+                    ? 'text-emerald-500 animate-spin'
+                    : scanSuccess
+                      ? 'text-emerald-600 dark:text-emerald-400'
+                      : 'text-emerald-500'
+                    }`}
                 />
                 {isScanning
                   ? 'Analizando ticket con IA...'
@@ -608,24 +606,26 @@ export function ExpenseDialog({
                 <button
                   type="button"
                   onClick={() => setIsPersonal(false)}
-                  className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${
-                    !isPersonal
-                      ? 'border-emerald-500 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 font-semibold shadow-2xs'
-                      : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
-                  }`}
+                  className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${!isPersonal
+                    ? 'border-emerald-500 bg-emerald-50/50 text-emerald-700 dark:bg-emerald-950/20 dark:text-emerald-400 font-semibold shadow-2xs'
+                    : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
+                    }`}
                 >
-                  <span>🏡 Del Hogar (Compartido)</span>
+                  <span className='flex items-center gap-2'>
+                    <HouseHeartIcon className="h-4 w-4" />
+                    Del Hogar (Compartido)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsPersonal(true)}
-                  className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${
-                    isPersonal
-                      ? 'border-indigo-500 bg-indigo-50/50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 font-semibold shadow-2xs'
-                      : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
-                  }`}
+                  className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${isPersonal
+                    ? 'border-indigo-500 bg-indigo-50/50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 font-semibold shadow-2xs'
+                    : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
+                    }`}
                 >
-                  <span>👤 Gasto Personal</span>
+                  <span className='flex items-center gap-2'>
+                    <UserSquareIcon className='' size={18} />
+                    Gasto Personal</span>
                 </button>
               </div>
             </div>
