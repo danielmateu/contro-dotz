@@ -52,6 +52,33 @@ export interface CashflowForecastResult {
   error?: string
 }
 
+export interface MonthAnnualSummary {
+  monthStr: string // YYYY-MM
+  monthNumber: number // 1..12
+  monthName: string
+  isPast: boolean
+  isCurrent: boolean
+  totalIncome: number
+  totalFixedBills: number
+  actualSpent: number
+  projectedSpent: number
+  projectedNet: number
+  projectedEndingBalance: number
+  isDeficitRisk: boolean
+  recurringCount: number
+}
+
+export interface AnnualCashflowForecastResult {
+  year: number
+  totalAnnualIncome: number
+  totalAnnualSpent: number
+  totalAnnualNet: number
+  hasDeficitMonths: boolean
+  deficitMonthNames: string[]
+  months: MonthAnnualSummary[]
+  error?: string
+}
+
 /**
  * Calcula y devuelve la previsión de cashflow día a día para un mes específico.
  */
@@ -388,3 +415,168 @@ export async function convertRecurringToExpenseAction(
 
   return { success: `Factura "${rec.name}" registrada como gasto real.` }
 }
+
+/**
+ * Calcula y devuelve la previsión de cashflow mensual para los 12 meses del año especificado.
+ */
+export async function fetchAnnualCashflowForecastAction(
+  householdId: string,
+  targetYear?: number
+): Promise<AnnualCashflowForecastResult> {
+  const supabase = await createClient()
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const currentYear = new Date().getFullYear()
+  const year = targetYear || currentYear
+  const currentMonthIndex = new Date().getMonth() + 1
+  const isCurrentYear = new Date().getFullYear() === year
+
+  if (!user) {
+    return {
+      year,
+      totalAnnualIncome: 0,
+      totalAnnualSpent: 0,
+      totalAnnualNet: 0,
+      hasDeficitMonths: false,
+      deficitMonthNames: [],
+      months: [],
+      error: 'Sesión no iniciada.',
+    }
+  }
+
+  const startDateStr = `${year}-01-01`
+  const endDateStr = `${year}-12-31`
+  const startMonthStr = `${year}-01`
+  const endMonthStr = `${year}-12`
+
+  try {
+    const [membersRes, incomesRes, expensesRes, recurringRes] = await Promise.all([
+      supabase.from('household_members').select('user_id, monthly_income').eq('household_id', householdId),
+      supabase
+        .from('member_incomes')
+        .select('user_id, amount, month')
+        .eq('household_id', householdId)
+        .gte('month', startMonthStr)
+        .lte('month', endMonthStr),
+      supabase
+        .from('expenses')
+        .select('amount, expense_date')
+        .eq('household_id', householdId)
+        .gte('expense_date', startDateStr)
+        .lte('expense_date', endDateStr),
+      supabase
+        .from('recurring_expenses')
+        .select('id, amount, is_active')
+        .eq('household_id', householdId)
+        .eq('is_active', true),
+    ])
+
+    const members = membersRes.data || []
+    const incomes = incomesRes.data || []
+    const expenses = expensesRes.data || []
+    const recurringExpenses = recurringRes.data || []
+
+    const totalFixedBillsSum = recurringExpenses.reduce((sum, r) => sum + Number(r.amount || 0), 0)
+    const recurringCount = recurringExpenses.length
+
+    const expensesByMonth: Record<string, number> = {}
+    expenses.forEach((exp) => {
+      if (exp.expense_date) {
+        const monthKey = exp.expense_date.substring(0, 7)
+        expensesByMonth[monthKey] = (expensesByMonth[monthKey] || 0) + Number(exp.amount)
+      }
+    })
+
+    const months: MonthAnnualSummary[] = []
+    let accumulatedBalance = 0
+    let totalAnnualIncome = 0
+    let totalAnnualSpent = 0
+    const deficitMonthNames: string[] = []
+
+    const monthNamesEs = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ]
+
+    for (let m = 1; m <= 12; m++) {
+      const monthStr = `${year}-${m.toString().padStart(2, '0')}`
+      const monthName = monthNamesEs[m - 1]
+
+      const isPast = isCurrentYear ? m < currentMonthIndex : year < currentYear
+      const isCurrent = isCurrentYear && m === currentMonthIndex
+
+      let monthIncome = 0
+      members.forEach((member) => {
+        const specificInc = incomes.find((inc) => inc.month === monthStr && inc.user_id === member.user_id)
+        monthIncome += specificInc ? Number(specificInc.amount) : Number(member.monthly_income || 0)
+      })
+
+      const actualSpent = Math.round((expensesByMonth[monthStr] || 0) * 100) / 100
+
+      let projectedSpent = 0
+      if (isPast) {
+        projectedSpent = actualSpent
+      } else if (isCurrent) {
+        projectedSpent = Math.max(actualSpent, totalFixedBillsSum)
+      } else {
+        projectedSpent = Math.max(actualSpent, totalFixedBillsSum)
+      }
+
+      projectedSpent = Math.round(projectedSpent * 100) / 100
+      const projectedNet = Math.round((monthIncome - projectedSpent) * 100) / 100
+
+      accumulatedBalance += projectedNet
+      accumulatedBalance = Math.round(accumulatedBalance * 100) / 100
+
+      const isDeficitRisk = accumulatedBalance < 0
+      if (isDeficitRisk) {
+        deficitMonthNames.push(monthName)
+      }
+
+      totalAnnualIncome += monthIncome
+      totalAnnualSpent += projectedSpent
+
+      months.push({
+        monthStr,
+        monthNumber: m,
+        monthName,
+        isPast,
+        isCurrent,
+        totalIncome: Math.round(monthIncome * 100) / 100,
+        totalFixedBills: Math.round(totalFixedBillsSum * 100) / 100,
+        actualSpent,
+        projectedSpent,
+        projectedNet,
+        projectedEndingBalance: accumulatedBalance,
+        isDeficitRisk,
+        recurringCount,
+      })
+    }
+
+    return {
+      year,
+      totalAnnualIncome: Math.round(totalAnnualIncome * 100) / 100,
+      totalAnnualSpent: Math.round(totalAnnualSpent * 100) / 100,
+      totalAnnualNet: Math.round((totalAnnualIncome - totalAnnualSpent) * 100) / 100,
+      hasDeficitMonths: deficitMonthNames.length > 0,
+      deficitMonthNames,
+      months,
+    }
+  } catch (err: any) {
+    console.error('fetchAnnualCashflowForecastAction error:', err)
+    return {
+      year,
+      totalAnnualIncome: 0,
+      totalAnnualSpent: 0,
+      totalAnnualNet: 0,
+      hasDeficitMonths: false,
+      deficitMonthNames: [],
+      months: [],
+      error: 'Error al calcular la previsión anual: ' + (err.message || 'Error desconocido'),
+    }
+  }
+}
+

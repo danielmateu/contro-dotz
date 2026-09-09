@@ -2,12 +2,13 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getActiveHouseholdHelper } from '@/lib/household-context'
-import { fetchCashflowDataAction } from '@/app/actions/cashflow'
+import { fetchCashflowDataAction, fetchAnnualCashflowForecastAction } from '@/app/actions/cashflow'
 import { CashflowSummaryCards } from '@/components/cashflow/cashflow-summary-cards'
 import { CashflowCalendarView } from '@/components/cashflow/cashflow-calendar-view'
+import { CashflowMonthNavigator } from '@/components/cashflow/cashflow-month-navigator'
+import { CashflowAnnualView } from '@/components/cashflow/cashflow-annual-view'
 import { RecurringExpensesDialog } from '@/components/cashflow/recurring-expenses-dialog'
-import { CalendarCheck, Plus, TrendingUp } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { CalendarCheck } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Previsión de Saldo & Cashflow',
@@ -20,6 +21,8 @@ export const metadata: Metadata = {
 interface CashflowPageProps {
   searchParams: Promise<{
     month?: string
+    year?: string
+    view?: 'calendar' | 'annual'
   }>
 }
 
@@ -42,9 +45,13 @@ export default async function CashflowPage({ searchParams }: CashflowPageProps) 
   const currentMonthStr = `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
   const monthStr = query.month || currentMonthStr
 
-  // 3. Cargar datos de previsión y categorías
-  const [cashflowData, categoriesRes] = await Promise.all([
+  const activeView = query.view === 'annual' ? 'annual' : 'calendar'
+  const yearNum = query.year ? parseInt(query.year, 10) : parseInt(monthStr.split('-')[0], 10) || now.getFullYear()
+
+  // 3. Cargar datos de previsión mensual, anual y categorías
+  const [cashflowData, annualData, categoriesRes] = await Promise.all([
     fetchCashflowDataAction(householdId, monthStr),
+    fetchAnnualCashflowForecastAction(householdId, yearNum),
     supabase
       .from('categories')
       .select('id, name, color')
@@ -64,7 +71,7 @@ export default async function CashflowPage({ searchParams }: CashflowPageProps) 
             Previsión de Saldo (Cashflow)
           </h1>
           <p className="text-muted-foreground text-sm">
-            Visualiza la evolución del saldo disponible acumulado hasta fin de mes y prevé recibos fijos.
+            Visualiza la evolución del saldo disponible acumulado mes a mes o consulta la previsión anual a 12 meses.
           </p>
         </div>
 
@@ -74,23 +81,41 @@ export default async function CashflowPage({ searchParams }: CashflowPageProps) 
         />
       </div>
 
-      {/* Tarjetas Resumen */}
-      <CashflowSummaryCards
-        totalMonthlyIncome={cashflowData.totalMonthlyIncome}
-        totalSpentSoFar={cashflowData.totalSpentSoFar}
-        pendingBillsAmount={cashflowData.pendingBillsAmount}
-        projectedEndBalance={cashflowData.projectedEndBalance}
-        isDeficitRisk={cashflowData.isDeficitRisk}
-        lowestBalanceDay={cashflowData.lowestBalanceDay}
+      {/* Navegador de Meses & Selector de Vista */}
+      <CashflowMonthNavigator
+        currentMonthStr={monthStr}
+        currentYear={yearNum}
+        activeView={activeView}
       />
 
-      {/* Calendario Interactivo */}
-      <CashflowCalendarView
-        householdId={householdId}
-        days={cashflowData.days}
-        monthStr={monthStr}
-        recurringExpenses={cashflowData.recurringExpenses}
-      />
+      {/* Contenido según Vista Seleccionada */}
+      {activeView === 'annual' ? (
+        <CashflowAnnualView
+          annualData={annualData}
+          householdId={householdId}
+        />
+      ) : (
+        <>
+          {/* Tarjetas Resumen Mensual */}
+          <CashflowSummaryCards
+            totalMonthlyIncome={cashflowData.totalMonthlyIncome}
+            totalSpentSoFar={cashflowData.totalSpentSoFar}
+            pendingBillsAmount={cashflowData.pendingBillsAmount}
+            projectedEndBalance={cashflowData.projectedEndBalance}
+            isDeficitRisk={cashflowData.isDeficitRisk}
+            lowestBalanceDay={cashflowData.lowestBalanceDay}
+          />
+
+          {/* Calendario Interactivo Mensual */}
+          <CashflowCalendarView
+            householdId={householdId}
+            days={cashflowData.days}
+            monthStr={monthStr}
+            recurringExpenses={cashflowData.recurringExpenses}
+          />
+        </>
+      )}
     </div>
   )
 }
+
