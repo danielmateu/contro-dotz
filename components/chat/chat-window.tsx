@@ -10,12 +10,24 @@ import {
   MessageAvatar,
   MessageContent,
   MessageHeader,
+  MessageFooter,
 } from '@/components/ui/message'
+import {
+  MessageScroller,
+  MessageScrollerViewport,
+  MessageScrollerContent,
+  MessageScrollerItem,
+  MessageScrollerButton,
+} from '@/components/ui/message-scroller'
+import {
+  Bubble,
+  BubbleContent,
+} from '@/components/ui/bubble'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
+import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
@@ -74,17 +86,60 @@ function parsePendingAction(content: string): { text: string; actionData: Pendin
   }
 }
 
-function renderFormattedText(text: string) {
+function renderFormattedText(text: string, searchQuery: string = '') {
   if (!text) return null
+  const query = searchQuery.trim().toLowerCase()
+
+  const renderPartWithHighlight = (partText: string, keyPrefix: string) => {
+    if (!query) return partText
+    const lower = partText.toLowerCase()
+    const index = lower.indexOf(query)
+    if (index === -1) return partText
+
+    const elements: React.ReactNode[] = []
+    let lastIdx = 0
+    let currIdx = lower.indexOf(query, lastIdx)
+
+    while (currIdx !== -1) {
+      if (currIdx > lastIdx) {
+        elements.push(partText.substring(lastIdx, currIdx))
+      }
+      elements.push(
+        <mark
+          key={`${keyPrefix}-${currIdx}`}
+          className="bg-amber-300 dark:bg-amber-500/40 text-foreground px-0.5 rounded font-semibold"
+        >
+          {partText.substring(currIdx, currIdx + query.length)}
+        </mark>
+      )
+      lastIdx = currIdx + query.length
+      currIdx = lower.indexOf(query, lastIdx)
+    }
+
+    if (lastIdx < partText.length) {
+      elements.push(partText.substring(lastIdx))
+    }
+
+    return elements
+  }
+
   const parts = text.split(/(\*\*.*?\*\*|\*.*?\*)/g)
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index} className="font-bold">{part.slice(2, -2)}</strong>
+      return (
+        <strong key={index} className="font-bold">
+          {renderPartWithHighlight(part.slice(2, -2), `bold-${index}`)}
+        </strong>
+      )
     }
     if (part.startsWith('*') && part.endsWith('*')) {
-      return <em key={index} className="italic">{part.slice(1, -1)}</em>
+      return (
+        <em key={index} className="italic">
+          {renderPartWithHighlight(part.slice(1, -1), `italic-${index}`)}
+        </em>
+      )
     }
-    return part
+    return renderPartWithHighlight(part, `text-${index}`)
   })
 }
 
@@ -207,6 +262,29 @@ export function ChatWindow({
   members,
 }: ChatWindowProps) {
   const { t, locale } = useI18n()
+
+  // Ayudante para obtener datos de perfil de un miembro
+  const getMemberProfile = React.useCallback((senderId: string | null, isBot?: boolean): Member => {
+    if (isBot || !senderId) {
+      return {
+        user_id: '',
+        role: 'member',
+        display_name: 'Gemini AI',
+        avatar_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&h=80&fit=crop',
+        status: 'Asistente Financiero 🤖',
+        email: 'gemini@contro-dotz.ai',
+      }
+    }
+    const member = members.find((m) => m.user_id === senderId)
+    return member || {
+      user_id: senderId,
+      role: 'member',
+      display_name: 'Usuario',
+      avatar_url: '',
+      status: '',
+      email: '',
+    }
+  }, [members])
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputMessage, setInputMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
@@ -304,6 +382,77 @@ export function ChatWindow({
     isSubscribed: boolean
   }>({ isSupported: false, permission: 'default', isSubscribed: false })
   const [isPushLoading, setIsPushLoading] = useState(false)
+
+  // Estados para Búsqueda en el Chat y Navegación entre coincidencias
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const messageElementRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+
+  // Filtrar todos los mensajes coincidentes con la búsqueda sin ocultar la conversación
+  const matchingMessages = React.useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const q = searchQuery.trim().toLowerCase()
+    return messages.filter((msg) => {
+      if (msg.is_deleted) return false
+      const isBot = msg.is_bot || msg.created_by === '00000000-0000-0000-0000-000000000000' || msg.content?.startsWith('🤖')
+      const sender = getMemberProfile(msg.created_by, isBot)
+      const matchContent = msg.content?.toLowerCase().includes(q)
+      const matchSender = sender.display_name.toLowerCase().includes(q)
+      return matchContent || matchSender
+    })
+  }, [messages, searchQuery])
+
+  // Desplazar al mensaje correspondiente
+  const scrollToMatch = React.useCallback((index: number) => {
+    if (matchingMessages.length === 0) return
+    const targetMsg = matchingMessages[index]
+    if (targetMsg) {
+      const el = messageElementRefs.current.get(targetMsg.id)
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [matchingMessages])
+
+  // Cuando cambia la búsqueda, iniciar en la primera o última coincidencia
+  useEffect(() => {
+    if (matchingMessages.length > 0) {
+      setCurrentMatchIndex(0)
+      setTimeout(() => scrollToMatch(0), 100)
+    } else {
+      setCurrentMatchIndex(0)
+    }
+  }, [searchQuery])
+
+  // Navegar a la siguiente coincidencia
+  const handleNextMatch = () => {
+    if (matchingMessages.length === 0) return
+    const nextIdx = (currentMatchIndex + 1) % matchingMessages.length
+    setCurrentMatchIndex(nextIdx)
+    scrollToMatch(nextIdx)
+  }
+
+  // Navegar a la coincidencia anterior
+  const handlePrevMatch = () => {
+    if (matchingMessages.length === 0) return
+    const prevIdx = (currentMatchIndex - 1 + matchingMessages.length) % matchingMessages.length
+    setCurrentMatchIndex(prevIdx)
+    scrollToMatch(prevIdx)
+  }
+
+  const toggleSearch = () => {
+    setIsSearchOpen((prev) => {
+      const next = !prev
+      if (!next) {
+        setSearchQuery('')
+      } else {
+        setTimeout(() => searchInputRef.current?.focus(), 50)
+      }
+      return next
+    })
+  }
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -602,28 +751,7 @@ export function ChatWindow({
     }
   }
 
-  // Ayudante para obtener datos de perfil de un miembro
-  const getMemberProfile = (senderId: string | null, isBot?: boolean): Member => {
-    if (isBot || !senderId) {
-      return {
-        user_id: '',
-        role: 'member',
-        display_name: 'Gemini AI',
-        avatar_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&h=80&fit=crop',
-        status: 'Asistente Financiero 🤖',
-        email: 'gemini@contro-dotz.ai',
-      }
-    }
-    const member = members.find((m) => m.user_id === senderId)
-    return member || {
-      user_id: senderId,
-      role: 'member',
-      display_name: 'Usuario',
-      avatar_url: '',
-      status: '',
-      email: '',
-    }
-  }
+
 
   const dateLocale = locale === 'en' ? 'en-US' : locale === 'ca' ? 'ca-ES' : 'es-ES'
 
@@ -660,7 +788,18 @@ export function ChatWindow({
     }
   }
 
-  // Agrupar mensajes por día
+  // Filtrar mensajes según la búsqueda activa
+  const filteredMessages = messages.filter((msg) => {
+    if (!searchQuery.trim()) return true
+    const q = searchQuery.trim().toLowerCase()
+    const isBot = msg.is_bot || msg.created_by === '00000000-0000-0000-0000-000000000000' || msg.content?.startsWith('🤖')
+    const sender = getMemberProfile(msg.created_by, isBot)
+    const matchContent = msg.content?.toLowerCase().includes(q)
+    const matchSender = sender.display_name.toLowerCase().includes(q)
+    return matchContent || matchSender
+  })
+
+  // Agrupar mensajes por día (manteniendo el flujo completo de la conversación)
   const groupedMessages: { [key: string]: ChatMessage[] } = {}
   messages.forEach((msg) => {
     const dateKey = new Date(msg.created_at).toDateString()
@@ -669,6 +808,8 @@ export function ChatWindow({
     }
     groupedMessages[dateKey].push(msg)
   })
+
+  const activeMatchMsgId = searchQuery.trim() && matchingMessages.length > 0 ? matchingMessages[currentMatchIndex]?.id : null
 
   return (
     <div className="flex flex-col flex-1 border border-border/60 bg-background/50 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden">
@@ -688,8 +829,24 @@ export function ChatWindow({
           </div>
         </div>
 
-        {/* Toggle de Notificaciones Push y lista de miembros */}
+        {/* Toggle de Notificaciones Push, Buscador y lista de miembros */}
         <div className="flex items-center gap-2 sm:gap-3 self-start sm:self-center">
+          {/* Botón de Buscador */}
+          <Button
+            type="button"
+            variant={isSearchOpen ? 'secondary' : 'outline'}
+            size="sm"
+            onClick={toggleSearch}
+            className={`h-8 px-2.5 rounded-xl text-xs gap-1.5 border transition-all ${isSearchOpen || searchQuery
+              ? 'bg-primary/10 text-primary border-primary/30 font-bold'
+              : 'bg-background border-border text-muted-foreground hover:text-foreground'
+              }`}
+            title="Buscar en la conversación"
+          >
+            <Search className="h-3.5 w-3.5" />
+            <span className="hidden sm:inline">Buscar</span>
+          </Button>
+
           {pushState.isSupported && (
             <Button
               type="button"
@@ -752,172 +909,298 @@ export function ChatWindow({
         </div>
       </div>
 
-      {/* Cuerpo del Chat (Mensajes) */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6 scrollbar-thin">
-        {messages.length === 0 ? (
-          <div className="h-full flex flex-col items-center justify-center text-center py-10">
-            <div className="h-14 w-14 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center mb-3">
-              <MessageSquare className="h-7 w-7 stroke-1 text-slate-400" />
+      {/* Barra de Búsqueda Desplegable con Controles de Navegación */}
+      <AnimatePresence>
+        {isSearchOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2, ease: 'easeInOut' }}
+            className="overflow-hidden border-b border-border/60 bg-muted/40 px-4 py-2 flex items-center gap-2"
+          >
+            <div className="relative flex-1 flex items-center">
+              <Search className="absolute left-3 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+              <Input
+                ref={searchInputRef}
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    if (e.shiftKey) handlePrevMatch()
+                    else handleNextMatch()
+                  }
+                  if (e.key === 'Escape') toggleSearch()
+                }}
+                placeholder="Buscar en el chat (Presiona Enter para saltar de coincidencia)..."
+                className="h-9 pl-9 pr-9 text-xs rounded-xl bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary shadow-inner"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 p-1 rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  title="Limpiar texto de búsqueda"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
-            <p className="font-semibold text-foreground text-sm font-heading">
-              {t('chat.noMessages')}
-            </p>
-            <p className="text-xs text-muted-foreground max-w-xs mt-1 leading-relaxed">
-              {t('chat.noMessagesDesc')}
-            </p>
-          </div>
-        ) : (
-          Object.keys(groupedMessages).map((dateKey) => (
-            <div key={dateKey} className="space-y-4">
-              {/* Separador de Fecha */}
-              <div className="flex items-center justify-center my-4">
-                <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-muted/65 dark:bg-muted/30 px-3 py-1 rounded-full border border-border/30">
-                  {formatGroupDate(groupedMessages[dateKey][0].created_at)}
+
+            {/* Selector e Indicador de Coincidencias */}
+            {searchQuery && (
+              <div className="flex items-center gap-1.5 bg-background border border-border/60 px-2.5 py-1 rounded-xl shadow-xs shrink-0">
+                <span className="text-[11px] font-semibold text-primary select-none whitespace-nowrap">
+                  {matchingMessages.length > 0
+                    ? `${currentMatchIndex + 1} / ${matchingMessages.length}`
+                    : '0 resultados'}
                 </span>
+
+                <div className="flex items-center gap-0.5 border-l border-border/40 pl-1.5 ml-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={matchingMessages.length === 0}
+                    onClick={handlePrevMatch}
+                    className="h-6 w-6 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                    title="Anterior coincidencia (Shift + Enter)"
+                  >
+                    <ChevronUp className="h-3.5 w-3.5" />
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    disabled={matchingMessages.length === 0}
+                    onClick={handleNextMatch}
+                    className="h-6 w-6 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground"
+                    title="Siguiente coincidencia (Enter)"
+                  >
+                    <ChevronDown className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
               </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-              {/* Mensajes del día */}
-              <MessageGroup className="gap-4">
-                {groupedMessages[dateKey].map((msg) => {
-                  const isBot = msg.is_bot || msg.created_by === '00000000-0000-0000-0000-000000000000' || msg.content?.startsWith('🤖')
-                  const isMe = !isBot && msg.created_by === userId
-                  const sender = getMemberProfile(msg.created_by, isBot)
-                  const isEditing = editingMessageId === msg.id
-                  const { text: cleanText, actionData } = parsePendingAction(msg.content)
+      {/* Cuerpo del Chat (Mensajes con MessageScroller y Bubble) */}
+      <MessageScroller className="flex-1 min-h-0">
+        <MessageScrollerViewport className="p-4 space-y-6">
+          <MessageScrollerContent className="gap-6">
+            {messages.length === 0 ? (
+              <div className="h-full flex flex-col items-center justify-center text-center py-10 my-auto">
+                <div className="h-14 w-14 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center mb-3">
+                  <MessageSquare className="h-7 w-7 stroke-1 text-slate-400" />
+                </div>
+                <p className="font-semibold text-foreground text-sm font-heading">
+                  {t('chat.noMessages')}
+                </p>
+                <p className="text-xs text-muted-foreground max-w-xs mt-1 leading-relaxed">
+                  {t('chat.noMessagesDesc')}
+                </p>
+              </div>
+            ) : (
+              Object.keys(groupedMessages).map((dateKey) => (
+                <div key={dateKey} className="space-y-4">
+                  {/* Separador de Fecha */}
+                  <div className="flex items-center justify-center my-4 sticky top-0 z-10">
+                    <span className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider bg-background/90 backdrop-blur-md px-3 py-1 rounded-full border border-border/40 shadow-xs">
+                      {formatGroupDate(groupedMessages[dateKey][0].created_at)}
+                    </span>
+                  </div>
 
-                  return (
-                    <Message key={msg.id} align={isMe ? 'end' : 'start'} className="px-1 group/msg relative">
-                      <MessageAvatar>
-                        <Avatar className="h-8 w-8 border border-border/35 shadow-xs">
-                          {sender.avatar_url ? (
-                            <AvatarImage src={sender.avatar_url} alt={sender.display_name} className="object-cover" />
-                          ) : null}
-                          <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
-                            {sender.display_name.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                      </MessageAvatar>
-                      <MessageContent>
-                        <MessageHeader className={isMe ? 'justify-end' : ''}>
-                          {!isMe && (
-                            <span className="font-bold text-foreground mr-1.5">
-                              {sender.display_name}
-                            </span>
-                          )}
-                          {!isMe && sender.status && (
-                            <span
-                              className="text-[10px] text-muted-foreground italic mr-2 truncate max-w-30 sm:max-w-45"
-                              title={sender.status}
-                            >
-                              ({sender.status})
-                            </span>
-                          )}
-                          <span className="text-[10px] text-muted-foreground/80 font-normal flex items-center gap-1">
-                            {formatMessageTime(msg.created_at)}
-                            {msg.updated_at && !msg.is_deleted && (
-                              <span className="italic text-[9px] text-muted-foreground/60 font-medium">({t('chat.edited')})</span>
-                            )}
-                          </span>
-                        </MessageHeader>
+                  {/* Mensajes del día */}
+                  <MessageGroup className="gap-4">
+                    {groupedMessages[dateKey].map((msg) => {
+                      const isBot = msg.is_bot || msg.created_by === '00000000-0000-0000-0000-000000000000' || msg.content?.startsWith('🤖')
+                      const isMe = !isBot && msg.created_by === userId
+                      const sender = getMemberProfile(msg.created_by, isBot)
+                      const isEditing = editingMessageId === msg.id
+                      const { text: cleanText, actionData } = parsePendingAction(msg.content)
+                      const isActiveMatch = msg.id === activeMatchMsgId
 
-                        <div className="flex items-center gap-1.5 group/bubble">
-                          {/* Botones de acción para el creador del mensaje (Edición / Eliminación) */}
-                          {isMe && !isEditing && !msg.is_deleted && (
-                            <div className="opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center gap-1">
-                              <button
-                                type="button"
-                                onClick={() => handleStartEdit(msg)}
-                                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                                title="Editar mensaje"
-                              >
-                                <Pencil className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteMessage(msg.id)}
-                                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                                title="Eliminar mensaje"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          )}
+                      const bubbleVariant = isMe ? 'default' : isBot ? 'tinted' : 'muted'
 
-                          {msg.is_deleted ? (
-                            <div className="px-3 py-1.5 text-xs italic text-muted-foreground/70 bg-muted/30 border border-border/20 rounded-2xl flex items-center gap-1.5 select-none">
-                              <Trash2 className="w-3 h-3 text-muted-foreground/40 shrink-0" />
-                              <span>{t('chat.messageDeleted')}</span>
-                            </div>
-                          ) : isEditing ? (
-                            <div className="flex items-center gap-1.5 bg-background border border-primary/40 p-1.5 rounded-2xl shadow-md w-full max-w-xs sm:max-w-md">
-                              <input
-                                type="text"
-                                value={editingContent}
-                                onChange={(e) => setEditingContent(e.target.value)}
-                                onKeyDown={(e) => {
-                                  if (e.key === 'Enter') handleSaveEdit(msg.id)
-                                  if (e.key === 'Escape') handleCancelEdit()
-                                }}
-                                autoFocus
-                                className="flex-1 bg-transparent px-2.5 py-1 text-sm outline-none text-foreground"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleSaveEdit(msg.id)}
-                                className="p-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
-                                title={t('common.save')}
-                              >
-                                <Check className="w-3.5 h-3.5" />
-                              </button>
-                              <button
-                                type="button"
-                                onClick={handleCancelEdit}
-                                className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                title={t('common.cancel')}
-                              >
-                                <X className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
-                          ) : (
-                            <div
-                              className={`px-3.5 py-2.5 text-sm leading-relaxed max-w-[85%] sm:max-w-[70%] wrap-break-word shadow-xs border ${isMe
-                                ? 'bg-primary text-primary-foreground border-primary/20 rounded-2xl rounded-tr-none'
-                                : 'bg-muted/60 text-foreground border-border/40 rounded-2xl rounded-tl-none'
-                                }`}
-                            >
-                              <div className="whitespace-pre-wrap">{renderFormattedText(cleanText)}</div>
-                              {actionData && (
-                                <ActionConfirmationCard
-                                  actionData={actionData}
-                                  isExecuting={executingActionId === msg.id}
-                                  onConfirm={() => handleConfirmAction(msg.id, actionData)}
-                                  onCancel={() => handleCancelAction(msg.id)}
-                                />
-                              )}
-                            </div>
-                          )}
+                      return (
+                        <div
+                          key={msg.id}
+                          ref={(node) => {
+                            if (node) messageElementRefs.current.set(msg.id, node)
+                            else messageElementRefs.current.delete(msg.id)
+                          }}
+                          className="transition-all duration-300"
+                        >
+                          <MessageScrollerItem>
+                            <Message align={isMe ? 'end' : 'start'} className="px-1 group/msg relative">
+                              <MessageAvatar>
+                                <Avatar className={`h-8 w-8 border shadow-xs ${isBot ? 'border-primary/40 ring-2 ring-primary/10' : 'border-border/35'}`}>
+                                  {sender.avatar_url ? (
+                                    <AvatarImage src={sender.avatar_url} alt={sender.display_name} className="object-cover" />
+                                  ) : null}
+                                  <AvatarFallback className="bg-primary/5 text-primary text-[10px] font-bold">
+                                    {sender.display_name.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                              </MessageAvatar>
+
+                              <MessageContent>
+                                <MessageHeader className={isMe ? 'justify-end' : ''}>
+                                  {!isMe && (
+                                    <span className="font-bold text-foreground mr-1.5 flex items-center gap-1">
+                                      {sender.display_name}
+                                      {isBot && (
+                                        <Sparkles className="w-3 h-3 text-primary inline-block" />
+                                      )}
+                                    </span>
+                                  )}
+                                  {!isMe && sender.status && (
+                                    <span
+                                      className="text-[10px] text-muted-foreground italic mr-2 truncate max-w-30 sm:max-w-45"
+                                      title={sender.status}
+                                    >
+                                      ({sender.status})
+                                    </span>
+                                  )}
+                                  <span className="text-[10px] text-muted-foreground/80 font-normal flex items-center gap-1">
+                                    {formatMessageTime(msg.created_at)}
+                                    {msg.updated_at && !msg.is_deleted && (
+                                      <span className="italic text-[9px] text-muted-foreground/60 font-medium">({t('chat.edited')})</span>
+                                    )}
+                                  </span>
+                                </MessageHeader>
+
+                                <div className="flex items-center gap-1.5 group/bubble">
+                                  {/* Botones de acción para el creador del mensaje (Edición / Eliminación) */}
+                                  {isMe && !isEditing && !msg.is_deleted && (
+                                    <div className="opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleStartEdit(msg)}
+                                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                                        title="Editar mensaje"
+                                      >
+                                        <Pencil className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteMessage(msg.id)}
+                                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                        title="Eliminar mensaje"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  )}
+
+                                  {msg.is_deleted ? (
+                                    <div className="px-3 py-1.5 text-xs italic text-muted-foreground/70 bg-muted/30 border border-border/20 rounded-2xl flex items-center gap-1.5 select-none">
+                                      <Trash2 className="w-3 h-3 text-muted-foreground/40 shrink-0" />
+                                      <span>{t('chat.messageDeleted')}</span>
+                                    </div>
+                                  ) : isEditing ? (
+                                    <div className="flex items-center gap-1.5 bg-background border border-primary/40 p-1.5 rounded-2xl shadow-md w-full max-w-xs sm:max-w-md">
+                                      <input
+                                        type="text"
+                                        value={editingContent}
+                                        onChange={(e) => setEditingContent(e.target.value)}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') handleSaveEdit(msg.id)
+                                          if (e.key === 'Escape') handleCancelEdit()
+                                        }}
+                                        autoFocus
+                                        className="flex-1 bg-transparent px-2.5 py-1 text-sm outline-none text-foreground"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleSaveEdit(msg.id)}
+                                        className="p-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
+                                        title={t('common.save')}
+                                      >
+                                        <Check className="w-3.5 h-3.5" />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={handleCancelEdit}
+                                        className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                                        title={t('common.cancel')}
+                                      >
+                                        <X className="w-3.5 h-3.5" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <Bubble
+                                      variant={bubbleVariant}
+                                      align={isMe ? 'end' : 'start'}
+                                      className={`transition-all duration-300 ${isActiveMatch ? 'ring-3 ring-amber-400 dark:ring-amber-500 shadow-xl scale-[1.02]' : ''}`}
+                                    >
+                                      <BubbleContent>
+                                        <div className="whitespace-pre-wrap">{renderFormattedText(cleanText, searchQuery)}</div>
+                                        {actionData && (
+                                          <ActionConfirmationCard
+                                            actionData={actionData}
+                                            isExecuting={executingActionId === msg.id}
+                                            onConfirm={() => handleConfirmAction(msg.id, actionData)}
+                                            onCancel={() => handleCancelAction(msg.id)}
+                                          />
+                                        )}
+                                      </BubbleContent>
+                                    </Bubble>
+                                  )}
+                                </div>
+                              </MessageContent>
+                            </Message>
+                          </MessageScrollerItem>
                         </div>
-                      </MessageContent>
-                    </Message>
-                  )
-                })}
-              </MessageGroup>
-            </div>
-          ))
-        )}
+                      )
+                    })}
+                  </MessageGroup>
+                </div>
+              ))
+            )}
 
-        {/* Indicador de escritura del bot Gemini */}
-        {isBotTyping && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground italic px-2 animate-pulse mt-2">
-            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-            <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
-            <span className="ml-1 font-semibold text-primary">{t('chat.botAnalyzing')}</span>
-          </div>
-        )}
+            {/* Indicador de escritura del bot Gemini */}
+            {isBotTyping && (
+              <MessageScrollerItem>
+                <Message align="start" className="px-1">
+                  <MessageAvatar>
+                    <Avatar className="h-8 w-8 border border-primary/40 shadow-xs ring-2 ring-primary/10">
+                      <AvatarImage src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=80&h=80&fit=crop" alt="Gemini AI" />
+                      <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">AI</AvatarFallback>
+                    </Avatar>
+                  </MessageAvatar>
+                  <MessageContent>
+                    <MessageHeader>
+                      <span className="font-bold text-foreground mr-1.5 flex items-center gap-1 text-xs">
+                        Gemini AI <Sparkles className="w-3 h-3 text-primary animate-spin" />
+                      </span>
+                    </MessageHeader>
+                    <Bubble variant="tinted" align="start">
+                      <BubbleContent>
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground italic py-1">
+                          <span className="flex h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                          <span className="flex h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                          <span className="flex h-2 w-2 rounded-full bg-primary animate-bounce" />
+                          <span className="ml-1 font-semibold text-primary">{t('chat.botAnalyzing')}</span>
+                        </div>
+                      </BubbleContent>
+                    </Bubble>
+                  </MessageContent>
+                </Message>
+              </MessageScrollerItem>
+            )}
 
-        <div ref={messagesEndRef} />
-      </div>
+            <div ref={messagesEndRef} />
+          </MessageScrollerContent>
+        </MessageScrollerViewport>
+
+        {/* Botón flotante para desplazarse al final del chat */}
+        <MessageScrollerButton direction="end" className="shadow-lg border border-border/50 bg-background/95 backdrop-blur-md" />
+      </MessageScroller>
 
       {/* Alerta de Error */}
       {error && (
