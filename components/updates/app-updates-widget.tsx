@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Sparkles } from 'lucide-react'
+import { MegaphoneIcon, Sparkles } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AppUpdatesModal } from './app-updates-modal'
 import {
@@ -53,7 +53,7 @@ export function AppUpdatesWidget() {
         title="Novedades y Actualizaciones"
       >
         <div className="relative flex items-center justify-center">
-          <Sparkles className={`w-4 h-4 ${hasUnread ? 'text-indigo-500 animate-pulse' : 'text-primary'}`} />
+          <MegaphoneIcon className={`w-4 h-4 ${hasUnread ? 'text-indigo-500 animate-pulse' : 'text-primary'}`} />
           {hasUnread && (
             <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
@@ -61,7 +61,7 @@ export function AppUpdatesWidget() {
             </span>
           )}
         </div>
-        <span className="hidden md:inline font-medium text-xs">Novedades</span>
+        <span className="hidden lg:inline font-medium text-xs">Novedades</span>
       </Button>
 
       <AppUpdatesModal

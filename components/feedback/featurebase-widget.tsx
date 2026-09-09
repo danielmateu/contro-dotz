@@ -65,7 +65,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
             className={`rounded-xl border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 font-semibold gap-2 transition-all active:scale-95 ${className}`}
           >
             <MessageSquarePlus className="h-4 w-4 text-violet-400" />
-            <span className="hidden sm:inline">Feedback / Sugerencias</span>
+            <span className="hidden lg:inline">Feedback</span>
           </Button>
         }
       />

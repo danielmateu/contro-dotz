@@ -143,7 +143,7 @@ export function ShareAppModal({
           }
         >
           <Share2 className="w-4 h-4 text-primary" />
-          <span className="hidden sm:inline">
+          <span className="hidden lg:inline">
             {locale === 'en' ? 'Share App' : locale === 'ca' ? 'Compartir App' : 'Compartir App'}
           </span>
         </Button>

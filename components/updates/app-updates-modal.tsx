@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sparkles, Rocket, Zap, Wrench, Megaphone, Calendar } from 'lucide-react'
+import { Sparkles, Rocket, Zap, Wrench, Megaphone, Calendar, MegaphoneIcon } from 'lucide-react'
 import { AppUpdate } from '@/app/actions/app-updates'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -62,7 +62,7 @@ export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModal
         <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm">
-              <Sparkles className="h-6 w-6 text-indigo-500 animate-pulse" />
+              <MegaphoneIcon className="h-6 w-6 text-indigo-500 animate-pulse" />
             </div>
             <div>
               <DialogTitle className="text-xl font-bold text-foreground">
@@ -78,41 +78,37 @@ export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModal
           <div className="flex flex-wrap gap-1.5 mt-4 pt-2">
             <button
               onClick={() => setSelectedCategory('all')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                selectedCategory === 'all'
-                  ? 'bg-primary text-primary-foreground shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${selectedCategory === 'all'
+                ? 'bg-primary text-primary-foreground shadow-sm'
+                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
             >
               Todas ({updates.length})
             </button>
             <button
               onClick={() => setSelectedCategory('feature')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                selectedCategory === 'feature'
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${selectedCategory === 'feature'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
             >
               🚀 Novedades
             </button>
             <button
               onClick={() => setSelectedCategory('improvement')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                selectedCategory === 'improvement'
-                  ? 'bg-emerald-600 text-white shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${selectedCategory === 'improvement'
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
             >
               ⚡ Mejoras
             </button>
             <button
               onClick={() => setSelectedCategory('fix')}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
-                selectedCategory === 'fix'
-                  ? 'bg-amber-600 text-white shadow-sm'
-                  : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
+              className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${selectedCategory === 'fix'
+                ? 'bg-amber-600 text-white shadow-sm'
+                : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
+                }`}
             >
               🛠️ Correcciones
             </button>

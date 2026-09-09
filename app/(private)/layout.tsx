@@ -152,14 +152,14 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
 
       <SidebarInset>
         {/* Header Superior Móvil/Desktop */}
-        <header className="flex h-14 shrink-0 items-center justify-between border-b border-border bg-background/50 backdrop-blur-md px-4 md:px-6">
-          <div className="flex items-center gap-3">
+        <header className="flex h-14 shrink-0 items-center justify-between gap-2 border-b border-border bg-background/50 backdrop-blur-md px-3 sm:px-4 md:px-6">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0 truncate">
             <SidebarTrigger />
             {/* <Separator orientation="vertical" className="h-4" /> */}
             <ActiveRouteName />
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <HeaderTamagotchiTrigger householdId={householdId || undefined} />
             <AppUpdatesWidget />
             <ShareAppModal />
