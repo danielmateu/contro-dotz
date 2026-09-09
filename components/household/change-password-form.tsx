@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle2, Lock } from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 // @ts-ignore
 import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
 // @ts-ignore
@@ -21,6 +22,7 @@ type FormState = {
 const initialState: FormState = {}
 
 export function ChangePasswordForm() {
+  const { t } = useI18n()
   const [state, formAction, pending] = useActionState(
     updatePasswordAction,
     initialState
@@ -38,7 +40,7 @@ export function ChangePasswordForm() {
       {state?.error && (
         <Alert variant="destructive" className="rounded-xl">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t('common.error')}</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
@@ -46,21 +48,21 @@ export function ChangePasswordForm() {
       {state?.success && (
         <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400 rounded-xl">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          <AlertTitle>Éxito</AlertTitle>
+          <AlertTitle>{t('common.success')}</AlertTitle>
           <AlertDescription>{state.success}</AlertDescription>
         </Alert>
       )}
 
       {/* Nueva contraseña */}
       <div className="space-y-2">
-        <Label htmlFor="password">Nueva contraseña</Label>
+        <Label htmlFor="password">{t('settings.newPasswordLabel')}</Label>
         <div className="relative">
           <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             id="password"
             name="password"
             type={showPassword ? 'text' : 'password'}
-            placeholder="Mínimo 6 caracteres"
+            placeholder={t('settings.newPasswordPlaceholder')}
             required
             className="pl-9 pr-10 bg-muted/50 focus:bg-background rounded-xl"
           />
@@ -68,7 +70,9 @@ export function ChangePasswordForm() {
             type="button"
             onClick={togglePasswordVisibility}
             className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground focus:outline-hidden"
-            aria-label={showPassword ? 'Ocultar clave' : 'Mostrar clave'}
+            aria-label={
+              showPassword ? t('settings.hideKey') : t('settings.showKey')
+            }
           >
             <MorphIcon
               icon={showPassword ? EyeOffData : EyeData}
@@ -81,14 +85,16 @@ export function ChangePasswordForm() {
 
       {/* Confirmar contraseña */}
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword">Confirmar nueva contraseña</Label>
+        <Label htmlFor="confirmPassword">
+          {t('settings.confirmPasswordLabel')}
+        </Label>
         <div className="relative">
           <Lock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             id="confirmPassword"
             name="confirmPassword"
             type={showConfirmPassword ? 'text' : 'password'}
-            placeholder="Repite la contraseña"
+            placeholder={t('settings.confirmPasswordPlaceholder')}
             required
             className="pl-9 pr-10 bg-muted/50 focus:bg-background rounded-xl"
           />
@@ -97,7 +103,9 @@ export function ChangePasswordForm() {
             onClick={toggleConfirmPasswordVisibility}
             className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground focus:outline-hidden"
             aria-label={
-              showConfirmPassword ? 'Ocultar clave' : 'Mostrar clave'
+              showConfirmPassword
+                ? t('settings.hideKey')
+                : t('settings.showKey')
             }
           >
             <MorphIcon
@@ -114,7 +122,9 @@ export function ChangePasswordForm() {
         disabled={pending}
         className="w-full sm:w-auto mt-2 rounded-xl"
       >
-        {pending ? 'Actualizando...' : 'Cambiar Contraseña'}
+        {pending
+          ? t('settings.updatingPassword')
+          : t('settings.changePassword')}
       </Button>
     </form>
   )

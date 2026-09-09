@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
 import { UserGameState, DotziGender, DotziPersonality } from '@/lib/game/game-service'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Sparkles,
   Wand2,
@@ -49,7 +50,7 @@ export function TamagotchiRpgCreatorModal({
   onStateChange,
   locale = 'es',
 }: TamagotchiRpgCreatorModalProps) {
-  const isCatalan = locale === 'ca'
+  const { t } = useI18n()
 
   // Estado local para el formulario RPG
   const [petName, setPetName] = useState(gameState.petName || 'Dotzi')
@@ -93,51 +94,51 @@ export function TamagotchiRpgCreatorModal({
   const personalities: { id: DotziPersonality; label: string; icon: React.ReactNode; desc: string }[] = [
     {
       id: 'saver',
-      label: isCatalan ? 'Estalviador Compulsiu' : 'Ahorrador Compulsivo',
+      label: t('tamagotchi.persSaverLabel'),
       icon: <Shield className="w-4 h-4 text-emerald-500" />,
-      desc: isCatalan ? 'Cuida cada moneda com si fos or pur.' : 'Protege cada moneda con uñas y dientes.',
+      desc: t('tamagotchi.persSaverDesc'),
     },
     {
       id: 'foodie',
-      label: isCatalan ? 'Glotó Alegre' : 'Glotón Alegre',
+      label: t('tamagotchi.persFoodieLabel'),
       icon: <Utensils className="w-4 h-4 text-rose-500" />,
-      desc: isCatalan ? 'Li encanta menjar i estar feliçment rechoncho.' : '¡Le fascina probar delicias y estar bien alimentado!',
+      desc: t('tamagotchi.persFoodieDesc'),
     },
     {
       id: 'adventurer',
-      label: isCatalan ? 'Aventurer' : 'Aventurero',
+      label: t('tamagotchi.persAdventurerLabel'),
       icon: <Compass className="w-4 h-4 text-amber-500" />,
-      desc: isCatalan ? 'Sempre buscant noves misions i reptes.' : 'Siempre listo para afrontar misiones y metas.',
+      desc: t('tamagotchi.persAdventurerDesc'),
     },
     {
       id: 'zen',
-      label: isCatalan ? 'Zen Financer' : 'Zen Financiero',
+      label: t('tamagotchi.persZenLabel'),
       icon: <Sun className="w-4 h-4 text-cyan-500" />,
-      desc: isCatalan ? 'Pau mental i despeses en serenitat.' : 'Mantiene la calma y el presupuesto bajo control.',
+      desc: t('tamagotchi.persZenDesc'),
     },
     {
       id: 'party',
-      label: isCatalan ? 'Fiester' : 'Fiestero',
+      label: t('tamagotchi.persPartyLabel'),
       icon: <PartyPopper className="w-4 h-4 text-purple-500" />,
-      desc: isCatalan ? 'Ho celebra tot amb la família!' : '¡Celebra cada logro del hogar con alegría!',
+      desc: t('tamagotchi.persPartyDesc'),
     },
   ]
 
   const skinColors = [
-    { id: 'skin_indigo', name: isCatalan ? 'Menta Clàssic' : 'Menta Clásico', colorBg: 'bg-emerald-500' },
-    { id: 'skin_purple', name: isCatalan ? 'Púrpura Cíber' : 'Púrpura Cíber', colorBg: 'bg-purple-500' },
-    { id: 'skin_cyan', name: isCatalan ? 'Cian Oceà' : 'Cian Océano', colorBg: 'bg-cyan-500' },
-    { id: 'skin_amber', name: isCatalan ? 'Daurat Estalviador' : 'Dorado Ahorrador', colorBg: 'bg-amber-500' },
-    { id: 'skin_rose', name: isCatalan ? 'Rosa Coquette' : 'Rosa Coquette', colorBg: 'bg-pink-500' },
+    { id: 'skin_indigo', name: t('tamagotchi.skinIndigo'), colorBg: 'bg-emerald-500' },
+    { id: 'skin_purple', name: t('tamagotchi.skinPurple'), colorBg: 'bg-purple-500' },
+    { id: 'skin_cyan', name: t('tamagotchi.skinCyan'), colorBg: 'bg-cyan-500' },
+    { id: 'skin_amber', name: t('tamagotchi.skinAmber'), colorBg: 'bg-amber-500' },
+    { id: 'skin_rose', name: t('tamagotchi.skinRose'), colorBg: 'bg-pink-500' },
   ]
 
   const hairstyles: { id: string; name: string; icon: React.ReactNode }[] = [
-    { id: 'hair_none', name: isCatalan ? 'Sense Peinat' : 'Sin Peinado', icon: <Smile className="w-3.5 h-3.5 text-muted-foreground" /> },
-    { id: 'hair_copete', name: isCatalan ? 'Copete Cool' : 'Copete Cool', icon: <Scissors className="w-3.5 h-3.5 text-indigo-500" /> },
-    { id: 'hair_cresta', name: isCatalan ? 'Cresta Punk' : 'Cresta Punk', icon: <Zap className="w-3.5 h-3.5 text-rose-500" /> },
-    { id: 'hair_afro', name: isCatalan ? 'Afro Retro' : 'Afro Retro', icon: <CircleDot className="w-3.5 h-3.5 text-amber-500" /> },
-    { id: 'hair_bow', name: isCatalan ? 'Llaç Coquette' : 'Lazo Coquette', icon: <Sparkles className="w-3.5 h-3.5 text-pink-500" /> },
-    { id: 'hair_spikes', name: isCatalan ? 'Pics Anime' : 'Picos Anime', icon: <Zap className="w-3.5 h-3.5 text-sky-500" /> },
+    { id: 'hair_none', name: t('tamagotchi.hairNone'), icon: <Smile className="w-3.5 h-3.5 text-muted-foreground" /> },
+    { id: 'hair_copete', name: t('tamagotchi.hairCopete'), icon: <Scissors className="w-3.5 h-3.5 text-indigo-500" /> },
+    { id: 'hair_cresta', name: t('tamagotchi.hairCresta'), icon: <Zap className="w-3.5 h-3.5 text-rose-500" /> },
+    { id: 'hair_afro', name: t('tamagotchi.hairAfro'), icon: <CircleDot className="w-3.5 h-3.5 text-amber-500" /> },
+    { id: 'hair_bow', name: t('tamagotchi.hairBow'), icon: <Sparkles className="w-3.5 h-3.5 text-pink-500" /> },
+    { id: 'hair_spikes', name: t('tamagotchi.hairSpikes'), icon: <Zap className="w-3.5 h-3.5 text-sky-500" /> },
   ]
 
   const activePersonality = personalities.find((p) => p.id === personality)
@@ -152,13 +153,11 @@ export function TamagotchiRpgCreatorModal({
             </div>
             <div>
               <DialogTitle className="text-xl font-bold font-heading flex items-center gap-2">
-                <span>{isCatalan ? 'Creador de Personatge RPG' : 'Creador de Personaje RPG'}</span>
+                <span>{t('tamagotchi.rpgCreator')}</span>
                 <Sparkles className="w-4 h-4 text-amber-500" />
               </DialogTitle>
               <DialogDescription className="text-xs">
-                {isCatalan
-                  ? 'Personalitza el teu Dotzi des de zero: Nom, Sexe, Caràcter i Aparència.'
-                  : 'Personaliza tu Dotzi desde cero: Nombre, Sexo, Carácter y Apariencia.'}
+                {t('tamagotchi.rpgSubtitle')}
               </DialogDescription>
             </div>
           </div>
@@ -185,7 +184,7 @@ export function TamagotchiRpgCreatorModal({
                   {petName || 'Dotzi'}
                 </h4>
                 <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-primary/10 text-primary border-primary/20">
-                  {gender === 'boy' ? 'Chico' : gender === 'girl' ? 'Chica' : 'Neutro'}
+                  {gender === 'boy' ? t('tamagotchi.boy') : gender === 'girl' ? t('tamagotchi.girl') : t('tamagotchi.neutral')}
                 </Badge>
               </div>
 
@@ -201,7 +200,7 @@ export function TamagotchiRpgCreatorModal({
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Edit3 className="w-3.5 h-3.5 text-primary" />
-                <span>{isCatalan ? 'Nom del teu Dotzi' : 'Nombre de tu Dotzi'}</span>
+                <span>{t('tamagotchi.nameLabel')}</span>
               </Label>
               <Input
                 value={petName}
@@ -216,13 +215,13 @@ export function TamagotchiRpgCreatorModal({
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <User className="w-3.5 h-3.5 text-primary" />
-                <span>{isCatalan ? 'Sexe / Identitat' : 'Sexo / Identidad'}</span>
+                <span>{t('tamagotchi.genderLabel')}</span>
               </Label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'boy', label: 'Chico' },
-                  { id: 'girl', label: 'Chica' },
-                  { id: 'neutral', label: 'Neutro' },
+                  { id: 'boy', label: t('tamagotchi.boy') },
+                  { id: 'girl', label: t('tamagotchi.girl') },
+                  { id: 'neutral', label: t('tamagotchi.neutral') },
                 ].map((g) => (
                   <Button
                     key={g.id}
@@ -242,13 +241,13 @@ export function TamagotchiRpgCreatorModal({
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Scale className="w-3.5 h-3.5 text-primary" />
-                <span>{isCatalan ? 'Constitució Física Inicial' : 'Constitución Física Inicial'}</span>
+                <span>{t('tamagotchi.physiqueLabel')}</span>
               </Label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { w: 80, label: 'Gordito' },
-                  { w: 50, label: 'Equilibrado' },
-                  { w: 25, label: 'Delgado' },
+                  { w: 80, label: t('tamagotchi.weightGordito') },
+                  { w: 50, label: t('tamagotchi.weightEquilibrado') },
+                  { w: 25, label: t('tamagotchi.weightDelgado') },
                 ].map((item) => (
                   <Button
                     key={item.w}
@@ -268,7 +267,7 @@ export function TamagotchiRpgCreatorModal({
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Wand2 className="w-3.5 h-3.5 text-primary" />
-                <span>{isCatalan ? 'Caràcter RPG' : 'Carácter RPG'}</span>
+                <span>{t('tamagotchi.personalityLabel')}</span>
               </Label>
               <div className="grid grid-cols-1 gap-1.5">
                 {personalities.map((p) => {
@@ -303,7 +302,7 @@ export function TamagotchiRpgCreatorModal({
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Palette className="w-3.5 h-3.5 text-primary" />
-                <span>{isCatalan ? 'Color de Pell' : 'Color de Piel'}</span>
+                <span>{t('tamagotchi.skinColorLabel')}</span>
               </Label>
               <div className="flex flex-wrap gap-2">
                 {skinColors.map((sk) => (
@@ -328,7 +327,7 @@ export function TamagotchiRpgCreatorModal({
             <div className="space-y-1.5">
               <Label className="text-xs font-bold text-foreground flex items-center gap-1.5">
                 <Scissors className="w-3.5 h-3.5 text-primary" />
-                <span>{isCatalan ? 'Peinat' : 'Peinado'}</span>
+                <span>{t('tamagotchi.hairstyleLabel')}</span>
               </Label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {hairstyles.map((h) => (
@@ -351,7 +350,7 @@ export function TamagotchiRpgCreatorModal({
 
         <DialogFooter className="pt-3 border-t border-border/40 flex justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)} className="rounded-xl">
-            {isCatalan ? 'Cancel·lar' : 'Cancelar'}
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
@@ -359,7 +358,7 @@ export function TamagotchiRpgCreatorModal({
             className="rounded-xl font-bold bg-linear-to-r from-primary to-indigo-600 shadow-md gap-1.5"
           >
             <Sparkles className="w-4 h-4 fill-current" />
-            <span>{isSaving ? 'Guardant...' : isCatalan ? 'Guardar Personatge' : 'Guardar Personaje'}</span>
+            <span>{isSaving ? t('tamagotchi.savingCharacter') : t('tamagotchi.saveCharacter')}</span>
           </Button>
         </DialogFooter>
       </DialogContent>

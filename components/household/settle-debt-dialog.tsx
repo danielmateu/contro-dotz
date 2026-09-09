@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Coins } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface Member {
   id: string
@@ -52,6 +53,7 @@ export function SettleDebtDialog({
   defaultReceiverId = '',
   defaultAmount = '',
 }: SettleDebtDialogProps) {
+  const { t } = useI18n()
   const [payerId, setPayerId] = useState(defaultPayerId)
   const [receiverId, setReceiverId] = useState(defaultReceiverId)
   const [amount, setAmount] = useState(defaultAmount)
@@ -73,19 +75,19 @@ export function SettleDebtDialog({
     setError('')
 
     if (!payerId) {
-      setError('Debes seleccionar un deudor.')
+      setError(t('household.selectDebtorErr'))
       return
     }
     if (!receiverId) {
-      setError('Debes seleccionar un acreedor.')
+      setError(t('household.selectCreditorErr'))
       return
     }
     if (payerId === receiverId) {
-      setError('El deudor y el acreedor no pueden ser la misma persona.')
+      setError(t('household.samePersonErr'))
       return
     }
     if (!amount || parseFloat(amount.replace(',', '.')) <= 0) {
-      setError('El importe debe ser un número positivo.')
+      setError(t('household.positiveAmountErr'))
       return
     }
 
@@ -111,10 +113,10 @@ export function SettleDebtDialog({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Coins className="h-5 w-5 text-emerald-500" />
-              Liquidar Deuda / Registrar Pago
+              {t('household.settleDebtTitle')}
             </DialogTitle>
             <DialogDescription>
-              Registra un pago directo entre miembros para ajustar los saldos del grupo.
+              {t('household.settleDebtDesc')}
             </DialogDescription>
           </DialogHeader>
 
@@ -122,21 +124,21 @@ export function SettleDebtDialog({
             {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
+                <AlertTitle>{t('expenses.validationErrorTitle')}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
 
             <div className="grid gap-2">
-              <Label htmlFor="payer">Miembro que paga (Deudor)</Label>
-              <Select value={payerId} onValueChange={(val) => setPayerId(val || '')} disabled={isPending} items={membersList.map((m) => ({ value: m.user_id, label: m.profiles?.display_name || m.profiles?.email.split('@')[0] || 'Miembro' }))}>
+              <Label htmlFor="payer">{t('household.payerMember')}</Label>
+              <Select value={payerId} onValueChange={(val) => setPayerId(val || '')} disabled={isPending} items={membersList.map((m) => ({ value: m.user_id, label: m.profiles?.display_name || m.profiles?.email.split('@')[0] || t('household.roleMember') }))}>
                 <SelectTrigger id="payer" className="bg-muted/50 focus:bg-background">
-                  <SelectValue placeholder="Selecciona quién paga..." />
+                  <SelectValue placeholder={t('household.selectPayerPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {membersList.map((m) => (
                     <SelectItem key={m.user_id} value={m.user_id}>
-                      {m.profiles?.display_name || m.profiles?.email.split('@')[0] || 'Miembro'}
+                      {m.profiles?.display_name || m.profiles?.email.split('@')[0] || t('household.roleMember')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -144,15 +146,15 @@ export function SettleDebtDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="receiver">Miembro que recibe (Acreedor)</Label>
-              <Select value={receiverId} onValueChange={(val) => setReceiverId(val || '')} disabled={isPending} items={membersList.map((m) => ({ value: m.user_id, label: m.profiles?.display_name || m.profiles?.email.split('@')[0] || 'Miembro' }))}>
+              <Label htmlFor="receiver">{t('household.receiverMember')}</Label>
+              <Select value={receiverId} onValueChange={(val) => setReceiverId(val || '')} disabled={isPending} items={membersList.map((m) => ({ value: m.user_id, label: m.profiles?.display_name || m.profiles?.email.split('@')[0] || t('household.roleMember') }))}>
                 <SelectTrigger id="receiver" className="bg-muted/50 focus:bg-background">
-                  <SelectValue placeholder="Selecciona quién recibe..." />
+                  <SelectValue placeholder={t('household.selectReceiverPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
                   {membersList.map((m) => (
                     <SelectItem key={m.user_id} value={m.user_id}>
-                      {m.profiles?.display_name || m.profiles?.email.split('@')[0] || 'Miembro'}
+                      {m.profiles?.display_name || m.profiles?.email.split('@')[0] || t('household.roleMember')}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -160,7 +162,7 @@ export function SettleDebtDialog({
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="amount">Importe (€)</Label>
+              <Label htmlFor="amount">{t('expenses.amount')} (€)</Label>
               <Input
                 id="amount"
                 type="text"
@@ -181,10 +183,10 @@ export function SettleDebtDialog({
               onClick={() => onOpenChange(false)}
               disabled={isPending}
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={isPending} className="bg-emerald-600 hover:bg-emerald-700 text-white">
-              {isPending ? 'Registrando...' : 'Registrar Pago'}
+              {isPending ? t('household.recording') : t('household.registerPayment')}
             </Button>
           </DialogFooter>
         </form>

@@ -89,10 +89,10 @@ export function SettlementsTabContent({
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Coins className="h-5 w-5 text-emerald-500" />
-              Saldos del Grupo
+              {t('household.groupBalances')}
             </CardTitle>
             <CardDescription>
-              Resumen detallado de cuánto ha aportado cada miembro a los gastos del hogar respecto a su cuota acordada.
+              {t('household.groupBalancesDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -112,19 +112,19 @@ export function SettlementsTabContent({
                         <p className="text-sm font-semibold">{b.name}</p>
                         {b.weight !== undefined && b.weight > 0 ? (
                           <Badge variant="outline" className="text-[10px] bg-indigo-50/50 text-indigo-600 border-indigo-500/30 dark:bg-indigo-950/30 dark:text-indigo-400">
-                            Reparto: {b.weight}%
+                            {t('household.shareRatio', { weight: b.weight })}
                           </Badge>
                         ) : null}
                         {b.contribution && b.contribution > 0 ? (
                           <Badge variant="outline" className="text-[10px] bg-emerald-50/50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
-                            Cuota: {b.contribution.toFixed(2)}€
+                            {t('household.shareQuota', { amount: b.contribution.toFixed(2) })}
                           </Badge>
                         ) : null}
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        Gastado en Hogar: <span className="font-medium">{b.spent.toFixed(2)}€</span> (Cuota justa: {b.fairShare.toFixed(2)}€)
-                        {b.paid > 0 && <span className="text-emerald-600 font-medium"> (+{b.paid.toFixed(2)}€ liquidados)</span>}
-                        {b.received > 0 && <span className="text-rose-600 font-medium"> (-{b.received.toFixed(2)}€ recibidos)</span>}
+                        {t('household.spentInHousehold')} <span className="font-medium">{b.spent.toFixed(2)}€</span> ({t('household.fairShareQuota')} {b.fairShare.toFixed(2)}€)
+                        {b.paid > 0 && <span className="text-emerald-600 font-medium"> {t('household.paidSettled', { amount: b.paid.toFixed(2) })}</span>}
+                        {b.received > 0 && <span className="text-rose-600 font-medium"> {t('household.receivedSettled', { amount: b.received.toFixed(2) })}</span>}
                       </p>
                     </div>
 
@@ -143,10 +143,10 @@ export function SettlementsTabContent({
                         </p>
                         <p className="text-[10px] text-muted-foreground">
                           {isPositive
-                            ? 'Se le debe'
+                            ? t('household.owedToMember')
                             : isNegative
-                              ? 'Debe'
-                              : 'Al día'}
+                              ? t('household.owesMember')
+                              : t('household.upToDate')}
                         </p>
                       </div>
                     </div>
@@ -162,20 +162,20 @@ export function SettlementsTabContent({
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Plus className="h-5 w-5 text-indigo-500" />
-              Compensación de Deudas
+              {t('household.debtCompensation')}
             </CardTitle>
             <CardDescription>
-              Transferencias sugeridas para saldar todas las cuentas del hogar de forma simplificada.
+              {t('household.debtCompensationDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {debts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center text-muted-foreground">
                 <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">
-                  🎉 ¡Cuentas saldadas!
+                  {t('household.accountsSettledTitle')}
                 </p>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Todos están al día en el hogar y no hay deudas pendientes.
+                  {t('household.accountsSettledDesc')}
                 </p>
               </div>
             ) : (
@@ -189,7 +189,7 @@ export function SettlementsTabContent({
                       <span className="font-semibold text-rose-600 dark:text-rose-400">{d.from_name}</span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />
                       <span className="font-semibold text-emerald-600 dark:text-emerald-400">{d.to_name}</span>
-                      <span className="text-muted-foreground ml-1">debe pagar</span>
+                      <span className="text-muted-foreground ml-1">{t('household.mustPay')}</span>
                       <span className="font-bold text-foreground">{d.amount.toFixed(2)}€</span>
                     </div>
 
@@ -200,7 +200,7 @@ export function SettlementsTabContent({
                       }
                       className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs h-8"
                     >
-                      Liquidar
+                      {t('household.settleAction')}
                     </Button>
                   </div>
                 ))}
@@ -216,7 +216,7 @@ export function SettlementsTabContent({
           <CardHeader>
             <CardTitle className="text-sm font-bold flex items-center gap-2">
               <Coins className="h-4 w-4 text-emerald-500" />
-              Operaciones de Saldo
+              {t('household.balanceOperations')}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -225,7 +225,7 @@ export function SettlementsTabContent({
               onClick={() => handleOpenSettleDialog()}
             >
               <Plus className="h-4 w-4" />
-              Registrar Pago Directo
+              {t('household.registerDirectPayment')}
             </Button>
           </CardContent>
         </Card>
@@ -235,26 +235,26 @@ export function SettlementsTabContent({
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <History className="h-5 w-5 text-muted-foreground" />
-              Historial de Pagos
+              {t('household.paymentHistory')}
             </CardTitle>
             <CardDescription>
-              Histórico de transferencias de saldo registradas en el grupo.
+              {t('household.paymentHistoryDesc')}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {settlementsList.length === 0 ? (
               <p className="text-xs text-muted-foreground text-center py-6">
-                No se han registrado pagos de saldo todavía.
+                {t('household.noPaymentsRecorded')}
               </p>
             ) : (
               <div className="space-y-4">
                 {settlementsList.map((s) => {
                   const payerName =
                     membersList.find((m) => m.user_id === s.payer_id)?.profiles
-                      ?.display_name || 'Miembro'
+                      ?.display_name || t('household.roleMember')
                   const receiverName =
                     membersList.find((m) => m.user_id === s.receiver_id)?.profiles
-                      ?.display_name || 'Miembro'
+                      ?.display_name || t('household.roleMember')
 
                   return (
                     <div
@@ -263,13 +263,13 @@ export function SettlementsTabContent({
                     >
                       <div className="space-y-0.5 min-w-0">
                         <p className="text-xs font-semibold text-foreground truncate">
-                          {payerName} pagó a {receiverName}
+                          {t('household.paidTo', { payer: payerName, receiver: receiverName })}
                         </p>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                           <Calendar className="h-3 w-3" />
                           {s.settled_at &&
                             format(new Date(s.settled_at), "d 'de' MMMM, HH:mm", {
-                              locale: es,
+                              locale: dateLocale,
                             })}
                         </p>
                         <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">

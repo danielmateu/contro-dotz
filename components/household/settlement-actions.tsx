@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface SettlementActionsProps {
   settlementId: string
@@ -25,6 +26,7 @@ export function SettlementActions({
   settlementId,
   householdId,
 }: SettlementActionsProps) {
+  const { t } = useI18n()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
 
@@ -44,7 +46,7 @@ export function SettlementActions({
             variant="ghost"
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
             disabled={isPending}
-            aria-label="Eliminar pago registrado"
+            aria-label={t('household.deletePaymentTitle')}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -52,19 +54,19 @@ export function SettlementActions({
       />
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar este pago?</AlertDialogTitle>
+          <AlertDialogTitle>{t('household.deletePaymentTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
-            Esta acción revertirá el pago de saldo seleccionado. El balance de los miembros se recalculará automáticamente.
+            {t('household.deletePaymentDesc')}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={isPending}
             className="bg-destructive hover:bg-destructive/90 text-white"
           >
-            {isPending ? 'Eliminando...' : 'Eliminar'}
+            {isPending ? t('household.deleting') : t('common.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

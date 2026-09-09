@@ -96,12 +96,12 @@ export function ExpenseForm({
     <Card className="border-slate-200/50 shadow-md">
       <CardHeader>
         <CardTitle className="text-lg">
-          {initialData ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
+          {initialData ? t('expenses.editExpense') : t('expenses.newExpenseTitle')}
         </CardTitle>
         <CardDescription>
           {initialData
-            ? 'Modifica los detalles del gasto seleccionado.'
-            : 'Añade un nuevo gasto para tu hogar familiar.'}
+            ? t('expenses.editExpenseDesc')
+            : t('expenses.newExpenseDesc')}
         </CardDescription>
       </CardHeader>
 
@@ -110,14 +110,14 @@ export function ExpenseForm({
           {state?.error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>Error de validación</AlertTitle>
+              <AlertTitle>{t('expenses.validationErrorTitle')}</AlertTitle>
               <AlertDescription>{state.error}</AlertDescription>
             </Alert>
           )}
 
           {/* Importe */}
           <div className="space-y-1">
-            <Label htmlFor="amount">Importe (€)</Label>
+            <Label htmlFor="amount">{t('expenses.amount')} (€)</Label>
             <Input
               id="amount"
               name="amount"
@@ -129,13 +129,13 @@ export function ExpenseForm({
               className="bg-muted/50 focus:bg-background text-lg font-semibold"
             />
             <p className="text-[10px] text-muted-foreground">
-              Utiliza una coma o punto para separar los decimales (máx. 2 decimales).
+              {t('expenses.decimalTip')}
             </p>
           </div>
 
           {/* Categoría */}
           <div className="space-y-1">
-            <Label htmlFor="category_id">Categoría</Label>
+            <Label htmlFor="category_id">{t('expenses.category')}</Label>
             <Select
               name="category_id"
               value={categoryId}
@@ -143,7 +143,7 @@ export function ExpenseForm({
               items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
             >
               <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
-                <SelectValue placeholder="-- Selecciona una categoría --" />
+                <SelectValue placeholder={t('expenses.selectMember')} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((cat) => (
@@ -157,12 +157,12 @@ export function ExpenseForm({
 
           {/* Concepto / Descripción */}
           <div className="space-y-1">
-            <Label htmlFor="description">Concepto / Descripción</Label>
+            <Label htmlFor="description">{t('expenses.description')}</Label>
             <Input
               id="description"
               name="description"
               type="text"
-              placeholder="Ej. Compra semanal Mercadona, Combustible coche"
+              placeholder={t('expenses.conceptPlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               required
@@ -178,14 +178,14 @@ export function ExpenseForm({
                 className="mt-1 text-[11px] text-primary hover:underline flex items-center gap-1.5 animate-pulse text-left"
               >
                 <Sparkles className="h-3 w-3 text-primary shrink-0" />
-                <span>¿Categoría <strong>{suggestedCategory.name}</strong>? Haz clic para aplicar.</span>
+                <span>{t('expenses.suggestedCategory', { name: suggestedCategory.name })}</span>
               </button>
             )}
           </div>
 
           {/* Fecha del gasto */}
           <div className="space-y-1">
-            <Label htmlFor="expense_date">Fecha</Label>
+            <Label htmlFor="expense_date">{t('expenses.date')}</Label>
             <Input
               id="expense_date"
               name="expense_date"
@@ -198,10 +198,10 @@ export function ExpenseForm({
 
           {/* Método de pago */}
           <div className="space-y-1">
-            <Label htmlFor="payment_method">Método de pago</Label>
+            <Label htmlFor="payment_method">{t('cashflow.paymentMethod')}</Label>
             <Select name="payment_method" defaultValue={initialData?.payment_method || 'Tarjeta'} items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}>
               <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
-                <SelectValue placeholder="-- Selecciona método de pago --" />
+                <SelectValue placeholder={t('cashflow.selectPaymentMethod')} />
               </SelectTrigger>
               <SelectContent>
                 {PAYMENT_METHODS.map((method) => (
@@ -216,7 +216,7 @@ export function ExpenseForm({
           {/* Pagado por (solo para propietarios) */}
           {isOwner && members && members.length > 0 && (
             <div className="space-y-1">
-              <Label htmlFor="created_by">Pagado por</Label>
+              <Label htmlFor="created_by">{t('expenses.paidBy')}</Label>
               <Select
                 name="created_by"
                 defaultValue={
@@ -226,11 +226,11 @@ export function ExpenseForm({
                 }
                 items={[
                   ...members.map((m) => ({ value: m.id, label: m.name })),
-                  { value: 'shared', label: 'A medias / Compartido (Todos)' },
+                  { value: 'shared', label: t('expenses.sharedSplit') },
                 ]}
               >
                 <SelectTrigger id="created_by" className="w-full bg-muted/50 h-9">
-                  <SelectValue placeholder="Seleccionar miembro" />
+                  <SelectValue placeholder={t('expenses.selectMember')} />
                 </SelectTrigger>
                 <SelectContent>
                   {members.map((member) => (
@@ -238,7 +238,7 @@ export function ExpenseForm({
                       {member.name}
                     </SelectItem>
                   ))}
-                  <SelectItem value="shared">A medias / Compartido (Todos)</SelectItem>
+                  <SelectItem value="shared">{t('expenses.sharedSplit')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -246,11 +246,11 @@ export function ExpenseForm({
 
           {/* Notas */}
           <div className="space-y-1">
-            <Label htmlFor="notes">Notas adicionales (opcional)</Label>
+            <Label htmlFor="notes">{t('expenses.additionalNotes')}</Label>
             <Textarea
               id="notes"
               name="notes"
-              placeholder="Detalles adicionales..."
+              placeholder={t('expenses.notesPlaceholder')}
               defaultValue={initialData?.notes || ''}
               className="bg-muted/50 focus:bg-background min-h-20"
             />
@@ -258,12 +258,12 @@ export function ExpenseForm({
 
           {/* Ticket de compra */}
           <div className="space-y-1">
-            <Label className="text-xs">Ticket de compra (opcional)</Label>
+            <Label className="text-xs">{t('expenses.receiptOptional')}</Label>
 
             {initialData?.receipt_path && !deleteReceipt ? (
               <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-primary/20">
                 <Receipt className="h-4 w-4 text-primary shrink-0" />
-                <span className="truncate flex-1 font-medium text-muted-foreground">Ticket guardado</span>
+                <span className="truncate flex-1 font-medium text-muted-foreground">{t('expenses.receiptSaved')}</span>
                 <Button
                   type="button"
                   variant="outline"
@@ -286,7 +286,7 @@ export function ExpenseForm({
                     }
                   }}
                 >
-                  Ver
+                  {t('expenses.view')}
                 </Button>
                 <Button
                   type="button"
@@ -319,7 +319,7 @@ export function ExpenseForm({
         <CardFooter className="flex flex-col sm:flex-row gap-3 pt-2">
           <Button type="submit" disabled={pending} className="w-full sm:w-auto">
             <Save className="mr-2 h-4 w-4" />
-            {pending ? 'Guardando...' : 'Guardar Gasto'}
+            {pending ? t('expenses.saving') : t('expenses.saveExpense')}
           </Button>
 
           <Link
@@ -327,7 +327,7 @@ export function ExpenseForm({
             className={buttonVariants({ variant: 'outline', className: 'w-full sm:w-auto' })}
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Cancelar
+            {t('common.cancel')}
           </Link>
         </CardFooter>
       </form>

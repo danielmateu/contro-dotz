@@ -221,9 +221,9 @@ export function ExpenseDialog({
           await enqueueAction('CREATE_EXPENSE', { householdId, fields })
         }
 
-        setFormState({ success: 'Gasto guardado localmente (Modo Offline). Se subirá al conectar.' })
+        setFormState({ success: t('expenses.saveOfflineSuccess') })
       } catch (err) {
-        setFormState({ error: 'Error al guardar el gasto localmente.' })
+        setFormState({ error: t('expenses.saveOfflineError') })
       } finally {
         setIsSavingExpense(false)
       }
@@ -253,7 +253,7 @@ export function ExpenseDialog({
       setFormState(res || {})
     } catch (err) {
       console.error('Error saving expense:', err)
-      setFormState({ error: 'Error al guardar el gasto. Inténtalo de nuevo.' })
+      setFormState({ error: t('expenses.saveError') })
     } finally {
       setIsSavingExpense(false)
     }
@@ -266,13 +266,13 @@ export function ExpenseDialog({
 
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
-      setScanError('Por favor, selecciona una imagen de ticket válida.')
+      setScanError(t('expenses.scanTypeError'))
       return
     }
 
     // Validar tamaño máximo (4MB)
     if (file.size > 4 * 1024 * 1024) {
-      setScanError('La imagen del ticket supera el tamaño máximo permitido de 4MB.')
+      setScanError(t('expenses.scanSizeError'))
       return
     }
 
@@ -314,7 +314,7 @@ export function ExpenseDialog({
         }
       } catch (err) {
         console.error('Receipt Scan Client Error:', err)
-        setScanError('Error al analizar la imagen del ticket. Inténtalo de nuevo.')
+        setScanError(t('expenses.scanError'))
       } finally {
         setIsScanning(false)
         e.target.value = '' // Limpiar input para permitir re-subir
@@ -335,7 +335,7 @@ export function ExpenseDialog({
         spring="snappy"
         className="mr-2 h-4 w-4"
       />
-      {expense ? 'Editar Gasto' : 'Registrar Gasto'}
+      {expense ? t('expenses.editExpense') : t('expenses.newExpense')}
     </Button>
   )
 
@@ -346,12 +346,12 @@ export function ExpenseDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {expense ? 'Editar Gasto' : 'Registrar Nuevo Gasto'}
+            {expense ? t('expenses.editExpense') : t('expenses.newExpenseTitle')}
           </DialogTitle>
           <DialogDescription className="hidden sm:block">
             {expense
-              ? 'Modifica los detalles del gasto seleccionado.'
-              : 'Añade un nuevo gasto para tu hogar familiar.'}
+              ? t('expenses.editExpenseDesc')
+              : t('expenses.newExpenseDesc')}
           </DialogDescription>
         </DialogHeader>
 
@@ -397,9 +397,9 @@ export function ExpenseDialog({
                     }`}
                 />
                 {isScanning
-                  ? 'Analizando ticket con IA...'
+                  ? t('expenses.scanningReceipt')
                   : scanSuccess
-                    ? '¡Ticket analizado con éxito!'
+                    ? t('expenses.scanSuccess')
                     : ''}
               </Button>
             ) : (
@@ -412,7 +412,7 @@ export function ExpenseDialog({
                   disabled={isScanning || isSavingExpense}
                 >
                   <Camera className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span>Cámara (IA)</span>
+                  <span>{t('expenses.scanReceiptCamera')}</span>
                 </Button>
                 <Button
                   type="button"
@@ -422,7 +422,7 @@ export function ExpenseDialog({
                   disabled={isScanning || isSavingExpense}
                 >
                   <ImageIcon className="h-4 w-4 text-emerald-500 shrink-0" />
-                  <span>Galería (IA)</span>
+                  <span>{t('expenses.scanReceiptGallery')}</span>
                 </Button>
               </div>
             )}
@@ -441,7 +441,7 @@ export function ExpenseDialog({
             {formState?.error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error de validación</AlertTitle>
+                <AlertTitle>{t('expenses.validationErrorTitle')}</AlertTitle>
                 <AlertDescription>{formState.error}</AlertDescription>
               </Alert>
             )}
@@ -449,7 +449,7 @@ export function ExpenseDialog({
             {formState?.success && (
               <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                 <Check className="h-4 w-4 text-emerald-500" />
-                <AlertTitle>Éxito</AlertTitle>
+                <AlertTitle>{t('chat.operationSuccess')}</AlertTitle>
                 <AlertDescription>{formState.success}</AlertDescription>
               </Alert>
             )}
@@ -458,7 +458,7 @@ export function ExpenseDialog({
             <div className="grid grid-cols-2 gap-3">
               {/* Importe */}
               <div className="space-y-1">
-                <Label htmlFor="amount">Importe (€)</Label>
+                <Label htmlFor="amount">{t('expenses.amount')} (€)</Label>
                 <Input
                   id="amount"
                   name="amount"
@@ -472,13 +472,13 @@ export function ExpenseDialog({
                   className="bg-muted/50 focus:bg-background text-lg font-semibold"
                 />
                 <p className="text-[10px] text-muted-foreground leading-tight">
-                  Utiliza coma/punto (máx. 2 dec.).
+                  {t('expenses.decimalTip')}
                 </p>
               </div>
 
               {/* Categoría */}
               <div className="space-y-1">
-                <Label htmlFor="category_id">Categoría</Label>
+                <Label htmlFor="category_id">{t('expenses.category')}</Label>
                 <Select
                   name="category_id"
                   value={categoryId}
@@ -487,7 +487,7 @@ export function ExpenseDialog({
                   items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
                 >
                   <SelectTrigger id="category_id" className="w-full bg-muted/50 h-9">
-                    <SelectValue placeholder="Seleccionar" />
+                    <SelectValue placeholder={t('expenses.selectMember')} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -502,12 +502,12 @@ export function ExpenseDialog({
 
             {/* Concepto / Descripción */}
             <div className="space-y-1">
-              <Label htmlFor="description">Concepto / Descripción</Label>
+              <Label htmlFor="description">{t('expenses.description')}</Label>
               <Input
                 id="description"
                 name="description"
                 type="text"
-                placeholder="Ej. Compra semanal Mercadona, Combustible coche"
+                placeholder={t('expenses.conceptPlaceholder')}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 disabled={isScanning}
@@ -524,7 +524,7 @@ export function ExpenseDialog({
                   className="mt-1 text-[11px] text-primary hover:underline flex items-center gap-1.5 animate-pulse text-left"
                 >
                   <Sparkles className="h-3 w-3 text-primary shrink-0" />
-                  <span>¿Categoría <strong>{suggestedCategory.name}</strong>? Haz clic para aplicar.</span>
+                  <span>{t('expenses.suggestedCategory', { name: suggestedCategory.name })}</span>
                 </button>
               )}
             </div>
@@ -533,7 +533,7 @@ export function ExpenseDialog({
             <div className="grid grid-cols-2 gap-3">
               {/* Fecha del gasto */}
               <div className="space-y-1">
-                <Label htmlFor="expense_date">Fecha</Label>
+                <Label htmlFor="expense_date">{t('expenses.date')}</Label>
                 <Input
                   id="expense_date"
                   name="expense_date"
@@ -548,7 +548,7 @@ export function ExpenseDialog({
 
               {/* Método de pago */}
               <div className="space-y-1">
-                <Label htmlFor="payment_method">Método de pago</Label>
+                <Label htmlFor="payment_method">{t('cashflow.paymentMethod')}</Label>
                 <Select
                   name="payment_method"
                   value={paymentMethod}
@@ -557,7 +557,7 @@ export function ExpenseDialog({
                   items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}
                 >
                   <SelectTrigger id="payment_method" className="w-full bg-muted/50 h-9">
-                    <SelectValue placeholder="Seleccionar" />
+                    <SelectValue placeholder={t('cashflow.selectPaymentMethod')} />
                   </SelectTrigger>
                   <SelectContent>
                     {PAYMENT_METHODS.map((method) => (
@@ -573,7 +573,7 @@ export function ExpenseDialog({
             {/* Pagado por (solo para propietarios) */}
             {isOwner && members && members.length > 0 && (
               <div className="space-y-1">
-                <Label htmlFor="created_by">Pagado por</Label>
+                <Label htmlFor="created_by">{t('expenses.paidBy')}</Label>
                 <Select
                   name="created_by"
                   value={createdBy}
@@ -581,11 +581,11 @@ export function ExpenseDialog({
                   disabled={isScanning}
                   items={[
                     ...members.map((m) => ({ value: m.id, label: m.name })),
-                    { value: 'shared', label: 'A medias / Compartido (Todos)' },
+                    { value: 'shared', label: t('expenses.sharedSplit') },
                   ]}
                 >
                   <SelectTrigger id="created_by" className="w-full bg-muted/50 h-9">
-                    <SelectValue placeholder="Seleccionar miembro" />
+                    <SelectValue placeholder={t('expenses.selectMember')} />
                   </SelectTrigger>
                   <SelectContent>
                     {members.map((member) => (
@@ -593,7 +593,7 @@ export function ExpenseDialog({
                         {member.name}
                       </SelectItem>
                     ))}
-                    <SelectItem value="shared">A medias / Compartido (Todos)</SelectItem>
+                    <SelectItem value="shared">{t('expenses.sharedSplit')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -601,7 +601,7 @@ export function ExpenseDialog({
 
             {/* Ámbito del gasto: Compartido del Hogar vs Personal */}
             <div className="space-y-1">
-              <Label className="text-xs">Ámbito del Gasto</Label>
+              <Label className="text-xs">{t('expenses.scope')}</Label>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -613,7 +613,7 @@ export function ExpenseDialog({
                 >
                   <span className='flex items-center gap-2'>
                     <HouseHeartIcon className="h-4 w-4" />
-                    Del Hogar (Compartido)</span>
+                    {t('expenses.scopeHousehold')}</span>
                 </button>
                 <button
                   type="button"
@@ -625,7 +625,7 @@ export function ExpenseDialog({
                 >
                   <span className='flex items-center gap-2'>
                     <UserSquareIcon className='' size={18} />
-                    Gasto Personal</span>
+                    {t('expenses.scopePersonal')}</span>
                 </button>
               </div>
             </div>
@@ -634,11 +634,11 @@ export function ExpenseDialog({
               <>
                 {/* Notas */}
                 <div className="space-y-1">
-                  <Label htmlFor="notes">Notas adicionales (opcional)</Label>
+                  <Label htmlFor="notes">{t('expenses.additionalNotes')}</Label>
                   <Textarea
                     id="notes"
                     name="notes"
-                    placeholder="Detalles adicionales..."
+                    placeholder={t('expenses.notesPlaceholder')}
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     disabled={isScanning}
@@ -648,7 +648,7 @@ export function ExpenseDialog({
 
                 {/* Ticket de compra */}
                 <div className="space-y-1">
-                  <Label className="text-xs">Ticket de compra (opcional)</Label>
+                  <Label className="text-xs">{t('expenses.receiptOptional')}</Label>
 
                   {selectedFile ? (
                     <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-emerald-500/20">
@@ -667,7 +667,7 @@ export function ExpenseDialog({
                   ) : expense?.receipt_path && !deleteReceipt ? (
                     <div className="flex items-center gap-2 text-xs bg-muted/40 p-2 rounded-lg border border-primary/20">
                       <Receipt className="h-4 w-4 text-primary shrink-0" />
-                      <span className="truncate flex-1 font-medium text-muted-foreground">Ticket guardado</span>
+                      <span className="truncate flex-1 font-medium text-muted-foreground">{t('expenses.receiptSaved')}</span>
                       <Button
                         type="button"
                         variant="outline"
@@ -675,7 +675,7 @@ export function ExpenseDialog({
                         className="h-7 px-2 text-[10px]"
                         onClick={handleViewReceipt}
                       >
-                        Ver
+                        {t('expenses.view')}
                       </Button>
                       <Button
                         type="button"
@@ -710,7 +710,7 @@ export function ExpenseDialog({
                   className="w-full text-xs text-muted-foreground hover:text-foreground py-1 h-auto flex items-center justify-center gap-1"
                   onClick={() => setShowOptionalFields(false)}
                 >
-                  - Ocultar campos opcionales
+                  {t('expenses.hideOptional')}
                 </Button>
               </>
             ) : (
@@ -721,13 +721,13 @@ export function ExpenseDialog({
                 className="w-full text-xs text-muted-foreground hover:text-foreground py-2.5 h-auto border border-dashed border-muted/80 hover:border-muted-foreground/30 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-300"
                 onClick={() => setShowOptionalFields(true)}
               >
-                + Añadir notas o ticket (opcional)
+                {t('expenses.addOptional')}
               </Button>
             )}
           </div>
 
           <DialogFooter className="pt-4">
-            <DialogClose render={<Button variant="outline" type="button" disabled={isScanning || isSavingExpense}>Cancelar</Button>} />
+            <DialogClose render={<Button variant="outline" type="button" disabled={isScanning || isSavingExpense}>{t('common.cancel')}</Button>} />
             <Button
               type="submit"
               disabled={isScanning || isSavingExpense}
@@ -739,7 +739,7 @@ export function ExpenseDialog({
                 spring="snappy"
                 className={`mr-2 h-4 w-4 ${isSavingExpense ? 'animate-spin' : ''}`}
               />
-              {isSavingExpense ? 'Guardando...' : 'Guardar Gasto'}
+              {isSavingExpense ? t('expenses.saving') : t('expenses.saveExpense')}
             </Button>
           </DialogFooter>
         </form>

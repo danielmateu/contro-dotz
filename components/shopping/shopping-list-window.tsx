@@ -199,7 +199,7 @@ export function ShoppingListWindow({
       setItemQuantity('')
     } catch (err: any) {
       console.error('Error adding shopping item:', err)
-      setAddError('Error al añadir el artículo. Inténtalo de nuevo.')
+      setAddError(t('shopping.addError'))
     } finally {
       setIsAdding(false)
     }
@@ -292,7 +292,7 @@ export function ShoppingListWindow({
 
     const amountStr = expenseAmount.trim()
     if (!amountStr) {
-      setExpenseError('El importe es obligatorio.')
+      setExpenseError(t('shopping.amountRequiredErr'))
       return
     }
 
@@ -315,7 +315,7 @@ export function ShoppingListWindow({
       if (res.error) {
         setExpenseError(res.error)
       } else {
-        setExpenseSuccess('¡Gasto registrado y artículo removido con éxito!')
+        setExpenseSuccess(t('shopping.convertSuccess'))
 
         // Eliminar de la lista de la compra al convertirse con éxito
         await supabase.from('shopping_list').delete().eq('id', activeItem.id)
@@ -327,7 +327,7 @@ export function ShoppingListWindow({
       }
     } catch (err) {
       console.error('Error converting item to expense:', err)
-      setExpenseError('Error de red al guardar el gasto.')
+      setExpenseError(t('shopping.networkErr'))
     } finally {
       setIsSavingExpense(false)
     }
@@ -336,7 +336,7 @@ export function ShoppingListWindow({
   const getCreatorProfile = (creatorId: string) => {
     return members.find((m) => m.user_id === creatorId) || {
       user_id: creatorId,
-      display_name: 'Miembro',
+      display_name: t('household.roleMember'),
       avatar_url: '',
     }
   }
@@ -368,7 +368,7 @@ export function ShoppingListWindow({
               )}
 
               <div className="space-y-1">
-                <Label htmlFor="name">{locale === 'en' ? 'Item Name' : locale === 'ca' ? 'Nom del producte' : 'Nombre del producto'}</Label>
+                <Label htmlFor="name">{t('shopping.itemNameLabel')}</Label>
                 <Input
                   id="name"
                   type="text"
@@ -382,11 +382,11 @@ export function ShoppingListWindow({
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="quantity">{t('shopping.qty')} (Opcional)</Label>
+                <Label htmlFor="quantity">{t('shopping.qtyOptional')}</Label>
                 <Input
                   id="quantity"
                   type="text"
-                  placeholder="Ej. 6 bricks, 1 kg"
+                  placeholder={t('shopping.quantityPlaceholder')}
                   value={itemQuantity}
                   onChange={(e) => setItemQuantity(e.target.value)}
                   disabled={isAdding}
@@ -417,15 +417,15 @@ export function ShoppingListWindow({
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader className="pb-3">
             <CardTitle className="text-lg">
-              {locale === 'en' ? `Pending Items (${pendingItems.length})` : locale === 'ca' ? `Articles Pendents (${pendingItems.length})` : `Artículos Pendientes (${pendingItems.length})`}
+              {t('shopping.pendingItemsCount', { count: pendingItems.length })}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {pendingItems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground bg-muted/10 rounded-xl border border-dashed border-border/60">
                 <Check className="h-10 w-10 text-emerald-500 bg-emerald-500/10 p-2 rounded-full mb-2" />
-                <p className="text-sm font-semibold text-foreground">¡Todo comprado!</p>
-                <p className="text-xs mt-1">No hay artículos pendientes. Buen trabajo.</p>
+                <p className="text-sm font-semibold text-foreground">{t('shopping.allBoughtTitle')}</p>
+                <p className="text-xs mt-1">{t('shopping.allBoughtDesc')}</p>
               </div>
             ) : (
               <div className="divide-y divide-border/60">
@@ -443,7 +443,7 @@ export function ShoppingListWindow({
                           onClick={() => handleToggleBought(item.id, item.bought)}
                           className="mt-1 h-5 w-5 rounded-md border border-border/80 flex items-center justify-center hover:bg-muted/30 transition-all"
                         >
-                          <span className="sr-only">Marcar comprado</span>
+                          <span className="sr-only">{t('shopping.markBought')}</span>
                         </button>
 
                         <div className="flex flex-col min-w-0">
@@ -479,7 +479,7 @@ export function ShoppingListWindow({
                           className="h-8 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/20"
                         >
                           <Receipt className="h-3.5 w-3.5 mr-1" />
-                          Gasto
+                          {t('tamagotchi.expenseAction')}
                         </Button>
                         <Button
                           size="icon"
@@ -504,7 +504,7 @@ export function ShoppingListWindow({
             <CardHeader className="py-3 flex flex-row items-center justify-between cursor-pointer" onClick={() => setShowBought(!showBought)}>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-sm font-semibold text-muted-foreground">
-                  Comprados recientemente ({boughtItems.length})
+                  {t('shopping.recentlyBoughtCount', { count: boughtItems.length })}
                 </CardTitle>
                 <Button
                   size="sm"
@@ -518,7 +518,7 @@ export function ShoppingListWindow({
                   ) : (
                     <Trash2 className="h-3 w-3 mr-1" />
                   )}
-                  Limpiar Comprados
+                  {t('shopping.clearCompleted')}
                 </Button>
               </div>
               <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground">
@@ -579,7 +579,7 @@ export function ShoppingListWindow({
                             className="h-8 text-xs border-emerald-500/30 text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-950/20"
                           >
                             <Receipt className="h-3.5 w-3.5 mr-1" />
-                            Gasto
+                            {t('tamagotchi.expenseAction')}
                           </Button>
                           <Button
                             size="icon"
@@ -606,10 +606,10 @@ export function ShoppingListWindow({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 font-heading">
               <Receipt className="h-5 w-5 text-emerald-500" />
-              Convertir a Gasto Familiar
+              {t('shopping.convertToExpenseTitle')}
             </DialogTitle>
             <DialogDescription>
-              Ingresa el importe y categoría para registrar la compra de **{activeItem?.name}**.
+              {t('shopping.convertToExpenseDesc', { name: activeItem?.name || '' })}
             </DialogDescription>
           </DialogHeader>
 
@@ -618,7 +618,7 @@ export function ShoppingListWindow({
               {expenseError && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>{t('common.error')}</AlertTitle>
                   <AlertDescription>{expenseError}</AlertDescription>
                 </Alert>
               )}
@@ -626,14 +626,14 @@ export function ShoppingListWindow({
               {expenseSuccess && (
                 <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                   <Check className="h-4 w-4 text-emerald-500" />
-                  <AlertTitle>Éxito</AlertTitle>
+                  <AlertTitle>{t('common.success')}</AlertTitle>
                   <AlertDescription>{expenseSuccess}</AlertDescription>
                 </Alert>
               )}
 
               {/* Importe definitivo */}
               <div className="space-y-1">
-                <Label htmlFor="expense_amount">Importe definitivo (€)</Label>
+                <Label htmlFor="expense_amount">{t('shopping.finalAmountLabel')}</Label>
                 <Input
                   id="expense_amount"
                   type="text"
@@ -646,13 +646,13 @@ export function ShoppingListWindow({
                   className="bg-muted/50 focus:bg-background text-lg font-bold text-emerald-600 dark:text-emerald-400"
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  Ingresa el valor total pagado por el artículo.
+                  {t('shopping.finalAmountTip')}
                 </p>
               </div>
 
               {/* Categoría */}
               <div className="space-y-1">
-                <Label htmlFor="expense_category_id">Categoría</Label>
+                <Label htmlFor="expense_category_id">{t('common.categories')}</Label>
                 <Select
                   value={expenseCategoryId}
                   onValueChange={(val) => setExpenseCategoryId(val || '')}
@@ -660,7 +660,7 @@ export function ShoppingListWindow({
                   items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}
                 >
                   <SelectTrigger id="expense_category_id" className="w-full bg-muted/50 h-9">
-                    <SelectValue placeholder="-- Selecciona una categoría --" />
+                    <SelectValue placeholder={`-- ${t('cashflow.selectCategory')} --`} />
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((cat) => (
@@ -674,7 +674,7 @@ export function ShoppingListWindow({
 
               {/* Método de pago */}
               <div className="space-y-1">
-                <Label htmlFor="expense_payment_method">Método de pago</Label>
+                <Label htmlFor="expense_payment_method">{t('cashflow.paymentMethod')}</Label>
                 <Select
                   value={expensePaymentMethod}
                   onValueChange={(val) => setExpensePaymentMethod(val || 'Tarjeta')}
@@ -682,7 +682,7 @@ export function ShoppingListWindow({
                   items={PAYMENT_METHODS.map((method) => ({ value: method, label: method }))}
                 >
                   <SelectTrigger id="expense_payment_method" className="w-full bg-muted/50 h-9">
-                    <SelectValue placeholder="-- Selecciona método de pago --" />
+                    <SelectValue placeholder={`-- ${t('cashflow.selectPaymentMethod')} --`} />
                   </SelectTrigger>
                   <SelectContent>
                     {PAYMENT_METHODS.map((method) => (
@@ -696,11 +696,11 @@ export function ShoppingListWindow({
 
               {/* Notas */}
               <div className="space-y-1">
-                <Label htmlFor="expense_notes">Notas (Opcional)</Label>
+                <Label htmlFor="expense_notes">{t('shopping.notesOptional')}</Label>
                 <Input
                   id="expense_notes"
                   type="text"
-                  placeholder="Detalles del gasto..."
+                  placeholder={t('shopping.notesPlaceholder')}
                   value={expenseNotes}
                   onChange={(e) => setExpenseNotes(e.target.value)}
                   disabled={isSavingExpense}
@@ -710,17 +710,17 @@ export function ShoppingListWindow({
             </div>
 
             <DialogFooter className="pt-4">
-              <DialogClose render={<Button variant="outline" type="button" disabled={isSavingExpense}>Cancelar</Button>} />
+              <DialogClose render={<Button variant="outline" type="button" disabled={isSavingExpense}>{t('common.cancel')}</Button>} />
               <Button type="submit" disabled={!expenseAmount || isSavingExpense} className="bg-emerald-600 hover:bg-emerald-700 text-white">
                 {isSavingExpense ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Registrando...
+                    {t('shopping.convertingExpense')}
                   </>
                 ) : (
                   <>
                     <Check className="h-4 w-4 mr-2" />
-                    Confirmar Gasto
+                    {t('shopping.confirmExpenseAction')}
                   </>
                 )}
               </Button>

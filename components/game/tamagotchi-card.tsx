@@ -9,6 +9,7 @@ import { TamagotchiChatModal } from '@/components/game/tamagotchi-chat-modal'
 import { TamagotchiRpgCreatorModal } from '@/components/game/tamagotchi-rpg-creator-modal'
 import { PetStats } from '@/lib/game/fin-pet-engine'
 import { useGameState } from '@/lib/game/game-context'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -45,7 +46,7 @@ export function TamagotchiCard({
   variant = 'hero',
   onClose,
 }: TamagotchiCardProps) {
-  const isCatalan = locale === 'ca'
+  const { t } = useI18n()
   const { gameState, updateGameState } = useGameState()
   const [shopOpen, setShopOpen] = useState(false)
   const [questsOpen, setQuestsOpen] = useState(false)
@@ -80,9 +81,9 @@ export function TamagotchiCard({
   }
 
   const getWeightLabel = (w: number) => {
-    if (w > 65) return { text: isCatalan ? 'Gordet' : 'Gordito', color: 'bg-amber-500/10 text-amber-600 border-amber-500/30' }
-    if (w < 35) return { text: isCatalan ? 'Prima' : 'Delgado', color: 'bg-sky-500/10 text-sky-600 border-sky-500/30' }
-    return { text: isCatalan ? 'Equilibrat' : 'Equilibrado', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' }
+    if (w > 65) return { text: t('tamagotchi.weightGordito'), color: 'bg-amber-500/10 text-amber-600 border-amber-500/30' }
+    if (w < 35) return { text: t('tamagotchi.weightDelgado'), color: 'bg-sky-500/10 text-sky-600 border-sky-500/30' }
+    return { text: t('tamagotchi.weightEquilibrado'), color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' }
   }
 
   const weightInfo = getWeightLabel(gameState.weight ?? 50)
@@ -97,7 +98,7 @@ export function TamagotchiCard({
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Badge variant="outline" className="bg-background/80 border-primary/30 text-primary font-bold px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs rounded-xl shadow-2xs">
                 <Trophy className="w-3 sm:w-3.5 h-3 sm:h-3.5 mr-1 text-amber-500" />
-                {isCatalan ? `Nv. ${stats.level}` : `Nv. ${stats.level}`}
+                {t('tamagotchi.level', { level: stats.level })}
               </Badge>
               <Badge className="bg-primary/10 text-primary hover:bg-primary/20 border-0 font-semibold text-[11px] sm:text-xs rounded-xl px-2 sm:px-2.5">
                 {stats.moodTitle}
@@ -111,7 +112,7 @@ export function TamagotchiCard({
                 size="sm"
                 onClick={() => setRpgOpen(true)}
                 className="h-7 rounded-xl bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-extrabold text-[11px] sm:text-xs px-2 sm:px-2.5 gap-1 hover:bg-purple-500/20"
-                title="Creador de Personaje RPG"
+                title={t('tamagotchi.rpgCreator')}
               >
                 <Wand2 className="w-3.5 h-3.5 text-purple-500" />
                 <span>RPG</span>
@@ -131,7 +132,7 @@ export function TamagotchiCard({
               {/* Racha */}
               <div className="flex items-center gap-1 sm:gap-1.5 text-[11px] sm:text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-2 sm:px-2.5 py-1 rounded-xl">
                 <Flame className="w-3.5 sm:w-4 h-3.5 sm:h-4 fill-amber-500 text-amber-500 animate-pulse" />
-                <span>{stats.streakDays} {isCatalan ? 'd racha' : 'días racha'}</span>
+                <span>{t('tamagotchi.streakDays', { days: stats.streakDays })}</span>
               </div>
             </div>
           </div>
@@ -197,7 +198,7 @@ export function TamagotchiCard({
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                   <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500 shrink-0" />
-                  <span className="truncate">{isCatalan ? 'Salut' : 'Salud'}</span>
+                  <span className="truncate">{t('tamagotchi.health')}</span>
                 </span>
                 <span className="font-bold text-foreground ml-1 shrink-0">{stats.health}%</span>
               </div>
@@ -214,7 +215,7 @@ export function TamagotchiCard({
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1 text-muted-foreground min-w-0">
                   <ShowerHead className="w-3.5 h-3.5 text-cyan-500 shrink-0" />
-                  <span className="truncate">{isCatalan ? 'Higiene' : 'Higiene'}</span>
+                  <span className="truncate">{t('tamagotchi.hygiene')}</span>
                 </span>
                 <span className="font-bold text-foreground ml-1 shrink-0">{cleanliness}%</span>
               </div>
@@ -231,7 +232,7 @@ export function TamagotchiCard({
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1.5 text-muted-foreground min-w-0">
                   <Trophy className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                  <span className="truncate">{isCatalan ? 'XP' : 'XP'}</span>
+                  <span className="truncate">{t('tamagotchi.xp')}</span>
                 </span>
                 <span className="font-bold text-foreground ml-1 shrink-0">{stats.xp}/100</span>
               </div>
@@ -253,7 +254,7 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <MessageCircle className="w-3.5 h-3.5 shrink-0" />
-              <span className="whitespace-nowrap">{isCatalan ? 'Xerrar' : 'Charlar'}</span>
+              <span className="whitespace-nowrap">{t('tamagotchi.chatAction')}</span>
             </Button>
 
             <Button
@@ -264,7 +265,7 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <ShowerHead className="w-3.5 h-3.5 shrink-0 animate-bounce" />
-              <span className="whitespace-nowrap">{isBathing ? 'Bañando...' : isCatalan ? 'Banyar' : 'Bañar'}</span>
+              <span className="whitespace-nowrap">{isBathing ? t('tamagotchi.bathing') : t('tamagotchi.bathAction')}</span>
             </Button>
 
             <Button
@@ -274,7 +275,7 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-              <span className="whitespace-nowrap">{isCatalan ? 'Botiga' : 'Tienda'}</span>
+              <span className="whitespace-nowrap">{t('tamagotchi.shopAction')}</span>
             </Button>
 
             <Button
@@ -284,13 +285,13 @@ export function TamagotchiCard({
               className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <Target className="w-3.5 h-3.5 shrink-0" />
-              <span className="whitespace-nowrap">{isCatalan ? 'Missions' : 'Misiones'}</span>
+              <span className="whitespace-nowrap">{t('tamagotchi.questsAction')}</span>
             </Button>
 
             <Link href="/expenses" className="w-full col-span-2 sm:col-span-1">
               <Button variant="default" size="sm" className="w-full rounded-xl font-semibold gap-1 text-[10px] sm:text-xs shadow-xs px-1 sm:px-2 h-8 sm:h-9">
                 <PlusCircle className="w-3.5 h-3.5 shrink-0" />
-                <span className="whitespace-nowrap">{isCatalan ? 'Despesa' : 'Gasto'}</span>
+                <span className="whitespace-nowrap">{t('tamagotchi.expenseAction')}</span>
               </Button>
             </Link>
           </div>

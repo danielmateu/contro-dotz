@@ -10,6 +10,8 @@ import { AlertCircle, CheckCircle2, User, Smile, Camera, Loader2, Trash2 } from 
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { createClient } from '@/lib/supabase/client'
 
+import { useI18n } from '@/lib/i18n/i18n-context'
+
 interface ProfileNameFormProps {
   initialName: string
   initialAvatarUrl?: string
@@ -30,6 +32,7 @@ export function ProfileNameForm({
   initialStatus = '',
   userId,
 }: ProfileNameFormProps) {
+  const { t } = useI18n()
   const [state, formAction, pending] = useActionState(
     updateProfileNameAction,
     initialState
@@ -39,7 +42,7 @@ export function ProfileNameForm({
   const [status, setStatus] = useState(initialStatus)
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
@@ -53,12 +56,12 @@ export function ProfileNameForm({
 
     // Validations
     if (!file.type.startsWith('image/')) {
-      setUploadError('Por favor, selecciona un archivo de imagen válido (.png, .jpg, .jpeg, etc.)')
+      setUploadError(t('settings.invalidImageErr'))
       return
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      setUploadError('La imagen debe ser menor a 2MB.')
+      setUploadError(t('settings.maxSize2mbErr'))
       return
     }
 
@@ -91,7 +94,7 @@ export function ProfileNameForm({
       setAvatarUrl(publicUrl)
     } catch (err: any) {
       console.error('Error al subir la imagen:', err)
-      setUploadError('Error al subir la imagen. Por favor, inténtalo de nuevo.')
+      setUploadError(t('settings.uploadImageErr'))
     } finally {
       setIsUploading(false)
     }
@@ -112,7 +115,7 @@ export function ProfileNameForm({
       {state?.error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t('expenses.validationErrorTitle')}</AlertTitle>
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>
       )}
@@ -120,7 +123,7 @@ export function ProfileNameForm({
       {uploadError && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error de subida</AlertTitle>
+          <AlertTitle>{t('settings.uploadErrorTitle')}</AlertTitle>
           <AlertDescription>{uploadError}</AlertDescription>
         </Alert>
       )}
@@ -128,7 +131,7 @@ export function ProfileNameForm({
       {state?.success && (
         <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          <AlertTitle>Éxito</AlertTitle>
+          <AlertTitle>{t('chat.operationSuccess')}</AlertTitle>
           <AlertDescription>{state.success}</AlertDescription>
         </Alert>
       )}
@@ -156,7 +159,7 @@ export function ProfileNameForm({
               {initials}
             </AvatarFallback>
           </Avatar>
-          
+
           {/* Overlay de cámara al pasar el ratón */}
           <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             {isUploading ? (
@@ -174,9 +177,9 @@ export function ProfileNameForm({
         </div>
 
         <div className="flex flex-col items-center sm:items-start gap-2">
-          <h3 className="font-semibold text-foreground text-sm">Imagen de Perfil</h3>
+          <h3 className="font-semibold text-foreground text-sm">{t('settings.profileImageTitle')}</h3>
           <p className="text-xs text-muted-foreground text-center sm:text-left max-w-[280px]">
-            Formatos aceptados: PNG, JPG, JPEG. Tamaño máximo de 2MB.
+            {t('settings.profileImageTip')}
           </p>
           <div className="flex gap-2 mt-1">
             <Button
@@ -187,7 +190,7 @@ export function ProfileNameForm({
               disabled={isUploading}
               className="text-xs h-8"
             >
-              Cambiar Imagen
+              {t('settings.changeImage')}
             </Button>
             {avatarUrl && (
               <Button
@@ -199,7 +202,7 @@ export function ProfileNameForm({
                 className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive h-8"
               >
                 <Trash2 className="h-3 w-3 mr-1" />
-                Eliminar
+                {t('common.delete')}
               </Button>
             )}
           </div>
@@ -208,7 +211,7 @@ export function ProfileNameForm({
 
       {/* Campo: Nombre para Mostrar */}
       <div className="space-y-2">
-        <Label htmlFor="displayName">Nombre para mostrar</Label>
+        <Label htmlFor="displayName">{t('settings.displayNameLabel')}</Label>
         <div className="relative">
           <User className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -221,13 +224,13 @@ export function ProfileNameForm({
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Este nombre será visible para los demás miembros de tu hogar en los gastos.
+          {t('settings.displayNameTip')}
         </p>
       </div>
 
       {/* Campo: Estado de perfil */}
       <div className="space-y-2">
-        <Label htmlFor="status">Estado de perfil</Label>
+        <Label htmlFor="status">{t('settings.profileStatusLabel')}</Label>
         <div className="relative">
           <Smile className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -236,17 +239,17 @@ export function ProfileNameForm({
             type="text"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            placeholder="¿Qué estás haciendo? Ej. Trabajando 💻, Comprando 🛒"
+            placeholder={t('settings.profileStatusPlaceholder')}
             className="pl-9 bg-muted/50 focus:bg-background"
           />
         </div>
         <p className="text-xs text-muted-foreground">
-          Un estado corto que otros miembros de tu familia verán en la app.
+          {t('settings.profileStatusTip')}
         </p>
       </div>
 
       <Button type="submit" disabled={pending || isUploading} className="w-full sm:w-auto">
-        {pending ? 'Guardando cambios...' : 'Guardar Cambios'}
+        {pending ? t('settings.savingChanges') : t('settings.saveChanges')}
       </Button>
     </form>
   )

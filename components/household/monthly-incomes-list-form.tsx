@@ -21,6 +21,8 @@ import { AlertCircle, CheckCircle2, Calendar, Landmark, Loader2, Trash2, FileTex
 import { formatCurrency } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 
+import { useI18n } from '@/lib/i18n/i18n-context'
+
 interface MonthlyIncome {
   id: string
   month: string
@@ -40,6 +42,7 @@ export function MonthlyIncomesListForm({
   householdId,
   userId,
 }: MonthlyIncomesListFormProps) {
+  const { t, locale } = useI18n()
   const [isPending, startTransition] = useTransition()
 
   // Obtener fecha actual para establecer valores por defecto
@@ -63,21 +66,13 @@ export function MonthlyIncomesListForm({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
-  // Definición de listado estático de meses
-  const monthsList = [
-    { value: '01', label: 'Enero' },
-    { value: '02', label: 'Febrero' },
-    { value: '03', label: 'Marzo' },
-    { value: '04', label: 'Abril' },
-    { value: '05', label: 'Mayo' },
-    { value: '06', label: 'Junio' },
-    { value: '07', label: 'Julio' },
-    { value: '08', label: 'Agosto' },
-    { value: '09', label: 'Septiembre' },
-    { value: '10', label: 'Octubre' },
-    { value: '11', label: 'Noviembre' },
-    { value: '12', label: 'Diciembre' },
-  ]
+  // Definición de listado dinámico de meses traducidos
+  const monthsList = Array.from({ length: 12 }, (_, i) => {
+    const val = (i + 1).toString().padStart(2, '0')
+    const d = new Date(2026, i, 1)
+    const name = d.toLocaleDateString(locale === 'ca' ? 'ca-ES' : locale === 'en' ? 'en-US' : 'es-ES', { month: 'long' })
+    return { value: val, label: name.charAt(0).toUpperCase() + name.slice(1) }
+  })
 
   // Rango de años: anterior, actual y próximo
   const currentYearNum = today.getFullYear()
@@ -105,12 +100,12 @@ export function MonthlyIncomesListForm({
     const numericContrib = contribution.trim() === '' ? 0 : parseFloat(normalizedContrib)
 
     if (isNaN(numericAmount) || numericAmount < 0) {
-      setError('Introduce un importe válido y mayor o igual a 0.')
+      setError(t('household.validAmountErr'))
       return
     }
 
     if (isNaN(numericContrib) || numericContrib < 0) {
-      setError('Introduce una aportación válida y mayor o igual a 0.')
+      setError(t('household.validContribErr'))
       return
     }
 
@@ -118,11 +113,11 @@ export function MonthlyIncomesListForm({
     if (file) {
       const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
       if (!allowedTypes.includes(file.type)) {
-        setError('Por favor, selecciona un archivo válido (PDF o Imagen PNG/JPG).')
+        setError(t('household.invalidFileTypeErr'))
         return
       }
       if (file.size > 5 * 1024 * 1024) {
-        setError('El archivo debe ser menor a 5MB.')
+        setError(t('household.maxSizeErr'))
         return
       }
     }
@@ -148,7 +143,7 @@ export function MonthlyIncomesListForm({
           }
         } catch (err: any) {
           console.error('Error al subir documento de nómina:', err)
-          setError('Error al subir el archivo de la nómina. Inténtalo de nuevo.')
+          setError(t('household.uploadPayrollErr'))
           return
         }
       }
@@ -157,7 +152,7 @@ export function MonthlyIncomesListForm({
       if (res?.error) {
         setError(res.error)
       } else {
-        setSuccess('Ingreso mensual y documento registrados con éxito.')
+        setSuccess(t('household.savePayrollSuccess'))
         setAmount('')
         setContribution('')
         // Restablecer a mes y año actuales por defecto
@@ -191,7 +186,7 @@ export function MonthlyIncomesListForm({
       if (res?.error) {
         setError(res.error)
       } else {
-        setSuccess('Registro de ingresos eliminado con éxito.')
+        setSuccess(t('household.deletePayrollSuccess'))
       }
     })
   }
@@ -207,7 +202,7 @@ export function MonthlyIncomesListForm({
         window.open(res.url, '_blank')
       }
     } catch (err) {
-      setError('Error al abrir el documento de la nómina.')
+      setError(t('household.openPayrollErr'))
     } finally {
       setDownloadingId(null)
     }
@@ -216,7 +211,7 @@ export function MonthlyIncomesListForm({
   const formatMonthName = (monthStr: string) => {
     const [year, month] = monthStr.split('-')
     const date = new Date(parseInt(year), parseInt(month) - 1, 1)
-    const label = date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
+    const label = date.toLocaleDateString(locale === 'ca' ? 'ca-ES' : locale === 'en' ? 'en-US' : 'es-ES', { month: 'long', year: 'numeric' })
     return label.charAt(0).toUpperCase() + label.slice(1)
   }
 
@@ -225,7 +220,7 @@ export function MonthlyIncomesListForm({
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
+          <AlertTitle>{t('expenses.validationErrorTitle')}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -233,7 +228,7 @@ export function MonthlyIncomesListForm({
       {success && (
         <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-          <AlertTitle>Éxito</AlertTitle>
+          <AlertTitle>{t('chat.operationSuccess')}</AlertTitle>
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
@@ -243,10 +238,10 @@ export function MonthlyIncomesListForm({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex gap-2">
             <div className="space-y-2 flex-1">
-              <Label htmlFor="monthSelect">Mes</Label>
+              <Label htmlFor="monthSelect">{t('household.thMonth')}</Label>
               <Select value={selectedMonth} onValueChange={(val) => setSelectedMonth(val || '')} disabled={isPending}>
                 <SelectTrigger id="monthSelect" className="bg-background">
-                  <SelectValue placeholder="Mes" />
+                  <SelectValue placeholder={t('household.thMonth')} />
                 </SelectTrigger>
                 <SelectContent>
                   {monthsList.map((opt) => (
@@ -259,10 +254,10 @@ export function MonthlyIncomesListForm({
             </div>
 
             <div className="space-y-2 flex-1">
-              <Label htmlFor="yearSelect">Año</Label>
+              <Label htmlFor="yearSelect">{t('cashflow.year')}</Label>
               <Select value={selectedYear} onValueChange={(val) => setSelectedYear(val || '')} disabled={isPending}>
                 <SelectTrigger id="yearSelect" className="bg-background">
-                  <SelectValue placeholder="Año" />
+                  <SelectValue placeholder={t('cashflow.year')} />
                 </SelectTrigger>
                 <SelectContent>
                   {yearsList.map((opt) => (
@@ -276,7 +271,7 @@ export function MonthlyIncomesListForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="monthlyAmount">Importe Neto (€)</Label>
+            <Label htmlFor="monthlyAmount">{t('household.netIncome')}</Label>
             <div className="relative">
               <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -284,7 +279,7 @@ export function MonthlyIncomesListForm({
                 type="text"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="Ej. 2450"
+                placeholder={t('household.netIncomePlaceholder')}
                 disabled={isPending}
                 required
                 className="pl-9 bg-background focus:bg-background"
@@ -293,7 +288,7 @@ export function MonthlyIncomesListForm({
           </div>
 
           <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="monthlyContribution">Aportación al Hogar (€)</Label>
+            <Label htmlFor="monthlyContribution">{t('household.householdContribution')}</Label>
             <div className="relative">
               <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
               <Input
@@ -301,7 +296,7 @@ export function MonthlyIncomesListForm({
                 type="text"
                 value={contribution}
                 onChange={(e) => setContribution(e.target.value)}
-                placeholder="Ej. 600 (opcional)"
+                placeholder={t('household.contributionPlaceholder')}
                 disabled={isPending}
                 className="pl-9 bg-background focus:bg-background"
               />
@@ -311,7 +306,7 @@ export function MonthlyIncomesListForm({
 
         {/* Carga del documento Justificante/Nómina */}
         <div className="space-y-2">
-          <Label htmlFor="payrollFile">Adjuntar Nómina / Justificante (Opcional)</Label>
+          <Label htmlFor="payrollFile">{t('household.attachPayroll')}</Label>
           <div className="flex items-center gap-3">
             <div className="relative flex-1">
               <Upload className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -336,12 +331,12 @@ export function MonthlyIncomesListForm({
                 }}
                 className="text-xs text-destructive hover:bg-destructive/10"
               >
-                Quitar archivo
+                {t('household.removeFile')}
               </Button>
             )}
           </div>
           <p className="text-[10px] text-muted-foreground">
-            Formatos admitidos: PDF, PNG, JPG, JPEG. Tamaño máximo de 5MB. El documento será estrictamente privado para ti.
+            {t('household.payrollTip')}
           </p>
         </div>
 
@@ -349,38 +344,37 @@ export function MonthlyIncomesListForm({
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Guardando nómina...
+              {t('household.savingPayroll')}
             </>
           ) : (
-            'Registrar Nómina'
+            t('household.registerPayroll')
           )}
         </Button>
       </form>
 
       {/* Historial listado */}
       <div className="space-y-3">
-        <h3 className="font-semibold text-sm text-foreground">Historial de Nóminas Registradas</h3>
+        <h3 className="font-semibold text-sm text-foreground">{t('household.payrollHistory')}</h3>
         {sortedIncomes.length === 0 ? (
           <p className="text-xs text-muted-foreground italic py-2">
-            No has registrado nóminas específicas para meses anteriores. El sistema aplicará tu ingreso base por defecto.
+            {t('household.noPayrollsHistory')}
           </p>
         ) : (
           <div className="rounded-xl border border-slate-200/50 overflow-x-auto dark:border-slate-800/50">
             <table className="w-full border-collapse text-left text-xs min-w-110">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50 text-muted-foreground font-semibold">
-                  <th className="p-3 whitespace-nowrap">Mes</th>
-                  <th className="p-3 text-right whitespace-nowrap">Ingreso Neto</th>
-                  <th className="p-3 text-right whitespace-nowrap">Aportación Hogar</th>
-                  <th className="p-3 text-center whitespace-nowrap">Documento</th>
-                  <th className="p-3 w-16 text-center whitespace-nowrap">Acción</th>
+                  <th className="p-3 whitespace-nowrap">{t('household.thMonth')}</th>
+                  <th className="p-3 text-right whitespace-nowrap">{t('household.thNetIncome')}</th>
+                  <th className="p-3 text-right whitespace-nowrap">{t('household.thHouseholdContribution')}</th>
+                  <th className="p-3 text-center whitespace-nowrap">{t('household.thDocument')}</th>
+                  <th className="p-3 w-16 text-center whitespace-nowrap">{t('household.thAction')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">
                 {sortedIncomes.map((inc) => (
                   <tr key={inc.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 text-foreground transition-colors">
                     <td className="p-3 font-medium flex items-center gap-2">
-                      <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
                       {formatMonthName(inc.month)}
                     </td>
                     <td className="p-3 text-right font-semibold">
@@ -404,10 +398,10 @@ export function MonthlyIncomesListForm({
                           ) : (
                             <FileText className="h-3.5 w-3.5" />
                           )}
-                          Ver Nómina
+                          {t('household.viewPayroll')}
                         </Button>
                       ) : (
-                        <span className="text-[10px] text-muted-foreground italic">Sin documento</span>
+                        <span className="text-[10px] text-muted-foreground italic">{t('household.noDocument')}</span>
                       )}
                     </td>
                     <td className="p-3 text-center">
@@ -434,18 +428,18 @@ export function MonthlyIncomesListForm({
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Confirmar eliminación?</AlertDialogTitle>
+            <AlertDialogTitle>{t('household.deleteConfirmTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que deseas eliminar este registro de ingresos y su documento asociado? Esta acción no se puede deshacer.
+              {t('household.deleteConfirmDesc')}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               onClick={confirmDelete}
             >
-              Eliminar
+              {t('common.delete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
