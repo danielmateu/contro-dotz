@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MegaphoneIcon, Sparkles } from 'lucide-react'
+import { MegaphoneIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AppUpdatesModal } from './app-updates-modal'
 import {

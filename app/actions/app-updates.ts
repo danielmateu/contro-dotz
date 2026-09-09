@@ -182,7 +182,7 @@ export async function createAppUpdateAction(payload: CreateAppUpdatePayload) {
     }
 
     let emailStats = { sent: 0, errors: 0 }
-    let pushStats = { sent: 0 }
+    const pushStats = { sent: 0 }
 
     // 2. Enviar emails si está marcado
     if (payload.sendEmail) {
