@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { askGeminiAction } from '@/app/actions/gemini'
 import { sendMessageAction, updateMessageAction, deleteMessageAction, confirmChatAction, cancelChatAction } from '@/app/actions/chat'
 import {
   MessageGroup,
@@ -10,7 +9,6 @@ import {
   MessageAvatar,
   MessageContent,
   MessageHeader,
-  MessageFooter,
 } from '@/components/ui/message'
 import {
   MessageScroller,
@@ -26,8 +24,7 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
-import { Send, Users, Smile, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search } from 'lucide-react'
+import { Send, Users, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
@@ -388,7 +385,6 @@ export function ChatWindow({
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
   const searchInputRef = useRef<HTMLInputElement>(null)
-  const messageElementRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   // Filtrar todos los mensajes coincidentes con la búsqueda sin ocultar la conversación
   const matchingMessages = React.useMemo(() => {
@@ -402,14 +398,14 @@ export function ChatWindow({
       const matchSender = sender.display_name.toLowerCase().includes(q)
       return matchContent || matchSender
     })
-  }, [messages, searchQuery])
+  }, [messages, searchQuery, getMemberProfile])
 
   // Desplazar al mensaje correspondiente
   const scrollToMatch = React.useCallback((index: number) => {
     if (matchingMessages.length === 0) return
     const targetMsg = matchingMessages[index]
     if (targetMsg) {
-      const el = messageElementRefs.current.get(targetMsg.id)
+      const el = document.querySelector(`[data-msg-id="${targetMsg.id}"]`)
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       }
@@ -1029,10 +1025,7 @@ export function ChatWindow({
                       return (
                         <div
                           key={msg.id}
-                          ref={(node) => {
-                            if (node) messageElementRefs.current.set(msg.id, node)
-                            else messageElementRefs.current.delete(msg.id)
-                          }}
+                          data-msg-id={msg.id}
                           className="transition-all duration-300"
                         >
                           <MessageScrollerItem>
