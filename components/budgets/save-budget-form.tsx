@@ -14,6 +14,8 @@ import {
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Save } from 'lucide-react'
 
+import { useI18n } from '@/lib/i18n/i18n-context'
+
 interface Category {
   id: string
   name: string
@@ -37,6 +39,7 @@ export function SaveBudgetForm({
   month,
   action,
 }: SaveBudgetFormProps) {
+  const { t, locale } = useI18n()
   const [state, formAction, pending] = useActionState(action, initialState)
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -55,10 +58,14 @@ export function SaveBudgetForm({
     >
       <div className="flex flex-col gap-1">
         <h3 className="text-sm font-semibold text-foreground font-heading">
-          Asignar o Modificar Presupuesto
+          {locale === 'en' ? 'Set / Edit Budget' : locale === 'ca' ? 'Establir / Editar Pressupost' : 'Asignar o Modificar Presupuesto'}
         </h3>
         <p className="text-xs text-muted-foreground">
-          Define el importe mensual máximo para controlar el gasto por categorías.
+          {locale === 'en'
+            ? 'Set maximum monthly spending limit per category.'
+            : locale === 'ca'
+              ? 'Estableix el límit mensual màxim per categoria.'
+              : 'Define el importe mensual máximo para controlar el gasto por categorías.'}
         </p>
       </div>
 
@@ -72,7 +79,7 @@ export function SaveBudgetForm({
 
       {state?.success && (
         <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
-          <AlertTitle>Guardado</AlertTitle>
+          <AlertTitle>{t('common.save')}</AlertTitle>
           <AlertDescription>{state.success}</AlertDescription>
         </Alert>
       )}
@@ -84,11 +91,11 @@ export function SaveBudgetForm({
         {/* Categoría */}
         <div className="space-y-1">
           <Label htmlFor="category_id" className="text-xs">
-            Categoría
+            {t('expenses.category')}
           </Label>
           <Select name="category_id" defaultValue="" items={categories.map((cat) => ({ value: cat.id, label: cat.name }))}>
             <SelectTrigger id="category_id" className="w-full bg-muted/40 h-9 text-xs">
-              <SelectValue placeholder="-- Selecciona categoría --" />
+              <SelectValue placeholder={locale === 'en' ? '-- Select category --' : locale === 'ca' ? '-- Selecciona categoria --' : '-- Selecciona categoría --'} />
             </SelectTrigger>
             <SelectContent>
               {categories.map((cat) => (
@@ -103,14 +110,14 @@ export function SaveBudgetForm({
         {/* Límite Importe */}
         <div className="space-y-1">
           <Label htmlFor="amount" className="text-xs">
-            Límite Mensual (€)
+            {t('budgets.limit')} (€)
           </Label>
           <Input
             id="amount"
             name="amount"
             type="text"
             inputMode="decimal"
-            placeholder="Ej: 200,00"
+            placeholder="200,00"
             required
             className="bg-muted/40 focus:bg-background h-9 text-xs"
           />
@@ -119,8 +126,9 @@ export function SaveBudgetForm({
 
       <Button type="submit" disabled={pending} className="w-full h-9">
         <Save className="mr-2 h-4 w-4" />
-        {pending ? 'Guardando...' : 'Establecer Presupuesto'}
+        {pending ? t('common.loading') : t('budgets.newBudget')}
       </Button>
     </form>
   )
 }
+

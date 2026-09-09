@@ -142,7 +142,7 @@ export function SidebarMenuItems({
       disabled: !hasHousehold,
     },
     {
-      title: 'Previsión Saldo',
+      title: t('cashflow.title'),
       url: '/cashflow',
       icon: CalendarCheckData,
       activeIcon: TrendingUpData,
@@ -221,13 +221,13 @@ export function SidebarMenuItems({
                       spring="snappy"
                       className="h-4 w-4 shrink-0"
                     />
-                    {item.title === 'Chat Familiar' && hasUnread && (
+                    {item.url === '/chat' && hasUnread && (
                       <span className="absolute -top-1 -right-1 flex h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
                     )}
                   </div>
                   <span className="group-data-[collapsible=icon]:hidden flex-1 flex items-center justify-between">
                     <span>{item.title}</span>
-                    {item.title === 'Chat Familiar' && hasUnread && (
+                    {item.url === '/chat' && hasUnread && (
                       <span className="ml-2 h-2 w-2 rounded-full bg-destructive animate-pulse" />
                     )}
                   </span>

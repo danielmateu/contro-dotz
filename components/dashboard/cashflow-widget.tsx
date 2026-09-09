@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge'
 import { formatCurrency } from '@/lib/format'
 import { CalendarCheck, ArrowRight, TrendingUp, AlertTriangle, ShieldCheck } from 'lucide-react'
 
+import { useI18n } from '@/lib/i18n/i18n-context'
+
 interface CashflowWidgetProps {
   projectedEndBalance: number
   pendingBillsAmount: number
@@ -25,11 +27,13 @@ export function CashflowWidget({
   nextBillAmount,
   nextBillDay,
 }: CashflowWidgetProps) {
+  const { t, locale } = useI18n()
+
   return (
     <Card className="border-border/60 bg-linear-to-br from-card via-card to-primary/5 shadow-md flex flex-col justify-between overflow-hidden relative">
       {isDeficitRisk && (
         <div className="absolute top-0 right-0 bg-destructive text-white text-[9px] font-extrabold uppercase px-2.5 py-0.5 rounded-bl-xl tracking-wider animate-pulse">
-          ⚠️ Riesgo Descubierto
+          ⚠️ {t('cashflow.overdraft')}
         </div>
       )}
 
@@ -40,10 +44,14 @@ export function CashflowWidget({
           </div>
           <div>
             <CardTitle className="text-base font-extrabold font-heading">
-              Previsión Fin de Mes
+              {t('cashflow.projectedBalance')}
             </CardTitle>
             <CardDescription className="text-xs">
-              Saldo estimado tras recibos fijos
+              {locale === 'en'
+                ? 'Estimated balance after fixed bills'
+                : locale === 'ca'
+                  ? 'Saldo estimat després de rebuts fixos'
+                  : 'Saldo estimado tras recibos fijos'}
             </CardDescription>
           </div>
         </div>
@@ -51,7 +59,9 @@ export function CashflowWidget({
 
       <CardContent className="space-y-3 pt-0">
         <div className="flex items-baseline justify-between pt-1">
-          <span className="text-xs font-semibold text-muted-foreground">Saldo disponible:</span>
+          <span className="text-xs font-semibold text-muted-foreground">
+            {locale === 'en' ? 'Available balance:' : locale === 'ca' ? 'Saldo disponible:' : 'Saldo disponible:'}
+          </span>
           <span
             className={`text-xl font-extrabold font-heading ${
               projectedEndBalance < 0
@@ -68,7 +78,7 @@ export function CashflowWidget({
           <div className="p-2.5 rounded-2xl bg-muted/40 border border-border/50 flex items-center justify-between gap-2 text-xs">
             <div className="space-y-0.5 min-w-0">
               <span className="text-[10px] text-muted-foreground uppercase font-bold block">
-                Próxima factura (Día {nextBillDay}):
+                {locale === 'en' ? `Next bill (Day ${nextBillDay}):` : locale === 'ca' ? `Pròxima factura (Dia ${nextBillDay}):` : `Próxima factura (Día ${nextBillDay}):`}
               </span>
               <p className="font-bold text-foreground truncate">{nextBillName}</p>
             </div>
@@ -78,7 +88,7 @@ export function CashflowWidget({
           </div>
         ) : (
           <div className="text-xs text-muted-foreground italic bg-muted/30 p-2.5 rounded-2xl border border-border/40">
-            Sin facturas pendientes este mes.
+            {locale === 'en' ? 'No pending bills this month.' : locale === 'ca' ? 'Sense factures pendents aquest mes.' : 'Sin facturas pendientes este mes.'}
           </div>
         )}
 
@@ -88,7 +98,7 @@ export function CashflowWidget({
             size="sm"
             className="w-full text-xs font-bold rounded-xl justify-between border-primary/30 text-primary hover:bg-primary/10"
           >
-            <span>Ver Calendario Completo</span>
+            <span>{t('cashflow.calendarView')}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Button>
         </Link>

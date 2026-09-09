@@ -17,6 +17,7 @@ import { setActiveHouseholdAction } from '@/app/actions/household'
 import { HouseholdMembershipItem } from '@/lib/household-context'
 import { toast } from '@/components/ui/toast'
 import Link from 'next/link'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface HouseholdSwitcherProps {
   activeHouseholdId: string | null
@@ -27,11 +28,12 @@ export function HouseholdSwitcher({
   activeHouseholdId,
   memberships,
 }: HouseholdSwitcherProps) {
+  const { t } = useI18n()
   const router = useRouter()
   const [isChanging, setIsChanging] = useState(false)
 
   const activeMembership = memberships.find((m) => m.household_id === activeHouseholdId) || memberships[0]
-  const activeName = activeMembership?.households?.name || 'Sin hogar asignado'
+  const activeName = activeMembership?.households?.name || t('household.noHousehold')
 
   const handleSelectHousehold = async (householdId: string) => {
     if (householdId === activeHouseholdId || isChanging) return
@@ -41,15 +43,15 @@ export function HouseholdSwitcher({
 
     if (res.error) {
       toast.add({
-        title: 'Error al cambiar de hogar',
+        title: t('household.switchError'),
         description: res.error,
         type: 'error',
       })
     } else {
       const selected = memberships.find((m) => m.household_id === householdId)
       toast.add({
-        title: 'Hogar cambiado',
-        description: `Ahora estás en "${selected?.households.name || 'el nuevo hogar'}".`,
+        title: t('household.switchSuccessTitle'),
+        description: t('household.switchSuccessDesc', { name: selected?.households.name || '' }),
         type: 'success',
       })
       router.refresh()
@@ -72,7 +74,9 @@ export function HouseholdSwitcher({
               </span>
               {activeMembership && (
                 <span className="text-[10px] text-muted-foreground mt-1 uppercase tracking-wider font-bold">
-                  Rol: {activeMembership.role === 'owner' ? 'Propietario' : 'Miembro'}
+                  {t('household.roleLabel', {
+                    role: activeMembership.role === 'owner' ? t('household.roleOwner') : t('household.roleMember')
+                  })}
                 </span>
               )}
             </div>
@@ -82,7 +86,7 @@ export function HouseholdSwitcher({
           <DropdownMenuContent className="w-64 rounded-2xl p-2 shadow-xl border-border bg-card text-card-foreground" align="start">
             <DropdownMenuGroup className="space-y-1">
               <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2 py-1.5">
-                Mis Hogares ({memberships.length})
+                {t('household.myHouseholds', { count: memberships.length })}
               </DropdownMenuLabel>
               {memberships.map((m) => {
                 const isActive = m.household_id === activeHouseholdId
@@ -100,7 +104,7 @@ export function HouseholdSwitcher({
                       <div className="flex flex-col truncate">
                         <span className="truncate">{m.households.name}</span>
                         <span className="text-[10px] text-muted-foreground font-normal">
-                          {m.role === 'owner' ? 'Propietario' : 'Miembro'}
+                          {m.role === 'owner' ? t('household.roleOwner') : t('household.roleMember')}
                         </span>
                       </div>
                     </div>
@@ -117,7 +121,7 @@ export function HouseholdSwitcher({
               className="p-2 rounded-xl text-xs font-medium cursor-pointer hover:bg-muted flex items-center gap-2 text-foreground"
             >
               <PlusCircle className="w-4 h-4 text-primary shrink-0" />
-              <span>Gestión de Hogares & Invitaciones</span>
+              <span>{t('household.manageHouseholds')}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

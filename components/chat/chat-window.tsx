@@ -99,6 +99,8 @@ function ActionConfirmationCard({
   onConfirm: () => void
   onCancel: () => void
 }) {
+  const { t } = useI18n()
+
   const getActionIcon = () => {
     switch (actionData.action) {
       case 'create_saving_goal':
@@ -118,17 +120,17 @@ function ActionConfirmationCard({
   const getActionTitle = () => {
     switch (actionData.action) {
       case 'create_saving_goal':
-        return `Crear Hucha: "${actionData.params?.name || 'Ahorro'}"`
+        return t('chat.createGoalAction', { name: actionData.params?.name || 'Ahorro' })
       case 'add_saving_contribution':
-        return `Aportar a Hucha: ${actionData.params?.amount || 0}€`
+        return t('chat.contributeGoalAction', { amount: actionData.params?.amount || 0 })
       case 'add_shopping_items':
-        return `Añadir a la Compra: ${actionData.params?.items?.map((i: any) => i.name || i).join(', ') || ''}`
+        return t('chat.addShoppingAction', { items: actionData.params?.items?.map((i: any) => i.name || i).join(', ') || '' })
       case 'add_expense':
-        return `Registrar Gasto: ${actionData.params?.amount || 0}€ - ${actionData.params?.description || ''}`
+        return t('chat.addExpenseAction', { amount: actionData.params?.amount || 0, desc: actionData.params?.description || '' })
       case 'send_member_reminder':
-        return `Enviar Aviso a ${actionData.params?.target_user_name || 'Miembro'}`
+        return t('chat.sendReminderAction', { user: actionData.params?.target_user_name || 'Miembro' })
       default:
-        return 'Confirmar Acción'
+        return t('chat.confirmActionTitle')
     }
   }
 
@@ -136,7 +138,7 @@ function ActionConfirmationCard({
     return (
       <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-1.5">
         <Check className="w-3.5 h-3.5" />
-        <span>Acción confirmada y ejecutada con éxito</span>
+        <span>{t('chat.actionConfirmedSuccess')}</span>
       </div>
     )
   }
@@ -145,7 +147,7 @@ function ActionConfirmationCard({
     return (
       <div className="mt-2.5 px-3 py-1.5 rounded-xl bg-muted/50 border border-border/40 text-muted-foreground text-xs font-medium flex items-center gap-1.5">
         <X className="w-3.5 h-3.5" />
-        <span>Acción cancelada</span>
+        <span>{t('chat.actionCancelled')}</span>
       </div>
     )
   }
@@ -162,7 +164,7 @@ function ActionConfirmationCard({
       </div>
 
       <p className="text-[11px] text-muted-foreground leading-relaxed">
-        ¿Deseas confirmar la ejecución de esta acción en tu hogar?
+        {t('chat.confirmActionPrompt')}
       </p>
 
       <div className="flex items-center gap-2 pt-1">
@@ -178,7 +180,7 @@ function ActionConfirmationCard({
           ) : (
             <Check className="w-3.5 h-3.5" />
           )}
-          <span>Confirmar</span>
+          <span>{t('chat.confirm')}</span>
         </Button>
 
         <Button
@@ -190,7 +192,7 @@ function ActionConfirmationCard({
           className="h-8 px-3 rounded-xl text-xs text-muted-foreground hover:text-destructive border-border hover:border-destructive/30 transition-all cursor-pointer"
         >
           <X className="w-3.5 h-3.5 mr-1" />
-          <span>Cancelar</span>
+          <span>{t('common.cancel')}</span>
         </Button>
       </div>
     </div>
@@ -249,14 +251,14 @@ export function ChatWindow({
       const res = await confirmChatAction(msgId, actionData)
       if (res.error) {
         toast.add({
-          title: 'Error al confirmar la acción',
+          title: t('chat.errorConfirmAction'),
           description: res.error,
           type: 'error',
         })
       } else {
         toast.add({
-          title: '¡Acción ejecutada!',
-          description: res.resultMessage || 'La operación se ha realizado con éxito.',
+          title: t('chat.actionExecutedSuccess'),
+          description: res.resultMessage || t('chat.operationSuccess'),
           type: 'success',
         })
       }
@@ -278,13 +280,13 @@ export function ChatWindow({
       const res = await cancelChatAction(msgId)
       if (res.error) {
         toast.add({
-          title: 'Error al cancelar la acción',
+          title: t('chat.errorCancelAction'),
           description: res.error,
           type: 'error',
         })
       } else {
         toast.add({
-          title: 'Acción cancelada',
+          title: t('chat.actionCancelled'),
           type: 'info',
         })
       }
@@ -319,8 +321,8 @@ export function ChatWindow({
       if (res.success) {
         setPushState((prev) => ({ ...prev, isSubscribed: false }))
         toast.add({
-          title: 'Notificaciones Push desactivadas',
-          description: 'Ya no recibirás notificaciones en este dispositivo.',
+          title: t('chat.pushDisabled'),
+          description: t('chat.pushDisabledDesc'),
           type: 'info',
         })
       }
@@ -329,13 +331,13 @@ export function ChatWindow({
       if (res.success) {
         setPushState((prev) => ({ ...prev, isSubscribed: true, permission: 'granted' }))
         toast.add({
-          title: '¡Notificaciones Push activadas! 🔔',
-          description: 'Recibirás notificaciones en tu pantalla cuando la familia escriba en el chat.',
+          title: t('chat.pushEnabled'),
+          description: t('chat.pushEnabledDesc'),
           type: 'success',
         })
       } else if (res.error) {
         toast.add({
-          title: 'Error al activar notificaciones',
+          title: t('chat.errorEnablePush'),
           description: res.error,
           type: 'error',
         })
@@ -623,11 +625,13 @@ export function ChatWindow({
     }
   }
 
+  const dateLocale = locale === 'en' ? 'en-US' : locale === 'ca' ? 'ca-ES' : 'es-ES'
+
   // Formatear hora de un mensaje (ej: 15:30)
   const formatMessageTime = (dateString: string) => {
     try {
       const date = new Date(dateString)
-      return date.toLocaleTimeString('es-ES', {
+      return date.toLocaleTimeString(dateLocale, {
         hour: '2-digit',
         minute: '2-digit',
       })
@@ -644,11 +648,11 @@ export function ChatWindow({
     yesterday.setDate(yesterday.getDate() - 1)
 
     if (date.toDateString() === today.toDateString()) {
-      return 'Hoy'
+      return t('chat.today')
     } else if (date.toDateString() === yesterday.toDateString()) {
-      return 'Ayer'
+      return t('chat.yesterday')
     } else {
-      return date.toLocaleDateString('es-ES', {
+      return date.toLocaleDateString(dateLocale, {
         day: 'numeric',
         month: 'long',
         year: 'numeric',
@@ -676,10 +680,10 @@ export function ChatWindow({
           </div>
           <div>
             <h2 className="font-bold text-foreground text-base tracking-tight font-heading leading-tight">
-              Chat Familiar - {householdName}
+              {t('chat.title')} - {householdName}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Mensajes en tiempo real con tu hogar
+              {t('chat.subtitle')}
             </p>
           </div>
         </div>
@@ -697,23 +701,16 @@ export function ChatWindow({
                 ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 font-bold'
                 : 'bg-background border-border text-muted-foreground hover:text-foreground'
                 }`}
-              title={
-                pushState.permission === 'denied'
-                  ? 'Permiso de notificaciones denegado en el navegador'
-                  : pushState.isSubscribed
-                    ? 'Desactivar notificaciones push en este dispositivo'
-                    : 'Activar notificaciones push en este dispositivo'
-              }
             >
               {pushState.isSubscribed ? (
                 <>
                   <BellRing className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />
-                  <span className="hidden sm:inline font-bold">Push Activas</span>
+                  <span className="hidden sm:inline font-bold">{t('chat.pushActive')}</span>
                 </>
               ) : (
                 <>
                   <Bell className="h-3.5 w-3.5" />
-                  <span className="hidden sm:inline">Activar Push</span>
+                  <span className="hidden sm:inline">{t('chat.enablePush')}</span>
                 </>
               )}
             </Button>
@@ -723,7 +720,7 @@ export function ChatWindow({
           <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none max-w-full py-1">
             <div className="text-[10px] text-muted-foreground flex items-center gap-1 mr-1 font-semibold uppercase tracking-wider hidden xs:flex">
               <Users className="h-3.5 w-3.5" />
-              Familia:
+              {t('chat.family')}
             </div>
             {members.map((m) => (
               <div
@@ -762,9 +759,11 @@ export function ChatWindow({
             <div className="h-14 w-14 rounded-2xl bg-muted text-muted-foreground flex items-center justify-center mb-3">
               <MessageSquare className="h-7 w-7 stroke-1 text-slate-400" />
             </div>
-            <p className="font-semibold text-foreground text-sm font-heading">Sin mensajes todavía</p>
+            <p className="font-semibold text-foreground text-sm font-heading">
+              {t('chat.noMessages')}
+            </p>
             <p className="text-xs text-muted-foreground max-w-xs mt-1 leading-relaxed">
-              ¡Di hola a tu familia y empieza a chatear! Los mensajes se actualizan instantáneamente.
+              {t('chat.noMessagesDesc')}
             </p>
           </div>
         ) : (
@@ -816,7 +815,7 @@ export function ChatWindow({
                           <span className="text-[10px] text-muted-foreground/80 font-normal flex items-center gap-1">
                             {formatMessageTime(msg.created_at)}
                             {msg.updated_at && !msg.is_deleted && (
-                              <span className="italic text-[9px] text-muted-foreground/60 font-medium">(editado)</span>
+                              <span className="italic text-[9px] text-muted-foreground/60 font-medium">({t('chat.edited')})</span>
                             )}
                           </span>
                         </MessageHeader>
@@ -847,7 +846,7 @@ export function ChatWindow({
                           {msg.is_deleted ? (
                             <div className="px-3 py-1.5 text-xs italic text-muted-foreground/70 bg-muted/30 border border-border/20 rounded-2xl flex items-center gap-1.5 select-none">
                               <Trash2 className="w-3 h-3 text-muted-foreground/40 shrink-0" />
-                              <span>Este mensaje fue eliminado</span>
+                              <span>{t('chat.messageDeleted')}</span>
                             </div>
                           ) : isEditing ? (
                             <div className="flex items-center gap-1.5 bg-background border border-primary/40 p-1.5 rounded-2xl shadow-md w-full max-w-xs sm:max-w-md">
@@ -866,7 +865,7 @@ export function ChatWindow({
                                 type="button"
                                 onClick={() => handleSaveEdit(msg.id)}
                                 className="p-1.5 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
-                                title="Guardar cambios"
+                                title={t('common.save')}
                               >
                                 <Check className="w-3.5 h-3.5" />
                               </button>
@@ -874,7 +873,7 @@ export function ChatWindow({
                                 type="button"
                                 onClick={handleCancelEdit}
                                 className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                                title="Cancelar"
+                                title={t('common.cancel')}
                               >
                                 <X className="w-3.5 h-3.5" />
                               </button>
@@ -913,7 +912,7 @@ export function ChatWindow({
             <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
             <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
             <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
-            <span className="ml-1 font-semibold text-primary">Gemini AI está analizando los datos del hogar... 🤖</span>
+            <span className="ml-1 font-semibold text-primary">{t('chat.botAnalyzing')}</span>
           </div>
         )}
 
@@ -940,7 +939,7 @@ export function ChatWindow({
               title="Haz clic para mencionar a @gemini y empezar a escribir"
             >
               <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
-              <span>🤖 Consultar a Gemini</span>
+              <span>{t('chat.askGemini')}</span>
             </button>
 
             <Button
@@ -950,7 +949,7 @@ export function ChatWindow({
               onClick={toggleShortcuts}
               className="h-6 px-2 text-[11px] text-muted-foreground hover:text-foreground font-semibold rounded-lg flex items-center gap-1 hover:bg-muted/50 cursor-pointer"
             >
-              <span>{showShortcuts ? 'Ocultar sugerencias' : 'Ver accesos IA (9)'}</span>
+              <span>{showShortcuts ? t('chat.hideSuggestions') : t('chat.showShortcuts')}</span>
               {showShortcuts ? (
                 <ChevronUp className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
               ) : (
@@ -1061,7 +1060,7 @@ export function ChatWindow({
             ref={inputRef}
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Escribe un mensaje para tu familia..."
+            placeholder={t('chat.typePlaceholder')}
             disabled={isSending}
             maxLength={1000}
             className="flex-1 rounded-xl bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary text-sm py-5 px-4"
@@ -1073,7 +1072,7 @@ export function ChatWindow({
             className="rounded-xl h-10 w-10 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95"
           >
             <Send className="h-4.5 w-4.5" />
-            <span className="sr-only">Enviar mensaje</span>
+            <span className="sr-only">{t('chat.send')}</span>
           </Button>
         </form>
       </div>

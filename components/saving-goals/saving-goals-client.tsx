@@ -263,10 +263,10 @@ export function SavingGoalsClient({
                 </div>
                 <div>
                   <CardTitle className="text-base sm:text-lg font-extrabold font-heading">
-                    Ratio de Ahorro sobre Salario
+                    {t('savingGoals.salaryRatioTitle')}
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Porcentaje de la nómina mensual del hogar destinado a ahorro
+                    {t('savingGoals.salaryRatioDesc')}
                   </CardDescription>
                 </div>
               </div>
@@ -281,10 +281,10 @@ export function SavingGoalsClient({
                   }`}
               >
                 {salarySavingsPercent >= 20
-                  ? '🚀 Ahorro Excelente (≥20%)'
+                  ? (locale === 'en' ? '🚀 Excellent Savings (≥20%)' : locale === 'ca' ? '🚀 Estalvi Excel·lent (≥20%)' : '🚀 Ahorro Excelente (≥20%)')
                   : salarySavingsPercent >= 10
-                    ? '📈 Buen Ritmo (10-20%)'
-                    : '💡 Ahorro Moderado (<10%)'}
+                    ? (locale === 'en' ? '📈 Good Pace (10-20%)' : locale === 'ca' ? '📈 Bon Ritme (10-20%)' : '📈 Buen Ritmo (10-20%)')
+                    : (locale === 'en' ? '💡 Moderate Savings (<10%)' : locale === 'ca' ? '💡 Estalvi Moderat (<10%)' : '💡 Ahorro Moderado (<10%)')}
               </Badge>
             </div>
           </CardHeader>
@@ -293,7 +293,7 @@ export function SavingGoalsClient({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="p-3 bg-background/80 backdrop-blur-xs rounded-2xl border border-border/50 space-y-0.5">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                  Salario Hogar / Mes
+                  {locale === 'en' ? 'Household Income / Mo' : locale === 'ca' ? 'Salari Llar / Mes' : 'Salario Hogar / Mes'}
                 </span>
                 <p className="text-sm sm:text-base font-extrabold text-foreground">
                   {formatCurrency(totalMonthlySalary)}
@@ -302,7 +302,7 @@ export function SavingGoalsClient({
 
               <div className="p-3 bg-background/80 backdrop-blur-xs rounded-2xl border border-border/50 space-y-0.5">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                  Ahorrado este Mes
+                  {locale === 'en' ? 'Saved This Month' : locale === 'ca' ? 'Estalviat Aquest Mes' : 'Ahorrado este Mes'}
                 </span>
                 <p className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(currentMonthSavings)}
@@ -311,7 +311,7 @@ export function SavingGoalsClient({
 
               <div className="p-3 bg-background/80 backdrop-blur-xs rounded-2xl border border-border/50 space-y-0.5 col-span-2 sm:col-span-1">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                  Fondo Total Huchas
+                  {locale === 'en' ? 'Total Saved Fund' : locale === 'ca' ? 'Fons Total Guardioles' : 'Fondo Total Huchas'}
                 </span>
                 <p className="text-sm sm:text-base font-extrabold text-primary">
                   {formatCurrency(totalHouseholdSaved)}
@@ -322,8 +322,10 @@ export function SavingGoalsClient({
             {/* Barra de Porcentaje */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs font-bold">
-                <span className="text-muted-foreground">Destinado a Ahorro este Mes</span>
-                <span className="text-primary">{salarySavingsPercent}% del salario total</span>
+                <span className="text-muted-foreground">
+                  {locale === 'en' ? 'Allocated to Savings This Month' : locale === 'ca' ? 'Destinat a Estalvi Aquest Mes' : 'Destinado a Ahorro este Mes'}
+                </span>
+                <span className="text-primary">{salarySavingsPercent}% {locale === 'en' ? 'of salary' : locale === 'ca' ? 'del salari' : 'del salario total'}</span>
               </div>
               <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-border/40">
                 <div
@@ -331,15 +333,6 @@ export function SavingGoalsClient({
                   style={{ width: `${Math.min(100, salarySavingsPercent)}%` }}
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground italic">
-                {totalMonthlySalary === 0 ? (
-                  <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1 font-semibold">
-                    💡 Configura los ingresos mensuales en la sección Hogar/Ajustes para calcular automáticamente tu % de ahorro.
-                  </span>
-                ) : (
-                  'Basado en la regla financiera 50/30/20, se recomienda destinar al menos un 20% del salario mensual al ahorro.'
-                )}
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -349,7 +342,9 @@ export function SavingGoalsClient({
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
-              <CardTitle className="text-base font-extrabold">Impulso Tamagotchi</CardTitle>
+              <CardTitle className="text-base font-extrabold">
+                {locale === 'en' ? 'Tamagotchi Boost' : locale === 'ca' ? 'Impuls Tamagotchi' : 'Impulso Tamagotchi'}
+              </CardTitle>
             </div>
           </CardHeader>
           <CardContent className="space-y-3 pt-0">
@@ -360,22 +355,13 @@ export function SavingGoalsClient({
                 equippedAccessory={gameState.equippedAccessory}
               />
               <div className="space-y-0.5 min-w-0">
-                <p className="text-xs font-extrabold text-foreground">Dotzi te acompaña 🐷</p>
+                <p className="text-xs font-extrabold text-foreground">Dotzi 🐷</p>
                 <p className="text-[11px] text-muted-foreground italic leading-tight line-clamp-2">
                   {currentMonthSavings > 0
-                    ? '¡Dotzi está feliz! Vuestras aportaciones de ahorro le dan súper energía.'
-                    : '¡Añade dinero a tus huchas para ganar monedas y XP para Dotzi!'}
+                    ? (locale === 'en' ? 'Dotzi is happy! Your contributions give super energy.' : locale === 'ca' ? 'Dotzi està feliç! Les teves aportacions li donen super energia.' : '¡Dotzi está feliz! Vuestras aportaciones de ahorro le dan súper energía.')
+                    : (locale === 'en' ? 'Add money to your goals to earn coins and XP!' : locale === 'ca' ? 'Afegeix diners a les teves guardioles per guanyar monedes i XP!' : '¡Añade dinero a tus huchas para ganar monedas y XP para Dotzi!')}
                 </p>
               </div>
-            </div>
-
-            <div className="flex items-center justify-between text-xs font-semibold pt-1 bg-amber-500/10 p-2.5 rounded-xl border border-amber-500/20">
-              <span className="text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-amber-500 fill-amber-500" /> Recompensa:
-              </span>
-              <span className="font-extrabold text-amber-600 dark:text-amber-400">
-                +15 Monedas / Aportación
-              </span>
             </div>
           </CardContent>
         </Card>
@@ -385,21 +371,23 @@ export function SavingGoalsClient({
         {/* Columna Izquierda/Centro: Tarjetas de Huchas */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-xl font-bold text-foreground font-heading">Huchas Activas</h2>
+            <h2 className="text-xl font-bold text-foreground font-heading">
+              {locale === 'en' ? 'Active Savings Goals' : locale === 'ca' ? 'Guardioles Actives' : 'Huchas Activas'}
+            </h2>
             <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
               <DialogTrigger
                 render={
                   <Button size="sm" className="flex items-center gap-1.5 shadow-sm font-bold">
                     <Plus className="h-4 w-4" />
-                    Nueva Meta
+                    {t('savingGoals.newGoal')}
                   </Button>
                 }
               />
               <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                  <DialogTitle>Crear Meta o Hucha Libre</DialogTitle>
+                  <DialogTitle>{t('savingGoals.newGoal')}</DialogTitle>
                   <DialogDescription>
-                    Define una meta con objetivo o crea una hucha libre para ahorrar sin límite.
+                    {t('savingGoals.subtitle')}
                   </DialogDescription>
                 </DialogHeader>
 

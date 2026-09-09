@@ -26,6 +26,7 @@ import {
 import { AlertCircle, ArrowLeft, Save, Receipt, X, Sparkles } from 'lucide-react'
 import { PAYMENT_METHODS } from '@/lib/validations'
 import { predictCategory } from '@/lib/category-predictor'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface Category {
   id: string
@@ -70,6 +71,7 @@ export function ExpenseForm({
   currentUserId = '',
   isOwner = false,
 }: ExpenseFormProps) {
+  const { t, locale } = useI18n()
   const [state, formAction, pending] = useActionState(action, initialState)
   const [deleteReceipt, setDeleteReceipt] = useState(false)
   const [categoryId, setCategoryId] = useState(initialData?.category_id || '')

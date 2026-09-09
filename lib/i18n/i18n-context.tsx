@@ -16,7 +16,7 @@ const dictionaries: Record<SupportedLocale, typeof esDict> = {
 interface I18nContextType {
   locale: SupportedLocale
   setLocale: (loc: SupportedLocale) => void
-  t: (keyPath: string) => string
+  t: (keyPath: string, params?: Record<string, string | number>) => string
 }
 
 const I18nContext = createContext<I18nContextType>({
@@ -46,7 +46,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const t = (keyPath: string): string => {
+  const t = (keyPath: string, params?: Record<string, string | number>): string => {
     const dict = dictionaries[locale] || dictionaries.es
     const parts = keyPath.split('.')
     let current: any = dict
@@ -55,11 +55,18 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       if (current && typeof current === 'object' && part in current) {
         current = current[part]
       } else {
-        return keyPath
+        current = null
+        break
       }
     }
 
-    return typeof current === 'string' ? current : keyPath
+    let val = typeof current === 'string' ? current : keyPath
+    if (params && typeof val === 'string') {
+      Object.entries(params).forEach(([k, v]) => {
+        val = val.replace(new RegExp(`\\{${k}\\}`, 'g'), String(v))
+      })
+    }
+    return val
   }
 
   return (

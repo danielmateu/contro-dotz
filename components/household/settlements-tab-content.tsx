@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Coins, ArrowRight, History, Calendar, Plus } from 'lucide-react'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS, ca } from 'date-fns/locale'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface Member {
   id: string
@@ -65,6 +66,8 @@ export function SettlementsTabContent({
   debts,
   settlementsList,
 }: SettlementsTabContentProps) {
+  const { t, locale } = useI18n()
+  const dateLocale = locale === 'ca' ? ca : locale === 'en' ? enUS : es
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [dialogPayer, setDialogPayer] = useState('')
   const [dialogReceiver, setDialogReceiver] = useState('')

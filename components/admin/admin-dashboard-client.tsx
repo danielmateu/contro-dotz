@@ -50,12 +50,12 @@ import { AdminAppUpdatesTab } from '@/components/admin/admin-app-updates-tab'
 
 const statusBadges: Record<
   string,
-  { label: string; icon: React.ComponentType<{ className?: string }>; color: string }
+  { key: string; icon: React.ComponentType<{ className?: string }>; color: string }
 > = {
-  pending: { label: 'Pendiente', icon: Clock, color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
-  in_progress: { label: 'En Curso', icon: AlertCircle, color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
-  completed: { label: 'Completado', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
-  rejected: { label: 'Descartado', icon: XCircle, color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' },
+  pending: { key: 'admin.statusPending', icon: Clock, color: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
+  in_progress: { key: 'admin.statusInProgress', icon: AlertCircle, color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
+  completed: { key: 'admin.statusCompleted', icon: CheckCircle2, color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
+  rejected: { key: 'admin.statusRejected', icon: XCircle, color: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20' },
 }
 
 const categoryColors: Record<string, string> = {
@@ -113,31 +113,31 @@ export function AdminDashboardClient() {
 
     if (res.error) {
       toast.add({
-        title: 'Error al cambiar estado',
+        title: t('common.error'),
         description: res.error,
         type: 'error',
       })
       fetchMetrics() // Revertir en caso de falla
     } else {
       toast.add({
-        title: 'Estado de sugerencia actualizado',
-        description: `La sugerencia ahora está marcada como ${statusBadges[newStatus]?.label || newStatus}.`,
+        title: t('admin.feedbackTitle'),
+        description: `${t(statusBadges[newStatus]?.key || newStatus)}`,
         type: 'success',
       })
     }
   }
 
   useEffect(() => {
-    document.title = 'SuperAdmin Dashboard | Control Dotz'
+    document.title = `${t('admin.title')} | Control Dotz`
     fetchMetrics()
-  }, [])
+  }, [t])
 
   if (loading) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center space-y-4">
         <RefreshCw className="h-8 w-8 text-primary animate-spin" />
         <p className="text-sm font-medium text-muted-foreground animate-pulse">
-          Cargando métricas globales del sistema...
+          {t('common.loading')}
         </p>
       </div>
     )
@@ -153,7 +153,7 @@ export function AdminDashboardClient() {
         <p className="text-xs text-muted-foreground leading-relaxed">{error}</p>
         <Link href="/dashboard">
           <Button variant="outline" className="rounded-xl">
-            Volver al Dashboard
+            {t('common.back')}
           </Button>
         </Link>
       </div>
@@ -169,13 +169,13 @@ export function AdminDashboardClient() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="h-3.5 w-3.5" />
-            <span>Panel de SuperAdministrador</span>
+            <span>{t('admin.title')}</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground font-heading">
-            Métricas del Sistema Contro-Dotz
+            {t('admin.title')}
           </h1>
           <p className="text-xs text-muted-foreground font-medium">
-            Monitorización en tiempo real de actividad, usuarios, hogares e interacciones IA.
+            {t('admin.subtitle')}
           </p>
         </div>
 
@@ -186,7 +186,7 @@ export function AdminDashboardClient() {
           className="rounded-xl bg-background/80 hover:bg-background backdrop-blur-sm border-border font-semibold gap-2 self-start sm:self-auto shadow-2xs"
         >
           <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-          Actualizar
+          {t('admin.refresh')}
         </Button>
       </Card>
 
@@ -201,7 +201,7 @@ export function AdminDashboardClient() {
             }`}
         >
           <Activity className="h-4 w-4" />
-          <span>Métricas y Feedback</span>
+          <span>{t('admin.metricsAndFeedback')}</span>
         </button>
         <button
           type="button"
@@ -212,7 +212,7 @@ export function AdminDashboardClient() {
             }`}
         >
           <Megaphone className="h-4 w-4" />
-          <span>Novedades y Actualizaciones</span>
+          <span>{t('admin.updatesAndNews')}</span>
         </button>
       </div>
 
@@ -226,7 +226,7 @@ export function AdminDashboardClient() {
             <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Usuarios Totales
+                  {t('admin.totalUsers')}
                 </CardTitle>
                 <div className="h-9 w-9 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                   <Users className="h-5 w-5" />
@@ -237,7 +237,7 @@ export function AdminDashboardClient() {
                   {metrics.totalUsers}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1 font-medium">
-                  <Activity className="h-3 w-3 text-emerald-500" /> Cuentas registradas
+                  <Activity className="h-3 w-3 text-emerald-500" /> {t('admin.registeredAccounts')}
                 </p>
               </CardContent>
             </Card>
@@ -246,7 +246,7 @@ export function AdminDashboardClient() {
             <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Hogares Activos
+                  {t('admin.activeHouseholds')}
                 </CardTitle>
                 <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
                   <Home className="h-5 w-5" />
@@ -257,7 +257,7 @@ export function AdminDashboardClient() {
                   {metrics.totalHouseholds}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                  Grupos familiares creados
+                  {t('admin.familyGroups')}
                 </p>
               </CardContent>
             </Card>
@@ -266,7 +266,7 @@ export function AdminDashboardClient() {
             <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Gastos Registrados
+                  {t('admin.registeredExpenses')}
                 </CardTitle>
                 <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <Receipt className="h-5 w-5" />
@@ -277,7 +277,7 @@ export function AdminDashboardClient() {
                   {metrics.totalExpenses}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1 font-medium truncate">
-                  Volumen: <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatCurrency(metrics.totalAmountTracked)}</span>
+                  {t('admin.trackedVolume')}: <span className="text-emerald-600 dark:text-emerald-400 font-bold">{formatCurrency(metrics.totalAmountTracked)}</span>
                 </p>
               </CardContent>
             </Card>
@@ -286,7 +286,7 @@ export function AdminDashboardClient() {
             <Card className="rounded-2xl border-border bg-card text-card-foreground shadow-2xs hover:border-primary/20 transition-all">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                  Uso de Gemini AI
+                  {t('admin.aiUsage')}
                 </CardTitle>
                 <div className="h-9 w-9 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
                   <Sparkles className="h-5 w-5" />
@@ -297,7 +297,7 @@ export function AdminDashboardClient() {
                   {metrics.totalAiResponses}
                 </div>
                 <p className="text-[11px] text-muted-foreground mt-1 font-medium">
-                  Respuestas del asistente inteligente
+                  {t('admin.aiResponses')}
                 </p>
               </CardContent>
             </Card>
@@ -312,10 +312,10 @@ export function AdminDashboardClient() {
                   <div>
                     <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
                       <Users className="h-5 w-5 text-blue-500" />
-                      Últimos Usuarios Registrados
+                      {t('admin.recentUsers')}
                     </CardTitle>
                     <CardDescription className="text-xs font-medium text-muted-foreground">
-                      Cuentas más recientes en la plataforma
+                      {t('admin.recentUsersDesc')}
                     </CardDescription>
                   </div>
                 </div>
@@ -357,10 +357,10 @@ export function AdminDashboardClient() {
                   <div>
                     <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
                       <Home className="h-5 w-5 text-indigo-500" />
-                      Últimos Hogares Creados
+                      {t('admin.recentHouseholds')}
                     </CardTitle>
                     <CardDescription className="text-xs font-medium text-muted-foreground">
-                      Nuevos grupos familiares en el sistema
+                      {t('admin.recentHouseholdsDesc')}
                     </CardDescription>
                   </div>
                 </div>
@@ -432,10 +432,10 @@ export function AdminDashboardClient() {
                         <div className="h-8 w-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
                           <MessageSquare className="h-4.5 w-4.5" />
                         </div>
-                        Sugerencias y Feedback de Usuarios
+                        {t('admin.feedbackTitle')}
                       </CardTitle>
                       <CardDescription className="text-xs font-medium text-muted-foreground">
-                        Gestión en tiempo real de tickets, solicitudes y reportes de la comunidad
+                        {t('admin.feedbackSubtitle')}
                       </CardDescription>
                     </div>
 
@@ -452,7 +452,7 @@ export function AdminDashboardClient() {
                         )}
                       >
                         <LayoutList className="h-3.5 w-3.5" />
-                        <span>Lista</span>
+                        <span>{t('admin.viewList')}</span>
                       </button>
                       <button
                         type="button"
@@ -465,7 +465,7 @@ export function AdminDashboardClient() {
                         )}
                       >
                         <LayoutGrid className="h-3.5 w-3.5" />
-                        <span>Tablero Kanban</span>
+                        <span>{t('admin.viewKanban')}</span>
                       </button>
                     </div>
                   </div>
@@ -484,7 +484,7 @@ export function AdminDashboardClient() {
                             : "bg-muted/40 text-muted-foreground border-transparent hover:bg-muted/80 hover:text-foreground"
                         )}
                       >
-                        <span>Todos</span>
+                        <span>{t('admin.filterAll')}</span>
                         <span className={cn(
                           "px-1.5 py-0.2 text-[10px] rounded-full font-bold",
                           feedbackStatusFilter === 'all' ? "bg-primary-foreground/20 text-primary-foreground" : "bg-muted text-muted-foreground"
@@ -512,7 +512,7 @@ export function AdminDashboardClient() {
                             )}
                           >
                             <IconComp className="h-3.5 w-3.5" />
-                            <span>{cfg.label}</span>
+                            <span>{t(cfg.key)}</span>
                             <span className="px-1.5 py-0.2 text-[10px] rounded-full font-bold bg-background/50 border border-current/20">
                               {count}
                             </span>
@@ -528,7 +528,7 @@ export function AdminDashboardClient() {
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                         <Input
                           type="text"
-                          placeholder="Buscar por título, texto o mail..."
+                          placeholder={t('admin.searchPlaceholder')}
                           value={feedbackSearch}
                           onChange={(e) => setFeedbackSearch(e.target.value)}
                           className="pl-9 h-8 text-xs bg-muted/30 focus:bg-background border-border/80 rounded-xl"
@@ -551,7 +551,7 @@ export function AdminDashboardClient() {
                             render={
                               <Button variant="outline" size="sm" className="h-8 text-xs rounded-xl font-semibold gap-1.5 border-border/80 cursor-pointer">
                                 <Tag className="h-3.5 w-3.5 text-muted-foreground" />
-                                <span>{feedbackCategoryFilter === 'all' ? 'Categorías' : feedbackCategoryFilter}</span>
+                                <span>{feedbackCategoryFilter === 'all' ? t('admin.categoriesLabel') : feedbackCategoryFilter}</span>
                                 <ChevronDown className="h-3 w-3 opacity-60" />
                               </Button>
                             }
@@ -561,7 +561,7 @@ export function AdminDashboardClient() {
                               onClick={() => setFeedbackCategoryFilter('all')}
                               className="text-xs font-medium cursor-pointer rounded-lg px-2 py-1.5"
                             >
-                              Todas las categorías
+                              {t('admin.allCategories')}
                             </DropdownMenuItem>
                             {categories.map((cat) => (
                               <DropdownMenuItem
@@ -588,9 +588,9 @@ export function AdminDashboardClient() {
                           <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-muted/60 text-muted-foreground">
                             <Inbox className="h-6 w-6" />
                           </div>
-                          <p className="text-sm font-semibold text-foreground">No se encontraron sugerencias</p>
+                          <p className="text-sm font-semibold text-foreground">{t('admin.noFeedback')}</p>
                           <p className="text-xs text-muted-foreground max-w-sm mx-auto">
-                            No hay tickets que coincidan con los filtros seleccionados o la búsqueda actual.
+                            {t('admin.noFeedbackDesc')}
                           </p>
                           {(feedbackStatusFilter !== 'all' || feedbackCategoryFilter !== 'all' || feedbackSearch) && (
                             <Button
@@ -603,7 +603,7 @@ export function AdminDashboardClient() {
                               }}
                               className="text-xs text-primary font-bold hover:underline cursor-pointer"
                             >
-                              Limpiar filtros
+                              {t('admin.clearFilters')}
                             </Button>
                           )}
                         </div>
@@ -648,7 +648,7 @@ export function AdminDashboardClient() {
                                             className={`h-7 px-2.5 rounded-lg border text-xs font-semibold gap-1.5 transition-all cursor-pointer ${statusConfig.color}`}
                                           >
                                             <StatusIcon className="h-3.5 w-3.5" />
-                                            <span>{statusConfig.label}</span>
+                                            <span>{t(statusConfig.key)}</span>
                                             <ChevronDown className="h-3 w-3 opacity-60" />
                                           </Button>
                                         }
@@ -664,7 +664,7 @@ export function AdminDashboardClient() {
                                               className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
                                             >
                                               <IconComp className="h-3.5 w-3.5 text-muted-foreground" />
-                                              <span>{cfg.label}</span>
+                                              <span>{t(cfg.key)}</span>
                                             </DropdownMenuItem>
                                           )
                                         })}
@@ -680,7 +680,7 @@ export function AdminDashboardClient() {
                                 {fb.user_email && (
                                   <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono pt-1">
                                     <Users className="h-3 w-3 text-muted-foreground/70" />
-                                    <span>Enviado por:</span>
+                                    <span>{t('admin.submittedBy')}:</span>
                                     <span className="text-foreground font-semibold">{fb.user_email}</span>
                                   </div>
                                 )}
@@ -741,7 +741,7 @@ export function AdminDashboardClient() {
                                   <IconComp className="h-4 w-4" />
                                 </span>
                                 <span className="text-xs font-bold text-foreground font-heading">
-                                  {cfg.label}
+                                  {t(cfg.key)}
                                 </span>
                               </div>
                               <span className="text-xs font-extrabold px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
@@ -756,7 +756,7 @@ export function AdminDashboardClient() {
                                   "py-12 text-center text-xs font-medium rounded-xl border border-dashed transition-all",
                                   isOver ? "border-violet-500/50 text-violet-600 dark:text-violet-400 bg-violet-500/10 font-bold" : "border-border/60 text-muted-foreground/50"
                                 )}>
-                                  {isOver ? '¡Soltar ticket aquí!' : 'Sin tickets en esta columna'}
+                                  {isOver ? t('admin.dropHere') : t('admin.noColumnTickets')}
                                 </div>
                               ) : (
                                 columnItems.map((fb) => {
@@ -821,7 +821,7 @@ export function AdminDashboardClient() {
                                                 disabled={updatingId === fb.id}
                                                 className="h-6 px-2 text-[10px] font-semibold text-muted-foreground hover:text-foreground rounded-lg cursor-pointer gap-1"
                                               >
-                                                <span>Mover</span>
+                                                <span>{t('admin.move')}</span>
                                                 <ChevronDown className="h-2.5 w-2.5" />
                                               </Button>
                                             }
@@ -838,7 +838,7 @@ export function AdminDashboardClient() {
                                                   className="flex items-center gap-2 text-xs font-medium cursor-pointer rounded-lg px-2 py-1.5 hover:bg-accent hover:text-accent-foreground"
                                                 >
                                                   <TargetIcon className="h-3 w-3 text-muted-foreground" />
-                                                  <span>{targetCfg.label}</span>
+                                                  <span>{t(targetCfg.key)}</span>
                                                 </DropdownMenuItem>
                                               )
                                             })}

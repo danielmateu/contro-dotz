@@ -11,6 +11,7 @@ import {
   Sparkles,
   Activity
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 export interface ActivityEvent {
   id: string
@@ -27,6 +28,8 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
+  const { t, locale } = useI18n()
+
   // Función para parsear texto en negrita simple (**texto**)
   const renderFormattedText = (text: string) => {
     const parts = text.split(/(\*\*.*?\*\*)/g)
@@ -86,11 +89,12 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
     const diffMins = Math.round(diffMs / (1000 * 60))
     const diffHours = Math.round(diffMs / (1000 * 60 * 60))
 
-    if (diffMins < 1) return 'Hace un momento'
-    if (diffMins < 60) return `Hace ${diffMins} min`
-    if (diffHours < 24) return `Hace ${diffHours} h`
+    if (diffMins < 1) return t('dashboard.activityFeedJustNow')
+    if (diffMins < 60) return t('dashboard.activityFeedAgoMins', { mins: diffMins })
+    if (diffHours < 24) return t('dashboard.activityFeedAgoHours', { hours: diffHours })
 
-    return date.toLocaleDateString('es-ES', {
+    const dateLocale = locale === 'en' ? 'en-US' : locale === 'ca' ? 'ca-ES' : 'es-ES'
+    return date.toLocaleDateString(dateLocale, {
       day: 'numeric',
       month: 'short',
       hour: '2-digit',
@@ -103,16 +107,16 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-lg flex items-center gap-2">
           <Activity className="h-5 w-5 text-primary animate-pulse" />
-          Actividad del Hogar
+          {t('dashboard.activityFeedTitle')}
         </CardTitle>
         <CardDescription className="text-xs">
-          Últimos movimientos colaborativos de la familia en tiempo real.
+          {t('dashboard.activityFeedSubtitle')}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1 overflow-y-auto px-0 pb-4 max-h-95">
         {activities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center text-xs text-muted-foreground">
-            No hay actividad reciente registrada en el hogar.
+            {t('dashboard.activityFeedEmpty')}
           </div>
         ) : (
           <div className="space-y-0.5">

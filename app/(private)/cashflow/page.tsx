@@ -10,6 +10,8 @@ import { CashflowAnnualView } from '@/components/cashflow/cashflow-annual-view'
 import { RecurringExpensesDialog } from '@/components/cashflow/recurring-expenses-dialog'
 import { CalendarCheck } from 'lucide-react'
 
+import { cookies } from 'next/headers'
+
 export const metadata: Metadata = {
   title: 'Previsión de Saldo & Cashflow',
   robots: {
@@ -28,6 +30,8 @@ interface CashflowPageProps {
 
 export default async function CashflowPage({ searchParams }: CashflowPageProps) {
   const query = await searchParams
+  const cookieStore = await cookies()
+  const locale = cookieStore.get('NEXT_LOCALE')?.value || 'es'
   const supabase = await createClient()
 
   // 1. Verificar sesión
@@ -68,10 +72,14 @@ export default async function CashflowPage({ searchParams }: CashflowPageProps) 
         <div className="flex flex-col gap-1">
           <h1 className="text-3xl font-bold tracking-tight text-foreground font-heading flex items-center gap-2.5">
             <CalendarCheck className="w-8 h-8 text-primary" />
-            Previsión de Saldo (Cashflow)
+            {locale === 'en' ? 'Cash Flow Forecast' : locale === 'ca' ? 'Projecció de Flux de Caixa' : 'Previsión de Saldo (Cashflow)'}
           </h1>
           <p className="text-muted-foreground text-sm">
-            Visualiza la evolución del saldo disponible acumulado mes a mes o consulta la previsión anual a 12 meses.
+            {locale === 'en'
+              ? 'View month-to-month accumulated balance evolution or inspect 12-month annual projections.'
+              : locale === 'ca'
+                ? 'Visualitza l\'evolució del saldo disponible acumulat mes a mes o consulta la projecció anual.'
+                : 'Visualiza la evolución del saldo disponible acumulado mes a mes o consulta la previsión anual a 12 meses.'}
           </p>
         </div>
 

@@ -20,6 +20,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { formatCurrency } from '@/lib/format'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   LayoutDashboard,
   Users2,
@@ -107,6 +108,7 @@ export function DashboardCharts({
   mappedMembers = [],
   currentUserId,
 }: DashboardChartsProps) {
+  const { t, locale } = useI18n()
   const [isMounted, setIsMounted] = useState(false)
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -123,11 +125,11 @@ export function DashboardCharts({
     if (mappedMembers && mappedMembers.length > 0) {
       mappedMembers.forEach(m => list.push({ id: m.id, name: m.name }))
     } else if (memberNames && memberNames.length > 0) {
-      memberNames.filter(n => n !== 'Compartido').forEach(n => list.push({ id: n, name: n }))
+      memberNames.filter(n => n !== 'Compartido' && n !== t('dashboard.charts.shared')).forEach(n => list.push({ id: n, name: n }))
     }
-    list.push({ id: 'shared', name: 'Compartido' })
+    list.push({ id: 'shared', name: t('dashboard.charts.shared') })
     return list
-  }, [mappedMembers, memberNames])
+  }, [mappedMembers, memberNames, t])
 
   // Lista de miembros activos con su color asignado
   const activeMembersList = useMemo(() => {
@@ -183,7 +185,11 @@ export function DashboardCharts({
     const month = now.getMonth() // 0..11
     const lastDayOfMonth = new Date(year, month + 1, 0).getDate()
 
-    const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
+    const MONTH_LABELS = locale === 'ca'
+      ? ['Gen', 'Febr', 'Març', 'Abr', 'Maig', 'Juny', 'Jul', 'Ag', 'Set', 'Oct', 'Nov', 'Des']
+      : locale === 'en'
+        ? ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+        : ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
     if (timeframe === 'acumulado' || timeframe === 'diario') {
       // Mapa por id de miembro y por día
@@ -341,10 +347,10 @@ export function DashboardCharts({
     if (active && payload && payload.length) {
       const data = payload[0].payload
       let titleLabel = ''
-      if (timeframe === 'acumulado') titleLabel = `Día ${data.label} (Acumulado)`
-      else if (timeframe === 'diario') titleLabel = `Día ${data.label}`
-      else if (timeframe === 'mensual') titleLabel = `Mes: ${data.label}`
-      else titleLabel = `Año ${data.label}`
+      if (timeframe === 'acumulado') titleLabel = t('dashboard.charts.dayLabel').replace('{day}', data.label) + ' (' + t('dashboard.charts.tfAcumulado') + ')'
+      else if (timeframe === 'diario') titleLabel = t('dashboard.charts.dayLabel').replace('{day}', data.label)
+      else if (timeframe === 'mensual') titleLabel = t('dashboard.charts.monthLabel').replace('{month}', data.label)
+      else titleLabel = t('dashboard.charts.yearLabel').replace('{year}', data.label)
 
       const totalVal = data.Total !== undefined ? data.Total : payload.reduce((sum: number, p: any) => sum + Number(p.value || 0), 0)
 
@@ -456,7 +462,7 @@ export function DashboardCharts({
     if (active && payload && payload.length) {
       return (
         <div className="bg-popover border border-border p-2.5 rounded-xl shadow-md text-xs text-popover-foreground">
-          <span className="font-semibold text-muted-foreground">Día {payload[0].payload.day}</span>
+          <span className="font-semibold text-muted-foreground">{t('dashboard.charts.dayLabel').replace('{day}', payload[0].payload.day)}</span>
           <div className="mt-1 font-bold text-foreground">
             Total: <span className="text-primary">{formatCurrency(payload[0].value)}</span>
           </div>
@@ -479,17 +485,17 @@ export function DashboardCharts({
         <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-1">
           <p className="font-bold text-foreground border-b pb-1 mb-1">{data.name}</p>
           <p className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Presupuesto:</span>
+            <span className="text-muted-foreground">{t('dashboard.charts.budget')}</span>
             <span className="font-semibold">{formatCurrency(budget)}</span>
           </p>
           <p className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Gastado:</span>
+            <span className="text-muted-foreground">{t('dashboard.charts.spent')}</span>
             <span className="font-semibold text-primary">{formatCurrency(spent)}</span>
           </p>
           <p className="flex justify-between gap-4 pt-1 border-t">
-            <span className="text-muted-foreground">Diferencia:</span>
+            <span className="text-muted-foreground">{t('dashboard.charts.difference')}</span>
             <span className={`font-bold ${isExceeded ? 'text-destructive' : 'text-emerald-600 dark:text-emerald-400'}`}>
-              {isExceeded ? 'Excedido por ' : 'Sobrante: '}{formatCurrency(Math.abs(diff))}
+              {isExceeded ? t('dashboard.charts.exceededBy') : t('dashboard.charts.remaining')}{formatCurrency(Math.abs(diff))}
             </span>
           </p>
         </div>
@@ -504,7 +510,7 @@ export function DashboardCharts({
       const data = payload[0].payload
       return (
         <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-1.5">
-          <p className="font-bold border-b pb-1 mb-1">Día {data.day}</p>
+          <p className="font-bold border-b pb-1 mb-1">{t('dashboard.charts.dayLabel').replace('{day}', data.day)}</p>
           {payload.map((item: any) => (
             <p key={item.name} className="flex justify-between gap-4">
               <span className="flex items-center gap-1.5">
@@ -526,15 +532,15 @@ export function DashboardCharts({
       const data = payload[0].payload
       return (
         <div className="bg-popover border border-border p-3 rounded-xl shadow-md text-xs text-popover-foreground space-y-1.5">
-          <p className="font-bold border-b pb-1 mb-1 text-foreground">Día {data.day}</p>
+          <p className="font-bold border-b pb-1 mb-1 text-foreground">{t('dashboard.charts.dayLabel').replace('{day}', data.day)}</p>
           {data['Gasto Real'] !== null && (
             <p className="flex justify-between gap-4">
-              <span className="text-muted-foreground">Gasto Real:</span>
+              <span className="text-muted-foreground">{t('dashboard.charts.actualCumulativeSpent')}:</span>
               <span className="font-semibold text-primary">{formatCurrency(data['Gasto Real'])}</span>
             </p>
           )}
           <p className="flex justify-between gap-4">
-            <span className="text-muted-foreground">Proyección:</span>
+            <span className="text-muted-foreground">{t('dashboard.charts.estimatedProjection')}:</span>
             <span className="font-semibold text-emerald-600 dark:text-emerald-400">{formatCurrency(data['Proyección'])}</span>
           </p>
         </div>
@@ -546,7 +552,7 @@ export function DashboardCharts({
   if (!isMounted) {
     return (
       <div className="w-full h-100 flex items-center justify-center text-xs text-muted-foreground border border-slate-200/50 rounded-2xl bg-background/50 dark:border-slate-800/50">
-        Cargando gráficos...
+        {t('dashboard.charts.loading')}
       </div>
     )
   }
@@ -555,16 +561,16 @@ export function DashboardCharts({
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full space-y-6">
       <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 p-1 rounded-xl bg-transparent">
         <TabsTrigger value="overview" className="flex items-center gap-1.5 rounded-lg ">
-          Vista General
+          {t('dashboard.charts.overview')}
         </TabsTrigger>
         <TabsTrigger value="budgets" className="flex items-center gap-1.5 rounded-lg ">
-          Presupuesto vs Real
+          {t('dashboard.charts.budgetsVsReal')}
         </TabsTrigger>
         <TabsTrigger value="members" className="flex items-center gap-1.5 rounded-lg ">
-          Por Miembro
+          {t('dashboard.charts.byMember')}
         </TabsTrigger>
         <TabsTrigger value="projection" className="flex items-center gap-1.5 rounded-lg ">
-          Proyección
+          {t('dashboard.charts.projection')}
         </TabsTrigger>
       </TabsList>
 
@@ -581,26 +587,26 @@ export function DashboardCharts({
                       {timeframe === 'diario' && <Calendar className="h-5 w-5 text-indigo-500" />}
                       {timeframe === 'mensual' && <BarChart3 className="h-5 w-5 text-emerald-500" />}
                       {timeframe === 'anual' && <Landmark className="h-5 w-5 text-amber-500" />}
-                      {timeframe === 'acumulado' && 'Evolución de Gastos (Acumulado)'}
-                      {timeframe === 'diario' && 'Gastos Diarios (Mes Actual)'}
-                      {timeframe === 'mensual' && 'Gastos Mensuales (Año Actual)'}
-                      {timeframe === 'anual' && 'Gastos Anuales (Histórico)'}
+                      {timeframe === 'acumulado' && t('dashboard.charts.timeframeAcumuladoTitle')}
+                      {timeframe === 'diario' && t('dashboard.charts.timeframeDiarioTitle')}
+                      {timeframe === 'mensual' && t('dashboard.charts.timeframeMensualTitle')}
+                      {timeframe === 'anual' && t('dashboard.charts.timeframeAnualTitle')}
                     </CardTitle>
                     <CardDescription>
-                      {timeframe === 'acumulado' && 'Historial acumulado del período seleccionado.'}
-                      {timeframe === 'diario' && 'Desglose de importe gastado día por día.'}
-                      {timeframe === 'mensual' && 'Evolución total gastada en cada mes del año.'}
-                      {timeframe === 'anual' && 'Consolidado anual de gastos registrados.'}
+                      {timeframe === 'acumulado' && t('dashboard.charts.timeframeAcumuladoDesc')}
+                      {timeframe === 'diario' && t('dashboard.charts.timeframeDiarioDesc')}
+                      {timeframe === 'mensual' && t('dashboard.charts.timeframeMensualDesc')}
+                      {timeframe === 'anual' && t('dashboard.charts.timeframeAnualDesc')}
                     </CardDescription>
                   </div>
 
                   {/* Selector de Marco Temporal */}
                   <div className="flex flex-wrap items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60 shrink-0">
                     {[
-                      { id: 'acumulado', label: 'Acumulado', icon: TrendingUp },
-                      { id: 'diario', label: 'Diario', icon: Calendar },
-                      { id: 'mensual', label: 'Mensual', icon: BarChart3 },
-                      { id: 'anual', label: 'Anual', icon: Landmark },
+                      { id: 'acumulado', label: t('dashboard.charts.tfAcumulado'), icon: TrendingUp },
+                      { id: 'diario', label: t('dashboard.charts.tfDiario'), icon: Calendar },
+                      { id: 'mensual', label: t('dashboard.charts.tfMensual'), icon: BarChart3 },
+                      { id: 'anual', label: t('dashboard.charts.tfAnual'), icon: Landmark },
                     ].map((tf) => {
                       const Icon = tf.icon
                       const isActive = timeframe === tf.id
@@ -627,9 +633,9 @@ export function DashboardCharts({
                   {/* Selector de Ámbito */}
                   <div className="flex items-center gap-1 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
                     {[
-                      { id: 'all', label: 'Todos', icon: Globe },
-                      { id: 'shared', label: 'Hogar', icon: Home },
-                      { id: 'personal', label: 'Personal', icon: User },
+                      { id: 'all', label: t('dashboard.charts.scopeAll'), icon: Globe },
+                      { id: 'shared', label: t('dashboard.charts.scopeShared'), icon: Home },
+                      { id: 'personal', label: t('dashboard.charts.scopePersonal'), icon: User },
                     ].map((sc) => {
                       const Icon = sc.icon
                       const isActive = scopeFilter === sc.id
@@ -653,7 +659,7 @@ export function DashboardCharts({
                   {/* Multiselección de Miembros */}
                   <div className="flex flex-wrap items-center gap-1.5">
                     <span className="text-[11px] font-medium text-muted-foreground mr-0.5 flex items-center gap-1">
-                      <Users2 className="h-3.5 w-3.5 text-primary" /> Miembros:
+                      <Users2 className="h-3.5 w-3.5 text-primary" /> {t('dashboard.charts.membersLabel')}
                     </span>
 
                     <button
@@ -664,7 +670,7 @@ export function DashboardCharts({
                           : 'bg-muted/30 border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                     >
-                      Todos
+                      {t('dashboard.charts.allMembers')}
                     </button>
 
                     {memberOptions.map((mem) => {
@@ -696,15 +702,15 @@ export function DashboardCharts({
                 {/* Micro Estadísticas de la Vista */}
                 <div className="grid grid-cols-3 gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/40 text-xs">
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Total Período</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">{t('dashboard.charts.totalPeriod')}</span>
                     <span className="text-sm font-extrabold text-foreground">{formatCurrency(totalInView)}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Promedio</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">{t('dashboard.charts.average')}</span>
                     <span className="text-sm font-bold text-foreground">{formatCurrency(avgInView)}</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">Pico Máximo</span>
+                    <span className="text-[10px] text-muted-foreground uppercase font-semibold">{t('dashboard.charts.maxPeak')}</span>
                     <span className="text-sm font-bold text-primary">{formatCurrency(maxInView)}</span>
                   </div>
                 </div>
@@ -785,16 +791,16 @@ export function DashboardCharts({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <PieChartIcon className="h-5 w-5 text-emerald-500" />
-                  Reparto de Gastos
+                  {t('dashboard.charts.expenseDistribution')}
                 </CardTitle>
                 <CardDescription>
-                  Gastos por categoría este mes.
+                  {t('dashboard.charts.categoryDistributionDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex flex-col items-center justify-center">
                 {pieData.length === 0 ? (
                   <div className="w-55 h-55 flex items-center justify-center text-xs text-muted-foreground">
-                    Registra gastos para visualizar la distribución.
+                    {t('dashboard.charts.noExpensesForPie')}
                   </div>
                 ) : (
                   <>
@@ -848,16 +854,16 @@ export function DashboardCharts({
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-indigo-500" />
-                Presupuestos vs Gastos por Categoría
+                {t('dashboard.charts.budgetsVsExpensesTitle')}
               </CardTitle>
               <CardDescription>
-                Comparación visual de los presupuestos asignados frente al importe real consumido por categoría.
+                {t('dashboard.charts.budgetsVsExpensesDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="h-87.5">
               {barData.length === 0 ? (
                 <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                  No hay presupuestos ni gastos registrados este mes.
+                  {t('dashboard.charts.noBudgetsOrExpenses')}
                 </div>
               ) : (
                 <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
@@ -882,13 +888,13 @@ export function DashboardCharts({
                     <Legend verticalAlign="top" height={36} className="text-xs" />
                     <Bar
                       dataKey="Presupuesto"
-                      name="Presupuesto"
+                      name={t('dashboard.charts.budgetLegend')}
                       fill="#a855f7"
                       radius={[4, 4, 0, 0]}
                     />
                     <Bar
                       dataKey="Gastado"
-                      name="Gastado Real"
+                      name={t('dashboard.charts.spentLegend')}
                       fill="#10b981"
                       radius={[4, 4, 0, 0]}
                     />
@@ -908,16 +914,16 @@ export function DashboardCharts({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Users2 className="h-5 w-5 text-emerald-500" />
-                  Aportación de Gastos por Miembro
+                  {t('dashboard.charts.memberContributionTitle')}
                 </CardTitle>
                 <CardDescription>
-                  Evolución acumulada de los gastos del mes dividida por la aportación individual de cada miembro.
+                  {t('dashboard.charts.memberContributionDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-87.5">
                 {memberNames.length === 0 || stackedData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-                    No hay aportaciones de miembros registradas este mes.
+                    {t('dashboard.charts.noMemberContributions')}
                   </div>
                 ) : (
                   <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
@@ -962,10 +968,10 @@ export function DashboardCharts({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <Landmark className="h-5 w-5 text-indigo-500" />
-                  Reparto Proporcional
+                  {t('dashboard.charts.proportionalTitle')}
                 </CardTitle>
                 <CardDescription>
-                  Comparación del esfuerzo financiero basado en los ingresos de cada uno.
+                  {t('dashboard.charts.proportionalDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col justify-between">
@@ -975,16 +981,16 @@ export function DashboardCharts({
                       <Landmark className="h-6 w-6 text-muted-foreground/60" />
                     </div>
                     <p className="max-w-55">
-                      No hay ingresos configurados en este hogar.
+                      {t('dashboard.charts.noIncomeConfigured')}
                     </p>
                     <p className="text-[11px] max-w-60 text-muted-foreground/80">
-                      Configura tus ingresos mensuales netos en la sección de <strong>Ajustes</strong> para activar el análisis proporcional.
+                      {t('dashboard.charts.configureIncomeTip')}
                     </p>
                   </div>
                 ) : (
                   <div className="space-y-5">
                     <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/40 flex justify-between items-center text-xs">
-                      <span className="text-muted-foreground">Ingresos del Hogar:</span>
+                      <span className="text-muted-foreground">{t('dashboard.charts.householdIncome')}</span>
                       <span className="font-semibold text-foreground text-sm">{formatCurrency(totalHouseholdIncome)}</span>
                     </div>
 
@@ -997,7 +1003,7 @@ export function DashboardCharts({
                               <div>
                                 <span className="font-semibold text-sm text-foreground">{m.name}</span>
                                 <p className="text-[10px] text-muted-foreground">
-                                  Ingreso: {formatCurrency(m.income)} ({m.incomePercentage.toFixed(0)}%)
+                                  {t('dashboard.charts.income')} {formatCurrency(m.income)} ({m.incomePercentage.toFixed(0)}%)
                                 </p>
                               </div>
                               <div className="text-right">
@@ -1010,7 +1016,7 @@ export function DashboardCharts({
                                   {m.diff > 0 ? '+' : ''}{formatCurrency(m.diff)}
                                 </span>
                                 <p className="text-[9px] text-muted-foreground">
-                                  {m.diff > 0 ? 'Aportó de más' : m.diff < 0 ? 'Aportó de menos' : 'Equilibrado'}
+                                  {m.diff > 0 ? t('dashboard.charts.contributedMore') : m.diff < 0 ? t('dashboard.charts.contributedLess') : t('dashboard.charts.balanced')}
                                 </p>
                               </div>
                             </div>
@@ -1020,7 +1026,7 @@ export function DashboardCharts({
                               {/* Barra de Ingreso */}
                               <div className="space-y-0.5">
                                 <div className="flex justify-between text-[9px] text-muted-foreground/80">
-                                  <span>Peso de ingresos:</span>
+                                  <span>{t('dashboard.charts.incomeWeight')}</span>
                                   <span>{m.incomePercentage.toFixed(0)}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -1034,7 +1040,7 @@ export function DashboardCharts({
                               {/* Barra de Gasto Real */}
                               <div className="space-y-0.5">
                                 <div className="flex justify-between text-[9px] text-muted-foreground/80">
-                                  <span>Gasto real aportado:</span>
+                                  <span>{t('dashboard.charts.actualSpentContribution')}</span>
                                   <span>{contributionPercentage.toFixed(0)}%</span>
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
@@ -1065,10 +1071,10 @@ export function DashboardCharts({
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-emerald-500" />
-                  Proyección de Gastos del Mes
+                  {t('dashboard.charts.monthlyProjectionTitle')}
                 </CardTitle>
                 <CardDescription>
-                  Proyección del gasto final estimado basándose en el ritmo diario acumulado hasta hoy.
+                  {t('dashboard.charts.monthlyProjectionDesc')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-87.5">
@@ -1105,7 +1111,7 @@ export function DashboardCharts({
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorGastoReal)"
-                      name="Gasto Real Acumulado"
+                      name={t('dashboard.charts.actualCumulativeSpent')}
                     />
                     <Line
                       type="monotone"
@@ -1114,7 +1120,7 @@ export function DashboardCharts({
                       strokeWidth={2}
                       strokeDasharray="5 5"
                       dot={false}
-                      name="Proyección Estimada"
+                      name={t('dashboard.charts.estimatedProjection')}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -1124,27 +1130,27 @@ export function DashboardCharts({
             <Card className="border-slate-200/50 shadow-md">
               <CardHeader>
                 <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                  Análisis Predictivo
+                  {t('dashboard.charts.predictiveAnalysis')}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Promedio de gasto diario</span>
+                  <span className="text-xs text-muted-foreground">{t('dashboard.charts.avgDailyExpense')}</span>
                   <p className="text-2xl font-extrabold text-foreground">
                     {formatCurrency(avgDaily)}
-                    <span className="text-xs font-normal text-muted-foreground"> / día</span>
+                    <span className="text-xs font-normal text-muted-foreground"> {t('dashboard.charts.perDay')}</span>
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Gasto real acumulado (Día {currentDay})</span>
+                  <span className="text-xs text-muted-foreground">{t('dashboard.charts.actualSpentToday').replace('{day}', currentDay.toString())}</span>
                   <p className="text-2xl font-bold text-foreground">
                     {formatCurrency(todayCumulative)}
                   </p>
                 </div>
 
                 <div className="space-y-1">
-                  <span className="text-xs text-muted-foreground">Gasto final proyectado</span>
+                  <span className="text-xs text-muted-foreground">{t('dashboard.charts.finalProjectedSpent')}</span>
                   <p className="text-3xl font-extrabold text-primary">
                     {formatCurrency(finalProjected)}
                   </p>
@@ -1154,7 +1160,7 @@ export function DashboardCharts({
                   {totalBudget > 0 ? (
                     <div className="space-y-3">
                       <div className="flex justify-between text-xs font-medium">
-                        <span className="text-muted-foreground">Presupuesto total del mes:</span>
+                        <span className="text-muted-foreground">{t('dashboard.charts.totalMonthlyBudget')}</span>
                         <span className="text-foreground font-semibold">{formatCurrency(totalBudget)}</span>
                       </div>
 
@@ -1163,19 +1169,19 @@ export function DashboardCharts({
                         : 'bg-emerald-50/50 border-emerald-500/20 text-emerald-700 dark:bg-emerald-950/10 dark:border-emerald-500/10 dark:text-emerald-400'
                         }`}>
                         <span className="text-xs font-bold uppercase tracking-wider">
-                          {isOverBudget ? '⚠️ Alerta de Desviación' : '✅ Proyección Saludable'}
+                          {isOverBudget ? t('dashboard.charts.deviationAlertTitle') : t('dashboard.charts.healthyProjectionTitle')}
                         </span>
                         <span className="text-xs leading-relaxed">
                           {isOverBudget
-                            ? `A este ritmo, superaréis el presupuesto mensual por ${formatCurrency(Math.abs(budgetDiff))}. Considera reducir gastos no esenciales.`
-                            : `¡Excelente control! A este ritmo, terminaréis el mes ahorrando ${formatCurrency(budgetDiff)} respecto al presupuesto.`
+                            ? t('dashboard.charts.deviationAlertDesc').replace('{diff}', formatCurrency(Math.abs(budgetDiff)))
+                            : t('dashboard.charts.healthyProjectionDesc').replace('{diff}', formatCurrency(budgetDiff))
                           }
                         </span>
                       </div>
                     </div>
                   ) : (
                     <p className="text-xs text-muted-foreground">
-                      Establece presupuestos en la pestaña de presupuestos para comparar con la proyección.
+                      {t('dashboard.charts.setBudgetsTip')}
                     </p>
                   )}
                 </div>

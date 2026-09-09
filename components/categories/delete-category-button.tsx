@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import { AlertCircle, Trash2 } from 'lucide-react'
 
 interface DeleteCategoryButtonProps {
@@ -26,6 +27,7 @@ export function DeleteCategoryButton({
   categoryId,
   categoryName,
 }: DeleteCategoryButtonProps) {
+  const { t } = useI18n()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState('')
@@ -62,23 +64,23 @@ export function DeleteCategoryButton({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar esta categoría?</AlertDialogTitle>
+          <AlertDialogTitle>{t('categories.confirmDelete')}</AlertDialogTitle>
           <AlertDialogDescription className="space-y-3">
             <span>
-              ¿Estás seguro de que quieres eliminar la categoría &quot;{categoryName}&quot;?
+              {categoryName}
             </span>
 
             {error && (
               <Alert variant="destructive" className="mt-3">
                 <AlertCircle className="h-4 w-4" />
-                <AlertTitle>No se puede eliminar</AlertTitle>
+                <AlertTitle>Error</AlertTitle>
                 <AlertDescription className="text-xs">{error}</AlertDescription>
               </Alert>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
@@ -87,7 +89,7 @@ export function DeleteCategoryButton({
             disabled={isPending}
             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
-            {isPending ? 'Eliminando...' : 'Sí, eliminar'}
+            {isPending ? t('common.loading') : t('common.delete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

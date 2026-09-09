@@ -11,6 +11,7 @@ import {
   BarChart3,
   RotateCcw,
 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface CashflowMonthNavigatorProps {
   currentMonthStr: string // YYYY-MM
@@ -18,21 +19,12 @@ interface CashflowMonthNavigatorProps {
   activeView: 'calendar' | 'annual'
 }
 
-const MONTH_NAMES_SHORT = [
-  'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun',
-  'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
-]
-
-const MONTH_NAMES_FULL = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-]
-
 export function CashflowMonthNavigator({
   currentMonthStr,
   currentYear,
   activeView,
 }: CashflowMonthNavigatorProps) {
+  const { t, locale } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
   const [isPending, startTransition] = useTransition()
@@ -41,6 +33,18 @@ export function CashflowMonthNavigator({
 
   const today = new Date()
   const todayMonthStr = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`
+
+  const dateLocale = locale === 'en' ? 'en-US' : locale === 'ca' ? 'ca-ES' : 'es-ES'
+
+  const getMonthNameFull = (monthIndex1Based: number, year: number) => {
+    const date = new Date(year, monthIndex1Based - 1, 1)
+    return date.toLocaleDateString(dateLocale, { month: 'long' })
+  }
+
+  const getMonthNameShort = (monthIndex1Based: number) => {
+    const date = new Date(2026, monthIndex1Based - 1, 1)
+    return date.toLocaleDateString(dateLocale, { month: 'short' })
+  }
 
   const updateUrl = (newParams: Record<string, string>) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -112,7 +116,7 @@ export function CashflowMonthNavigator({
             }`}
           >
             <Calendar className="w-4 h-4" />
-            <span>Vista Mensual</span>
+            <span>{t('cashflow.monthlyView')}</span>
           </Button>
 
           <Button
@@ -125,7 +129,7 @@ export function CashflowMonthNavigator({
             }`}
           >
             <BarChart3 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
-            <span>Previsión 12 Meses</span>
+            <span>{t('cashflow.annualForecast')}</span>
           </Button>
         </div>
 
@@ -141,7 +145,7 @@ export function CashflowMonthNavigator({
                 className="rounded-xl text-xs font-semibold gap-1 text-primary border-primary/30 hover:bg-primary/10 h-9"
               >
                 <RotateCcw className="w-3.5 h-3.5" />
-                <span className="hidden xs:inline">Mes Actual</span>
+                <span className="hidden xs:inline">{t('cashflow.currentMonth')}</span>
               </Button>
             )}
 
@@ -158,7 +162,7 @@ export function CashflowMonthNavigator({
               </Button>
 
               <span className="text-xs sm:text-sm font-extrabold text-foreground px-2 capitalize min-w-[110px] text-center font-heading">
-                {MONTH_NAMES_FULL[monthNum - 1]} {yearNum}
+                {getMonthNameFull(monthNum, yearNum)} {yearNum}
               </span>
 
               <Button
@@ -188,7 +192,7 @@ export function CashflowMonthNavigator({
               </Button>
 
               <span className="text-xs sm:text-sm font-extrabold text-foreground px-3 font-heading">
-                Año {currentYear}
+                {t('dashboard.charts.yearLabel', { year: currentYear })}
               </span>
 
               <Button
@@ -210,18 +214,18 @@ export function CashflowMonthNavigator({
       {activeView === 'calendar' && (
         <div className="pt-2 border-t border-border/30">
           <div className="flex items-center gap-1 overflow-x-auto pb-1 no-scrollbar scroll-smooth">
-            {MONTH_NAMES_SHORT.map((name, idx) => {
-              const monthIdx = idx + 1
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((monthIdx) => {
+              const name = getMonthNameShort(monthIdx)
               const isSelected = monthNum === monthIdx
               const isThisCurrentMonth =
                 today.getFullYear() === yearNum && today.getMonth() + 1 === monthIdx
 
               return (
                 <button
-                  key={name}
+                  key={monthIdx}
                   type="button"
                   onClick={() => handleSelectMonthIndex(monthIdx)}
-                  className={`px-2.5 py-1.5 rounded-xl text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 ${
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-extrabold transition-all shrink-0 flex items-center gap-1.5 capitalize ${
                     isSelected
                       ? 'bg-primary text-primary-foreground shadow-xs scale-105'
                       : isThisCurrentMonth

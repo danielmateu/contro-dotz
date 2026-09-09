@@ -10,7 +10,10 @@ import {
   AppUpdate,
 } from '@/app/actions/app-updates'
 
+import { useI18n } from '@/lib/i18n/i18n-context'
+
 export function AppUpdatesWidget() {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [updates, setUpdates] = useState<AppUpdate[]>([])
   const [hasUnread, setHasUnread] = useState(false)
@@ -50,7 +53,7 @@ export function AppUpdatesWidget() {
         size="sm"
         onClick={handleOpenModal}
         className="relative gap-1.5 rounded-xl border-border bg-background/80 hover:bg-accent text-foreground transition-all duration-200"
-        title="Novedades y Actualizaciones"
+        title={t('updates.title')}
       >
         <div className="relative flex items-center justify-center">
           <MegaphoneIcon className={`w-4 h-4 ${hasUnread ? 'text-indigo-500 animate-pulse' : 'text-primary'}`} />
@@ -61,7 +64,7 @@ export function AppUpdatesWidget() {
             </span>
           )}
         </div>
-        <span className="hidden lg:inline font-medium text-xs">Novedades</span>
+        <span className="hidden lg:inline font-medium text-xs">{t('updates.title')}</span>
       </Button>
 
       <AppUpdatesModal

@@ -13,7 +13,8 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Sparkles, Rocket, Zap, Wrench, Megaphone, Calendar, MegaphoneIcon } from 'lucide-react'
 import { AppUpdate } from '@/app/actions/app-updates'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { es, enUS, ca } from 'date-fns/locale'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface AppUpdatesModalProps {
   open: boolean
@@ -48,6 +49,8 @@ const CATEGORY_CONFIG: Record<
 }
 
 export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModalProps) {
+  const { t, locale } = useI18n()
+  const dateLocale = locale === 'ca' ? ca : locale === 'en' ? enUS : es
   const [selectedCategory, setSelectedCategory] = useState<string>('all')
 
   const filteredUpdates = updates.filter((item) => {
@@ -66,10 +69,10 @@ export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModal
             </div>
             <div>
               <DialogTitle className="text-xl font-bold text-foreground">
-                Novedades y Actualizaciones
+                {t('updates.title')}
               </DialogTitle>
               <DialogDescription className="text-sm text-muted-foreground mt-0.5">
-                Descubre las últimas mejoras y nuevas funciones de Control Dotz
+                {t('updates.subtitle')}
               </DialogDescription>
             </div>
           </div>

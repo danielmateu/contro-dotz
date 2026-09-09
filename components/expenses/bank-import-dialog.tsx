@@ -246,10 +246,14 @@ export function BankImportDialog({
             </div>
             <div>
               <DialogTitle className="text-lg sm:text-xl font-extrabold font-heading">
-                Importación Masiva de Extractos
+                {locale === 'en' ? 'Bulk Bank Statement Import' : locale === 'ca' ? 'Importació Massiva d\'Extractes' : 'Importación Masiva de Extractos'}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Sube extractos bancarios en CSV, Excel o TXT y la IA categorizará y detectará duplicados automáticamente.
+                {locale === 'en'
+                  ? 'Upload CSV, Excel, or TXT bank statements and AI will categorize and detect duplicates.'
+                  : locale === 'ca'
+                  ? 'Carrega extractes bancaris en CSV, Excel o TXT i la IA categoritzarà i detectarà duplicats.'
+                  : 'Sube extractos bancarios en CSV, Excel o TXT y la IA categorizará y detectará duplicados automáticamente.'}
               </DialogDescription>
             </div>
           </div>

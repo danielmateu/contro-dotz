@@ -29,11 +29,7 @@ export function CategoriesViewClient({
             {t('common.categories')}
           </h1>
           <p className="text-muted-foreground">
-            {locale === 'en'
-              ? 'Customize and manage expense categories for your household.'
-              : locale === 'ca'
-              ? 'Personalitza i gestiona les categories de despeses de la teva llar.'
-              : 'Personaliza y gestiona las categorías de gastos de tu familia.'}
+            {t('categories.subtitle')}
           </p>
         </div>
 
@@ -43,7 +39,7 @@ export function CategoriesViewClient({
           trigger={
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              {locale === 'en' ? 'New Category' : locale === 'ca' ? 'Nova Categoria' : 'Nueva Categoría'}
+              {t('categories.newCategory')}
             </Button>
           }
         />
@@ -55,14 +51,10 @@ export function CategoriesViewClient({
           <CardContent className="flex flex-col items-center justify-center py-16 text-center">
             <FolderOpen className="h-12 w-12 text-slate-400 mb-4 stroke-1" />
             <h3 className="text-lg font-semibold font-heading">
-              {locale === 'en' ? 'No categories recorded' : locale === 'ca' ? 'Sense categories enregistrades' : 'Sin categorías registradas'}
+              {t('categories.noCategories')}
             </h3>
             <p className="text-sm text-muted-foreground max-w-sm mt-1">
-              {locale === 'en'
-                ? 'Categories help organize your expenses. Click "New Category" to create your first one.'
-                : locale === 'ca'
-                ? 'Les categories ajuden a organitzar les teves despeses. Clica a "Nova Categoria" per crear la primera.'
-                : 'Las categorías ayudan a organizar tus gastos. Pulsa en "Nueva Categoría" para crear la primera.'}
+              {t('categories.subtitle')}
             </p>
           </CardContent>
         </Card>

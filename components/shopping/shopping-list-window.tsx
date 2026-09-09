@@ -40,6 +40,7 @@ import {
 } from 'lucide-react'
 import { PAYMENT_METHODS } from '@/lib/validations'
 import { useOfflineSync } from '@/components/providers/offline-sync-provider'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface Member {
   user_id: string
@@ -79,6 +80,7 @@ export function ShoppingListWindow({
   categories,
   members,
 }: ShoppingListWindowProps) {
+  const { t, locale } = useI18n()
   const [items, setItems] = useState<ShoppingItem[]>(initialItems)
   const [itemName, setItemName] = useState('')
   const [itemQuantity, setItemQuantity] = useState('')
@@ -350,10 +352,10 @@ export function ShoppingListWindow({
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <ShoppingBasket className="h-5 w-5 text-primary" />
-              Añadir Artículo
+              {t('shopping.addItem')}
             </CardTitle>
             <CardDescription>
-              Añade cosas que hagan falta en la nevera o en la despensa.
+              {t('shopping.subtitle')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -366,11 +368,11 @@ export function ShoppingListWindow({
               )}
 
               <div className="space-y-1">
-                <Label htmlFor="name">Nombre del producto</Label>
+                <Label htmlFor="name">{locale === 'en' ? 'Item Name' : locale === 'ca' ? 'Nom del producte' : 'Nombre del producto'}</Label>
                 <Input
                   id="name"
                   type="text"
-                  placeholder="Ej. Leche entera, Manzanas"
+                  placeholder={t('shopping.itemPlaceholder')}
                   value={itemName}
                   onChange={(e) => setItemName(e.target.value)}
                   required
@@ -380,11 +382,11 @@ export function ShoppingListWindow({
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="quantity">Cantidad / Detalles (Opcional)</Label>
+                <Label htmlFor="quantity">{t('shopping.qty')} (Opcional)</Label>
                 <Input
                   id="quantity"
                   type="text"
-                  placeholder="Ej. 6 bricks, 1 kg, Marca Hacendado"
+                  placeholder="Ej. 6 bricks, 1 kg"
                   value={itemQuantity}
                   onChange={(e) => setItemQuantity(e.target.value)}
                   disabled={isAdding}
@@ -396,12 +398,12 @@ export function ShoppingListWindow({
                 {isAdding ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Añadiendo...
+                    {t('common.loading')}
                   </>
                 ) : (
                   <>
                     <Plus className="h-4 w-4 mr-2" />
-                    Añadir a la Lista
+                    {t('shopping.addItem')}
                   </>
                 )}
               </Button>
@@ -414,7 +416,9 @@ export function ShoppingListWindow({
       <div className="md:col-span-2 space-y-6">
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Artículos Pendientes ({pendingItems.length})</CardTitle>
+            <CardTitle className="text-lg">
+              {locale === 'en' ? `Pending Items (${pendingItems.length})` : locale === 'ca' ? `Articles Pendents (${pendingItems.length})` : `Artículos Pendientes (${pendingItems.length})`}
+            </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {pendingItems.length === 0 ? (

@@ -19,6 +19,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, Tag, Check, LucideIcon } from 'lucide-react'
 import * as Icons from 'lucide-react'
 
+import { useI18n } from '@/lib/i18n/i18n-context'
+
 // Paleta de colores predefinida
 const COLORS = [
   '#ef4444', // Rojo
@@ -78,6 +80,7 @@ export function CategoryDialog({
   category,
   trigger,
 }: CategoryDialogProps) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [selectedColor, setSelectedColor] = useState(
     category?.color || COLORS[0]
@@ -115,12 +118,10 @@ export function CategoryDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>
-            {category ? 'Editar Categoría' : 'Nueva Categoría'}
+            {category ? t('categories.editCategory') : t('categories.newCategory')}
           </DialogTitle>
           <DialogDescription>
-            {category
-              ? 'Personaliza el nombre, color e icono de esta categoría.'
-              : 'Crea una categoría personalizada para clasificar tus gastos.'}
+            {t('categories.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -137,14 +138,14 @@ export function CategoryDialog({
             {state?.success && (
               <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                 <Check className="h-4 w-4 text-emerald-500" />
-                <AlertTitle>Éxito</AlertTitle>
+                <AlertTitle>OK</AlertTitle>
                 <AlertDescription>{state.success}</AlertDescription>
               </Alert>
             )}
 
             {/* Nombre */}
             <div className="space-y-1">
-              <Label htmlFor="name">Nombre de categoría</Label>
+              <Label htmlFor="name">{t('categories.name')}</Label>
               <Input
                 id="name"
                 name="name"

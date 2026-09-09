@@ -123,17 +123,17 @@ export function CashflowCalendarView({
                     {monthName}
                   </CardTitle>
                   <CardDescription className="text-xs">
-                    Evolución diaria del saldo disponible acumulado
+                    {t('cashflow.dailyEvolutionDesc')}
                   </CardDescription>
                 </div>
               </div>
 
               <div className="flex items-center gap-3 text-[11px] font-semibold">
                 <span className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> Saldo positivo
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" /> {t('cashflow.positiveBalance')}
                 </span>
                 <span className="flex items-center gap-1 text-destructive">
-                  <span className="w-2 h-2 rounded-full bg-destructive inline-block" /> Descubierto
+                  <span className="w-2 h-2 rounded-full bg-destructive inline-block" /> {t('cashflow.overdraft')}
                 </span>
               </div>
             </div>
@@ -192,7 +192,7 @@ export function CashflowCalendarView({
                           variant="outline"
                           className="text-[9px] font-extrabold px-1 py-0 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hidden sm:inline-flex"
                         >
-                          +Nómina
+                          {t('cashflow.payrollBadge')}
                         </Badge>
                       )}
                     </div>
@@ -239,10 +239,10 @@ export function CashflowCalendarView({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-base font-extrabold text-foreground font-heading">
-              Facturas Fijas Registradas
+              {t('cashflow.registeredBills')}
             </h3>
             <Badge variant="outline" className="text-xs font-bold px-2 py-0.5">
-              {recurringExpenses.length} Fijas
+              {t('cashflow.fixedCount', { count: recurringExpenses.length })}
             </Badge>
           </div>
 
@@ -251,9 +251,9 @@ export function CashflowCalendarView({
               {recurringExpenses.length === 0 ? (
                 <div className="py-8 text-center space-y-2 text-xs text-muted-foreground">
                   <Receipt className="w-8 h-8 mx-auto text-muted-foreground/60 stroke-1" />
-                  <p className="font-semibold text-foreground">No hay facturas fijas todavía</p>
+                  <p className="font-semibold text-foreground">{t('cashflow.noFixedBills')}</p>
                   <p className="text-[11px] max-w-xs mx-auto">
-                    Añade tu primer gasto recurrente (alquiler, luz, suscripciones) para calcular la previsión.
+                    {t('cashflow.noFixedBillsDesc')}
                   </p>
                 </div>
               ) : (
@@ -266,7 +266,7 @@ export function CashflowCalendarView({
                       <div className="space-y-0.5 min-w-0">
                         <h4 className="text-xs font-bold text-foreground truncate">{rec.name}</h4>
                         <p className="text-[10px] text-muted-foreground">
-                          Día {rec.day_of_month} de cada mes • {rec.payment_method}
+                          {t('cashflow.dueEveryMonth', { day: rec.day_of_month, method: rec.payment_method })}
                         </p>
                       </div>
                     </div>
@@ -302,7 +302,7 @@ export function CashflowCalendarView({
               <div className="flex items-center justify-between">
                 <DialogTitle className="text-lg font-extrabold font-heading flex items-center gap-2">
                   <CalendarIcon className="w-5 h-5 text-primary" />
-                  <span>Día {selectedDay.dayNumber} de {monthName}</span>
+                  <span>{t('cashflow.dayTitle', { day: selectedDay.dayNumber, month: monthName })}</span>
                 </DialogTitle>
                 <Badge
                   variant="outline"
@@ -312,11 +312,11 @@ export function CashflowCalendarView({
                       : 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                   }`}
                 >
-                  Saldo: {formatCurrency(selectedDay.projectedEndingBalance)}
+                  {t('cashflow.projectedBalance')}: {formatCurrency(selectedDay.projectedEndingBalance)}
                 </Badge>
               </div>
               <DialogDescription className="text-xs text-muted-foreground">
-                Desglose de facturas previstas y gastos reales registrados en este día.
+                {t('cashflow.dayModalDesc')}
               </DialogDescription>
             </DialogHeader>
 
@@ -324,12 +324,12 @@ export function CashflowCalendarView({
               {/* Facturas Previstas del Día */}
               <div className="space-y-2">
                 <h4 className="text-xs font-extrabold text-foreground uppercase tracking-wider">
-                  Facturas Previstas para este Día
+                  {t('cashflow.billsForDay')}
                 </h4>
 
                 {selectedDay.scheduledBills.length === 0 ? (
                   <p className="text-xs text-muted-foreground italic py-2">
-                    No hay facturas recurrentes programadas para el día {selectedDay.dayNumber}.
+                    {t('cashflow.noBillsForDay', { day: selectedDay.dayNumber })}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -359,7 +359,7 @@ export function CashflowCalendarView({
                           {b.isPaid ? (
                             <Badge variant="outline" className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] font-bold gap-1 px-2 py-1 rounded-xl">
                               <CheckCircle2 className="w-3 h-3" />
-                              Abonada
+                              {t('cashflow.paidBadge')}
                             </Badge>
                           ) : (
                             <Button
@@ -373,7 +373,7 @@ export function CashflowCalendarView({
                               ) : (
                                 <>
                                   <Check className="w-3.5 h-3.5" />
-                                  Pagar / Gasto
+                                  {t('cashflow.payBillAction')}
                                 </>
                               )}
                             </Button>
@@ -393,7 +393,7 @@ export function CashflowCalendarView({
                 onClick={() => setSelectedDay(null)}
                 className="rounded-xl text-xs font-bold"
               >
-                Cerrar
+                {t('cashflow.close')}
               </Button>
             </DialogFooter>
           </DialogContent>

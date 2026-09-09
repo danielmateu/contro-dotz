@@ -43,6 +43,7 @@ import { __iconNode as SaveData } from 'lucide-react/dist/esm/icons/save.mjs'
 import { PAYMENT_METHODS } from '@/lib/validations'
 import { predictCategory } from '@/lib/category-predictor'
 import { useOfflineSync } from '@/components/providers/offline-sync-provider'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface Category {
   id: string
@@ -95,6 +96,7 @@ export function ExpenseDialog({
   className,
   size,
 }: ExpenseDialogProps) {
+  const { t, locale } = useI18n()
   const [open, setOpen] = useState(false)
   const [triggerHovered, setTriggerHovered] = useState(false)
   const [saveHovered, setSaveHovered] = useState(false)

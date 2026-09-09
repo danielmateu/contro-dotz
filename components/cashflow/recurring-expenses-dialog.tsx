@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/select'
 import { PAYMENT_METHODS } from '@/lib/validations'
 import { formatCurrency } from '@/lib/format'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   CalendarCheck,
   Plus,
@@ -59,6 +60,7 @@ export function RecurringExpensesDialog({
   open: externalOpen,
   onOpenChange: externalOnOpenChange,
 }: RecurringExpensesDialogProps) {
+  const { t } = useI18n()
   const router = useRouter()
   const [internalOpen, setInternalOpen] = useState(false)
   const isControlled = externalOpen !== undefined
@@ -131,7 +133,7 @@ export function RecurringExpensesDialog({
           render={
             <Button size="sm" className="font-bold gap-1.5 shadow-sm rounded-xl">
               <Plus className="w-4 h-4" />
-              <span>Añadir Factura Recurrente</span>
+              <span>{t('cashflow.addRecurringBill')}</span>
             </Button>
           }
         />
@@ -145,10 +147,10 @@ export function RecurringExpensesDialog({
             </div>
             <div>
               <DialogTitle className="text-lg font-extrabold font-heading">
-                Nueva Factura o Gasto Recurrente
+                {t('cashflow.newRecurringBill')}
               </DialogTitle>
               <DialogDescription className="text-xs text-muted-foreground">
-                Registra recibos fijos (alquiler, luz, seguro, cole) para calcular automáticamente el saldo disponible día a día.
+                {t('cashflow.recurringBillDesc')}
               </DialogDescription>
             </div>
           </div>
@@ -174,11 +176,11 @@ export function RecurringExpensesDialog({
           {/* Nombre / Concepto */}
           <div className="space-y-1">
             <Label htmlFor="rec-name" className="text-xs font-bold">
-              Nombre de la Factura o Recibo
+              {t('cashflow.billName')}
             </Label>
             <Input
               id="rec-name"
-              placeholder="Ej. Alquiler piso, Recibo Luz Endesa, Seguro Coche, Netflix"
+              placeholder={t('cashflow.billNamePlaceholder')}
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
@@ -190,7 +192,7 @@ export function RecurringExpensesDialog({
             {/* Importe (€) */}
             <div className="space-y-1">
               <Label htmlFor="rec-amount" className="text-xs font-bold">
-                Importe (€)
+                {t('expenses.amount')} (€)
               </Label>
               <Input
                 id="rec-amount"
@@ -207,14 +209,14 @@ export function RecurringExpensesDialog({
             {/* Día del mes en que vence */}
             <div className="space-y-1">
               <Label htmlFor="rec-day" className="text-xs font-bold flex items-center gap-1">
-                <Calendar className="w-3.5 h-3.5 text-primary" /> Día de Vencimiento
+                <Calendar className="w-3.5 h-3.5 text-primary" /> {t('cashflow.dueDate')}
               </Label>
               <Input
                 id="rec-day"
                 type="number"
                 min="1"
                 max="31"
-                placeholder="Día 1-31"
+                placeholder={t('cashflow.dueDayPlaceholder')}
                 value={dayOfMonth}
                 onChange={(e) => setDayOfMonth(e.target.value)}
                 required
@@ -225,14 +227,14 @@ export function RecurringExpensesDialog({
 
           {/* Categoría */}
           <div className="space-y-1">
-            <Label className="text-xs font-bold">Categoría</Label>
+            <Label className="text-xs font-bold">{t('expenses.category')}</Label>
             <Select
               value={categoryId || categories[0]?.id || ''}
               onValueChange={(val) => setCategoryId(val || '')}
               items={categories.map((c) => ({ value: c.id, label: c.name }))}
             >
               <SelectTrigger className="w-full bg-muted/50 h-9 rounded-xl text-xs font-semibold">
-                <SelectValue placeholder="Seleccionar categoría" />
+                <SelectValue placeholder={t('cashflow.selectCategory')} />
               </SelectTrigger>
               <SelectContent>
                 {categories.map((c) => (
@@ -246,14 +248,14 @@ export function RecurringExpensesDialog({
 
           {/* Método de pago */}
           <div className="space-y-1">
-            <Label className="text-xs font-bold">Método de Pago</Label>
+            <Label className="text-xs font-bold">{t('cashflow.paymentMethod')}</Label>
             <Select
               value={paymentMethod}
               onValueChange={(val) => setPaymentMethod(val || 'Domiciliación')}
               items={PAYMENT_METHODS.map((m) => ({ value: m, label: m }))}
             >
               <SelectTrigger className="w-full bg-muted/50 h-9 rounded-xl text-xs font-semibold">
-                <SelectValue placeholder="Seleccionar método" />
+                <SelectValue placeholder={t('cashflow.selectPaymentMethod')} />
               </SelectTrigger>
               <SelectContent>
                 {PAYMENT_METHODS.map((m) => (
@@ -272,7 +274,7 @@ export function RecurringExpensesDialog({
               onClick={() => handleOpenChange(false)}
               className="rounded-xl text-xs font-bold"
             >
-              Cancelar
+              {t('common.cancel')}
             </Button>
             <Button
               type="submit"
@@ -282,12 +284,12 @@ export function RecurringExpensesDialog({
               {isPending ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  Guardando...
+                  {t('common.loading')}
                 </>
               ) : (
                 <>
                   <CalendarCheck className="w-4 h-4" />
-                  Registrar Factura Recurrente
+                  {t('cashflow.registerRecurringBill')}
                 </>
               )}
             </Button>

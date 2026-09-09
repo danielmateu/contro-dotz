@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { MessageSquarePlus, Send, CheckCircle2, Sparkles, MessageCircleDashed } from 'lucide-react'
 import { sendFeedbackAction } from '@/app/actions/feedback'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface FeatureBaseWidgetProps {
   userEmail?: string
@@ -23,6 +24,7 @@ interface FeatureBaseWidgetProps {
 }
 
 export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
+  const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [feedback, setFeedback] = useState('')
@@ -76,25 +78,25 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
             <MessageCircleDashed className="h-5 w-5" />
           </div>
           <DialogTitle className="text-xl font-bold font-heading">
-            Envíanos tu Feedback o Sugerencia
+            {t('feedback.title')}
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            ¿Qué te gustaría ver en Control Dotz o qué podemos mejorar? Tu opinión es clave.
+            {t('feedback.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
         {submitted ? (
           <div className="py-8 text-center space-y-3">
             <CheckCircle2 className="h-12 w-12 text-emerald-400 mx-auto animate-bounce" />
-            <h3 className="text-lg font-bold text-foreground">¡Muchas gracias!</h3>
+            <h3 className="text-lg font-bold text-foreground">{t('feedback.thankYou')}</h3>
             <p className="text-xs text-muted-foreground">
-              Hemos recibido tu sugerencia correctamente.
+              {t('feedback.submittedDesc')}
             </p>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 pt-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-semibold">Tipo de Petición</Label>
+              <Label className="text-xs font-semibold">{t('feedback.requestType')}</Label>
               <div className="grid grid-cols-3 gap-2">
                 <Button
                   type="button"
@@ -107,7 +109,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                   }`}
                 >
                   <Sparkles className="h-3.5 w-3.5 mr-1" />
-                  Nueva Idea
+                  {t('feedback.newIdea')}
                 </Button>
                 <Button
                   type="button"
@@ -119,7 +121,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                       : 'border-slate-700/80 bg-transparent text-muted-foreground hover:text-foreground hover:bg-slate-800/50'
                   }`}
                 >
-                  Error / Bug
+                  {t('feedback.bug')}
                 </Button>
                 <Button
                   type="button"
@@ -131,16 +133,16 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                       : 'border-slate-700/80 bg-transparent text-muted-foreground hover:text-foreground hover:bg-slate-800/50'
                   }`}
                 >
-                  Otro
+                  {t('feedback.other')}
                 </Button>
               </div>
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="title" className="text-xs font-semibold">Título breve</Label>
+              <Label htmlFor="title" className="text-xs font-semibold">{t('feedback.shortTitle')}</Label>
               <Input
                 id="title"
-                placeholder="Ej. Exportar informe mensual en PDF..."
+                placeholder={t('feedback.shortTitlePlaceholder')}
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 required
@@ -149,10 +151,10 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="feedback" className="text-xs font-semibold">Detalles de la sugerencia</Label>
+              <Label htmlFor="feedback" className="text-xs font-semibold">{t('feedback.details')}</Label>
               <Textarea
                 id="feedback"
-                placeholder="Explica qué necesitas y cómo te gustaría que funcionase..."
+                placeholder={t('feedback.detailsPlaceholder')}
                 value={feedback}
                 onChange={(e) => setFeedback(e.target.value)}
                 rows={4}
@@ -168,7 +170,7 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                 onClick={() => setOpen(false)}
                 className="rounded-xl text-xs"
               >
-                Cancelar
+                {t('common.cancel')}
               </Button>
               <Button
                 type="submit"
@@ -176,10 +178,10 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
                 className="bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl text-xs gap-2"
               >
                 {loading ? (
-                  'Enviando...'
+                  t('common.loading')
                 ) : (
                   <>
-                    <span>Enviar Feedback</span>
+                    <span>{t('feedback.sendFeedback')}</span>
                     <Send className="h-3.5 w-3.5" />
                   </>
                 )}
