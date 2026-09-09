@@ -281,10 +281,10 @@ export function SavingGoalsClient({
                   }`}
               >
                 {salarySavingsPercent >= 20
-                  ? (locale === 'en' ? '🚀 Excellent Savings (≥20%)' : locale === 'ca' ? '🚀 Estalvi Excel·lent (≥20%)' : '🚀 Ahorro Excelente (≥20%)')
+                  ? t('savingGoals.excellentSavings')
                   : salarySavingsPercent >= 10
-                    ? (locale === 'en' ? '📈 Good Pace (10-20%)' : locale === 'ca' ? '📈 Bon Ritme (10-20%)' : '📈 Buen Ritmo (10-20%)')
-                    : (locale === 'en' ? '💡 Moderate Savings (<10%)' : locale === 'ca' ? '💡 Estalvi Moderat (<10%)' : '💡 Ahorro Moderado (<10%)')}
+                    ? t('savingGoals.goodPace')
+                    : t('savingGoals.moderateSavings')}
               </Badge>
             </div>
           </CardHeader>
@@ -293,7 +293,7 @@ export function SavingGoalsClient({
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <div className="p-3 bg-background/80 backdrop-blur-xs rounded-2xl border border-border/50 space-y-0.5">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                  {locale === 'en' ? 'Household Income / Mo' : locale === 'ca' ? 'Salari Llar / Mes' : 'Salario Hogar / Mes'}
+                  {t('savingGoals.householdIncomeMo')}
                 </span>
                 <p className="text-sm sm:text-base font-extrabold text-foreground">
                   {formatCurrency(totalMonthlySalary)}
@@ -302,7 +302,7 @@ export function SavingGoalsClient({
 
               <div className="p-3 bg-background/80 backdrop-blur-xs rounded-2xl border border-border/50 space-y-0.5">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                  {locale === 'en' ? 'Saved This Month' : locale === 'ca' ? 'Estalviat Aquest Mes' : 'Ahorrado este Mes'}
+                  {t('savingGoals.savedThisMonth')}
                 </span>
                 <p className="text-sm sm:text-base font-extrabold text-emerald-600 dark:text-emerald-400">
                   {formatCurrency(currentMonthSavings)}
@@ -311,7 +311,7 @@ export function SavingGoalsClient({
 
               <div className="p-3 bg-background/80 backdrop-blur-xs rounded-2xl border border-border/50 space-y-0.5 col-span-2 sm:col-span-1">
                 <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-                  {locale === 'en' ? 'Total Saved Fund' : locale === 'ca' ? 'Fons Total Guardioles' : 'Fondo Total Huchas'}
+                  {t('savingGoals.totalSavedFund')}
                 </span>
                 <p className="text-sm sm:text-base font-extrabold text-primary">
                   {formatCurrency(totalHouseholdSaved)}
@@ -323,9 +323,9 @@ export function SavingGoalsClient({
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs font-bold">
                 <span className="text-muted-foreground">
-                  {locale === 'en' ? 'Allocated to Savings This Month' : locale === 'ca' ? 'Destinat a Estalvi Aquest Mes' : 'Destinado a Ahorro este Mes'}
+                  {t('savingGoals.allocatedToSavings')}
                 </span>
-                <span className="text-primary">{salarySavingsPercent}% {locale === 'en' ? 'of salary' : locale === 'ca' ? 'del salari' : 'del salario total'}</span>
+                <span className="text-primary">{salarySavingsPercent}% {t('savingGoals.ofSalary')}</span>
               </div>
               <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-border/40">
                 <div
@@ -343,7 +343,7 @@ export function SavingGoalsClient({
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-amber-500" />
               <CardTitle className="text-base font-extrabold">
-                {locale === 'en' ? 'Tamagotchi Boost' : locale === 'ca' ? 'Impuls Tamagotchi' : 'Impulso Tamagotchi'}
+                {t('savingGoals.tamagotchiBoost')}
               </CardTitle>
             </div>
           </CardHeader>
@@ -358,8 +358,8 @@ export function SavingGoalsClient({
                 <p className="text-xs font-extrabold text-foreground">Dotzi 🐷</p>
                 <p className="text-[11px] text-muted-foreground italic leading-tight line-clamp-2">
                   {currentMonthSavings > 0
-                    ? (locale === 'en' ? 'Dotzi is happy! Your contributions give super energy.' : locale === 'ca' ? 'Dotzi està feliç! Les teves aportacions li donen super energia.' : '¡Dotzi está feliz! Vuestras aportaciones de ahorro le dan súper energía.')
-                    : (locale === 'en' ? 'Add money to your goals to earn coins and XP!' : locale === 'ca' ? 'Afegeix diners a les teves guardioles per guanyar monedes i XP!' : '¡Añade dinero a tus huchas para ganar monedas y XP para Dotzi!')}
+                    ? t('savingGoals.dotziHappy')
+                    : t('savingGoals.addMoneyToGoals')}
                 </p>
               </div>
             </div>
@@ -372,7 +372,7 @@ export function SavingGoalsClient({
         <div className="lg:col-span-2 space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-xl font-bold text-foreground font-heading">
-              {locale === 'en' ? 'Active Savings Goals' : locale === 'ca' ? 'Guardioles Actives' : 'Huchas Activas'}
+              {t('savingGoals.activeGoalsTitle')}
             </h2>
             <Dialog open={isGoalModalOpen} onOpenChange={setIsGoalModalOpen}>
               <DialogTrigger
@@ -395,7 +395,7 @@ export function SavingGoalsClient({
                   {goalError && (
                     <Alert variant="destructive">
                       <ShieldAlert className="h-4 w-4" />
-                      <AlertTitle>Error</AlertTitle>
+                      <AlertTitle>{t('common.error')}</AlertTitle>
                       <AlertDescription>{goalError}</AlertDescription>
                     </Alert>
                   )}
@@ -403,16 +403,16 @@ export function SavingGoalsClient({
                   {goalSuccess && (
                     <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                       <Sparkles className="h-4 w-4 text-emerald-500" />
-                      <AlertTitle>Éxito</AlertTitle>
+                      <AlertTitle>{t('common.success')}</AlertTitle>
                       <AlertDescription>{goalSuccess}</AlertDescription>
                     </Alert>
                   )}
 
                   <div className="space-y-1">
-                    <Label htmlFor="goal-name">Nombre de la Hucha o Meta</Label>
+                    <Label htmlFor="goal-name">{t('savingGoals.goalNameLabel')}</Label>
                     <Input
                       id="goal-name"
-                      placeholder="Ej. Vacaciones 2027, Sofá nuevo, Fondo de Emergencia"
+                      placeholder={t('savingGoals.goalNamePlaceholder')}
                       value={goalName}
                       onChange={(e) => setGoalName(e.target.value)}
                       required
@@ -423,10 +423,10 @@ export function SavingGoalsClient({
                   <div className="flex items-center justify-between bg-muted/50 p-3 rounded-2xl border border-border/60">
                     <div className="space-y-0.5">
                       <Label htmlFor="free-goal" className="text-xs font-bold cursor-pointer text-foreground">
-                        Hucha Libre (Sin meta fija)
+                        {t('savingGoals.freeGoalLabel')}
                       </Label>
                       <p className="text-[10px] text-muted-foreground">
-                        Guarda dinero continuamente sin un objetivo ni fecha límite.
+                        {t('savingGoals.freeGoalTip')}
                       </p>
                     </div>
                     <input
@@ -444,7 +444,7 @@ export function SavingGoalsClient({
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <Label htmlFor="goal-target">
-                        Importe Objetivo (€) {isFreeGoal && <span className="text-xs text-muted-foreground">(Sin límite)</span>}
+                        {t('savingGoals.targetAmountLabel')} {isFreeGoal && <span className="text-xs text-muted-foreground">{t('savingGoals.noLimit')}</span>}
                       </Label>
                       <Input
                         id="goal-target"
@@ -457,7 +457,7 @@ export function SavingGoalsClient({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="goal-date">Fecha Límite (opcional)</Label>
+                      <Label htmlFor="goal-date">{t('savingGoals.deadlineOptional')}</Label>
                       <Input
                         id="goal-date"
                         type="date"
@@ -468,9 +468,9 @@ export function SavingGoalsClient({
                   </div>
 
                   <DialogFooter className="pt-2">
-                    <DialogClose render={<Button type="button" variant="outline">Cancelar</Button>} />
+                    <DialogClose render={<Button type="button" variant="outline">{t('common.cancel')}</Button>} />
                     <Button type="submit" disabled={isPending} className="font-bold">
-                      {isPending ? 'Creando...' : isFreeGoal ? 'Crear Hucha Libre' : 'Crear Meta'}
+                      {isPending ? t('savingGoals.creating') : isFreeGoal ? t('savingGoals.createFreeGoal') : t('savingGoals.createGoal')}
                     </Button>
                   </DialogFooter>
                 </form>
@@ -483,13 +483,13 @@ export function SavingGoalsClient({
               <div className="p-4 bg-muted rounded-full text-muted-foreground/80 mb-3">
                 <PiggyBank className="h-10 w-10 text-primary" />
               </div>
-              <h3 className="font-bold text-lg text-foreground">No hay huchas ni metas activas</h3>
+              <h3 className="font-bold text-lg text-foreground">{t('savingGoals.noGoalsTitle')}</h3>
               <p className="text-sm text-muted-foreground max-w-sm mt-1 mb-4">
-                Establece vuestra primera hucha virtual para empezar a guardar dinero colaborativamente para viajes, fondo de reserva o compras.
+                {t('savingGoals.noGoalsDesc')}
               </p>
               <Button size="sm" onClick={() => setIsGoalModalOpen(true)} className="font-bold">
                 <PlusCircle className="mr-2 h-4 w-4" />
-                Crear Primera Hucha
+                {t('savingGoals.createFirstGoal')}
               </Button>
             </Card>
           ) : (
@@ -509,13 +509,13 @@ export function SavingGoalsClient({
                   >
                     {isCompleted && (
                       <div className="absolute top-0 right-0 bg-emerald-500 text-white font-bold text-[9px] px-2 py-0.5 rounded-bl-lg uppercase tracking-wider shadow-xs animate-pulse">
-                        ¡Completada! 🎉
+                        {t('savingGoals.completedBadge')}
                       </div>
                     )}
 
                     {isFree && (
                       <div className="absolute top-0 right-0 bg-indigo-500 text-white font-bold text-[9px] px-2 py-0.5 rounded-bl-lg uppercase tracking-wider shadow-xs">
-                        Hucha Libre 🐷
+                        {t('savingGoals.freeGoalBadge')}
                       </div>
                     )}
 
@@ -529,15 +529,15 @@ export function SavingGoalsClient({
                             <Calendar className="h-3 w-3" />
                             {goal.target_date ? (
                               <span>
-                                Hasta el{' '}
-                                {new Date(goal.target_date).toLocaleDateString('es-ES', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
+                                {t('savingGoals.untilDate', {
+                                  date: new Date(goal.target_date).toLocaleDateString(
+                                    locale === 'en' ? 'en-US' : locale === 'ca' ? 'ca-ES' : 'es-ES',
+                                    { day: 'numeric', month: 'short', year: 'numeric' }
+                                  ),
                                 })}
                               </span>
                             ) : (
-                              <span>Sin límite de fecha</span>
+                              <span>{t('savingGoals.noDeadline')}</span>
                             )}
                           </CardDescription>
                         </div>
@@ -551,13 +551,13 @@ export function SavingGoalsClient({
                         {/* Cuentas y Progreso */}
                         <div className="space-y-1.5">
                           <div className="flex justify-between items-baseline text-xs">
-                            <span className="text-muted-foreground font-medium">Ahorrado actual:</span>
+                            <span className="text-muted-foreground font-medium">{t('savingGoals.currentSaved')}</span>
                             <span className="font-bold text-foreground">
                               {formatCurrency(goal.current_amount)}
                               {!isFree && (
                                 <span className="text-[10px] font-normal text-muted-foreground">
                                   {' '}
-                                  de {formatCurrency(goal.target_amount)}
+                                  {t('savingGoals.ofTarget', { amount: formatCurrency(goal.target_amount) })}
                                 </span>
                               )}
                             </span>
@@ -579,14 +579,14 @@ export function SavingGoalsClient({
                           <div className="flex justify-between items-center text-[10px]">
                             {isFree ? (
                               <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
-                                <InfinityIcon className="w-3 h-3" /> Crecimiento continuo
+                                <InfinityIcon className="w-3 h-3" /> {t('savingGoals.continuousGrowth')}
                               </span>
                             ) : (
                               <span
                                 className={`font-semibold ${isCompleted ? 'text-emerald-500' : 'text-primary'
                                   }`}
                               >
-                                {progressPercentage}% completado
+                                {t('savingGoals.percentCompleted', { percent: progressPercentage })}
                               </span>
                             )}
 
@@ -599,10 +599,10 @@ export function SavingGoalsClient({
                                 }
                               >
                                 {daysRemaining < 0
-                                  ? 'Excedido'
+                                  ? t('savingGoals.daysRemainingExceeded')
                                   : daysRemaining === 0
-                                    ? '¡Hoy es el último día!'
-                                    : `Quedan ${daysRemaining} días`}
+                                    ? t('savingGoals.daysRemainingLastDay')
+                                    : t('savingGoals.daysRemaining', { days: daysRemaining })}
                               </span>
                             )}
                           </div>
@@ -620,7 +620,7 @@ export function SavingGoalsClient({
                           setIsContributionModalOpen(true)
                         }}
                       >
-                        Aportar Fondos
+                        {t('savingGoals.contributeFunds')}
                       </Button>
 
                       <Button
@@ -642,19 +642,19 @@ export function SavingGoalsClient({
 
         {/* Columna Derecha: Aportaciones Recientes */}
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-foreground font-heading">Aportaciones</h2>
+          <h2 className="text-xl font-bold text-foreground font-heading">{t('savingGoals.contributionsTitle')}</h2>
 
           <Card className="border-slate-200/50 shadow-md">
             <CardHeader className="pb-3">
-              <CardTitle className="text-base font-bold">Últimas Aportaciones</CardTitle>
+              <CardTitle className="text-base font-bold">{t('savingGoals.recentContributionsTitle')}</CardTitle>
               <CardDescription className="text-xs">
-                Historial de dinero ingresado en las huchas del hogar.
+                {t('savingGoals.contributionsDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="px-0 pb-4">
               {initialContributions.length === 0 ? (
                 <div className="py-10 text-center text-xs text-muted-foreground">
-                  No hay aportaciones registradas.
+                  {t('savingGoals.noContributions')}
                 </div>
               ) : (
                 <div className="space-y-0.5 max-h-115 overflow-y-auto pr-1">
@@ -681,15 +681,18 @@ export function SavingGoalsClient({
                               {c.user_name}
                             </span>
                             <span className="text-[10px] text-muted-foreground truncate leading-tight">
-                              en: <strong className="text-foreground/80 font-medium">{c.goal_name}</strong>
+                              {t('savingGoals.inGoal', { goal: c.goal_name })}
                             </span>
                             <span className="text-[9px] text-muted-foreground mt-0.5">
-                              {new Date(c.created_at).toLocaleDateString('es-ES', {
-                                day: 'numeric',
-                                month: 'short',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
+                              {new Date(c.created_at).toLocaleDateString(
+                                locale === 'en' ? 'en-US' : locale === 'ca' ? 'ca-ES' : 'es-ES',
+                                {
+                                  day: 'numeric',
+                                  month: 'short',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                }
+                              )}
                             </span>
                           </div>
                         </div>
@@ -723,9 +726,9 @@ export function SavingGoalsClient({
         <Dialog open={isContributionModalOpen} onOpenChange={setIsContributionModalOpen}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Aportar Fondos de Ahorro</DialogTitle>
+              <DialogTitle>{t('savingGoals.contributeTitle')}</DialogTitle>
               <DialogDescription>
-                Añade dinero a la hucha: <strong className="text-foreground">{selectedGoal?.name}</strong>
+                {t('savingGoals.addMoneyTo', { goal: selectedGoal?.name || '' })}
               </DialogDescription>
             </DialogHeader>
 
@@ -733,7 +736,7 @@ export function SavingGoalsClient({
               {contributionError && (
                 <Alert variant="destructive">
                   <ShieldAlert className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>{t('common.error')}</AlertTitle>
                   <AlertDescription>{contributionError}</AlertDescription>
                 </Alert>
               )}
@@ -741,13 +744,13 @@ export function SavingGoalsClient({
               {contributionSuccess && (
                 <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400">
                   <Sparkles className="h-4 w-4 text-emerald-500" />
-                  <AlertTitle>Éxito</AlertTitle>
+                  <AlertTitle>{t('common.success')}</AlertTitle>
                   <AlertDescription>{contributionSuccess}</AlertDescription>
                 </Alert>
               )}
 
               <div className="space-y-1">
-                <Label htmlFor="contribution-amount">Importe a Guardar (€)</Label>
+                <Label htmlFor="contribution-amount">{t('savingGoals.amountToSave')}</Label>
                 <Input
                   id="contribution-amount"
                   type="text"
@@ -759,14 +762,14 @@ export function SavingGoalsClient({
                   className="bg-muted/50 focus:bg-background text-lg font-bold"
                 />
                 <p className="text-[10px] text-muted-foreground">
-                  Al aportar fondos ganarás <strong className="text-amber-600 dark:text-amber-400">+15 Monedas</strong> para tu Tamagotchi Dotzi 🐷.
+                  {t('savingGoals.tamagotchiRewardTip')}
                 </p>
               </div>
 
               <DialogFooter className="pt-2">
-                <DialogClose render={<Button type="button" variant="outline">Cancelar</Button>} />
+                <DialogClose render={<Button type="button" variant="outline">{t('common.cancel')}</Button>} />
                 <Button type="submit" disabled={isPending} className="font-bold">
-                  {isPending ? 'Guardando...' : 'Aportar Ahorro'}
+                  {isPending ? t('savingGoals.saving') : t('savingGoals.addSavingAction')}
                 </Button>
               </DialogFooter>
             </form>
@@ -843,14 +846,13 @@ export function SavingGoalsClient({
       <AlertDialog open={!!goalToDelete} onOpenChange={(open) => !open && setGoalToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar meta de ahorro?</AlertDialogTitle>
+            <AlertDialogTitle>{t('savingGoals.deleteGoalTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que quieres eliminar la meta de ahorro &quot;{goalToDelete?.name}&quot;?
-              Se borrarán también todas sus aportaciones de forma permanente.
+              {t('savingGoals.deleteGoalDesc', { name: goalToDelete?.name || '' })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault()
@@ -869,7 +871,7 @@ export function SavingGoalsClient({
               disabled={isPending}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
             >
-              {isPending ? 'Eliminando...' : 'Sí, eliminar'}
+              {isPending ? t('savingGoals.deleting') : t('savingGoals.yesDelete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -879,14 +881,15 @@ export function SavingGoalsClient({
       <AlertDialog open={!!contributionToDelete} onOpenChange={(open) => !open && setContributionToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>¿Eliminar aportación?</AlertDialogTitle>
+            <AlertDialogTitle>{t('savingGoals.deleteContributionTitle')}</AlertDialogTitle>
             <AlertDialogDescription>
-              ¿Estás seguro de que quieres eliminar esta aportación de{' '}
-              {contributionToDelete ? formatCurrency(contributionToDelete.amount) : ''}? El dinero acumulado en la hucha se restará automáticamente.
+              {t('savingGoals.deleteContributionDesc', {
+                amount: contributionToDelete ? formatCurrency(contributionToDelete.amount) : '',
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+            <AlertDialogCancel disabled={isPending}>{t('common.cancel')}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault()
@@ -905,7 +908,7 @@ export function SavingGoalsClient({
               disabled={isPending}
               className="bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold"
             >
-              {isPending ? 'Eliminando...' : 'Sí, eliminar'}
+              {isPending ? t('savingGoals.deleting') : t('savingGoals.yesDelete')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
