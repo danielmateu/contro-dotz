@@ -312,7 +312,12 @@
     "quickPrompt1": "¿Cómo vamos de presupuesto este mes?",
     "quickPrompt2": "¿Puedo darme un capricho el fin de semana?",
     "quickPrompt3": "¿Cómo consigo más DotzCoins?",
-    "quickPrompt4": "¡Brindemos por el ahorro del hogar!"
+    "quickPrompt4": "¡Brindemos por el ahorro del hogar!",
+    "clearHistory": "Limpiar conversación",
+    "clearHistoryConfirmTitle": "¿Vaciar historial con Dotzi?",
+    "clearHistoryConfirmDesc": "Se borrarán todos los mensajes guardados con tu Dotzi. Esta acción no se puede deshacer.",
+    "clearHistorySuccess": "Historial vaciado con éxito.",
+    "loadingHistory": "Cargando historial de chat..."
   },
   "tamagotchiShop": {
     "title": "Tienda, Armario y Comida de Dotzi",

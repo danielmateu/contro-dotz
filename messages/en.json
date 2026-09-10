@@ -312,7 +312,12 @@
     "quickPrompt1": "How are we doing on budget this month?",
     "quickPrompt2": "Can I treat myself this weekend?",
     "quickPrompt3": "How do I get more DotzCoins?",
-    "quickPrompt4": "Cheers to household savings!"
+    "quickPrompt4": "Cheers to household savings!",
+    "clearHistory": "Clear conversation",
+    "clearHistoryConfirmTitle": "Clear history with Dotzi?",
+    "clearHistoryConfirmDesc": "All saved messages with your Dotzi will be deleted. This action cannot be undone.",
+    "clearHistorySuccess": "History cleared successfully.",
+    "loadingHistory": "Loading chat history..."
   },
   "tamagotchiShop": {
     "title": "Dotzi's Shop, Wardrobe & Food",

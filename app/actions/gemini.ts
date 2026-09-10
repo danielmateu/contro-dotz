@@ -619,6 +619,78 @@ export interface ChatWithDotziParams {
 }
 
 /**
+ * Server Action para obtener el historial de chat guardado con Dotzi
+ */
+export async function getDotziChatHistoryAction(): Promise<{
+  messages?: Array<{ id: string; sender: 'user' | 'dotzi'; text: string; timestamp: string }>
+  error?: string
+}> {
+  try {
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Sesión no iniciada.' }
+
+    const { data, error } = await supabase
+      .from('dotzi_chat_messages')
+      .select('id, sender, content, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+      .limit(50)
+
+    if (error) {
+      console.error('getDotziChatHistoryAction Error:', error)
+      return { error: 'Error al recuperar el historial del chat.' }
+    }
+
+    const messages = (data || []).map((m: any) => ({
+      id: m.id,
+      sender: m.sender as 'user' | 'dotzi',
+      text: m.content,
+      timestamp: m.created_at,
+    }))
+
+    return { messages }
+  } catch (err: any) {
+    console.error('getDotziChatHistoryAction Catch Error:', err)
+    return { error: 'Error al cargar el historial.' }
+  }
+}
+
+/**
+ * Server Action para borrar el historial de chats con Dotzi del usuario activo
+ */
+export async function clearDotziChatHistoryAction(): Promise<{ success?: boolean; error?: string }> {
+  try {
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Sesión no iniciada.' }
+
+    const { error } = await supabase
+      .from('dotzi_chat_messages')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (error) {
+      console.error('clearDotziChatHistoryAction Error:', error)
+      return { error: 'Error al borrar el historial de chats.' }
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('clearDotziChatHistoryAction Catch Error:', err)
+    return { error: 'Error inesperado al borrar el historial.' }
+  }
+}
+
+/**
  * Server Action para charlar con Dotzi usando Gemini AI y su personalidad de Tamagotchi Financiero
  */
 export async function chatWithDotziAction({
@@ -627,7 +699,7 @@ export async function chatWithDotziAction({
   petStats,
   gameState,
   locale = 'es',
-}: ChatWithDotziParams): Promise<{ reply?: string; error?: string }> {
+}: ChatWithDotziParams): Promise<{ reply?: string; userMessageId?: string; replyMessageId?: string; error?: string }> {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return {
@@ -636,6 +708,50 @@ export async function chatWithDotziAction({
   }
 
   try {
+    const { createClient } = await import('@/lib/supabase/server')
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    let userMsgId: string | undefined
+
+    // Registrar mensaje del usuario en DB si está autenticado
+    if (user) {
+      const { data: insertedUserMsg } = await supabase
+        .from('dotzi_chat_messages')
+        .insert({
+          user_id: user.id,
+          household_id: householdId || null,
+          sender: 'user',
+          content: userPrompt.trim(),
+        })
+        .select('id')
+        .single()
+
+      if (insertedUserMsg) {
+        userMsgId = insertedUserMsg.id
+      }
+    }
+
+    // Obtener los últimos 10 mensajes del historial previo para alimentar el contexto conversacional a Gemini
+    let conversationHistoryContext = ''
+    if (user) {
+      const { data: historyMsgs } = await supabase
+        .from('dotzi_chat_messages')
+        .select('sender, content')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(10)
+
+      if (historyMsgs && historyMsgs.length > 0) {
+        const chronological = historyMsgs.reverse()
+        conversationHistoryContext = chronological
+          .map((m: any) => `${m.sender === 'user' ? 'Usuario' : 'Dotzi'}: ${m.content}`)
+          .join('\n')
+      }
+    }
+
     const langName = locale === 'ca' ? 'catalán' : locale === 'en' ? 'inglés' : 'español'
     const systemPrompt = `Eres "Dotzi", el Tamagotchi y mascota financiera oficial de la aplicación contro-dotz.
 Tu trabajo es ser el compañero interactivo, empático, simpático y muy motivador del usuario.
@@ -654,9 +770,10 @@ Tu estado actual:
 - Accesorio equipado actual: "${gameState.equippedAccessory}"
 - Saldo de DotzCoins: ${gameState.coins}
 
-El usuario te dice: "${userPrompt.trim()}"
+${conversationHistoryContext ? `Historial reciente de conversación:\n${conversationHistoryContext}\n` : ''}
+El usuario te dice ahora: "${userPrompt.trim()}"
 
-Responde como Dotzi con tu toque único, empático y personalizado:`
+Responde como Dotzi con tu toque único, empático y personalizado manteniendo la coherencia de la conversación:`
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
@@ -687,7 +804,32 @@ Responde como Dotzi con tu toque único, empático y personalizado:`
       return { error: 'Dotzi se ha quedado pensativo. ¡Prueba otra vez!' }
     }
 
-    return { reply: botReply.trim() }
+    const trimmedReply = botReply.trim()
+    let replyMsgId: string | undefined
+
+    // Guardar respuesta de Dotzi en DB si el usuario está autenticado
+    if (user) {
+      const { data: insertedReply } = await supabase
+        .from('dotzi_chat_messages')
+        .insert({
+          user_id: user.id,
+          household_id: householdId || null,
+          sender: 'dotzi',
+          content: trimmedReply,
+        })
+        .select('id')
+        .single()
+
+      if (insertedReply) {
+        replyMsgId = insertedReply.id
+      }
+    }
+
+    return {
+      reply: trimmedReply,
+      userMessageId: userMsgId,
+      replyMessageId: replyMsgId,
+    }
   } catch (err: any) {
     console.error('chatWithDotziAction Error:', err)
     return { error: 'Error al hablar con Dotzi.' }

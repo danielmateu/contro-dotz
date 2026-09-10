@@ -312,7 +312,12 @@
     "quickPrompt1": "Com anem de pressupost aquest mes?",
     "quickPrompt2": "Em puc donar un capritx el cap de setmana?",
     "quickPrompt3": "Com aconsegueixo més DotzCoins?",
-    "quickPrompt4": "Brindem per l’estalvi del llar!"
+    "quickPrompt4": "Brindem per l’estalvi del llar!",
+    "clearHistory": "Netejar conversa",
+    "clearHistoryConfirmTitle": "¿Buidar historial amb en Dotzi?",
+    "clearHistoryConfirmDesc": "Es buidaran tots els missatges desats amb el teu Dotzi. Aquesta acció no es pot desfer.",
+    "clearHistorySuccess": "Historial buidat amb èxit.",
+    "loadingHistory": "Carregant historial de xat..."
   },
   "tamagotchiShop": {
     "title": "Botiga, Armari i Menjar de Dotzi",
