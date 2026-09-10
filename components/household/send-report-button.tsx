@@ -4,9 +4,16 @@ import React, { useState } from 'react'
 import { sendHouseholdReportAction } from '@/app/actions/household'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Mail, Loader2, Check, AlertCircle } from 'lucide-react'
+import { Loader2, Check, AlertCircle } from 'lucide-react'
 import { toast } from '@/components/ui/toast'
 import { useI18n } from '@/lib/i18n/i18n-context'
+import { MorphIcon } from '@/components/ui/client-morph-icon'
+// @ts-ignore
+import { __iconNode as MailData } from 'lucide-react/dist/esm/icons/mail.mjs'
+// @ts-ignore
+import { __iconNode as SendData } from 'lucide-react/dist/esm/icons/send.mjs'
+// @ts-ignore
+import { __iconNode as CheckData } from 'lucide-react/dist/esm/icons/check.mjs'
 import {
   Tooltip,
   TooltipContent,
@@ -23,6 +30,9 @@ export function SendReportButton({ householdId, compact }: SendReportButtonProps
   const { locale } = useI18n()
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState<string | null>(null)
+  const [isHovered, setIsHovered] = useState(false)
+
+  const currentIcon = status === 'success' ? CheckData : isHovered ? SendData : MailData
 
   const handleSendReport = async () => {
     if (status === 'loading') return
@@ -119,6 +129,8 @@ export function SendReportButton({ householdId, compact }: SendReportButtonProps
             <Button
               onClick={handleSendReport}
               disabled={status === 'loading'}
+              onMouseEnter={() => setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
               variant={compact ? "outline" : "default"}
               className={compact ? "h-9 px-3 rounded-xl border-slate-200/50 hover:bg-muted/50 dark:border-slate-800/50" : "w-full sm:w-auto"}
             >
@@ -133,7 +145,11 @@ export function SendReportButton({ householdId, compact }: SendReportButtonProps
                 </>
               ) : (
                 <>
-                  <Mail className="h-4 w-4" />
+                  <MorphIcon
+                    icon={currentIcon}
+                    spring="snappy"
+                    className="h-4 w-4 shrink-0"
+                  />
                   {!compact ? (
                     <span className="ml-2">
                       {locale === 'en' ? 'Send Family Report by Email' : locale === 'ca' ? 'Enviar Informe Familiar per Email' : 'Enviar Informe Familiar por Email'}
@@ -147,9 +163,9 @@ export function SendReportButton({ householdId, compact }: SendReportButtonProps
               )}
             </Button>
           } />
-          <TooltipContent side="bottom" align={compact ? "center" : "center"} className="max-w-xs">
+          <TooltipContent side="bottom" align="center" className="max-w-xs p-3">
             <div className="space-y-1 text-left">
-              <p className="font-semibold text-xs">{tooltipTitle}</p>
+              <p className="font-semibold text-xs text-foreground">{tooltipTitle}</p>
               <p className="text-[11px] text-muted-foreground leading-normal font-normal">
                 {tooltipDescription}
               </p>
