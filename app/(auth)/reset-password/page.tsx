@@ -9,6 +9,8 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { MouseGlow } from '@/components/landing/mouse-glow'
 import { HeroPiggyBackground } from '@/components/landing/hero-piggy-background'
@@ -47,6 +49,7 @@ export default function ResetPasswordPage() {
 }
 
 function ResetPasswordContent() {
+  const { t } = useI18n()
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -81,14 +84,14 @@ function ResetPasswordContent() {
         })
         if (error) {
           console.error('Error verificando OTP:', error)
-          setVerifyError('El enlace de recuperación es inválido o ha expirado. Por favor, solicita uno nuevo.')
+          setVerifyError(t('auth.resetPasswordPage.defaultVerifyError'))
           setVerified(false)
         } else {
           setVerified(true)
         }
       } catch (err) {
         console.error('Error en la verificación:', err)
-        setVerifyError('Ocurrió un error inesperado al validar el enlace.')
+        setVerifyError(t('auth.resetPasswordPage.unexpectedVerifyError'))
       } finally {
         setVerifying(false)
       }
@@ -116,15 +119,20 @@ function ResetPasswordContent() {
     } else {
       checkSession()
     }
-  }, [token_hash, type, supabase, router])
+  }, [token_hash, type, supabase, router, t])
 
   // Título de la página
   useEffect(() => {
-    document.title = 'Restablecer contraseña | Control Dotz'
-  }, [])
+    document.title = t('auth.resetPasswordPage.documentTitle')
+  }, [t])
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">
+      {/* Botón flotante para seleccionar idioma */}
+      <div className="absolute top-4 right-4 z-20">
+        <LocaleSwitcher />
+      </div>
+
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
 
@@ -148,7 +156,7 @@ function ResetPasswordContent() {
             Control Dotz
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Restablecer contraseña
+            {t('auth.resetPasswordPage.heroSubtitle')}
           </p>
         </div>
 
@@ -158,10 +166,10 @@ function ResetPasswordContent() {
             <div className="py-12 flex flex-col items-center justify-center space-y-4">
               <Loader2 className="h-8 w-8 text-primary animate-spin" />
               <div className="text-sm font-semibold text-foreground">
-                Verificando tu enlace de seguridad...
+                {t('auth.resetPasswordPage.verifyingTitle')}
               </div>
               <div className="text-xs text-muted-foreground">
-                Esto tomará solo unos segundos.
+                {t('auth.resetPasswordPage.verifyingSubtitle')}
               </div>
             </div>
           ) : verifyError ? (
@@ -169,16 +177,16 @@ function ResetPasswordContent() {
             <>
               <CardHeader className="space-y-1.5 pt-6 px-6">
                 <CardTitle className="text-2xl font-extrabold tracking-tight text-destructive font-heading">
-                  Enlace inválido o expirado
+                  {t('auth.resetPasswordPage.invalidLinkTitle')}
                 </CardTitle>
                 <CardDescription className="font-medium text-muted-foreground">
-                  El token de recuperación no pudo ser verificado.
+                  {t('auth.resetPasswordPage.invalidLinkDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 px-6 pb-4">
                 <Alert variant="destructive" className="rounded-xl">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Enlace caducado</AlertTitle>
+                  <AlertTitle>{t('auth.resetPasswordPage.linkExpiredAlert')}</AlertTitle>
                   <AlertDescription>{verifyError}</AlertDescription>
                 </Alert>
               </CardContent>
@@ -190,12 +198,12 @@ function ResetPasswordContent() {
                     "w-full font-semibold rounded-xl h-10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center"
                   )}
                 >
-                  Solicitar nuevo enlace
+                  {t('auth.resetPasswordPage.requestNewLink')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
                 <div className="text-center text-sm font-medium">
                   <Link href="/login" className="text-primary hover:underline font-bold">
-                    Volver al inicio de sesión
+                    {t('auth.resetPasswordPage.backToLogin')}
                   </Link>
                 </div>
               </CardFooter>
@@ -205,16 +213,16 @@ function ResetPasswordContent() {
             <>
               <CardHeader className="space-y-1.5 pt-6 px-6">
                 <CardTitle className="text-2xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400 font-heading">
-                  Contraseña restablecida
+                  {t('auth.resetPasswordPage.successTitle')}
                 </CardTitle>
                 <CardDescription className="font-medium text-muted-foreground">
-                  Tu cuenta ha sido actualizada con tu nueva contraseña.
+                  {t('auth.resetPasswordPage.successDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 px-6 pb-4">
                 <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400 rounded-xl">
                   <CheckCircle className="h-4 w-4 text-emerald-500" />
-                  <AlertTitle>¡Éxito!</AlertTitle>
+                  <AlertTitle>{t('common.success')}</AlertTitle>
                   <AlertDescription>{state.success}</AlertDescription>
                 </Alert>
               </CardContent>
@@ -226,7 +234,7 @@ function ResetPasswordContent() {
                     "w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center border-0"
                   )}
                 >
-                  Ir al panel de control
+                  {t('auth.resetPasswordPage.goToDashboard')}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </CardFooter>
@@ -236,10 +244,10 @@ function ResetPasswordContent() {
             <form action={formAction}>
               <CardHeader className="space-y-1.5 pt-6 px-6">
                 <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">
-                  Nueva contraseña
+                  {t('auth.resetPasswordPage.formTitle')}
                 </CardTitle>
                 <CardDescription className="font-medium text-muted-foreground">
-                  Elige una contraseña segura de al menos 6 caracteres para tu cuenta.
+                  {t('auth.resetPasswordPage.formDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 px-6 pb-4">
@@ -247,7 +255,7 @@ function ResetPasswordContent() {
                 {state?.error && (
                   <Alert variant="destructive" className="rounded-xl">
                     <AlertCircle className="h-4 w-4" />
-                    <AlertTitle>Error</AlertTitle>
+                    <AlertTitle>{t('common.error')}</AlertTitle>
                     <AlertDescription>{state.error}</AlertDescription>
                   </Alert>
                 )}
@@ -255,7 +263,7 @@ function ResetPasswordContent() {
                 {/* Campo: Nueva Contraseña */}
                 <div className="space-y-1.5">
                   <Label htmlFor="password" className="font-semibold text-xs text-foreground">
-                    Nueva contraseña
+                    {t('auth.resetPasswordPage.newPassword')}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -263,7 +271,7 @@ function ResetPasswordContent() {
                       id="password"
                       name="password"
                       type={showPassword ? 'text' : 'password'}
-                      placeholder="Mínimo 6 caracteres"
+                      placeholder={t('auth.resetPasswordPage.newPasswordPlaceholder')}
                       required
                       className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
                     />
@@ -271,7 +279,7 @@ function ResetPasswordContent() {
                       type="button"
                       onClick={togglePasswordVisibility}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                      aria-label={showPassword ? 'Ocultar clave' : 'Mostrar clave'}
+                      aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                     >
                       <MorphIcon
                         icon={showPassword ? EyeOffData : EyeData}
@@ -285,7 +293,7 @@ function ResetPasswordContent() {
                 {/* Campo: Confirmar Contraseña */}
                 <div className="space-y-1.5">
                   <Label htmlFor="confirmPassword" className="font-semibold text-xs text-foreground">
-                    Confirmar nueva contraseña
+                    {t('auth.resetPasswordPage.confirmPassword')}
                   </Label>
                   <div className="relative">
                     <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -293,7 +301,7 @@ function ResetPasswordContent() {
                       id="confirmPassword"
                       name="confirmPassword"
                       type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder="Repite tu contraseña"
+                      placeholder={t('auth.resetPasswordPage.confirmPasswordPlaceholder')}
                       required
                       className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
                     />
@@ -301,7 +309,7 @@ function ResetPasswordContent() {
                       type="button"
                       onClick={toggleConfirmPasswordVisibility}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                      aria-label={showConfirmPassword ? 'Ocultar clave' : 'Mostrar clave'}
+                      aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                     >
                       <MorphIcon
                         icon={showConfirmPassword ? EyeOffData : EyeData}
@@ -327,7 +335,7 @@ function ResetPasswordContent() {
                       spring="snappy"
                       className="w-4.5 h-4.5 text-violet-200"
                     />
-                    <span>{pending ? 'Actualizando contraseña...' : 'Restablecer contraseña'}</span>
+                    <span>{pending ? t('auth.resetPasswordPage.submitting') : t('auth.resetPasswordPage.submit')}</span>
                   </Button>
                 </div>
               </CardFooter>

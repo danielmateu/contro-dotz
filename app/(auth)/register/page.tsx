@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Card,
   CardContent,
@@ -38,17 +40,23 @@ type FormState = {
 const initialState: FormState = {}
 
 export default function RegisterPage() {
+  const { t } = useI18n()
   const [state, formAction, pending] = useActionState(signUpAction, initialState)
   const [isHovered, setIsHovered] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
-    document.title = 'Crear cuenta | Control Dotz'
-  }, [])
+    document.title = t('auth.registerPage.documentTitle')
+  }, [t])
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">
+      {/* Botón flotante para seleccionar idioma */}
+      <div className="absolute top-4 right-4 z-20">
+        <LocaleSwitcher />
+      </div>
+
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
 
@@ -72,15 +80,15 @@ export default function RegisterPage() {
             Control Dotz
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Crea tu cuenta familiar y empieza a ahorrar
+            {t('auth.registerPage.heroSubtitle')}
           </p>
         </div>
 
         <Card className="border-slate-200/40 shadow-2xl dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-[24px] overflow-hidden p-1">
           <CardHeader className="space-y-1.5 pt-6 px-6">
-            <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">Crear una cuenta</CardTitle>
+            <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">{t('auth.registerPage.title')}</CardTitle>
             <CardDescription className="font-medium text-muted-foreground">
-              Introduce tus datos para registrar tu cuenta de acceso familiar.
+              {t('auth.registerPage.description')}
             </CardDescription>
           </CardHeader>
 
@@ -90,7 +98,7 @@ export default function RegisterPage() {
               {state?.error && (
                 <Alert variant="destructive" className="rounded-xl">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>{t('common.error')}</AlertTitle>
                   <AlertDescription>{state.error}</AlertDescription>
                 </Alert>
               )}
@@ -99,7 +107,7 @@ export default function RegisterPage() {
               {state?.success && (
                 <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400 rounded-xl">
                   <CheckCircle className="h-4 w-4 text-emerald-500" />
-                  <AlertTitle>Registro exitoso</AlertTitle>
+                  <AlertTitle>{t('auth.registerPage.successTitle')}</AlertTitle>
                   <AlertDescription>{state.success}</AlertDescription>
                 </Alert>
               )}
@@ -107,32 +115,32 @@ export default function RegisterPage() {
               {!state?.success && (
                 <>
                   {/* Botón de registro rápido con Google OAuth */}
-                  <GoogleSignInButton text="Registrarse con Google" />
+                  <GoogleSignInButton text={t('auth.registerPage.googleButton')} />
 
                   <div className="relative flex items-center justify-center my-3">
                     <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
                     <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider relative z-10 shrink-0">
-                      o con correo
+                      {t('auth.orWithEmail')}
                     </span>
                     <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="displayName" className="font-semibold text-xs text-foreground">Nombre o Alias</Label>
+                    <Label htmlFor="displayName" className="font-semibold text-xs text-foreground">{t('auth.registerPage.displayName')}</Label>
                     <div className="relative">
                       <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
                         id="displayName"
                         name="displayName"
                         type="text"
-                        placeholder="Ej. Daniel"
+                        placeholder={t('auth.registerPage.displayNamePlaceholder')}
                         className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="email" className="font-semibold text-xs text-foreground">Correo electrónico</Label>
+                    <Label htmlFor="email" className="font-semibold text-xs text-foreground">{t('auth.email')}</Label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -148,7 +156,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="password" className="font-semibold text-xs text-foreground">Contraseña</Label>
+                    <Label htmlFor="password" className="font-semibold text-xs text-foreground">{t('auth.password')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -162,7 +170,7 @@ export default function RegisterPage() {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                        aria-label={showPassword ? 'Ocultar clave' : 'Mostrar clave'}
+                        aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                       >
                         <MorphIcon
                           icon={showPassword ? EyeOffData : EyeData}
@@ -174,7 +182,7 @@ export default function RegisterPage() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="confirmPassword" className="font-semibold text-xs text-foreground">Confirmar contraseña</Label>
+                    <Label htmlFor="confirmPassword" className="font-semibold text-xs text-foreground">{t('auth.registerPage.confirmPassword')}</Label>
                     <div className="relative">
                       <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -188,7 +196,7 @@ export default function RegisterPage() {
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                         className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                        aria-label={showConfirmPassword ? 'Ocultar clave' : 'Mostrar clave'}
+                        aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                       >
                         <MorphIcon
                           icon={showConfirmPassword ? EyeOffData : EyeData}
@@ -218,18 +226,18 @@ export default function RegisterPage() {
                       spring="snappy"
                       className="w-4.5 h-4.5 text-violet-200"
                     />
-                    <span>{pending ? 'Registrando cuenta...' : 'Crear cuenta'}</span>
+                    <span>{pending ? t('auth.registerPage.submitting') : t('auth.registerPage.submit')}</span>
                   </Button>
                 </div>
               )}
 
               <div className="text-center text-sm text-muted-foreground w-full font-medium">
-                ¿Ya tienes una cuenta?{' '}
+                {t('auth.registerPage.alreadyHaveAccountPrompt')}{' '}
                 <Link
                   href="/login"
                   className="font-bold text-primary hover:underline"
                 >
-                  Inicia sesión
+                  {t('auth.registerPage.loginLink')}
                 </Link>
               </div>
             </CardFooter>

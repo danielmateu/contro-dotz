@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
+import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Card,
   CardContent,
@@ -50,6 +52,7 @@ export default function LoginPage() {
 }
 
 function LoginForm() {
+  const { t } = useI18n()
   const [state, formAction, pending] = useActionState(signInAction, initialState)
   const searchParams = useSearchParams()
   const errorParam = searchParams.get('error')
@@ -57,11 +60,16 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
-    document.title = 'Iniciar sesión | Control Dotz'
-  }, [])
+    document.title = t('auth.loginPage.documentTitle')
+  }, [t])
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">
+      {/* Botón flotante para seleccionar idioma */}
+      <div className="absolute top-4 right-4 z-20">
+        <LocaleSwitcher />
+      </div>
+
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
 
@@ -85,15 +93,15 @@ function LoginForm() {
             Control Dotz<span className="text-primary">.</span>
           </h1>
           <p className="text-sm text-muted-foreground mt-1 font-medium">
-            Gestiona tus gastos familiares de forma inteligente
+            {t('auth.appTagline')}
           </p>
         </div>
 
         <Card className="border-slate-200/40 shadow-2xl dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-[24px] overflow-hidden p-1">
           <CardHeader className="space-y-1.5 pt-6 px-6">
-            <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">Iniciar sesión</CardTitle>
+            <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">{t('auth.loginPage.title')}</CardTitle>
             <CardDescription className="font-medium text-muted-foreground">
-              Introduce tus credenciales para acceder a tu panel familiar.
+              {t('auth.loginPage.description')}
             </CardDescription>
           </CardHeader>
 
@@ -103,7 +111,7 @@ function LoginForm() {
               {state?.error && (
                 <Alert variant="destructive" className="rounded-xl">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>{t('common.error')}</AlertTitle>
                   <AlertDescription>{state.error}</AlertDescription>
                 </Alert>
               )}
@@ -111,24 +119,24 @@ function LoginForm() {
               {errorParam && (
                 <Alert variant="destructive" className="rounded-xl">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Sesión inválida</AlertTitle>
+                  <AlertTitle>{t('auth.loginPage.invalidSessionTitle')}</AlertTitle>
                   <AlertDescription>{errorParam}</AlertDescription>
                 </Alert>
               )}
 
               {/* Botón de inicio de sesión rápido con Google OAuth */}
-              <GoogleSignInButton text="Iniciar sesión con Google" />
+              <GoogleSignInButton text={t('auth.loginPage.googleButton')} />
 
               <div className="relative flex items-center justify-center my-3">
                 <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
                 <span className="bg-white dark:bg-slate-900 px-3 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider relative z-10 shrink-0">
-                  o con correo
+                  {t('auth.orWithEmail')}
                 </span>
                 <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="email" className="font-semibold text-xs text-foreground">Correo electrónico</Label>
+                <Label htmlFor="email" className="font-semibold text-xs text-foreground">{t('auth.email')}</Label>
                 <div className="relative">
                   <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -145,12 +153,12 @@ function LoginForm() {
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="font-semibold text-xs text-foreground">Contraseña</Label>
+                  <Label htmlFor="password" className="font-semibold text-xs text-foreground">{t('auth.password')}</Label>
                   <Link
                     href="/forgot-password"
                     className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
                   >
-                    ¿La has olvidado?
+                    {t('auth.loginPage.forgotPasswordLink')}
                   </Link>
                 </div>
                 <div className="relative">
@@ -167,7 +175,7 @@ function LoginForm() {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                    aria-label={showPassword ? 'Ocultar clave' : 'Mostrar clave'}
+                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                   >
                     <MorphIcon
                       icon={showPassword ? EyeOffData : EyeData}
@@ -194,17 +202,17 @@ function LoginForm() {
                     spring="snappy"
                     className="w-4.5 h-4.5 text-violet-200"
                   />
-                  <span>{pending ? 'Iniciando sesión...' : 'Entrar en mi cuenta'}</span>
+                  <span>{pending ? t('auth.loginPage.submitting') : t('auth.loginPage.submit')}</span>
                 </Button>
               </div>
 
               <div className="text-center text-sm text-muted-foreground w-full font-medium">
-                ¿No tienes cuenta?{' '}
+                {t('auth.loginPage.noAccountPrompt')}{' '}
                 <Link
                   href="/register"
                   className="font-bold text-primary hover:underline"
                 >
-                  Regístrate ahora!
+                  {t('auth.loginPage.registerLink')}
                 </Link>
               </div>
             </CardFooter>

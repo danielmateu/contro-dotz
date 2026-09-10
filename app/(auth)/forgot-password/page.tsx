@@ -7,6 +7,8 @@ import { resetPasswordRequestAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Card,
   CardContent,
@@ -33,6 +35,7 @@ type FormState = {
 const initialState: FormState = {}
 
 export default function ForgotPasswordPage() {
+  const { t } = useI18n()
   const [state, formAction, pending] = useActionState(
     resetPasswordRequestAction,
     initialState
@@ -40,11 +43,16 @@ export default function ForgotPasswordPage() {
   const [isHovered, setIsHovered] = useState(false)
 
   useEffect(() => {
-    document.title = 'Recuperar contraseña | Control Dotz'
-  }, [])
+    document.title = t('auth.forgotPasswordPage.documentTitle')
+  }, [t])
 
   return (
     <div className="relative flex min-h-svh items-center justify-center bg-radial from-slate-50 to-slate-100 p-6 dark:from-slate-900 dark:to-slate-950">
+      {/* Botón flotante para seleccionar idioma */}
+      <div className="absolute top-4 right-4 z-20">
+        <LocaleSwitcher />
+      </div>
+
       {/* Orbe de luz interactivo del ratón */}
       <MouseGlow />
 
@@ -68,15 +76,15 @@ export default function ForgotPasswordPage() {
             Control Dotz
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Recupera el acceso a tu cuenta
+            {t('auth.forgotPasswordPage.heroSubtitle')}
           </p>
         </div>
 
         <Card className="border-slate-200/40 shadow-2xl dark:border-slate-800/80 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl rounded-[24px] overflow-hidden p-1">
           <CardHeader className="space-y-1.5 pt-6 px-6">
-            <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">Recuperar contraseña</CardTitle>
+            <CardTitle className="text-2xl font-extrabold tracking-tight font-heading">{t('auth.forgotPasswordPage.title')}</CardTitle>
             <CardDescription className="font-medium text-muted-foreground">
-              Introduce tu correo electrónico y te enviaremos las instrucciones de recuperación.
+              {t('auth.forgotPasswordPage.description')}
             </CardDescription>
           </CardHeader>
 
@@ -86,7 +94,7 @@ export default function ForgotPasswordPage() {
               {state?.error && (
                 <Alert variant="destructive" className="rounded-xl">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertTitle>Error</AlertTitle>
+                  <AlertTitle>{t('common.error')}</AlertTitle>
                   <AlertDescription>{state.error}</AlertDescription>
                 </Alert>
               )}
@@ -95,14 +103,14 @@ export default function ForgotPasswordPage() {
               {state?.success && (
                 <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400 rounded-xl">
                   <CheckCircle className="h-4 w-4 text-emerald-500" />
-                  <AlertTitle>Correo enviado</AlertTitle>
+                  <AlertTitle>{t('auth.forgotPasswordPage.emailSentTitle')}</AlertTitle>
                   <AlertDescription>{state.success}</AlertDescription>
                 </Alert>
               )}
 
               {!state?.success && (
                 <div className="space-y-1.5">
-                  <Label htmlFor="email" className="font-semibold text-xs text-foreground">Correo electrónico</Label>
+                  <Label htmlFor="email" className="font-semibold text-xs text-foreground">{t('auth.email')}</Label>
                   <div className="relative">
                     <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -135,18 +143,18 @@ export default function ForgotPasswordPage() {
                       spring="snappy"
                       className="w-4.5 h-4.5 text-violet-200"
                     />
-                    <span>{pending ? 'Enviando enlace...' : 'Enviar enlace de recuperación'}</span>
+                    <span>{pending ? t('auth.forgotPasswordPage.submitting') : t('auth.forgotPasswordPage.submit')}</span>
                   </Button>
                 </div>
               )}
 
               <div className="text-center text-sm text-muted-foreground w-full font-medium">
-                ¿Recordaste tu contraseña?{' '}
+                {t('auth.forgotPasswordPage.rememberPasswordPrompt')}{' '}
                 <Link
                   href="/login"
                   className="font-bold text-primary hover:underline"
                 >
-                  Inicia sesión
+                  {t('auth.forgotPasswordPage.loginLink')}
                 </Link>
               </div>
             </CardFooter>

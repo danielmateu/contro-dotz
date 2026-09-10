@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { AlertCircle } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface GoogleSignInButtonProps {
   text?: string
@@ -11,11 +12,14 @@ interface GoogleSignInButtonProps {
 }
 
 export function GoogleSignInButton({
-  text = 'Continuar con Google',
+  text,
   className = '',
 }: GoogleSignInButtonProps) {
+  const { t } = useI18n()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const displayText = text || t('auth.continueWithGoogle')
 
   const handleGoogleSignIn = async () => {
     try {
@@ -41,7 +45,7 @@ export function GoogleSignInButton({
         setLoading(false)
       }
     } catch (err: any) {
-      setError('Error al conectar con Google OAuth.')
+      setError(t('auth.googleError'))
       setLoading(false)
     }
   }
@@ -84,7 +88,7 @@ export function GoogleSignInButton({
             />
           </svg>
         )}
-        <span className="text-xs font-semibold">{loading ? 'Conectando con Google...' : text}</span>
+        <span className="text-xs font-semibold">{loading ? t('auth.connectingGoogle') : displayText}</span>
       </Button>
     </div>
   )
