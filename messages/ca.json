@@ -122,6 +122,17 @@
     "activityFeedJustNow": "Fa un moment",
     "activityFeedAgoMins": "Fa {mins} min",
     "activityFeedAgoHours": "Fa {hours} h",
+    "activityFeedEvents": {
+      "expense": "va registrar una despesa de **{amount}€** a **\"{description}\"** ({category})",
+      "botMessage": "l'**Assistent Gemini AI** va enviar una anàlisi o suggeriment al xat",
+      "userMessage": "va enviar un missatge al xat familiar",
+      "shoppingAdd": "va afegir **\"{name}\"** a la llista de la compra",
+      "shoppingBought": "va marcar com a comprat **\"{name}\"** a la llista",
+      "savingContribution": "va aportar **{amount}€** a la guardiola **\"{goal}\"**",
+      "member": "Membre",
+      "otherCategory": "Altres",
+      "savings": "Estalvis"
+    },
     "charts": {
       "loading": "Carregant gràfics...",
       "overview": "Visió General",

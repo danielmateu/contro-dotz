@@ -21,6 +21,13 @@ export interface ActivityEvent {
   user_name: string
   avatar_url?: string
   date: string
+  details?: {
+    description?: string
+    categoryName?: string
+    itemName?: string
+    goalName?: string
+    isBot?: boolean
+  }
 }
 
 interface ActivityFeedProps {
@@ -29,6 +36,39 @@ interface ActivityFeedProps {
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {
   const { t, locale } = useI18n()
+
+  const getActivityTitle = (activity: ActivityEvent) => {
+    const d = activity.details
+    if (!d) return activity.title
+
+    switch (activity.type) {
+      case 'expense':
+        return t('dashboard.activityFeedEvents.expense', {
+          amount: Number(activity.amount || 0).toFixed(2),
+          description: d.description || '',
+          category: d.categoryName || t('dashboard.activityFeedEvents.otherCategory'),
+        })
+      case 'message':
+        return d.isBot
+          ? t('dashboard.activityFeedEvents.botMessage')
+          : t('dashboard.activityFeedEvents.userMessage')
+      case 'shopping_add':
+        return t('dashboard.activityFeedEvents.shoppingAdd', {
+          name: d.itemName || '',
+        })
+      case 'shopping_bought':
+        return t('dashboard.activityFeedEvents.shoppingBought', {
+          name: d.itemName || '',
+        })
+      case 'saving_contribution':
+        return t('dashboard.activityFeedEvents.savingContribution', {
+          amount: Number(activity.amount || 0).toFixed(2),
+          goal: d.goalName || t('dashboard.activityFeedEvents.savings'),
+        })
+      default:
+        return activity.title
+    }
+  }
 
   // Función para parsear texto en negrita simple (**texto**)
   const renderFormattedText = (text: string) => {
@@ -123,6 +163,11 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
             {activities.map((activity) => {
               const meta = getActivityMeta(activity.type)
               const isGemini = activity.user_name === 'Gemini AI'
+              const formattedUserName =
+                activity.user_name === 'Miembro' || activity.user_name === 'Member' || activity.user_name === 'Membre'
+                  ? t('dashboard.activityFeedEvents.member')
+                  : activity.user_name
+              const eventTitle = getActivityTitle(activity)
 
               return (
                 <div
@@ -132,10 +177,10 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                   {/* Avatar de usuario */}
                   <Avatar className={`h-8 w-8 shrink-0 border border-border/40 ${isGemini ? 'ring-1 ring-primary/40' : ''}`}>
                     {activity.avatar_url ? (
-                      <AvatarImage src={activity.avatar_url} alt={activity.user_name} className="object-cover" />
+                      <AvatarImage src={activity.avatar_url} alt={formattedUserName} className="object-cover" />
                     ) : null}
                     <AvatarFallback className="bg-primary/5 text-primary font-semibold text-[10px]">
-                      {activity.user_name.substring(0, 2).toUpperCase()}
+                      {formattedUserName.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
 
@@ -143,9 +188,9 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
                   <div className="flex-1 min-w-0 space-y-0.5">
                     <p className="text-xs text-muted-foreground leading-normal wrap-break-word">
                       <span className="font-bold text-foreground mr-1">
-                        {activity.user_name}
+                        {formattedUserName}
                       </span>
-                      {renderFormattedText(activity.title)}
+                      {renderFormattedText(eventTitle)}
                     </p>
 
                     <div className="flex items-center gap-1.5 text-[9px] text-muted-foreground">

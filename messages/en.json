@@ -122,6 +122,17 @@
     "activityFeedJustNow": "Just now",
     "activityFeedAgoMins": "{mins}m ago",
     "activityFeedAgoHours": "{hours}h ago",
+    "activityFeedEvents": {
+      "expense": "logged an expense of **{amount}€** for **\"{description}\"** ({category})",
+      "botMessage": "the **Gemini AI Assistant** sent an analysis or suggestion to the chat",
+      "userMessage": "sent a message to the family chat",
+      "shoppingAdd": "added **\"{name}\"** to the shopping list",
+      "shoppingBought": "marked **\"{name}\"** as purchased on the list",
+      "savingContribution": "contributed **{amount}€** to the piggy bank **\"{goal}\"**",
+      "member": "Member",
+      "otherCategory": "Other",
+      "savings": "Savings"
+    },
     "charts": {
       "loading": "Loading charts...",
       "overview": "Overview",

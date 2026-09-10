@@ -10,6 +10,13 @@ export interface ActivityEvent {
   user_name: string
   avatar_url?: string
   date: string
+  details?: {
+    description?: string
+    categoryName?: string
+    itemName?: string
+    goalName?: string
+    isBot?: boolean
+  }
 }
 
 /**
@@ -110,6 +117,10 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
         user_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
         avatar_url: prof?.avatar_url || '',
         date: e.created_at,
+        details: {
+          description: e.description,
+          categoryName: cat?.name,
+        },
       })
     })
 
@@ -125,6 +136,9 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
           user_name: 'Gemini AI',
           avatar_url: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=150&h=150&fit=crop',
           date: m.created_at,
+          details: {
+            isBot: true,
+          },
         })
       } else {
         const prof = Array.isArray(m.profiles) ? m.profiles[0] : m.profiles
@@ -135,6 +149,9 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
           user_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
           avatar_url: prof?.avatar_url || '',
           date: m.created_at,
+          details: {
+            isBot: false,
+          },
         })
       }
     })
@@ -152,6 +169,9 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
         user_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
         avatar_url: prof?.avatar_url || '',
         date: s.created_at,
+        details: {
+          itemName: s.name,
+        },
       })
     })
 
@@ -168,6 +188,9 @@ export async function getRecentActivityAction(householdId: string): Promise<Acti
         user_name: prof?.display_name || prof?.email?.split('@')[0] || 'Miembro',
         avatar_url: prof?.avatar_url || '',
         date: s.created_at,
+        details: {
+          goalName: goal?.name,
+        },
       })
     })
 

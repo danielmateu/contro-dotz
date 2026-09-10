@@ -122,6 +122,17 @@
     "activityFeedJustNow": "Hace un momento",
     "activityFeedAgoMins": "Hace {mins} min",
     "activityFeedAgoHours": "Hace {hours} h",
+    "activityFeedEvents": {
+      "expense": "registró un gasto de **{amount}€** en **\"{description}\"** ({category})",
+      "botMessage": "el **Asistente Gemini AI** envió un análisis o sugerencia al chat",
+      "userMessage": "envió un mensaje al chat familiar",
+      "shoppingAdd": "añadió **\"{name}\"** a la lista de la compra",
+      "shoppingBought": "marcó como comprado **\"{name}\"** en la lista",
+      "savingContribution": "aportó **{amount}€** a la hucha **\"{goal}\"**",
+      "member": "Miembro",
+      "otherCategory": "Otros",
+      "savings": "Ahorros"
+    },
     "charts": {
       "loading": "Cargando gráficos...",
       "overview": "Vista General",
