@@ -383,7 +383,12 @@
     "uploadPayrollErr": "Error al subir el archivo de la nómina. Inténtalo de nuevo.",
     "savePayrollSuccess": "Ingreso mensual y documento registrados con éxito.",
     "deletePayrollSuccess": "Registro de ingresos eliminado con éxito.",
-    "openPayrollErr": "Error al abrir el documento de la nómina."
+    "openPayrollErr": "Error al abrir el documento de la nómina.",
+    "attachPayrollAction": "Adjuntar",
+    "changePayrollAction": "Cambiar",
+    "uploadingPayroll": "Subiendo...",
+    "attachPayrollSuccess": "Documento de nómina adjuntado con éxito.",
+    "editPayrollDesc": "Modifica el ingreso neto y la aportación al hogar para esta nómina."
   },
   "mode": {
     "light": "Claro",

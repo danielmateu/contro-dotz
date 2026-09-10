@@ -383,7 +383,12 @@
     "uploadPayrollErr": "Error en pujar l'arxiu de la nòmina. Torna-ho a intentar.",
     "savePayrollSuccess": "Ingrés mensual i document registrats amb èxit.",
     "deletePayrollSuccess": "Registre d'ingressos eliminat amb èxit.",
-    "openPayrollErr": "Error en obrir el document de la nòmina."
+    "openPayrollErr": "Error en obrir el document de la nòmina.",
+    "attachPayrollAction": "Adjuntar",
+    "changePayrollAction": "Canviar",
+    "uploadingPayroll": "Pujant...",
+    "attachPayrollSuccess": "Document de nòmina adjuntat amb èxit.",
+    "editPayrollDesc": "Modifica l'ingrés net i l'aportació a la llar per a aquesta nòmina."
   },
   "mode": {
     "light": "Clar",

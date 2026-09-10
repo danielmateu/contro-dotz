@@ -635,6 +635,23 @@ export async function saveMonthlyIncomeAction(
     return { error: 'Formato de mes no válido (debe ser AAAA-MM).' }
   }
 
+  let finalPayrollPath = payrollPath || null
+
+  // Si no se proporcionó una nueva ruta de archivo, comprobar si ya existía un documento para esta nómina
+  if (!payrollPath) {
+    const { data: existingRecord } = await supabase
+      .from('member_incomes')
+      .select('payroll_path')
+      .eq('household_id', householdId)
+      .eq('user_id', user.id)
+      .eq('month', month)
+      .maybeSingle()
+
+    if (existingRecord?.payroll_path) {
+      finalPayrollPath = existingRecord.payroll_path
+    }
+  }
+
   const { error } = await supabase
     .from('member_incomes')
     .upsert({
@@ -643,7 +660,7 @@ export async function saveMonthlyIncomeAction(
       month,
       amount,
       contribution,
-      payroll_path: payrollPath || null
+      payroll_path: finalPayrollPath
     }, {
       onConflict: 'household_id,user_id,month'
     })
@@ -739,3 +756,59 @@ export async function deleteMonthlyIncomeAction(incomeId: string): Promise<any> 
   revalidatePath('/dashboard')
   return { success: 'Ingreso mensual eliminado con éxito.' }
 }
+
+/**
+ * Actualiza o adjunta el documento de nómina para un registro de ingreso mensual existente
+ */
+export async function updateMonthlyIncomePayrollAction(
+  incomeId: string,
+  payrollPath: string
+): Promise<any> {
+  const supabase = await createClient()
+
+  // Obtener usuario autenticado
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { error: 'Sesión no iniciada.' }
+
+  // 1. Recuperar el registro para verificar propiedad y si tiene un documento anterior
+  const { data: incomeRecord, error: fetchError } = await supabase
+    .from('member_incomes')
+    .select('payroll_path')
+    .eq('id', incomeId)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (fetchError || !incomeRecord) {
+    return { error: 'No se encontró el registro de ingresos o no tienes permisos para editarlo.' }
+  }
+
+  // 2. Si tenía un documento anterior distinto, eliminarlo del bucket "payrolls"
+  if (incomeRecord.payroll_path && incomeRecord.payroll_path !== payrollPath) {
+    const { error: storageError } = await supabase.storage
+      .from('payrolls')
+      .remove([incomeRecord.payroll_path])
+    if (storageError) {
+      console.error('ERROR DELETING OLD PAYROLL DOCUMENT:', storageError)
+    }
+  }
+
+  // 3. Actualizar la ruta del documento en la base de datos
+  const { error } = await supabase
+    .from('member_incomes')
+    .update({ payroll_path: payrollPath })
+    .eq('id', incomeId)
+    .eq('user_id', user.id)
+
+  if (error) {
+    console.error('UPDATE PAYROLL PATH ERROR:', error)
+    return { error: 'Error al adjuntar el documento de la nómina en la base de datos.' }
+  }
+
+  revalidatePath('/settings')
+  revalidatePath('/dashboard')
+  revalidatePath('/household')
+  return { success: 'Documento de nómina adjuntado con éxito.' }
+}
+

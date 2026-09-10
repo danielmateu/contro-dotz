@@ -383,7 +383,12 @@
     "uploadPayrollErr": "Error uploading payslip file. Please try again.",
     "savePayrollSuccess": "Monthly income and document saved successfully.",
     "deletePayrollSuccess": "Income record deleted successfully.",
-    "openPayrollErr": "Error opening payslip document."
+    "openPayrollErr": "Error opening payslip document.",
+    "attachPayrollAction": "Attach",
+    "changePayrollAction": "Change",
+    "uploadingPayroll": "Uploading...",
+    "attachPayrollSuccess": "Payslip document attached successfully.",
+    "editPayrollDesc": "Modify net income and household contribution for this payslip."
   },
   "mode": {
     "light": "Light",

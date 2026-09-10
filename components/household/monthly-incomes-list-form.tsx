@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition, useRef } from 'react'
-import { saveMonthlyIncomeAction, deleteMonthlyIncomeAction, getPayrollUrlAction } from '@/app/actions/household'
+import { saveMonthlyIncomeAction, deleteMonthlyIncomeAction, getPayrollUrlAction, updateMonthlyIncomePayrollAction } from '@/app/actions/household'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -17,7 +17,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { AlertCircle, CheckCircle2, Calendar, Landmark, Loader2, Trash2, FileText, Upload } from 'lucide-react'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { AlertCircle, CheckCircle2, Calendar, Landmark, Loader2, Trash2, FileText, Upload, Pencil } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 
@@ -56,6 +64,8 @@ export function MonthlyIncomesListForm({
   const [contribution, setContribution] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
+  const [uploadingIncomeId, setUploadingIncomeId] = useState<string | null>(null)
+  const [targetIncomeForUpload, setTargetIncomeForUpload] = useState<MonthlyIncome | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -63,7 +73,14 @@ export function MonthlyIncomesListForm({
   const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const [incomeToDelete, setIncomeToDelete] = useState<string | null>(null)
 
+  // Edición de registro existente
+  const [isEditOpen, setIsEditOpen] = useState(false)
+  const [editingIncome, setEditingIncome] = useState<MonthlyIncome | null>(null)
+  const [editAmount, setEditAmount] = useState('')
+  const [editContribution, setEditContribution] = useState('')
+
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const rowFileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
   // Definición de listado dinámico de meses traducidos
@@ -191,6 +208,53 @@ export function MonthlyIncomesListForm({
     })
   }
 
+  const handleEditClick = (inc: MonthlyIncome) => {
+    setEditingIncome(inc)
+    setEditAmount(inc.amount ? inc.amount.toString() : '')
+    setEditContribution(inc.contribution ? inc.contribution.toString() : '')
+    setIsEditOpen(true)
+  }
+
+  const handleSaveEdit = () => {
+    if (!editingIncome) return
+    setError(null)
+    setSuccess(null)
+
+    const normalizedAmount = editAmount.trim().replace(',', '.')
+    const numericAmount = parseFloat(normalizedAmount)
+
+    const normalizedContrib = editContribution.trim().replace(',', '.')
+    const numericContrib = editContribution.trim() === '' ? 0 : parseFloat(normalizedContrib)
+
+    if (isNaN(numericAmount) || numericAmount < 0) {
+      setError(t('household.validAmountErr'))
+      return
+    }
+
+    if (isNaN(numericContrib) || numericContrib < 0) {
+      setError(t('household.validContribErr'))
+      return
+    }
+
+    setIsEditOpen(false)
+
+    startTransition(async () => {
+      const res = await saveMonthlyIncomeAction(
+        householdId,
+        editingIncome.month,
+        numericAmount,
+        numericContrib,
+        editingIncome.payroll_path
+      )
+      if (res?.error) {
+        setError(res.error)
+      } else {
+        setSuccess(t('household.savePayrollSuccess'))
+      }
+      setEditingIncome(null)
+    })
+  }
+
   const handleDownloadPayroll = async (path: string) => {
     setDownloadingId(path)
     setError(null)
@@ -208,6 +272,72 @@ export function MonthlyIncomesListForm({
     }
   }
 
+  const triggerAttachPayroll = (income: MonthlyIncome) => {
+    setTargetIncomeForUpload(income)
+    if (rowFileInputRef.current) {
+      rowFileInputRef.current.value = ''
+      rowFileInputRef.current.click()
+    }
+  }
+
+  const handleRowFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    if (!selectedFile || !targetIncomeForUpload) return
+
+    setError(null)
+    setSuccess(null)
+
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
+    if (!allowedTypes.includes(selectedFile.type)) {
+      setError(t('household.invalidFileTypeErr'))
+      setTargetIncomeForUpload(null)
+      return
+    }
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      setError(t('household.maxSizeErr'))
+      setTargetIncomeForUpload(null)
+      return
+    }
+
+    const incomeId = targetIncomeForUpload.id
+    const monthStr = targetIncomeForUpload.month
+    setUploadingIncomeId(incomeId)
+
+    startTransition(async () => {
+      try {
+        const fileExt = selectedFile.name.split('.').pop()
+        const filePath = `${householdId}/${userId}/${monthStr}-${Date.now()}.${fileExt}`
+
+        const { error: uploadError } = await supabase.storage
+          .from('payrolls')
+          .upload(filePath, selectedFile, {
+            cacheControl: '3600',
+            upsert: true
+          })
+
+        if (uploadError) {
+          throw uploadError
+        }
+
+        const res = await updateMonthlyIncomePayrollAction(incomeId, filePath)
+        if (res?.error) {
+          setError(res.error)
+        } else {
+          setSuccess(t('household.attachPayrollSuccess'))
+        }
+      } catch (err: any) {
+        console.error('Error al subir documento de nómina:', err)
+        setError(t('household.uploadPayrollErr'))
+      } finally {
+        setUploadingIncomeId(null)
+        setTargetIncomeForUpload(null)
+        if (rowFileInputRef.current) {
+          rowFileInputRef.current.value = ''
+        }
+      }
+    })
+  }
+
   const formatMonthName = (monthStr: string) => {
     const [year, month] = monthStr.split('-')
     const date = new Date(parseInt(year), parseInt(month) - 1, 1)
@@ -217,6 +347,15 @@ export function MonthlyIncomesListForm({
 
   return (
     <div className="space-y-6">
+      {/* Input oculto para adjuntar archivo a un registro existente */}
+      <input
+        type="file"
+        ref={rowFileInputRef}
+        className="hidden"
+        accept="application/pdf,image/*"
+        onChange={handleRowFileSelected}
+      />
+
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
@@ -368,7 +507,7 @@ export function MonthlyIncomesListForm({
                   <th className="p-3 text-right whitespace-nowrap">{t('household.thNetIncome')}</th>
                   <th className="p-3 text-right whitespace-nowrap">{t('household.thHouseholdContribution')}</th>
                   <th className="p-3 text-center whitespace-nowrap">{t('household.thDocument')}</th>
-                  <th className="p-3 w-16 text-center whitespace-nowrap">{t('household.thAction')}</th>
+                  <th className="p-3 w-20 text-center whitespace-nowrap">{t('household.thAction')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">
@@ -381,40 +520,88 @@ export function MonthlyIncomesListForm({
                       {formatCurrency(inc.amount)}
                     </td>
                     <td className="p-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                      {inc.contribution ? formatCurrency(inc.contribution) : '-'}
+                      {inc.contribution && Number(inc.contribution) > 0 ? formatCurrency(inc.contribution) : '-'}
                     </td>
                     <td className="p-3 text-center">
                       {inc.payroll_path ? (
-                        <Button
-                          type="button"
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleDownloadPayroll(inc.payroll_path!)}
-                          disabled={isPending || downloadingId !== null}
-                          className="h-7 text-[10px] gap-1 border-indigo-200 text-indigo-600 dark:border-indigo-900/50 dark:text-indigo-400 hover:bg-indigo-50/50"
-                        >
-                          {downloadingId === inc.payroll_path ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <FileText className="h-3.5 w-3.5" />
-                          )}
-                          {t('household.viewPayroll')}
-                        </Button>
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDownloadPayroll(inc.payroll_path!)}
+                            disabled={isPending || downloadingId !== null || uploadingIncomeId !== null}
+                            className="h-7 text-[10px] gap-1 border-indigo-200 text-indigo-600 dark:border-indigo-900/50 dark:text-indigo-400 hover:bg-indigo-50/50"
+                          >
+                            {downloadingId === inc.payroll_path ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <FileText className="h-3.5 w-3.5" />
+                            )}
+                            {t('household.viewPayroll')}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            title={t('household.changePayrollAction')}
+                            onClick={() => triggerAttachPayroll(inc)}
+                            disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
+                            className="h-7 px-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+                          >
+                            {uploadingIncomeId === inc.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Upload className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        </div>
                       ) : (
-                        <span className="text-[10px] text-muted-foreground italic">{t('household.noDocument')}</span>
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-[10px] text-muted-foreground italic">{t('household.noDocument')}</span>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => triggerAttachPayroll(inc)}
+                            disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
+                            className="h-7 text-[10px] gap-1 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
+                          >
+                            {uploadingIncomeId === inc.id ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <Upload className="h-3.5 w-3.5" />
+                            )}
+                            {t('household.attachPayrollAction')}
+                          </Button>
+                        </div>
                       )}
                     </td>
                     <td className="p-3 text-center">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handleDeleteClick(inc.id)}
-                        disabled={isPending}
-                        className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditClick(inc)}
+                          disabled={isPending}
+                          title={t('common.edit')}
+                          className="h-7 w-7 text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-foreground rounded-lg"
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteClick(inc.id)}
+                          disabled={isPending}
+                          title={t('common.delete')}
+                          className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -423,6 +610,61 @@ export function MonthlyIncomesListForm({
           </div>
         )}
       </div>
+
+      {/* Diálogo de Edición de Registro de Nómina */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {editingIncome ? `${t('common.edit')} (${formatMonthName(editingIncome.month)})` : t('common.edit')}
+            </DialogTitle>
+            <DialogDescription>
+              {t('household.editPayrollDesc')}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="editMonthlyAmount">{t('household.netIncome')}</Label>
+              <div className="relative">
+                <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="editMonthlyAmount"
+                  type="text"
+                  value={editAmount}
+                  onChange={(e) => setEditAmount(e.target.value)}
+                  placeholder={t('household.netIncomePlaceholder')}
+                  disabled={isPending}
+                  className="pl-9 bg-background focus:bg-background"
+                />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="editMonthlyContribution">{t('household.householdContribution')}</Label>
+              <div className="relative">
+                <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
+                <Input
+                  id="editMonthlyContribution"
+                  type="text"
+                  value={editContribution}
+                  onChange={(e) => setEditContribution(e.target.value)}
+                  placeholder={t('household.contributionPlaceholder')}
+                  disabled={isPending}
+                  className="pl-9 bg-background focus:bg-background"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" onClick={handleSaveEdit} disabled={isPending}>
+              {isPending ? <Loader2 className="h-4 w-4 mr-2 animate-spin text-white" /> : null}
+              {t('common.save')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Diálogo de Confirmación */}
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
@@ -447,3 +689,4 @@ export function MonthlyIncomesListForm({
     </div>
   )
 }
+
