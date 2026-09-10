@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react'
 import Link from 'next/link'
-import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
+import { TamagotchiAvatar, MaleIcon, FemaleIcon } from '@/components/game/tamagotchi-avatar'
 import { TamagotchiShopModal } from '@/components/game/tamagotchi-shop-modal'
 import { TamagotchiQuestsModal } from '@/components/game/tamagotchi-quests-modal'
 import { TamagotchiChatModal } from '@/components/game/tamagotchi-chat-modal'
@@ -171,7 +171,13 @@ export function TamagotchiCard({
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h3 className="font-extrabold text-sm sm:text-base tracking-tight flex items-center gap-1.5">
                   <span>{gameState.petName || 'Dotzi'}</span>
-                  <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-500" />
+                  {gameState.gender === 'boy' ? (
+                    <MaleIcon className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-sky-500" />
+                  ) : gameState.gender === 'girl' ? (
+                    <FemaleIcon className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-pink-500" />
+                  ) : (
+                    <Sparkles className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-amber-500" />
+                  )}
                 </h3>
                 <div className="flex items-center gap-1">
                   <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 rounded-lg ${weightInfo.color}`}>

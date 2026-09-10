@@ -54,8 +54,8 @@ export function SettingsViewClient({
           {locale === 'en'
             ? 'Manage your account and user profile information.'
             : locale === 'ca'
-            ? 'Administra la informació del teu compte i usuari.'
-            : 'Administra la información de tu cuenta y de tu usuario.'}
+              ? 'Administra la informació del teu compte i usuari.'
+              : 'Administra la información de tu cuenta y de tu usuario.'}
         </p>
       </div>
 
@@ -71,8 +71,8 @@ export function SettingsViewClient({
                 {locale === 'en'
                   ? 'Update your profile and base net income for proportional sharing of household expenses.'
                   : locale === 'ca'
-                  ? 'Actualitza el teu perfil i ingressos nets base per al repartiment equitatiu.'
-                  : 'Actualiza los datos de tu perfil y tus ingresos netos base para el reparto equitativo de los gastos del hogar.'}
+                    ? 'Actualitza el teu perfil i ingressos nets base per al repartiment equitatiu.'
+                    : 'Actualiza los datos de tu perfil y tus ingresos netos base para el reparto equitativo de los gastos del hogar.'}
               </CardDescription>
             </CardHeader>
 
@@ -96,8 +96,8 @@ export function SettingsViewClient({
                   {locale === 'en'
                     ? 'Email is linked to your Auth account and cannot be modified directly.'
                     : locale === 'ca'
-                    ? 'El correu electrònic està vinculat al teu compte d\'autenticació.'
-                    : 'El correo electrónico está vinculado a tu autenticación y no puede modificarse directamente.'}
+                      ? 'El correu electrònic està vinculat al teu compte d\'autenticació.'
+                      : 'El correo electrónico está vinculado a tu autenticación y no puede modificarse directamente.'}
                 </p>
               </div>
 
@@ -115,7 +115,7 @@ export function SettingsViewClient({
               </div>
 
               {/* Base Income Section */}
-              {householdId && (
+              {/* {householdId && (
                 <div className="border-t border-slate-200/50 dark:border-slate-800/50 pt-6 space-y-4">
                   <h3 className="font-semibold text-sm text-foreground font-heading">
                     {t('household.monthlyIncomes')} (Base)
@@ -133,7 +133,7 @@ export function SettingsViewClient({
                     householdId={householdId}
                   />
                 </div>
-              )}
+              )} */}
             </CardContent>
           </Card>
 
@@ -148,8 +148,8 @@ export function SettingsViewClient({
                   {locale === 'en'
                     ? 'Send a detailed financial report by email to all family members.'
                     : locale === 'ca'
-                    ? 'Envia un informe financer detallat per correu a tots els membres de la família.'
-                    : 'Envía un reporte financiero detallado por email a todos los miembros de tu familia.'}
+                      ? 'Envia un informe financer detallat per correu a tots els membres de la família.'
+                      : 'Envía un reporte financiero detallado por email a todos los miembros de tu familia.'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -171,8 +171,8 @@ export function SettingsViewClient({
                   {locale === 'en'
                     ? 'Log specific net incomes for specific months (e.g. bonus, commission).'
                     : locale === 'ca'
-                    ? 'Enregistra ingressos nets específics per a mesos concrets.'
-                    : 'Registra ingresos netos específicos para meses concretos (ej. nóminas con pagas extra, comisiones o bonus).'}
+                      ? 'Enregistra ingressos nets específics per a mesos concrets.'
+                      : 'Registra ingresos netos específicos para meses concretos (ej. nóminas con pagas extra, comisiones o bonus).'}
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -194,8 +194,8 @@ export function SettingsViewClient({
                 {locale === 'en'
                   ? 'Change your account password to keep your data secure.'
                   : locale === 'ca'
-                  ? 'Canvia la contrasenya del teu compte per mantenir les teves dades segures.'
-                  : 'Cambia la contraseña de tu cuenta para mantener tu información segura.'}
+                    ? 'Canvia la contrasenya del teu compte per mantenir les teves dades segures.'
+                    : 'Cambia la contraseña de tu cuenta para mantener tu información segura.'}
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -214,8 +214,8 @@ export function SettingsViewClient({
                 {locale === 'en'
                   ? 'Recommend Control Dotz to your family and friends so they can manage their household expenses.'
                   : locale === 'ca'
-                  ? 'Recomana Control Dotz a familiars i amics per a coordinar les despeses del seu hogar.'
-                  : 'Recomienda Control Dotz a tus familiares y conocidos para que coordinen los gastos de su hogar.'}
+                    ? 'Recomana Control Dotz a familiars i amics per a coordinar les despeses del seu hogar.'
+                    : 'Recomienda Control Dotz a tus familiares y conocidos para que coordinen los gastos de su hogar.'}
               </CardDescription>
             </CardHeader>
             <CardContent>

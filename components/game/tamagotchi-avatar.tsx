@@ -5,6 +5,45 @@ import { motion, AnimatePresence } from 'motion/react'
 import { PetMood } from '@/lib/game/fin-pet-engine'
 import { Sparkles, Heart, Zap, AlertTriangle, Coins } from 'lucide-react'
 import { useGameState } from '@/lib/game/game-context'
+import { DotziGender } from '@/lib/game/game-service'
+
+// Icono Masculino (♂ / Mars)
+export function MaleIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <circle cx="10" cy="14" r="5" />
+      <line x1="13.5" y1="10.5" x2="19" y2="5" />
+      <polyline points="14 5 19 5 19 10" />
+    </svg>
+  )
+}
+
+// Icono Femenino (♀ / Venus)
+export function FemaleIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <circle cx="12" cy="9" r="5" />
+      <line x1="12" y1="14" x2="12" y2="21" />
+      <line x1="8.5" y1="18" x2="15.5" y2="18" />
+    </svg>
+  )
+}
 
 interface TamagotchiAvatarProps {
   mood?: PetMood
@@ -19,6 +58,7 @@ interface TamagotchiAvatarProps {
   weight?: number // 0-100 (50 normal, >65 gordito, <35 delgado)
   cleanliness?: number // 0-100 (100 limpio, <40 sucio)
   isBathing?: boolean
+  gender?: DotziGender | string
   onClick?: () => void
 }
 
@@ -35,9 +75,11 @@ export function TamagotchiAvatar({
   weight = 50,
   cleanliness = 100,
   isBathing = false,
+  gender,
   onClick,
 }: TamagotchiAvatarProps) {
-  const { registerTap } = useGameState()
+  const { registerTap, gameState } = useGameState()
+  const effectiveGender = gender ?? gameState?.gender ?? 'neutral'
   const [isTapped, setIsTapped] = useState(false)
   const [tapPopups, setTapPopups] = useState<{ id: number; x: number; isCoinReward?: boolean; bonusCoins?: number; foodIcon?: string }[]>([])
 
@@ -588,10 +630,17 @@ export function TamagotchiAvatar({
 
         {/* Badge flotante de icono */}
         <div className={`absolute -bottom-1 -right-1 p-1 rounded-full text-[10px] font-bold shadow-md border border-background ${style.badgeColor}`}>
-          {mood === 'super_hero' && <Zap className="w-3 h-3 fill-current" />}
-          {mood === 'happy' && <Sparkles className="w-3 h-3 fill-current" />}
-          {mood === 'warning' && <AlertTriangle className="w-3 h-3" />}
-          {mood === 'exhausted' && <span className="text-[10px] font-extrabold">!</span>}
+          {mood === 'warning' ? (
+            <AlertTriangle className="w-3 h-3" />
+          ) : mood === 'exhausted' ? (
+            <span className="text-[10px] font-extrabold">!</span>
+          ) : effectiveGender === 'boy' ? (
+            <MaleIcon className="w-3 h-3" />
+          ) : effectiveGender === 'girl' ? (
+            <FemaleIcon className="w-3 h-3" />
+          ) : (
+            <Sparkles className="w-3 h-3 fill-current" />
+          )}
         </div>
       </motion.div>
     </div>

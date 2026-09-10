@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
-import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
+import { TamagotchiAvatar, MaleIcon, FemaleIcon } from '@/components/game/tamagotchi-avatar'
 import { UserGameState, DotziGender, DotziPersonality } from '@/lib/game/game-service'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
@@ -174,6 +174,7 @@ export function TamagotchiRpgCreatorModal({
                 equippedAccessory={gameState.equippedAccessory}
                 weight={weight}
                 cleanliness={gameState.cleanliness}
+                gender={gender}
                 interactive={false}
               />
             </div>
@@ -219,9 +220,9 @@ export function TamagotchiRpgCreatorModal({
               </Label>
               <div className="grid grid-cols-3 gap-2">
                 {[
-                  { id: 'boy', label: t('tamagotchi.boy') },
-                  { id: 'girl', label: t('tamagotchi.girl') },
-                  { id: 'neutral', label: t('tamagotchi.neutral') },
+                  { id: 'boy', label: t('tamagotchi.boy'), icon: <MaleIcon className="w-3.5 h-3.5" /> },
+                  { id: 'girl', label: t('tamagotchi.girl'), icon: <FemaleIcon className="w-3.5 h-3.5" /> },
+                  { id: 'neutral', label: t('tamagotchi.neutral'), icon: <Sparkles className="w-3.5 h-3.5 text-amber-500" /> },
                 ].map((g) => (
                   <Button
                     key={g.id}
@@ -229,9 +230,10 @@ export function TamagotchiRpgCreatorModal({
                     variant={gender === g.id ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setGender(g.id as DotziGender)}
-                    className="rounded-xl h-9 text-xs font-semibold px-2"
+                    className="rounded-xl h-9 text-xs font-semibold px-2 flex items-center justify-center gap-1"
                   >
-                    {g.label}
+                    {g.icon}
+                    <span>{g.label}</span>
                   </Button>
                 ))}
               </div>
