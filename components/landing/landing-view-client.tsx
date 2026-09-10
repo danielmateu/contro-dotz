@@ -43,9 +43,9 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
       {/* Header */}
       <header className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between border-b border-slate-200/20 dark:border-slate-800/30 backdrop-blur-xs">
         <div className="flex items-center gap-2 min-w-0">
-          <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 shrink-0">
+          {/* <div className="hidden sm:flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 shrink-0">
             <ShieldCheck className="h-5 w-5" />
-          </div>
+          </div> */}
           <span className="font-semibold text-lg sm:text-xl tracking-tight font-heading truncate">
             {t('landing.header.brand')}
           </span>
@@ -86,7 +86,7 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
 
       {/* Hero Section */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 py-12 sm:py-20 w-full max-w-5xl mx-auto space-y-6 sm:space-y-8 overflow-hidden">
-        <h1 className="text-3xl sm:text-6xl md:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.1] sm:leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300">
+        <h1 className="text-3xl sm:text-6xl md:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.1] sm:leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300 text-balance">
           {t('landing.hero.title')}
         </h1>
 
