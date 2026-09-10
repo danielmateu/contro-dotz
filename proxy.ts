@@ -31,7 +31,9 @@ export async function proxy(request: NextRequest) {
 
     // Redirigir a /login si no hay usuario autenticado en una ruta privada
     if (!user && !isPublicRoute) {
-      return NextResponse.redirect(new URL('/login', request.url))
+      const redirectRes = NextResponse.redirect(new URL('/login', request.url))
+      response.cookies.getAll().forEach((cookie) => redirectRes.cookies.set(cookie))
+      return redirectRes
     }
 
     // Redirigir a /dashboard si el usuario autenticado intenta ir a login/register/forgot-password
@@ -41,7 +43,9 @@ export async function proxy(request: NextRequest) {
         pathname.startsWith('/register') ||
         pathname.startsWith('/forgot-password'))
     ) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      const redirectRes = NextResponse.redirect(new URL('/dashboard', request.url))
+      response.cookies.getAll().forEach((cookie) => redirectRes.cookies.set(cookie))
+      return redirectRes
     }
 
     return response

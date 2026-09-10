@@ -4,8 +4,10 @@ import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { TrendingUp, Check, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 export function InteractiveShowcase() {
+  const { t } = useI18n()
   const [chatStep, setChatStep] = useState(0)
   const containerRef = React.useRef<HTMLDivElement>(null)
   const [isVisible, setIsVisible] = useState(false)
@@ -49,7 +51,7 @@ export function InteractiveShowcase() {
             <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-amber-500/80 shrink-0"></div>
             <div className="h-2.5 w-2.5 sm:h-3 sm:w-3 rounded-full bg-emerald-500/80 shrink-0"></div>
             <span className="text-xs font-mono text-muted-foreground ml-1.5 sm:ml-3 truncate select-none">
-              control-dotz.app/dashboard
+              {t('landing.showcase.url')}
             </span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
@@ -69,7 +71,7 @@ export function InteractiveShowcase() {
             </div>
             <div className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs text-primary font-bold select-none">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Dotzi House
+              {t('landing.showcase.live')}
             </div>
           </div>
         </div>
@@ -87,7 +89,7 @@ export function InteractiveShowcase() {
               className="p-4 border border-slate-100 dark:border-slate-900 bg-slate-500/5 rounded-2xl relative overflow-hidden"
             >
               <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground">
-                Gasto mensual (agosto)
+                {t('landing.showcase.monthlySpent')}
               </span>
               
               {/* Valor de gasto */}
@@ -99,7 +101,7 @@ export function InteractiveShowcase() {
                 <span className="px-1.5 py-0.5 rounded-md bg-emerald-500/10">
                   ▲ +12.4%
                 </span>
-                <span>vs. mes anterior</span>
+                <span>{t('landing.showcase.vsPreviousMonth')}</span>
               </div>
 
               {/* Proyección predictiva Badge */}
@@ -111,7 +113,7 @@ export function InteractiveShowcase() {
                 className="mt-3.5 text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-semibold px-2 py-1 rounded-lg inline-flex items-center gap-1 select-none"
               >
                 <TrendingUp className="h-3.5 w-3.5 animate-bounce" />
-                Proyectado al cierre: ~1.680 €
+                {t('landing.showcase.projectedClosing')}
               </motion.div>
             </motion.div>
 
@@ -125,14 +127,14 @@ export function InteractiveShowcase() {
             >
               <div className="flex items-center justify-between border-b border-border/50 pb-1">
                 <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground">
-                  Límites Mensuales
+                  {t('landing.showcase.monthlyLimits')}
                 </span>
               </div>
 
               {/* Categoría A (Alimentación) */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-foreground">🛒 Alimentación</span>
+                  <span className="font-semibold text-foreground">{t('landing.showcase.foodCategory')}</span>
                   <span className="font-bold text-amber-700 dark:text-amber-300">82%</span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
@@ -149,7 +151,7 @@ export function InteractiveShowcase() {
               {/* Categoría B (Ocio) */}
               <div className="space-y-1">
                 <div className="flex justify-between text-xs">
-                  <span className="font-semibold text-foreground">🍕 Ocio / Cenas</span>
+                  <span className="font-semibold text-foreground">{t('landing.showcase.leisureCategory')}</span>
                   <span className="font-bold text-rose-600 dark:text-rose-400">105%</span>
                 </div>
                 <div className="h-1.5 w-full rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
@@ -172,7 +174,7 @@ export function InteractiveShowcase() {
                       transition={{ delay: 1.2, duration: 0.3, ease: 'easeOut' }}
                       className="text-xs text-rose-600 dark:text-rose-400 font-bold absolute"
                     >
-                      ⚠️ ¡Presupuesto superado!
+                      {t('landing.showcase.budgetExceeded')}
                     </motion.p>
                   </AnimatePresence>
                 </div>
@@ -191,10 +193,10 @@ export function InteractiveShowcase() {
             <div className="flex items-center justify-between border-b pb-2 border-slate-100 dark:border-slate-900">
               <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Chat Familiar
+                {t('landing.showcase.liveChat')}
               </span>
               <span className="text-[10px] bg-primary/15 text-primary px-2 py-0.5 rounded-md font-bold uppercase tracking-wider select-none">
-                En vivo
+                {t('landing.showcase.liveBadge')}
               </span>
             </div>
 
@@ -261,7 +263,7 @@ export function InteractiveShowcase() {
                   exit={{ opacity: 0 }}
                   className="text-xs text-muted-foreground text-center italic py-8 select-none font-medium"
                 >
-                  Esperando actividad familiar...
+                  {t('landing.showcase.waitingActivity')}
                 </motion.div>
               )}
             </div>
@@ -277,7 +279,7 @@ export function InteractiveShowcase() {
           >
             <div className="border-b pb-2 border-slate-100 dark:border-slate-900">
               <span className="text-xs uppercase font-bold tracking-wider text-muted-foreground">
-                Lista de la Compra
+                {t('landing.showcase.shoppingList')}
               </span>
             </div>
 
@@ -292,17 +294,17 @@ export function InteractiveShowcase() {
                   <div className="h-4 w-4 rounded-md border border-border flex items-center justify-center shrink-0"></div>
                   <div className="truncate">
                     <p className="font-semibold text-foreground leading-tight text-xs truncate">
-                      Tomates cherry
+                      {t('landing.showcase.cherryTomatoes')}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">2 packs • por Papi</p>
+                    <p className="text-[11px] text-muted-foreground">{t('landing.showcase.tomatoesDetails')}</p>
                   </div>
                 </div>
                 <button
                   type="button"
-                  aria-label="Convertir Tomates cherry en gasto"
+                  aria-label="Convertir en gasto"
                   className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-md border border-emerald-500/20 hover:bg-emerald-500/20 transition-all shrink-0"
                 >
-                  Gasto
+                  {t('landing.showcase.expenseButton')}
                 </button>
               </motion.div>
 
@@ -326,19 +328,19 @@ export function InteractiveShowcase() {
                   </motion.div>
                   <div className="truncate">
                     <p className="font-medium text-muted-foreground line-through leading-tight text-xs truncate">
-                      Detergente lavadora
+                      {t('landing.showcase.detergent')}
                     </p>
-                    <p className="text-[11px] text-muted-foreground">1 bote • por Mamá</p>
+                    <p className="text-[11px] text-muted-foreground">{t('landing.showcase.detergentDetails')}</p>
                   </div>
                 </div>
                 <span className="text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 px-2 py-0.5 rounded-md font-semibold shrink-0">
-                  Comprado
+                  {t('landing.showcase.boughtStatus')}
                 </span>
               </motion.div>
 
               {/* Mensaje de info */}
               <p className="text-xs text-muted-foreground text-center italic leading-normal pt-3 select-none font-medium">
-                "Tacha los artículos que faltan en casa y regístralos como gastos con un solo clic."
+                {t('landing.showcase.shoppingTip')}
               </p>
             </div>
           </motion.div>

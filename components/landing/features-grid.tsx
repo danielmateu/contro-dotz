@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   HogarCompartidoDemo,
   EscanerIADemo,
@@ -23,8 +24,8 @@ import {
 
 interface FeatureItem {
   id: number
-  title: string
-  description: string
+  titleKey: string
+  descKey: string
   icon: LucideIcon
   colorClass: string
   iconColor: string
@@ -37,9 +38,8 @@ interface FeatureItem {
 const features: FeatureItem[] = [
   {
     id: 1,
-    title: 'Hogar Compartido',
-    description:
-      'Invita a tu familia al hogar. Registrad gastos y liquidaciones de deudas de forma conjunta con sincronización en tiempo real.',
+    titleKey: 'landing.features.f1Title',
+    descKey: 'landing.features.f1Desc',
     icon: Users2,
     colorClass: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
     iconColor: 'stroke-violet-600 dark:stroke-violet-400',
@@ -58,9 +58,8 @@ const features: FeatureItem[] = [
   },
   {
     id: 2,
-    title: 'Escáner de Tickets con IA',
-    description:
-      'Sube tus tickets de compra y deja que la IA de Gemini extraiga automáticamente el importe, la fecha y clasifique la categoría del gasto.',
+    titleKey: 'landing.features.f2Title',
+    descKey: 'landing.features.f2Desc',
     icon: Sparkles,
     colorClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
     iconColor: 'stroke-emerald-600 dark:stroke-emerald-400',
@@ -78,9 +77,8 @@ const features: FeatureItem[] = [
   },
   {
     id: 3,
-    title: 'Presupuestos y Límites',
-    description:
-      'Establece límites mensuales por categoría y recibe alertas de presupuesto automáticas directamente en el chat familiar al superar el 80%.',
+    titleKey: 'landing.features.f3Title',
+    descKey: 'landing.features.f3Desc',
     icon: PiggyBank,
     colorClass: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
     iconColor: 'stroke-amber-600 dark:stroke-amber-400',
@@ -97,9 +95,8 @@ const features: FeatureItem[] = [
   },
   {
     id: 4,
-    title: 'Chat Familiar y Gemini Bot',
-    description:
-      'Comunícate con tu familia y habla con @gemini en el chat para obtener análisis rápidos y resúmenes de vuestras finanzas al instante.',
+    titleKey: 'landing.features.f4Title',
+    descKey: 'landing.features.f4Desc',
     icon: MessageSquare,
     colorClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
     iconColor: 'stroke-blue-600 dark:stroke-blue-400',
@@ -115,9 +112,8 @@ const features: FeatureItem[] = [
   },
   {
     id: 5,
-    title: 'Lista de Compra Inteligente',
-    description:
-      'Añade artículos faltantes en tiempo real y regístralos como gastos financieros en el hogar con un solo clic una vez comprados.',
+    titleKey: 'landing.features.f5Title',
+    descKey: 'landing.features.f5Desc',
     icon: ShoppingBasket,
     colorClass: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
     iconColor: 'stroke-cyan-600 dark:stroke-cyan-400',
@@ -133,9 +129,8 @@ const features: FeatureItem[] = [
   },
   {
     id: 6,
-    title: 'Proyección e Informes',
-    description:
-      'Gráficos de proyección de gastos a final de mes y envío manual o programado de reportes detallados en HTML a toda la familia.',
+    titleKey: 'landing.features.f6Title',
+    descKey: 'landing.features.f6Desc',
     icon: Mail,
     colorClass: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
     iconColor: 'stroke-indigo-600 dark:stroke-indigo-400',
@@ -176,6 +171,7 @@ function FeatureDemoId({ id }: { id: number }) {
 
 // Componente de sección individual (Alternancia Zig-Zag y animaciones de scroll)
 function FeatureSection({ feature, index }: { feature: FeatureItem; index: number }) {
+  const { t } = useI18n()
   const [hovered, setHovered] = useState(false)
   const isEven = index % 2 === 0
 
@@ -230,21 +226,21 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
             </motion.div>
           </div>
           <span className="text-[10px] uppercase font-bold tracking-widest text-primary dark:text-violet-400">
-            Característica #0{feature.id}
+            {t('landing.features.badgePrefix')}{feature.id}
           </span>
         </div>
 
         <h3 className="font-extrabold text-xl sm:text-2xl md:text-4xl font-heading text-slate-900 dark:text-slate-100 leading-tight">
-          {feature.title}
+          {t(feature.titleKey)}
         </h3>
 
         <p className="text-sm sm:text-base md:text-lg text-muted-foreground leading-relaxed font-medium">
-          {feature.description}
+          {t(feature.descKey)}
         </p>
 
         <div className="pt-1 sm:pt-2 flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 select-none">
           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Prueba el demo interactivo en vivo</span>
+          <span>{t('landing.features.tryDemo')}</span>
         </div>
       </motion.div>
 

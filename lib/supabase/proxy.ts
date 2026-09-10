@@ -35,20 +35,39 @@ export async function updateSession(request: NextRequest) {
 
   // Refresca la sesión si ha expirado
   let user = null
+  let authError = null
+
   try {
-    const { data } = await supabase.auth.getUser()
-    user = data?.user ?? null
+    const { data, error } = await supabase.auth.getUser()
+    if (error) {
+      authError = error
+    } else {
+      user = data?.user ?? null
+    }
   } catch (err) {
     console.error('Error en proxy updateSession:', err)
   }
 
-  // Fallback offline: si no hay respuesta de red, intentar leer la sesión JWT local
-  if (!user) {
+  // Si hubo un error de autenticación (ej: refresh_token_not_found o token inválido/revocado),
+  // limpiamos las cookies de sesión para evitar que el navegador siga enviando tokens obsoletos.
+  if (authError) {
+    const allCookies = request.cookies.getAll()
+    allCookies.forEach((c) => {
+      if (c.name.startsWith('sb-')) {
+        request.cookies.delete(c.name)
+        response.cookies.set(c.name, '', { maxAge: 0, path: '/' })
+      }
+    })
+  } else if (!user) {
+    // Fallback offline: solo si no hay error de red ni de auth explícito, intentar leer la sesión JWT local
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      user = sessionData?.session?.user ?? null
+      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession()
+      if (!sessionErr) {
+        user = sessionData?.session?.user ?? null
+      }
     } catch (_) {}
   }
 
   return { response, user }
 }
+

@@ -12,14 +12,18 @@ export async function getAuthenticatedUser(): Promise<User | null> {
 
     // 1. Intentar validar token con los servidores de Supabase
     try {
-      const { data } = await supabase.auth.getUser()
+      const { data, error } = await supabase.auth.getUser()
+      if (error) {
+        // Si hay error de autenticación explícito (ej: refresh_token_not_found), no hay usuario válido
+        return null
+      }
       if (data?.user) return data.user
     } catch (_) {}
 
-    // 2. Fallback offline: decodificar sesión JWT desde cookies si no hay red
+    // 2. Fallback offline: decodificar sesión JWT desde cookies si no hay red ni error explícito de auth
     try {
-      const { data: sessionData } = await supabase.auth.getSession()
-      if (sessionData?.session?.user) {
+      const { data: sessionData, error: sessionErr } = await supabase.auth.getSession()
+      if (!sessionErr && sessionData?.session?.user) {
         return sessionData.session.user
       }
     } catch (_) {}

@@ -16,6 +16,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import { MorphIcon } from '@/components/ui/client-morph-icon'
+import { useI18n } from '@/lib/i18n/i18n-context'
 // @ts-ignore
 import { __iconNode as StickerData } from 'lucide-react/dist/esm/icons/sticker.mjs'
 // @ts-ignore
@@ -23,6 +24,7 @@ import { __iconNode as ScanFaceData } from 'lucide-react/dist/esm/icons/scan-fac
 
 // --- 1. HOGAR COMPARTIDO DEMO ---
 export function HogarCompartidoDemo() {
+  const { t } = useI18n()
   const [balances, setBalances] = useState([
     { name: 'Mateu', amount: 12.5, status: 'cobrar' },
     { name: 'Mamá', amount: -8.2, status: 'debe' },
@@ -57,8 +59,8 @@ export function HogarCompartidoDemo() {
     <div className="flex flex-col h-full justify-between text-xs space-y-4">
       <div className="space-y-2.5">
         <div className="flex justify-between items-center text-muted-foreground border-b border-slate-200 dark:border-slate-800 pb-1.5 font-bold uppercase tracking-wider text-[10px]">
-          <span>Miembro</span>
-          <span>Balance Familiar</span>
+          <span>{t('landing.demos.member')}</span>
+          <span>{t('landing.demos.balance')}</span>
         </div>
         {balances.map((b) => (
           <div key={b.name} className="flex justify-between items-center py-0.5">
@@ -102,12 +104,12 @@ export function HogarCompartidoDemo() {
             {animating ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                Saldando cuentas...
+                {t('landing.demos.settlingAccounts')}
               </>
             ) : (
               <>
                 <Users2 className="h-3.5 w-3.5" />
-                Saldar Deudas con 1 Clic
+                {t('landing.demos.settleOneClick')}
               </>
             )}
           </button>
@@ -118,13 +120,13 @@ export function HogarCompartidoDemo() {
             className="w-full space-y-2"
           >
             <div className="bg-emerald-500/10 border border-emerald-500/20 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-xl text-center font-medium flex items-center justify-center gap-1.5">
-              <Check className="h-4 w-4 stroke-[3px]" /> ¡Hogar liquidado! Todo a cero.
+              <Check className="h-4 w-4 stroke-[3px]" /> {t('landing.demos.settledSuccess')}
             </div>
             <button
               onClick={handleReset}
               className="w-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 py-1.5 rounded-lg transition-colors font-medium text-[10px]"
             >
-              Reiniciar Simulación
+              {t('landing.demos.resetSimulation')}
             </button>
           </motion.div>
         )}
@@ -135,6 +137,7 @@ export function HogarCompartidoDemo() {
 
 // --- 2. ESCÁNER DE TICKETS CON IA ---
 export function EscanerIADemo() {
+  const { t } = useI18n()
   const [scanState, setScanState] = useState<'idle' | 'scanning' | 'success'>('idle')
   const [data, setData] = useState<any>(null)
   const [isHovered, setIsHovered] = useState(false)
@@ -148,8 +151,8 @@ export function EscanerIADemo() {
         establecimiento: 'Mercadona Supermercados',
         fecha: '14/08/2026',
         total: '34.15 €',
-        categoria: '🛒 Alimentación',
-        items: ['Tomates cherry', 'Leche de avena', 'Detergente'],
+        categoria: t('landing.showcase.foodCategory'),
+        items: [t('landing.showcase.cherryTomatoes'), 'Leche de avena', 'Detergente'],
       })
     }, 2500)
   }
@@ -171,7 +174,7 @@ export function EscanerIADemo() {
               />
             </span>
             <p className="text-slate-600 dark:text-slate-400 text-[11px] leading-relaxed">
-              Sube un ticket de compra de ejemplo para ver extraer a Gemini la información.
+              {t('landing.demos.scanPrompt')}
             </p>
           </div>
         )}
@@ -180,7 +183,6 @@ export function EscanerIADemo() {
           <div className="relative flex flex-col items-center justify-center h-full py-4 space-y-2">
             {/* Línea de escaneo láser */}
             <div className="absolute left-0 right-0 h-0.5 bg-emerald-500/80 shadow-md shadow-emerald-500 z-10 pointer-events-none animate-scan-laser" />
-            {/* <span className="text-2xl animate-pulse">🧾</span> */}
             <span className="text-2xl select-none">
               <Loader2
                 size={22}
@@ -188,7 +190,7 @@ export function EscanerIADemo() {
               />
             </span>
             <p className="text-emerald-600 dark:text-emerald-400 font-semibold text-[10px] animate-pulse">
-              Gemini extrae los datos...
+              {t('landing.demos.geminiExtracting')}
             </p>
           </div>
         )}
@@ -209,7 +211,7 @@ export function EscanerIADemo() {
             </div>
             <div className="mt-1 pt-1.5 border-t border-slate-100 dark:border-slate-800/50">
               <p className="text-[9px] uppercase tracking-wider text-muted-foreground font-bold mb-1">
-                Artículos detectados:
+                {t('landing.demos.detectedItems')}
               </p>
               <div className="flex flex-wrap gap-1">
                 {data.items.map((item: string) => (
@@ -232,7 +234,7 @@ export function EscanerIADemo() {
         className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:bg-emerald-800 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
       >
         <Sparkles className="h-3.5 w-3.5" />
-        {scanState === 'scanning' ? 'Analizando...' : 'Escanear Ticket 🧾'}
+        {scanState === 'scanning' ? t('landing.demos.scanning') : t('landing.demos.scanButton')}
       </button>
     </div>
   )
@@ -240,6 +242,7 @@ export function EscanerIADemo() {
 
 // --- 3. PRESUPUESTOS Y LÍMITES ---
 export function PresupuestosDemo() {
+  const { t } = useI18n()
   const [spent, setSpent] = useState(70) // porcentaje
   const limitValue = 100 // Euros de límite
   const currentSpend = (spent / 100) * limitValue
@@ -258,7 +261,7 @@ export function PresupuestosDemo() {
         <div className="flex justify-between items-end">
           <div>
             <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider">
-              Presupuesto Ocio (Mensual)
+              {t('landing.demos.budgetLeisure')}
             </span>
             <div className="text-lg font-bold text-foreground mt-0.5">
               {currentSpend.toFixed(2)} € <span className="text-slate-500 text-xs font-normal">/ {limitValue.toFixed(2)} €</span>
@@ -298,9 +301,8 @@ export function PresupuestosDemo() {
               >
                 <AlertTriangle className="h-4 w-4 shrink-0 stroke-[2.5px]" />
                 <div>
-                  <span className="font-bold">¡Límite superado!</span> Habéis gastado{' '}
-                  <span className="font-bold">{(currentSpend - limitValue).toFixed(2)} €</span> de más. Se ha
-                  notificado a la familia.
+                  <span className="font-bold">{t('landing.demos.limitExceeded')}</span>{' '}
+                  {t('landing.demos.exceededByDesc', { amount: (currentSpend - limitValue).toFixed(2) })}
                 </div>
               </motion.div>
             ) : spent >= 80 ? (
@@ -313,9 +315,8 @@ export function PresupuestosDemo() {
               >
                 <AlertTriangle className="h-4 w-4 shrink-0 stroke-[2.5px]" />
                 <div>
-                  <span className="font-bold">Alerta 80% alcanzada:</span> Solo os quedan{' '}
-                  <span className="font-bold">{(limitValue - currentSpend).toFixed(2)} €</span> de ocio este mes. Bot
-                  avisará en el chat.
+                  <span className="font-bold">{t('landing.demos.alert80Title')}</span>{' '}
+                  {t('landing.demos.alert80Desc', { amount: (limitValue - currentSpend).toFixed(2) })}
                 </div>
               </motion.div>
             ) : (
@@ -326,7 +327,7 @@ export function PresupuestosDemo() {
                 exit={{ opacity: 0, y: -5 }}
                 className="text-slate-500 dark:text-slate-400 italic text-[10.5px] leading-normal pt-2 text-center"
               >
-                "Simula añadir gastos en cenas o cines para activar las notificaciones predictivas automáticas."
+                {t('landing.demos.budgetSimTip')}
               </motion.div>
             )}
           </AnimatePresence>
@@ -339,13 +340,13 @@ export function PresupuestosDemo() {
           className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
         >
           <Plus className="h-4 w-4" />
-          Añadir Gasto (+15€)
+          {t('landing.demos.addExpense15')}
         </button>
         <button
           onClick={resetSpend}
           className="border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 px-3.5 rounded-xl transition-colors"
         >
-          Reiniciar
+          {t('landing.demos.reset')}
         </button>
       </div>
     </div>
@@ -360,6 +361,7 @@ interface Message {
 }
 
 export function ChatGeminiDemo() {
+  const { t } = useI18n()
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, text: 'Hola @gemini, ¿cuál es nuestro balance actual?', sender: 'user' },
     {
@@ -379,11 +381,11 @@ export function ChatGeminiDemo() {
     // Respuesta simulada inteligente
     setTimeout(() => {
       let reply = 'Lo siento, no he entendido esa pregunta. Pregúntame sobre presupuestos o deudas.'
-      if (q.includes('alimentación')) {
+      if (q.includes('alimentación') || q.includes('groceries')) {
         reply = 'Habéis gastado 164,00 € en Alimentación. Quedan 36,00 € (18%) para alcanzar el límite establecido de 200,00 €.'
-      } else if (q.includes('deben')) {
+      } else if (q.includes('deben') || q.includes('balances')) {
         reply = 'Mamá debe 8,20 € y Papi debe 4,30 € a Mateu. Podéis saldar esta cuenta pulsando "Saldar Deudas" en la pestaña Hogar.'
-      } else if (q.includes('consejo')) {
+      } else if (q.includes('consejo') || q.includes('tip')) {
         reply = 'Recomiendo frenar gastos en Ocio / Cenas (actualmente al 105%). Si reducís un 10% el gasto en alimentación el mes que viene, ahorraréis unos 20,00 € extra.'
       }
 
@@ -420,7 +422,7 @@ export function ChatGeminiDemo() {
           <div className="flex flex-col items-start">
             <span className="text-[8px] text-muted-foreground font-bold mb-0.5">🤖 Gemini Bot</span>
             <div className="bg-violet-600/30 text-violet-300 px-3 py-1.5 rounded-2xl rounded-tl-none font-bold animate-pulse text-[10px]">
-              Analizando vuestros gastos...
+              {t('landing.demos.analyzingExpenses')}
             </div>
           </div>
         )}
@@ -429,7 +431,7 @@ export function ChatGeminiDemo() {
       {/* Sugerencias de preguntas rápidas */}
       <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 space-y-1.5 shrink-0">
         <p className="text-[8.5px] text-muted-foreground uppercase font-bold tracking-wider">
-          Preguntas sugeridas:
+          {t('landing.demos.suggestedQuestions')}
         </p>
         <div className="flex gap-1 overflow-x-auto pb-1 scrollbar-none flex-wrap">
           <button
@@ -437,21 +439,21 @@ export function ChatGeminiDemo() {
             disabled={typing}
             className="text-[9.5px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors shrink-0"
           >
-            📊 Gastos Alimentación
+            {t('landing.demos.qFood')}
           </button>
           <button
             onClick={() => askQuestion('¿Quiénes deben dinero y cuánto?')}
             disabled={typing}
             className="text-[9.5px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors shrink-0"
           >
-            💸 Saldos familiares
+            {t('landing.demos.qBalances')}
           </button>
           <button
             onClick={() => askQuestion('Dame un consejo para ahorrar')}
             disabled={typing}
             className="text-[9.5px] bg-slate-50 hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700 disabled:opacity-50 text-slate-700 dark:text-slate-300 px-2 py-1 rounded-lg border border-slate-200 dark:border-slate-700/50 transition-colors shrink-0"
           >
-            💡 Consejo ahorro
+            {t('landing.demos.qTip')}
           </button>
         </div>
       </div>
@@ -470,6 +472,7 @@ interface ShoppingItem {
 }
 
 export function ListaCompraDemo() {
+  const { t } = useI18n()
   const [items, setItems] = useState<ShoppingItem[]>([
     { id: 1, name: 'Leche de avena', qty: '2 bricks', addedBy: 'Mamá', price: 2.1, done: false },
     { id: 2, name: 'Tomates cherry', qty: '1 pack', addedBy: 'Papi', price: 1.45, done: false },
@@ -484,7 +487,7 @@ export function ListaCompraDemo() {
           const nextDone = !item.done
           // Si se marca como completado, mostrar notificación de conversión a gasto
           if (nextDone) {
-            setExpenseNotice(`Gasto de ${item.price.toFixed(2)}€ registrado en Alimentación`)
+            setExpenseNotice(t('landing.demos.shoppingNotice', { amount: item.price.toFixed(2) }))
             setTimeout(() => setExpenseNotice(null), 3000)
           }
           return { ...item, done: nextDone }
@@ -555,7 +558,7 @@ export function ListaCompraDemo() {
       </div>
 
       <p className="text-[9px] text-muted-foreground text-center italic select-none pt-1">
-        "Haz clic en cualquier artículo para comprarlo y registrarlo automáticamente como gasto."
+        {t('landing.demos.shoppingSimTip')}
       </p>
     </div>
   )
@@ -563,6 +566,7 @@ export function ListaCompraDemo() {
 
 // --- 6. PROYECCIÓN E INFORMES ---
 export function ProyeccionInformesDemo() {
+  const { t } = useI18n()
   const [reportState, setReportState] = useState<'idle' | 'sending' | 'sent'>('idle')
 
   const sendReport = () => {
@@ -581,8 +585,8 @@ export function ProyeccionInformesDemo() {
       {/* Vista previa del Informe */}
       <div className="border border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 flex-1 text-[10px] space-y-2">
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-1 font-bold text-slate-700 dark:text-slate-300">
-          <span>INFORMES MENSUALES</span>
-          <span className="text-[8px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.2 rounded uppercase">Agosto</span>
+          <span>{t('landing.demos.monthlyReports')}</span>
+          <span className="text-[8px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.2 rounded uppercase">{t('landing.demos.august')}</span>
         </div>
 
         {/* Gráfico de barras mini */}
@@ -608,8 +612,8 @@ export function ProyeccionInformesDemo() {
         </div>
 
         <div className="flex justify-between items-center text-[9px] pt-1 text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/50 mt-2">
-          <span>Gasto Total: <strong className="text-slate-800 dark:text-slate-200">1.450,20 €</strong></span>
-          <span>Proyección: <strong className="text-violet-600 dark:text-violet-400">~1.680 €</strong></span>
+          <span>{t('landing.demos.totalSpent')} <strong className="text-slate-800 dark:text-slate-200">1.450,20 €</strong></span>
+          <span>{t('landing.demos.projection')} <strong className="text-violet-600 dark:text-violet-400">~1.680 €</strong></span>
         </div>
       </div>
 
@@ -620,14 +624,14 @@ export function ProyeccionInformesDemo() {
             className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
           >
             <Mail className="h-3.5 w-3.5" />
-            Enviar Informe PDF/HTML a Familia
+            {t('landing.demos.sendReport')}
           </button>
         )}
 
         {reportState === 'sending' && (
           <div className="w-full bg-indigo-800 text-white font-bold py-2 rounded-xl text-center flex items-center justify-center gap-1.5 animate-pulse">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            Generando y enviando correos...
+            {t('landing.demos.sendingReport')}
           </div>
         )}
 
@@ -638,13 +642,13 @@ export function ProyeccionInformesDemo() {
             className="space-y-2"
           >
             <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 p-2 rounded-xl text-center font-medium flex items-center justify-center gap-1.5">
-              <Check className="h-4 w-4 stroke-[3px]" /> ¡Enviado a toda la familia! 🚀
+              <Check className="h-4 w-4 stroke-[3px]" /> {t('landing.demos.reportSent')}
             </div>
             <button
               onClick={resetReport}
               className="w-full border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 py-1.5 rounded-lg transition-colors font-medium text-[10px]"
             >
-              Reiniciar Simulación
+              {t('landing.demos.resetSimulation')}
             </button>
           </motion.div>
         )}

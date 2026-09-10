@@ -5,12 +5,15 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { buttonVariants } from '@/components/ui/button'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface CTASectionProps {
   isAuthenticated: boolean
 }
 
 export function CTASection({ isAuthenticated }: CTASectionProps) {
+  const { t } = useI18n()
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 20 }}
@@ -32,18 +35,17 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
         className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] text-primary dark:text-violet-400 font-extrabold uppercase tracking-widest select-none relative z-10"
       >
         <Sparkles className="h-3.5 w-3.5 text-primary dark:text-violet-400 animate-pulse" />
-        <span>Toma el control</span>
+        <span>{t('landing.cta.badge')}</span>
       </motion.div>
 
       {/* Título Principal */}
       <h2 className="text-2xl sm:text-3xl md:text-5xl font-extrabold font-heading tracking-tight text-slate-900 dark:text-slate-100 max-w-3xl leading-tight relative z-10">
-        Empieza a gestionar las finanzas de tu hogar hoy mismo
+        {t('landing.cta.title')}
       </h2>
 
       {/* Descripción */}
       <p className="text-xs sm:text-sm md:text-base text-muted-foreground max-w-2xl font-medium leading-relaxed relative z-10 px-1 sm:px-0">
-        Únete a las familias que ya utilizan Control Dotz para coordinar presupuestos,
-        escanear tickets de compra con IA y liquidar saldos de forma transparente y segura.
+        {t('landing.cta.subtitle')}
       </p>
 
       {/* Botones de Acción */}
@@ -57,7 +59,7 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
                 'w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 rounded-xl text-sm sm:text-base font-bold bg-primary text-primary-foreground shadow-xl shadow-primary/25 hover:bg-primary/95 transition-all duration-200 flex items-center justify-center'
               )}
             >
-              Ir a mi Dashboard
+              {t('landing.cta.goToMyDashboard')}
               <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
             </Link>
           </motion.div>
@@ -71,7 +73,7 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
                   'w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 rounded-xl text-sm sm:text-base font-bold bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-xl shadow-indigo-500/20 transition-all duration-200 flex items-center justify-center'
                 )}
               >
-                Crear cuenta
+                {t('landing.cta.createAccount')}
                 <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5" />
               </Link>
             </motion.div>
@@ -83,7 +85,7 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
                   'w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 rounded-xl text-sm sm:text-base font-bold border border-slate-350 dark:border-slate-800 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 text-foreground transition-all duration-200 flex items-center justify-center'
                 )}
               >
-                Iniciar sesión
+                {t('landing.cta.login')}
               </Link>
             </motion.div>
           </>

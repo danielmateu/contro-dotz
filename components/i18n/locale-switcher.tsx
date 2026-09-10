@@ -26,9 +26,9 @@ export function LocaleSwitcher({ className = '' }: { className?: string }) {
       <DropdownMenuTrigger
         render={
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
-            className={`h-9 px-3 rounded-xl border-slate-700 bg-background/50 hover:bg-background text-xs font-semibold gap-2 ${className}`}
+            className={`h-9 px-3 rounded-xl text-xs font-semibold gap-2 ${className}`}
           >
             <Globe className="h-3.5 w-3.5 text-primary" />
             <span className="uppercase font-bold text-foreground">{currentLang.code}</span>
