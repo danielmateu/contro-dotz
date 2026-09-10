@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Popover,
@@ -12,14 +12,29 @@ import { signOutAction } from '@/app/actions/auth'
 import { AppUpdatesWidget } from '@/components/updates/app-updates-widget'
 import { ShareAppModal } from '@/components/share-app-modal'
 import { FeatureBaseWidget } from '@/components/feedback/featurebase-widget'
-import {
-  ChevronsUpDown,
-  MegaphoneIcon,
-  Share2,
-  MessageSquarePlus,
-  LogOut,
-} from 'lucide-react'
+import { MorphIcon } from '@/components/ui/client-morph-icon'
 import { useI18n } from '@/lib/i18n/i18n-context'
+
+// @ts-ignore
+import { __iconNode as MegaphoneData } from 'lucide-react/dist/esm/icons/megaphone.mjs'
+// @ts-ignore
+import { __iconNode as SparklesData } from 'lucide-react/dist/esm/icons/sparkles.mjs'
+// @ts-ignore
+import { __iconNode as Share2Data } from 'lucide-react/dist/esm/icons/share-2.mjs'
+// @ts-ignore
+import { __iconNode as HeartData } from 'lucide-react/dist/esm/icons/heart.mjs'
+// @ts-ignore
+import { __iconNode as MessageSquarePlusData } from 'lucide-react/dist/esm/icons/message-square-plus.mjs'
+// @ts-ignore
+import { __iconNode as MessageCircleData } from 'lucide-react/dist/esm/icons/message-circle.mjs'
+// @ts-ignore
+import { __iconNode as LogOutData } from 'lucide-react/dist/esm/icons/log-out.mjs'
+// @ts-ignore
+import { __iconNode as DoorOpenData } from 'lucide-react/dist/esm/icons/door-open.mjs'
+// @ts-ignore
+import { __iconNode as ChevronsUpDownData } from 'lucide-react/dist/esm/icons/chevrons-up-down.mjs'
+// @ts-ignore
+import { __iconNode as ChevronUpData } from 'lucide-react/dist/esm/icons/chevron-up.mjs'
 
 interface SidebarUserFooterProps {
   userEmail?: string
@@ -35,6 +50,7 @@ export function SidebarUserFooter({
   status,
 }: SidebarUserFooterProps) {
   const { t, locale } = useI18n()
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   const shareText =
     locale === 'en'
@@ -47,9 +63,13 @@ export function SidebarUserFooter({
     <Popover>
       <PopoverTrigger
         render={
-          <button className="w-full text-left outline-none rounded-xl hover:bg-sidebar-accent/70 transition-colors p-2 flex items-center justify-between gap-2.5 group cursor-pointer border border-transparent hover:border-sidebar-border/40 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto">
+          <button
+            onMouseEnter={() => setHoveredItem('trigger')}
+            onMouseLeave={() => setHoveredItem(null)}
+            className="w-full text-left outline-none rounded-xl hover:bg-sidebar-accent/70 transition-colors p-2 flex items-center justify-between gap-2.5 group cursor-pointer border border-transparent hover:border-sidebar-border/40 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto"
+          >
             <div className="flex items-center gap-2.5 min-w-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:gap-0">
-              <Avatar className="h-8 w-8 border border-sidebar-border/50 shrink-0">
+              <Avatar className="h-8 w-8 border border-sidebar-border/50 shrink-0 group-hover:scale-105 transition-transform duration-200">
                 {avatarUrl ? (
                   <AvatarImage
                     src={avatarUrl}
@@ -76,7 +96,13 @@ export function SidebarUserFooter({
                 )}
               </div>
             </div>
-            <ChevronsUpDown className="w-3.5 h-3.5 text-muted-foreground/70 group-data-[collapsible=icon]:hidden shrink-0" />
+            <div className="w-4 h-4 flex items-center justify-center text-muted-foreground/70 group-data-[collapsible=icon]:hidden shrink-0 group-hover:text-foreground transition-colors">
+              <MorphIcon
+                icon={hoveredItem === 'trigger' ? ChevronUpData : ChevronsUpDownData}
+                spring="snappy"
+                className="w-3.5 h-3.5"
+              />
+            </div>
           </button>
         }
       />
@@ -121,10 +147,18 @@ export function SidebarUserFooter({
           {/* Novedades & Updates */}
           <AppUpdatesWidget
             trigger={(hasUnread) => (
-              <button className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer">
+              <button
+                onMouseEnter={() => setHoveredItem('updates')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer group"
+              >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0">
-                    <MegaphoneIcon className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/20 transition-colors">
+                    <MorphIcon
+                      icon={hoveredItem === 'updates' ? SparklesData : MegaphoneData}
+                      spring="snappy"
+                      className="w-4 h-4"
+                    />
                   </div>
                   <span className="truncate">{t('updates.title')}</span>
                 </div>
@@ -138,9 +172,17 @@ export function SidebarUserFooter({
           {/* Share App */}
           <ShareAppModal
             trigger={
-              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer">
-                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0">
-                  <Share2 className="w-4 h-4" />
+              <button
+                onMouseEnter={() => setHoveredItem('share')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer group"
+              >
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/20 transition-colors">
+                  <MorphIcon
+                    icon={hoveredItem === 'share' ? HeartData : Share2Data}
+                    spring="snappy"
+                    className="w-4 h-4"
+                  />
                 </div>
                 <span className="truncate">{shareText}</span>
               </button>
@@ -152,9 +194,17 @@ export function SidebarUserFooter({
             userEmail={userEmail}
             userName={displayName}
             trigger={
-              <button className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer">
-                <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0">
-                  <MessageSquarePlus className="w-4 h-4" />
+              <button
+                onMouseEnter={() => setHoveredItem('feedback')}
+                onMouseLeave={() => setHoveredItem(null)}
+                className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer group"
+              >
+                <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0 group-hover:bg-violet-500/20 transition-colors">
+                  <MorphIcon
+                    icon={hoveredItem === 'feedback' ? MessageCircleData : MessageSquarePlusData}
+                    spring="snappy"
+                    className="w-4 h-4"
+                  />
                 </div>
                 <span className="truncate">{t('feedback.title')}</span>
               </button>
@@ -168,10 +218,16 @@ export function SidebarUserFooter({
         <form action={signOutAction} className="w-full">
           <button
             type="submit"
-            className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer"
+            onMouseEnter={() => setHoveredItem('logout')}
+            onMouseLeave={() => setHoveredItem(null)}
+            className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-rose-500 hover:bg-rose-500/10 rounded-xl transition-all cursor-pointer group"
           >
-            <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0">
-              <LogOut className="w-4 h-4" />
+            <div className="w-7 h-7 rounded-lg bg-rose-500/10 text-rose-500 flex items-center justify-center shrink-0 group-hover:bg-rose-500/20 transition-colors">
+              <MorphIcon
+                icon={hoveredItem === 'logout' ? DoorOpenData : LogOutData}
+                spring="snappy"
+                className="w-4 h-4"
+              />
             </div>
             <span>{t('common.logout')}</span>
           </button>
