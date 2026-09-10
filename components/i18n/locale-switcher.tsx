@@ -35,12 +35,12 @@ export function LocaleSwitcher({ className = '' }: { className?: string }) {
           </Button>
         }
       />
-      <DropdownMenuContent align="end" className="bg-slate-900 border-slate-800 text-foreground rounded-xl w-36 p-1">
+      <DropdownMenuContent align="end" className="text-foreground rounded-xl w-36 p-1">
         {languages.map((lang) => (
           <DropdownMenuItem
             key={lang.code}
             onClick={() => setLocale(lang.code)}
-            className="flex items-center justify-between text-xs font-medium cursor-pointer rounded-lg px-2.5 py-2 hover:bg-slate-800 focus:bg-slate-800"
+            className="flex items-center justify-between text-xs font-medium cursor-pointer rounded-lg px-2.5 py-2 dark:hover:bg-dark hover:bg-accent"
           >
             <div className="flex items-center gap-2">
               <span>{lang.flag}</span>
