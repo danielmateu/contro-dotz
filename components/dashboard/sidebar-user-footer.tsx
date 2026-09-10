@@ -47,8 +47,8 @@ export function SidebarUserFooter({
     <Popover>
       <PopoverTrigger
         render={
-          <button className="w-full text-left outline-none rounded-xl hover:bg-sidebar-accent/70 transition-colors p-2 flex items-center justify-between gap-2.5 group cursor-pointer border border-transparent hover:border-sidebar-border/40">
-            <div className="flex items-center gap-2.5 min-w-0">
+          <button className="w-full text-left outline-none rounded-xl hover:bg-sidebar-accent/70 transition-colors p-2 flex items-center justify-between gap-2.5 group cursor-pointer border border-transparent hover:border-sidebar-border/40 group-data-[collapsible=icon]:w-9 group-data-[collapsible=icon]:h-9 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto">
+            <div className="flex items-center gap-2.5 min-w-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:w-full group-data-[collapsible=icon]:gap-0">
               <Avatar className="h-8 w-8 border border-sidebar-border/50 shrink-0">
                 {avatarUrl ? (
                   <AvatarImage

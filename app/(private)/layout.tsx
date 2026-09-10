@@ -99,7 +99,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-sidebar-border/50 p-2 sm:p-3">
+          <SidebarFooter className="border-t border-sidebar-border/50 p-2 sm:p-3 group-data-[collapsible=icon]:p-2 group-data-[collapsible=icon]:flex group-data-[collapsible=icon]:justify-center">
             {/* Popover con Perfil, Novedades, Compartir, Feedback y Logout */}
             <SidebarUserFooter
               userEmail={user.email}
