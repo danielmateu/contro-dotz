@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Separator } from '@/components/ui/separator'
 import { SidebarMenuItems } from '@/components/dashboard/sidebar-menu-items'
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import {
   Sidebar,
   SidebarContent,
@@ -19,26 +18,20 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { LogOut } from 'lucide-react'
 
 import { HouseholdSwitcher } from '@/components/dashboard/household-switcher'
 import { getActiveHouseholdHelper } from '@/lib/household-context'
 import { ModeToggle } from '@/components/ui/mode-toggle'
 import { ActiveRouteName } from '@/components/dashboard/active-route-name'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
-import { FeatureBaseWidget } from '@/components/feedback/featurebase-widget'
-import { ShareAppModal } from '@/components/share-app-modal'
-import { AppUpdatesWidget } from '@/components/updates/app-updates-widget'
 import { HeaderTamagotchiTrigger } from '@/components/game/header-tamagotchi-trigger'
 import { GameStateProvider } from '@/lib/game/game-context'
-
-import { LogoutButton } from '@/components/dashboard/logout-button'
+import { SidebarUserFooter } from '@/components/dashboard/sidebar-user-footer'
+import { getAuthenticatedUser } from '@/lib/supabase/get-authenticated-user'
 
 interface PrivateLayoutProps {
   children: React.ReactNode
 }
-
-import { getAuthenticatedUser } from '@/lib/supabase/get-authenticated-user'
 
 export default async function PrivateLayout({ children }: PrivateLayoutProps) {
   const user = await getAuthenticatedUser()
@@ -106,37 +99,14 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
             </SidebarGroup>
           </SidebarContent>
 
-          <SidebarFooter className="border-t border-sidebar-border/50 p-4">
-            {/* Perfil del usuario */}
-            <div className="flex items-center gap-3 py-2 group-data-[collapsible=icon]:hidden">
-              <Avatar className="h-9 w-9 border border-sidebar-border/40">
-                {profile?.avatar_url ? (
-                  <AvatarImage src={profile.avatar_url} alt={profile.display_name || 'Usuario'} className="object-cover" />
-                ) : null}
-                <AvatarFallback className="bg-primary/10 text-primary font-semibold text-xs">
-                  {(profile?.display_name || 'U').substring(0, 2).toUpperCase()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex flex-col min-w-0 truncate">
-                <span className="text-sm font-semibold text-foreground truncate">
-                  {profile?.display_name || 'Usuario'}
-                </span>
-                {profile?.status ? (
-                  <span className="text-[10px] text-muted-foreground truncate italic">
-                    {profile.status}
-                  </span>
-                ) : (
-                  <span className="text-xs text-muted-foreground truncate">
-                    {profile?.email}
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <Separator className="my-2 group-data-[collapsible=icon]:hidden" />
-
-            {/* Botón de logout */}
-            <LogoutButton />
+          <SidebarFooter className="border-t border-sidebar-border/50 p-2 sm:p-3">
+            {/* Popover con Perfil, Novedades, Compartir, Feedback y Logout */}
+            <SidebarUserFooter
+              userEmail={user.email}
+              displayName={profile?.display_name}
+              avatarUrl={profile?.avatar_url}
+              status={profile?.status}
+            />
           </SidebarFooter>
         </Sidebar>
 
@@ -151,9 +121,6 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
 
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
               <HeaderTamagotchiTrigger householdId={householdId || undefined} />
-              <AppUpdatesWidget />
-              <ShareAppModal />
-              <FeatureBaseWidget userEmail={profile?.email} userName={profile?.display_name || undefined} />
               <LocaleSwitcher />
               <ModeToggle />
             </div>

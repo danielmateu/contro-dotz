@@ -636,10 +636,10 @@ export async function chatWithDotziAction({
   }
 
   try {
-    const isCatalan = locale === 'ca'
+    const langName = locale === 'ca' ? 'catalán' : locale === 'en' ? 'inglés' : 'español'
     const systemPrompt = `Eres "Dotzi", el Tamagotchi y mascota financiera oficial de la aplicación contro-dotz.
 Tu trabajo es ser el compañero interactivo, empático, simpático y muy motivador del usuario.
-Hablas siempre en ${isCatalan ? 'catalán' : 'español'}.
+Hablas siempre en ${langName}.
 
 Tu personalidad:
 - Eres alegre, cariñoso, cercano y usas emojis de forma divertida.

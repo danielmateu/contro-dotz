@@ -302,6 +302,43 @@
     "hairBow": "Lazo Coquette",
     "hairSpikes": "Picos Anime"
   },
+  "tamagotchiChat": {
+    "title": "Dotzi AI",
+    "initialGreeting": "¡Hola! Soy **Dotzi**, tu Tamagotchi financiero. 🌱\n\nActualmente nuestra salud financiera está al **{health}%** ({moodTitle}). ¿De qué te apetece hablar hoy?",
+    "connectionError": "Uf... ¡he tenido un pequeño despiste! Prueba a preguntarme otra vez.",
+    "networkError": "¡Ups! No he podido conectarme en este instante.",
+    "thinking": "Dotzi pensando...",
+    "inputPlaceholder": "Escribe tu mensaje para Dotzi...",
+    "quickPrompt1": "¿Cómo vamos de presupuesto este mes?",
+    "quickPrompt2": "¿Puedo darme un capricho el fin de semana?",
+    "quickPrompt3": "¿Cómo consigo más DotzCoins?",
+    "quickPrompt4": "¡Brindemos por el ahorro del hogar!"
+  },
+  "tamagotchiShop": {
+    "title": "Tienda, Armario y Comida de Dotzi",
+    "subtitle": "Personaliza la piel, el peinado, los accesorios y alimenta a Dotzi.",
+    "coinsBadge": "{coins} Coins",
+    "eatingHappy": "¡Comiendo feliz! 😋",
+    "noAccessory": "Sin accesorio",
+    "tabShop": "Tienda",
+    "tabWardrobe": "Armario",
+    "tabStyle": "Estilo",
+    "tabFood": "Comida",
+    "equipped": "Equipado",
+    "equip": "Equipar",
+    "active": "Activo",
+    "use": "Usar",
+    "skinColorHeader": "🎨 Color de Piel",
+    "hairstyleHeader": "💇‍♂️ Peinados y Sombreros",
+    "feedAction": "Dar ({price})"
+  },
+  "tamagotchiQuests": {
+    "title": "Misiones y Logros",
+    "subtitle": "Completa retos financieros reales para ganar DotzCoins y subir de nivel.",
+    "done": "Hecha",
+    "claim": "Reclamar",
+    "inProgress": "En curso"
+  },
   "household": {
     "title": "Gestión del Hogar",
     "subtitle": "Administra miembros, roles, aportaciones e ingresos mensuales",

@@ -302,6 +302,43 @@
     "hairBow": "Coquette Bow",
     "hairSpikes": "Anime Spikes"
   },
+  "tamagotchiChat": {
+    "title": "Dotzi AI",
+    "initialGreeting": "Hello! I'm **Dotzi**, your financial Tamagotchi. 🌱\n\nCurrently our financial health is at **{health}%** ({moodTitle}). What would you like to talk about today?",
+    "connectionError": "Phew... I had a small connection glitch! Try asking me again in a moment.",
+    "networkError": "Oops! I couldn't connect at this moment.",
+    "thinking": "Dotzi thinking...",
+    "inputPlaceholder": "Write a message for Dotzi...",
+    "quickPrompt1": "How are we doing on budget this month?",
+    "quickPrompt2": "Can I treat myself this weekend?",
+    "quickPrompt3": "How do I get more DotzCoins?",
+    "quickPrompt4": "Cheers to household savings!"
+  },
+  "tamagotchiShop": {
+    "title": "Dotzi's Shop, Wardrobe & Food",
+    "subtitle": "Customize skin, hairstyle, accessories and feed Dotzi.",
+    "coinsBadge": "{coins} Coins",
+    "eatingHappy": "Eating happily! 😋",
+    "noAccessory": "No accessory",
+    "tabShop": "Shop",
+    "tabWardrobe": "Wardrobe",
+    "tabStyle": "Style",
+    "tabFood": "Food",
+    "equipped": "Equipped",
+    "equip": "Equip",
+    "active": "Active",
+    "use": "Use",
+    "skinColorHeader": "🎨 Skin Color",
+    "hairstyleHeader": "💇‍♂️ Hairstyle & Hats",
+    "feedAction": "Feed ({price})"
+  },
+  "tamagotchiQuests": {
+    "title": "Quests & Achievements",
+    "subtitle": "Complete real financial challenges to earn DotzCoins and level up.",
+    "done": "Completed",
+    "claim": "Claim",
+    "inProgress": "In progress"
+  },
   "household": {
     "title": "Household Management",
     "subtitle": "Manage family members, roles, contributions and monthly incomes",

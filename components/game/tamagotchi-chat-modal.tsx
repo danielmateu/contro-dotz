@@ -5,6 +5,7 @@ import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
 import { PetStats } from '@/lib/game/fin-pet-engine'
 import { UserGameState } from '@/lib/game/game-service'
 import { chatWithDotziAction } from '@/app/actions/gemini'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Dialog,
   DialogContent,
@@ -37,9 +38,10 @@ export function TamagotchiChatModal({
   petStats,
   gameState,
   householdId = '',
-  locale = 'es',
+  locale: propLocale,
 }: TamagotchiChatModalProps) {
-  const isCatalan = locale === 'ca'
+  const { t, locale: contextLocale } = useI18n()
+  const activeLocale = propLocale || contextLocale || 'es'
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -48,9 +50,10 @@ export function TamagotchiChatModal({
   // Inicializar conversación con saludo dinámico de Dotzi
   useEffect(() => {
     if (open && messages.length === 0) {
-      const initialGreeting = isCatalan
-        ? `¡Hola! Soc en **Dotzi**, el teu Tamagotchi financer. 🌱\n\nActualment la nostra salut financera està al **${petStats.health}%** (${petStats.moodTitle}). De què et ve de gust parlar avui?`
-        : `¡Hola! Soy **Dotzi**, tu Tamagotchi financiero. 🌱\n\nActualmente nuestra salud financiera está al **${petStats.health}%** (${petStats.moodTitle}). ¿De qué te apetece hablar hoy?`
+      const initialGreeting = t('tamagotchiChat.initialGreeting', {
+        health: petStats.health,
+        moodTitle: petStats.moodTitle,
+      })
 
       setMessages([
         {
@@ -61,7 +64,7 @@ export function TamagotchiChatModal({
         },
       ])
     }
-  }, [open, isCatalan, petStats, messages.length])
+  }, [open, petStats, messages.length, t])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -104,7 +107,7 @@ export function TamagotchiChatModal({
           coins: gameState.coins,
           equippedAccessory: gameState.equippedAccessory,
         },
-        locale,
+        locale: activeLocale,
       })
 
       const replyNow = new Date()
@@ -116,9 +119,7 @@ export function TamagotchiChatModal({
           {
             id: replyId,
             sender: 'dotzi',
-            text: isCatalan
-              ? 'Uf... he tingut un petit tall de connexió! Torna a provar en un moment.'
-              : 'Uf... ¡he tenido un pequeño despiste! Prueba a preguntarme otra vez.',
+            text: t('tamagotchiChat.connectionError'),
             timestamp: replyNow,
           },
         ])
@@ -142,7 +143,7 @@ export function TamagotchiChatModal({
         {
           id: errId,
           sender: 'dotzi',
-          text: '¡Ups! No he podido conectarme en este instante.',
+          text: t('tamagotchiChat.networkError'),
           timestamp: errNow,
         },
       ])
@@ -152,19 +153,12 @@ export function TamagotchiChatModal({
   }
 
   // Fichas de preguntas rápidas
-  const quickPrompts = isCatalan
-    ? [
-      'Com anem de pressupost aquest mes?',
-      'Em puc donar un capritx el cap de setmana?',
-      'Com aconsegueixo més DotzCoins?',
-      'Brindem per l’estalvi del llar!',
-    ]
-    : [
-      '¿Cómo vamos de presupuesto este mes?',
-      '¿Puedo darme un capricho el fin de semana?',
-      '¿Cómo consigo más DotzCoins?',
-      '¡Brindemos por el ahorro del hogar!',
-    ]
+  const quickPrompts = [
+    t('tamagotchiChat.quickPrompt1'),
+    t('tamagotchiChat.quickPrompt2'),
+    t('tamagotchiChat.quickPrompt3'),
+    t('tamagotchiChat.quickPrompt4'),
+  ]
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -182,12 +176,12 @@ export function TamagotchiChatModal({
             />
             <div className="flex flex-col text-left">
               <DialogTitle className="text-base font-extrabold flex items-center gap-1.5">
-                <span>Dotzi AI</span>
+                <span>{t('tamagotchiChat.title')}</span>
                 <Sparkles className="w-4 h-4 text-amber-500" />
               </DialogTitle>
               <span className="text-[11px] text-muted-foreground font-semibold flex items-center gap-1">
                 <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                {petStats.moodTitle} • Nv. {petStats.level}
+                {petStats.moodTitle} • {t('tamagotchi.level', { level: petStats.level })}
               </span>
             </div>
           </div>
@@ -198,8 +192,9 @@ export function TamagotchiChatModal({
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex items-end gap-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'
-                }`}
+              className={`flex items-end gap-2 ${
+                msg.sender === 'user' ? 'justify-end' : 'justify-start'
+              }`}
             >
               {msg.sender === 'dotzi' && (
                 <div className="shrink-0 mb-1">
@@ -215,10 +210,11 @@ export function TamagotchiChatModal({
               )}
 
               <div
-                className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed transition-all shadow-xs ${msg.sender === 'user'
-                  ? 'bg-primary text-primary-foreground font-medium rounded-br-none'
-                  : 'bg-muted/70 text-foreground border border-border/50 rounded-bl-none'
-                  }`}
+                className={`max-w-[88%] sm:max-w-[80%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed transition-all shadow-xs ${
+                  msg.sender === 'user'
+                    ? 'bg-primary text-primary-foreground font-medium rounded-br-none'
+                    : 'bg-muted/70 text-foreground border border-border/50 rounded-bl-none'
+                }`}
               >
                 {msg.text.split('\n').map((line, idx) => (
                   <p key={idx} className={idx > 0 ? 'mt-1.5' : ''}>
@@ -247,7 +243,7 @@ export function TamagotchiChatModal({
                 interactive={false}
               />
               <div className="bg-muted p-2.5 rounded-2xl rounded-bl-none flex items-center gap-1.5">
-                <span className="text-[11px] font-semibold">{isCatalan ? 'Dotzi pensant...' : 'Dotzi pensando...'}</span>
+                <span className="text-[11px] font-semibold">{t('tamagotchiChat.thinking')}</span>
                 <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce" />
                 <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.2s]" />
                 <span className="h-1.5 w-1.5 bg-primary rounded-full animate-bounce [animation-delay:0.4s]" />
@@ -283,7 +279,7 @@ export function TamagotchiChatModal({
           <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={isCatalan ? 'Escriu un missatge per a en Dotzi...' : 'Escribe tu mensaje para Dotzi...'}
+            placeholder={t('tamagotchiChat.inputPlaceholder')}
             disabled={loading}
             className="rounded-xl text-xs sm:text-sm bg-muted/30 border-border/70 focus-visible:ring-1 h-9 sm:h-10"
           />
@@ -299,5 +295,4 @@ export function TamagotchiChatModal({
       </DialogContent>
     </Dialog>
   )
-
 }

@@ -8,6 +8,7 @@ import {
   saveUserGameState,
 } from '@/lib/game/game-service'
 import { TamagotchiAvatar } from '@/components/game/tamagotchi-avatar'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Dialog,
   DialogContent,
@@ -33,9 +34,10 @@ export function TamagotchiShopModal({
   onOpenChange,
   gameState,
   onStateChange,
-  locale = 'es',
+  locale: propLocale,
 }: TamagotchiShopModalProps) {
-  const isCatalan = locale === 'ca'
+  const { t, locale: contextLocale } = useI18n()
+  const activeLocale = (propLocale || contextLocale || 'es') as 'es' | 'ca' | 'en'
   const [activeTab, setActiveTab] = useState<'shop' | 'wardrobe' | 'style' | 'food'>('shop')
   const [previewAccessory, setPreviewAccessory] = useState<string>(gameState.equippedAccessory)
   const [previewSkin, setPreviewSkin] = useState<string>(gameState.skinColor || 'skin_indigo')
@@ -112,6 +114,9 @@ export function TamagotchiShopModal({
     await saveUserGameState(newState)
   }
 
+  const getItemName = (item: ShopItem) => item.name[activeLocale] || item.name.es
+  const getItemDesc = (item: ShopItem) => item.description[activeLocale] || item.description.es
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="p-3.5 sm:p-6 rounded-3xl border-border shadow-2xl sm:max-w-xl md:max-w-2xl w-[calc(100vw-1.5rem)] max-h-[90vh] sm:max-h-[85vh] flex flex-col gap-3 sm:gap-4 overflow-hidden">
@@ -120,18 +125,16 @@ export function TamagotchiShopModal({
           <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle className="text-lg sm:text-xl font-extrabold flex items-center gap-2">
               <ShoppingBag className="w-5 h-5 text-indigo-500 shrink-0" />
-              <span>{isCatalan ? 'Botiga, Armari i Menjar de Dotzi' : 'Tienda, Armario y Comida de Dotzi'}</span>
+              <span>{t('tamagotchiShop.title')}</span>
             </DialogTitle>
 
             <Badge className="bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-extrabold px-2.5 sm:px-3 py-1 text-xs gap-1.5 rounded-xl shrink-0">
               <Coins className="w-4 h-4 fill-amber-500 text-amber-500" />
-              <span>{gameState.coins} Coins</span>
+              <span>{t('tamagotchiShop.coinsBadge', { coins: gameState.coins })}</span>
             </Badge>
           </div>
           <DialogDescription className="text-xs text-muted-foreground">
-            {isCatalan
-              ? 'Personalitza la pell, el peinat, els accesoris i alimenta en Dotzi.'
-              : 'Personaliza la piel, el peinado, los accesorios y alimenta a Dotzi.'}
+            {t('tamagotchiShop.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -153,9 +156,11 @@ export function TamagotchiShopModal({
             <div className="text-left sm:text-center min-w-0">
               <span className="text-[11px] sm:text-xs text-muted-foreground font-semibold block line-clamp-2">
                 {eatingFood ? (
-                  <span className="text-emerald-500 font-bold">{isCatalan ? 'Menjant feliç! 😋' : '¡Comiendo feliz! 😋'}</span>
+                  <span className="text-emerald-500 font-bold">{t('tamagotchiShop.eatingHappy')}</span>
                 ) : (
-                  SHOP_ITEMS.find((i) => i.id === previewAccessory)?.name[isCatalan ? 'ca' : 'es'] || (isCatalan ? 'Sense accessori' : 'Sin accesorio')
+                  SHOP_ITEMS.find((i) => i.id === previewAccessory)?.name[activeLocale] ||
+                  SHOP_ITEMS.find((i) => i.id === previewAccessory)?.name.es ||
+                  t('tamagotchiShop.noAccessory')
                 )}
               </span>
             </div>
@@ -166,19 +171,19 @@ export function TamagotchiShopModal({
             <TabsList className="grid grid-cols-4 rounded-2xl bg-muted/60 p-1 shrink-0">
               <TabsTrigger value="shop" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
                 <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{isCatalan ? 'Botiga' : 'Tienda'}</span>
+                <span className="truncate">{t('tamagotchiShop.tabShop')}</span>
               </TabsTrigger>
               <TabsTrigger value="wardrobe" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
                 <Shirt className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{isCatalan ? 'Armari' : 'Armario'}</span>
+                <span className="truncate">{t('tamagotchiShop.tabWardrobe')}</span>
               </TabsTrigger>
               <TabsTrigger value="style" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
                 <span className="text-xs">🎨</span>
-                <span className="truncate">{isCatalan ? 'Estil' : 'Estilo'}</span>
+                <span className="truncate">{t('tamagotchiShop.tabStyle')}</span>
               </TabsTrigger>
               <TabsTrigger value="food" className="rounded-xl font-bold text-[11px] sm:text-xs gap-1 px-1 sm:px-2">
                 <span className="text-xs">🍕</span>
-                <span className="truncate">{isCatalan ? 'Menjar' : 'Comida'}</span>
+                <span className="truncate">{t('tamagotchiShop.tabFood')}</span>
               </TabsTrigger>
             </TabsList>
 
@@ -203,10 +208,10 @@ export function TamagotchiShopModal({
                       </span>
                       <div className="space-y-0.5 min-w-0">
                         <h4 className="text-xs font-extrabold text-foreground truncate">
-                          {isCatalan ? item.name.ca : item.name.es}
+                          {getItemName(item)}
                         </h4>
                         <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-1">
-                          {isCatalan ? item.description.ca : item.description.es}
+                          {getItemDesc(item)}
                         </p>
                       </div>
                     </div>
@@ -222,10 +227,10 @@ export function TamagotchiShopModal({
                           {isEquipped ? (
                             <>
                               <Check className="w-3.5 h-3.5" />
-                              <span>{isCatalan ? 'Equipat' : 'Equipado'}</span>
+                              <span>{t('tamagotchiShop.equipped')}</span>
                             </>
                           ) : (
-                            <span>{isCatalan ? 'Equipar' : 'Equipar'}</span>
+                            <span>{t('tamagotchiShop.equip')}</span>
                           )}
                         </Button>
                       ) : (
@@ -258,7 +263,7 @@ export function TamagotchiShopModal({
                 <div className="flex items-center gap-2.5 sm:gap-3">
                   <span className="text-xl">🚫</span>
                   <span className="text-xs font-bold">
-                    {isCatalan ? 'Sense accesori' : 'Sin accesorio'}
+                    {t('tamagotchiShop.noAccessory')}
                   </span>
                 </div>
                 <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
@@ -269,8 +274,8 @@ export function TamagotchiShopModal({
                     className="rounded-xl text-xs font-bold h-8 px-2.5 sm:px-3"
                   >
                     {gameState.equippedAccessory === 'none'
-                      ? isCatalan ? 'Equipat' : 'Equipado'
-                      : isCatalan ? 'Equipar' : 'Equipar'}
+                      ? t('tamagotchiShop.equipped')
+                      : t('tamagotchiShop.equip')}
                   </Button>
                 </div>
               </div>
@@ -288,7 +293,7 @@ export function TamagotchiShopModal({
                     <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                       <span className="text-xl sm:text-2xl shrink-0 select-none">{item.icon}</span>
                       <span className="text-xs font-bold text-foreground truncate">
-                        {isCatalan ? item.name.ca : item.name.es}
+                        {getItemName(item)}
                       </span>
                     </div>
 
@@ -300,8 +305,8 @@ export function TamagotchiShopModal({
                         className="rounded-xl text-xs font-bold h-8 px-2.5 sm:px-3"
                       >
                         {isEquipped
-                          ? isCatalan ? 'Equipat' : 'Equipado'
-                          : isCatalan ? 'Equipar' : 'Equipar'}
+                          ? t('tamagotchiShop.equipped')
+                          : t('tamagotchiShop.equip')}
                       </Button>
                     </div>
                   </div>
@@ -313,7 +318,7 @@ export function TamagotchiShopModal({
             <TabsContent value="style" className="space-y-3 pt-3 max-h-[280px] sm:max-h-[340px] overflow-y-auto pr-1 flex-1">
               <div>
                 <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-2">
-                  {isCatalan ? '🎨 Color de Pell' : '🎨 Color de Piel'}
+                  {t('tamagotchiShop.skinColorHeader')}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {SHOP_ITEMS.filter((i) => i.category === 'skin').map((item) => {
@@ -330,7 +335,7 @@ export function TamagotchiShopModal({
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="text-lg shrink-0">{item.icon}</span>
-                          <span className="text-xs font-bold truncate">{isCatalan ? item.name.ca : item.name.es}</span>
+                          <span className="text-xs font-bold truncate">{getItemName(item)}</span>
                         </div>
                         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {isUnlocked ? (
@@ -340,7 +345,7 @@ export function TamagotchiShopModal({
                               onClick={() => handleEquip(item.id, 'skin')}
                               className="rounded-xl text-[11px] font-bold h-7 px-2"
                             >
-                              {isEquipped ? (isCatalan ? 'Actiu' : 'Activo') : (isCatalan ? 'Posar' : 'Usar')}
+                              {isEquipped ? t('tamagotchiShop.active') : t('tamagotchiShop.use')}
                             </Button>
                           ) : (
                             <Button
@@ -362,7 +367,7 @@ export function TamagotchiShopModal({
 
               <div>
                 <h4 className="text-xs font-extrabold text-muted-foreground uppercase tracking-wider mb-2 pt-2">
-                  {isCatalan ? '💇‍♂️ Peinats i Capells' : '💇‍♂️ Peinados y Capello'}
+                  {t('tamagotchiShop.hairstyleHeader')}
                 </h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {SHOP_ITEMS.filter((i) => i.category === 'hair').map((item) => {
@@ -379,7 +384,7 @@ export function TamagotchiShopModal({
                       >
                         <div className="flex items-center gap-2 min-w-0">
                           <span className="text-lg shrink-0">{item.icon}</span>
-                          <span className="text-xs font-bold truncate">{isCatalan ? item.name.ca : item.name.es}</span>
+                          <span className="text-xs font-bold truncate">{getItemName(item)}</span>
                         </div>
                         <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
                           {isUnlocked ? (
@@ -389,7 +394,7 @@ export function TamagotchiShopModal({
                               onClick={() => handleEquip(item.id, 'hair')}
                               className="rounded-xl text-[11px] font-bold h-7 px-2"
                             >
-                              {isEquipped ? (isCatalan ? 'Actiu' : 'Activo') : (isCatalan ? 'Posar' : 'Usar')}
+                              {isEquipped ? t('tamagotchiShop.active') : t('tamagotchiShop.use')}
                             </Button>
                           ) : (
                             <Button
@@ -426,10 +431,10 @@ export function TamagotchiShopModal({
                       </span>
                       <div className="space-y-0.5 min-w-0">
                         <h4 className="text-xs font-extrabold text-foreground truncate">
-                          {isCatalan ? item.name.ca : item.name.es}
+                          {getItemName(item)}
                         </h4>
                         <p className="text-[10px] sm:text-[11px] text-muted-foreground leading-snug line-clamp-1">
-                          {isCatalan ? item.description.ca : item.description.es}
+                          {getItemDesc(item)}
                         </p>
                       </div>
                     </div>
@@ -443,7 +448,7 @@ export function TamagotchiShopModal({
                           }`}
                       >
                         <Coins className="w-3.5 h-3.5 fill-current shrink-0" />
-                        <span>{isCatalan ? `Alimentar (${item.price})` : `Dar (${item.price})`}</span>
+                        <span>{t('tamagotchiShop.feedAction', { price: item.price })}</span>
                       </Button>
                     </div>
                   </div>

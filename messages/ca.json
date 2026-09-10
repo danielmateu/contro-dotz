@@ -302,6 +302,43 @@
     "hairBow": "Llaç Coquette",
     "hairSpikes": "Pics Anime"
   },
+  "tamagotchiChat": {
+    "title": "Dotzi AI",
+    "initialGreeting": "¡Hola! Soc en **Dotzi**, el teu Tamagotchi financer. 🌱\n\nActualment la nostra salut financera està al **{health}%** ({moodTitle}). De què et ve de gust parlar avui?",
+    "connectionError": "Uf... he tingut un petit tall de connexió! Torna a provar en un moment.",
+    "networkError": "Ups! No m'he pogut connectar en aquest moment.",
+    "thinking": "Dotzi pensant...",
+    "inputPlaceholder": "Escriu un missatge per a en Dotzi...",
+    "quickPrompt1": "Com anem de pressupost aquest mes?",
+    "quickPrompt2": "Em puc donar un capritx el cap de setmana?",
+    "quickPrompt3": "Com aconsegueixo més DotzCoins?",
+    "quickPrompt4": "Brindem per l’estalvi del llar!"
+  },
+  "tamagotchiShop": {
+    "title": "Botiga, Armari i Menjar de Dotzi",
+    "subtitle": "Personalitza la pell, el peinat, els accesoris i alimenta en Dotzi.",
+    "coinsBadge": "{coins} Coins",
+    "eatingHappy": "Menjant feliç! 😋",
+    "noAccessory": "Sense accessori",
+    "tabShop": "Botiga",
+    "tabWardrobe": "Armari",
+    "tabStyle": "Estil",
+    "tabFood": "Menjar",
+    "equipped": "Equipat",
+    "equip": "Equipar",
+    "active": "Actiu",
+    "use": "Posar",
+    "skinColorHeader": "🎨 Color de Pell",
+    "hairstyleHeader": "💇‍♂️ Pentinats i Barrets",
+    "feedAction": "Alimentar ({price})"
+  },
+  "tamagotchiQuests": {
+    "title": "Missions i Assoliments",
+    "subtitle": "Completa reptes financers reals per guanyar DotzCoins i pujar de nivell.",
+    "done": "Feta",
+    "claim": "Reclamar",
+    "inProgress": "En curs"
+  },
   "household": {
     "title": "Gestió de la Llar",
     "subtitle": "Administra membres, rols, aportacions i ingressos mensuals",

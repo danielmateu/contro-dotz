@@ -21,9 +21,10 @@ interface FeatureBaseWidgetProps {
   userEmail?: string
   userName?: string
   className?: string
+  trigger?: React.ReactElement
 }
 
-export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
+export function FeatureBaseWidget({ className, trigger }: FeatureBaseWidgetProps) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
@@ -59,18 +60,22 @@ export function FeatureBaseWidget({ className }: FeatureBaseWidgetProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        render={
-          <Button
-            variant="outline"
-            size="sm"
-            className={`rounded-xl border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 font-semibold gap-2 transition-all active:scale-95 ${className}`}
-          >
-            <MessageSquarePlus className="h-4 w-4 text-violet-400" />
-            <span className="hidden lg:inline">Feedback</span>
-          </Button>
-        }
-      />
+      {trigger ? (
+        <DialogTrigger render={trigger} />
+      ) : (
+        <DialogTrigger
+          render={
+            <Button
+              variant="outline"
+              size="sm"
+              className={`rounded-xl border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 font-semibold gap-2 transition-all active:scale-95 ${className}`}
+            >
+              <MessageSquarePlus className="h-4 w-4 text-violet-400" />
+              <span className="hidden lg:inline">Feedback</span>
+            </Button>
+          }
+        />
+      )}
 
       <DialogContent className="sm:max-w-md  border-slate-800 text-foreground rounded-2xl p-6">
         <DialogHeader className="space-y-1.5">

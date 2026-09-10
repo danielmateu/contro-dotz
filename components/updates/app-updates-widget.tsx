@@ -12,7 +12,11 @@ import {
 
 import { useI18n } from '@/lib/i18n/i18n-context'
 
-export function AppUpdatesWidget() {
+interface AppUpdatesWidgetProps {
+  trigger?: React.ReactNode | ((hasUnread: boolean) => React.ReactNode)
+}
+
+export function AppUpdatesWidget({ trigger }: AppUpdatesWidgetProps = {}) {
   const { t } = useI18n()
   const [open, setOpen] = useState(false)
   const [updates, setUpdates] = useState<AppUpdate[]>([])
@@ -48,24 +52,30 @@ export function AppUpdatesWidget() {
 
   return (
     <>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={handleOpenModal}
-        className="relative gap-1.5 rounded-xl border-border bg-background/80 hover:bg-accent text-foreground transition-all duration-200"
-        title={t('updates.title')}
-      >
-        <div className="relative flex items-center justify-center">
-          <MegaphoneIcon className={`w-4 h-4 ${hasUnread ? 'text-indigo-500 animate-pulse' : 'text-primary'}`} />
-          {hasUnread && (
-            <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
-            </span>
-          )}
+      {trigger ? (
+        <div onClick={handleOpenModal} className="w-full cursor-pointer">
+          {typeof trigger === 'function' ? trigger(hasUnread) : trigger}
         </div>
-        <span className="hidden lg:inline font-medium text-xs">{t('updates.title')}</span>
-      </Button>
+      ) : (
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleOpenModal}
+          className="relative gap-1.5 rounded-xl border-border bg-background/80 hover:bg-accent text-foreground transition-all duration-200"
+          title={t('updates.title')}
+        >
+          <div className="relative flex items-center justify-center">
+            <MegaphoneIcon className={`w-4 h-4 ${hasUnread ? 'text-indigo-500 animate-pulse' : 'text-primary'}`} />
+            {hasUnread && (
+              <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
+              </span>
+            )}
+          </div>
+          <span className="hidden lg:inline font-medium text-xs">{t('updates.title')}</span>
+        </Button>
+      )}
 
       <AppUpdatesModal
         open={open}

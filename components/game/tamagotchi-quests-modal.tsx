@@ -7,6 +7,7 @@ import {
   saveUserGameState,
 } from '@/lib/game/game-service'
 import { PetStats } from '@/lib/game/fin-pet-engine'
+import { useI18n } from '@/lib/i18n/i18n-context'
 import {
   Dialog,
   DialogContent,
@@ -33,9 +34,10 @@ export function TamagotchiQuestsModal({
   gameState,
   onStateChange,
   petStats,
-  locale = 'es',
+  locale: propLocale,
 }: TamagotchiQuestsModalProps) {
-  const isCatalan = locale === 'ca'
+  const { t, locale: contextLocale } = useI18n()
+  const activeLocale = (propLocale || contextLocale || 'es') as 'es' | 'ca' | 'en'
 
   const handleClaim = async (questId: string, coinsReward: number) => {
     if (gameState.completedQuests.includes(questId)) return
@@ -75,12 +77,10 @@ export function TamagotchiQuestsModal({
         <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-3 sm:pb-4 pr-6 shrink-0">
           <DialogTitle className="text-lg sm:text-xl font-extrabold flex items-center gap-2">
             <Trophy className="w-5 h-5 text-amber-500 shrink-0" />
-            <span>{isCatalan ? 'Missions i Assoliments' : 'Misiones y Logros'}</span>
+            <span>{t('tamagotchiQuests.title')}</span>
           </DialogTitle>
           <DialogDescription className="text-xs text-muted-foreground">
-            {isCatalan
-              ? 'Completa reptes financers reals per guanyar DotzCoins i pujar de nivell.'
-              : 'Completa retos financieros reales para ganar DotzCoins y subir de nivel.'}
+            {t('tamagotchiQuests.subtitle')}
           </DialogDescription>
         </DialogHeader>
 
@@ -88,6 +88,8 @@ export function TamagotchiQuestsModal({
           {GAME_QUESTS.map((quest) => {
             const isCompleted = gameState.completedQuests.includes(quest.id)
             const canClaim = !isCompleted && isQuestUnlocked(quest.conditionType)
+            const title = quest.title[activeLocale] || quest.title.es
+            const description = quest.description[activeLocale] || quest.description.es
 
             return (
               <div
@@ -103,10 +105,10 @@ export function TamagotchiQuestsModal({
                   <span className="text-2xl shrink-0 select-none">{quest.icon}</span>
                   <div className="space-y-1 min-w-0">
                     <h4 className="text-sm font-extrabold text-foreground truncate">
-                      {isCatalan ? quest.title.ca : quest.title.es}
+                      {title}
                     </h4>
                     <p className="text-xs text-muted-foreground leading-snug">
-                      {isCatalan ? quest.description.ca : quest.description.es}
+                      {description}
                     </p>
 
                     <div className="flex items-center gap-2 pt-1">
@@ -126,7 +128,7 @@ export function TamagotchiQuestsModal({
                   {isCompleted ? (
                     <div className="flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-3 py-1.5 rounded-xl">
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>{isCatalan ? 'Feta' : 'Hecha'}</span>
+                      <span>{t('tamagotchiQuests.done')}</span>
                     </div>
                   ) : canClaim ? (
                     <Button
@@ -134,11 +136,11 @@ export function TamagotchiQuestsModal({
                       onClick={() => handleClaim(quest.id, quest.rewardCoins)}
                       className="rounded-xl font-bold bg-amber-500 hover:bg-amber-600 text-slate-950 shadow-md animate-bounce"
                     >
-                      {isCatalan ? 'Reclamar' : 'Reclamar'}
+                      {t('tamagotchiQuests.claim')}
                     </Button>
                   ) : (
                     <Badge variant="secondary" className="text-[11px] px-2.5 py-1 rounded-xl text-muted-foreground">
-                      {isCatalan ? 'En curs' : 'En curso'}
+                      {t('tamagotchiQuests.inProgress')}
                     </Badge>
                   )}
                 </div>
