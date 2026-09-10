@@ -480,6 +480,11 @@
     "alert75": "A prop del límit (75%)",
     "alert90": "Alerta crítica (90%)",
     "confirmDelete": "Segur que vols eliminar aquest pressupost?",
+    "deleteBudgetTitle": "Eliminar aquest pressupost?",
+    "deleteBudgetDesc": "Estàs segur que vols eliminar el límit de pressupost per a la categoria \"{category}\" del mes {month}?",
+    "deleteBudgetAriaLabel": "Eliminar pressupost de {category} per a {month}",
+    "deleting": "Eliminant...",
+    "yesDelete": "Sí, eliminar",
     "selectMonth": "Seleccionar mes",
     "noBudgets": "No hi ha pressupostos definits per a aquest mes."
   },

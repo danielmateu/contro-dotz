@@ -15,6 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
 import { Trash2 } from 'lucide-react'
+import { useI18n } from '@/lib/i18n/i18n-context'
 
 interface DeleteBudgetButtonProps {
   budgetId: string
@@ -27,6 +28,7 @@ export function DeleteBudgetButton({
   categoryName,
   month,
 }: DeleteBudgetButtonProps) {
+  const { t } = useI18n()
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
 
@@ -37,7 +39,7 @@ export function DeleteBudgetButton({
     })
   }
 
-  // Formatear mes de YYYY-MM a legible en español (ej: 08/2026)
+  // Formatear mes de YYYY-MM a legible (ej: 08/2026)
   const [year, m] = month.split('-')
   const formattedMonth = `${m}/${year}`
 
@@ -49,7 +51,7 @@ export function DeleteBudgetButton({
             size="icon"
             variant="ghost"
             className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-8 w-8"
-            aria-label={`Eliminar presupuesto de ${categoryName} para ${formattedMonth}`}
+            aria-label={t('budgets.deleteBudgetAriaLabel', { category: categoryName, month: formattedMonth })}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -58,14 +60,13 @@ export function DeleteBudgetButton({
 
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>¿Eliminar este presupuesto?</AlertDialogTitle>
+          <AlertDialogTitle>{t('budgets.deleteBudgetTitle')}</AlertDialogTitle>
           <AlertDialogDescription>
-            ¿Estás seguro de que quieres eliminar el límite de presupuesto para la categoría
-            &quot;{categoryName}&quot; del mes {formattedMonth}?
+            {t('budgets.deleteBudgetDesc', { category: categoryName, month: formattedMonth })}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isPending}>Cancelar</AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>{t('common.cancel')}</AlertDialogCancel>
           <AlertDialogAction
             onClick={(e) => {
               e.preventDefault()
@@ -74,7 +75,7 @@ export function DeleteBudgetButton({
             disabled={isPending}
             className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
           >
-            {isPending ? 'Eliminando...' : 'Sí, eliminar'}
+            {isPending ? t('budgets.deleting') : t('budgets.yesDelete')}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

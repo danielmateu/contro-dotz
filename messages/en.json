@@ -480,6 +480,11 @@
     "alert75": "Near limit (75%)",
     "alert90": "Critical alert (90%)",
     "confirmDelete": "Are you sure you want to delete this budget?",
+    "deleteBudgetTitle": "Delete this budget?",
+    "deleteBudgetDesc": "Are you sure you want to delete the budget limit for category \"{category}\" for the month of {month}?",
+    "deleteBudgetAriaLabel": "Delete budget for {category} for {month}",
+    "deleting": "Deleting...",
+    "yesDelete": "Yes, delete",
     "selectMonth": "Select month",
     "noBudgets": "No budgets defined for this month."
   },
