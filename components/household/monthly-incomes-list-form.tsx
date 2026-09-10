@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useRef } from 'react'
 import { saveMonthlyIncomeAction, deleteMonthlyIncomeAction, getPayrollUrlAction, updateMonthlyIncomePayrollAction } from '@/app/actions/household'
+import { scanPayrollAction } from '@/app/actions/gemini'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -25,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { AlertCircle, CheckCircle2, Calendar, Landmark, Loader2, Trash2, FileText, Upload, Pencil } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Calendar, Landmark, Loader2, Trash2, FileText, Upload, Pencil, Sparkles, X } from 'lucide-react'
 import { formatCurrency } from '@/lib/format'
 import { createClient } from '@/lib/supabase/client'
 
@@ -66,6 +67,8 @@ export function MonthlyIncomesListForm({
   const [downloadingId, setDownloadingId] = useState<string | null>(null)
   const [uploadingIncomeId, setUploadingIncomeId] = useState<string | null>(null)
   const [targetIncomeForUpload, setTargetIncomeForUpload] = useState<MonthlyIncome | null>(null)
+  const [isScanningPayroll, setIsScanningPayroll] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -81,6 +84,7 @@ export function MonthlyIncomesListForm({
 
   const fileInputRef = useRef<HTMLInputElement>(null)
   const rowFileInputRef = useRef<HTMLInputElement>(null)
+  const scanFileInputRef = useRef<HTMLInputElement>(null)
   const supabase = createClient()
 
   // Definición de listado dinámico de meses traducidos
@@ -338,6 +342,85 @@ export function MonthlyIncomesListForm({
     })
   }
 
+  const processPayrollScanFile = (fileToScan: File) => {
+    setError(null)
+    setSuccess(null)
+
+    const allowedTypes = ['application/pdf', 'image/png', 'image/jpeg', 'image/jpg']
+    if (!allowedTypes.includes(fileToScan.type)) {
+      setError(t('household.invalidFileTypeErr'))
+      if (scanFileInputRef.current) scanFileInputRef.current.value = ''
+      return
+    }
+    if (fileToScan.size > 5 * 1024 * 1024) {
+      setError(t('household.maxSizeErr'))
+      if (scanFileInputRef.current) scanFileInputRef.current.value = ''
+      return
+    }
+
+    setIsScanningPayroll(true)
+    const reader = new FileReader()
+
+    reader.onload = async () => {
+      try {
+        const base64Content = (reader.result as string).split(',')[1]
+        const formData = new FormData()
+        formData.append('base64Data', base64Content)
+        formData.append('mimeType', fileToScan.type)
+
+        const res = await scanPayrollAction(formData)
+
+        if (res.error) {
+          setError(res.error)
+        } else {
+          if (res.amount) setAmount(res.amount)
+          if (res.month) setSelectedMonth(res.month)
+          if (res.year) setSelectedYear(res.year)
+          setFile(fileToScan)
+          setSuccess(t('household.scanPayrollSuccess'))
+        }
+      } catch (err: any) {
+        console.error('Error al escanear nómina con IA:', err)
+        setError(t('household.scanPayrollErr'))
+      } finally {
+        setIsScanningPayroll(false)
+        if (scanFileInputRef.current) scanFileInputRef.current.value = ''
+      }
+    }
+
+    reader.readAsDataURL(fileToScan)
+  }
+
+  const handleScanPayrollFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileToScan = e.target.files?.[0]
+    if (fileToScan) {
+      processPayrollScanFile(fileToScan)
+    }
+  }
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!isDragging) setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+  }
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDragging(false)
+
+    const droppedFiles = e.dataTransfer.files
+    if (droppedFiles && droppedFiles.length > 0) {
+      processPayrollScanFile(droppedFiles[0])
+    }
+  }
+
   const formatMonthName = (monthStr: string) => {
     const [year, month] = monthStr.split('-')
     const date = new Date(parseInt(year), parseInt(month) - 1, 1)
@@ -372,19 +455,110 @@ export function MonthlyIncomesListForm({
         </Alert>
       )}
 
-      {/* Formulario de registro */}
-      <form onSubmit={handleAddIncome} className="space-y-4 p-4 rounded-xl border border-slate-200/50 bg-slate-50/30 dark:border-slate-800/40 dark:bg-slate-900/10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="flex gap-2">
-            <div className="space-y-2 flex-1">
-              <Label htmlFor="monthSelect">{t('household.thMonth')}</Label>
-              <Select value={selectedMonth} onValueChange={(val) => setSelectedMonth(val || '')} disabled={isPending}>
-                <SelectTrigger id="monthSelect" className="bg-background">
+      {/* Target/Drop Zone de Inteligencia Artificial Gemini */}
+      <div
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        className={`relative overflow-hidden rounded-2xl p-6 transition-all duration-300 border ${isDragging
+            ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01] shadow-xl ring-2 ring-indigo-500/20'
+            : 'border-indigo-100 dark:border-indigo-900/40 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-slate-50 dark:from-indigo-950/30 dark:via-purple-950/20 dark:to-slate-900/40 shadow-sm hover:shadow-md'
+          }`}
+      >
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent rounded-full blur-2xl pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
+          <div className="space-y-1.5 max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100/80 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+              {/* <Sparkles className="h-3.5 w-3.5 fill-indigo-500/30 text-indigo-600 dark:text-indigo-400" /> */}
+              <span>{t('household.scanBannerTitle')}</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed pt-1">
+              {t('household.scanBannerSubtitle')}
+            </p>
+          </div>
+
+          <div className="flex-shrink-0">
+            <input
+              type="file"
+              ref={scanFileInputRef}
+              className="hidden"
+              accept="application/pdf,image/*"
+              onChange={handleScanPayrollFile}
+            />
+            <div
+              onClick={() => !isScanningPayroll && !isPending && scanFileInputRef.current?.click()}
+              className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed transition-all cursor-pointer group text-center min-w-[220px] ${isScanningPayroll
+                  ? 'border-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30'
+                  : 'border-indigo-200 dark:border-indigo-800/60 bg-white/70 dark:bg-slate-900/60 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-white dark:hover:bg-slate-900'
+                }`}
+            >
+              {isScanningPayroll ? (
+                <div className="flex flex-col items-center space-y-2 py-1">
+                  <Loader2 className="h-7 w-7 animate-spin text-indigo-600 dark:text-indigo-400" />
+                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                    {t('household.scanningPayroll')}
+                  </span>
+                </div>
+              ) : (
+                <div className="space-y-1 py-0.5">
+                  <div className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                    <Upload className="h-4 w-4" />
+                  </div>
+                  <div className="text-xs font-semibold text-foreground">
+                    {t('household.dropzonePrompt')}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {t('household.dropzoneFormats')}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Formulario manual de registro */}
+      <form onSubmit={handleAddIncome} className="rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-card p-5 space-y-5 shadow-sm">
+        <div className="flex items-center justify-between border-b border-border/60 pb-3">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+              <Landmark className="h-4 w-4" />
+            </div>
+            <h3 className="font-semibold text-sm text-foreground">{t('household.manualFormTitle')}</h3>
+          </div>
+          {file && (
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 text-xs">
+              <FileText className="h-3.5 w-3.5 text-indigo-500" />
+              <span className="max-w-[150px] truncate font-medium">{file.name}</span>
+              <button
+                type="button"
+                onClick={() => {
+                  setFile(null)
+                  if (fileInputRef.current) fileInputRef.current.value = ''
+                }}
+                className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-200"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="monthSelect" className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                {t('household.thMonth')}
+              </Label>
+              <Select value={selectedMonth} onValueChange={(val) => setSelectedMonth(val || '')} disabled={isPending || isScanningPayroll}>
+                <SelectTrigger id="monthSelect" className="h-9 text-xs bg-background">
                   <SelectValue placeholder={t('household.thMonth')} />
                 </SelectTrigger>
                 <SelectContent>
                   {monthsList.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
+                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
                       {opt.label}
                     </SelectItem>
                   ))}
@@ -392,15 +566,18 @@ export function MonthlyIncomesListForm({
               </Select>
             </div>
 
-            <div className="space-y-2 flex-1">
-              <Label htmlFor="yearSelect">{t('cashflow.year')}</Label>
-              <Select value={selectedYear} onValueChange={(val) => setSelectedYear(val || '')} disabled={isPending}>
-                <SelectTrigger id="yearSelect" className="bg-background">
+            <div className="space-y-1.5">
+              <Label htmlFor="yearSelect" className="text-xs font-medium text-muted-foreground flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                {t('cashflow.year')}
+              </Label>
+              <Select value={selectedYear} onValueChange={(val) => setSelectedYear(val || '')} disabled={isPending || isScanningPayroll}>
+                <SelectTrigger id="yearSelect" className="h-9 text-xs bg-background">
                   <SelectValue placeholder={t('cashflow.year')} />
                 </SelectTrigger>
                 <SelectContent>
                   {yearsList.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
+                    <SelectItem key={opt.value} value={opt.value} className="text-xs">
                       {opt.label}
                     </SelectItem>
                   ))}
@@ -409,77 +586,78 @@ export function MonthlyIncomesListForm({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="monthlyAmount">{t('household.netIncome')}</Label>
+          <div className="space-y-1.5">
+            <Label htmlFor="monthlyAmount" className="text-xs font-medium text-muted-foreground">
+              {t('household.netIncome')}
+            </Label>
             <div className="relative">
-              <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+              <span className="absolute left-3 top-2.5 text-xs text-muted-foreground font-semibold">€</span>
               <Input
                 id="monthlyAmount"
                 type="text"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder={t('household.netIncomePlaceholder')}
-                disabled={isPending}
+                disabled={isPending || isScanningPayroll}
                 required
-                className="pl-9 bg-background focus:bg-background"
+                className="h-9 pl-7 bg-background text-xs font-semibold focus:ring-1 focus:ring-indigo-500"
               />
             </div>
           </div>
 
-          <div className="space-y-2 sm:col-span-2">
-            <Label htmlFor="monthlyContribution">{t('household.householdContribution')}</Label>
+          <div className="space-y-1.5 md:col-span-2">
+            <Label htmlFor="monthlyContribution" className="text-xs font-medium text-muted-foreground flex items-center justify-between">
+              <span>{t('household.householdContribution')}</span>
+              <span className="text-[11px] text-muted-foreground font-normal">({t('household.contributionPlaceholder')})</span>
+            </Label>
             <div className="relative">
-              <Landmark className="absolute left-3 top-2.5 h-4 w-4 text-emerald-500" />
+              <span className="absolute left-3 top-2.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">€</span>
               <Input
                 id="monthlyContribution"
                 type="text"
                 value={contribution}
                 onChange={(e) => setContribution(e.target.value)}
                 placeholder={t('household.contributionPlaceholder')}
-                disabled={isPending}
-                className="pl-9 bg-background focus:bg-background"
+                disabled={isPending || isScanningPayroll}
+                className="h-9 pl-7 bg-background text-xs font-semibold text-emerald-600 dark:text-emerald-400 focus:ring-1 focus:ring-emerald-500"
               />
             </div>
           </div>
         </div>
 
-        {/* Carga del documento Justificante/Nómina */}
-        <div className="space-y-2">
-          <Label htmlFor="payrollFile">{t('household.attachPayroll')}</Label>
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1">
-              <Upload className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="payrollFile"
+        {/* Carga opcional manual si no se usó el drag zone */}
+        {!file && (
+          <div className="pt-1 flex items-center justify-between text-xs border-t border-border/40">
+            <div className="flex items-center gap-2">
+              <input
                 type="file"
                 ref={fileInputRef}
+                className="hidden"
                 accept="application/pdf,image/*"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                disabled={isPending}
-                className="pl-9 bg-background focus:bg-background cursor-pointer file:cursor-pointer file:mr-2 file:py-1 file:px-2 file:rounded-md file:border-0 file:text-[10px] file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                disabled={isPending || isScanningPayroll}
               />
-            </div>
-            {file && (
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setFile(null)
-                  if (fileInputRef.current) fileInputRef.current.value = ''
-                }}
-                className="text-xs text-destructive hover:bg-destructive/10"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isPending || isScanningPayroll}
+                className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
               >
-                {t('household.removeFile')}
+                <Upload className="h-3.5 w-3.5" />
+                {t('household.attachPayroll')}
               </Button>
-            )}
+            </div>
+            <span className="text-[10px] text-muted-foreground">PDF, PNG, JPG (&lt;5MB)</span>
           </div>
-          <p className="text-[10px] text-muted-foreground">
-            {t('household.payrollTip')}
-          </p>
-        </div>
+        )}
 
-        <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
+        <Button
+          type="submit"
+          disabled={isPending || isScanningPayroll}
+          className="w-full h-10 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium shadow-sm transition-all"
+        >
           {isPending ? (
             <>
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -492,121 +670,132 @@ export function MonthlyIncomesListForm({
       </form>
 
       {/* Historial listado */}
-      <div className="space-y-3">
-        <h3 className="font-semibold text-sm text-foreground">{t('household.payrollHistory')}</h3>
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <h3 className="font-semibold text-sm text-foreground flex items-center gap-2">
+            <span>{t('household.payrollHistory')}</span>
+            <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-muted-foreground font-medium">
+              {sortedIncomes.length}
+            </span>
+          </h3>
+        </div>
+
         {sortedIncomes.length === 0 ? (
-          <p className="text-xs text-muted-foreground italic py-2">
-            {t('household.noPayrollsHistory')}
-          </p>
+          <div className="text-center py-8 px-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-800 text-muted-foreground text-xs space-y-1">
+            <FileText className="h-8 w-8 mx-auto opacity-30 mb-2" />
+            <p className="font-medium">{t('household.noPayrollsHistory')}</p>
+          </div>
         ) : (
-          <div className="rounded-xl border border-slate-200/50 overflow-x-auto dark:border-slate-800/50">
-            <table className="w-full border-collapse text-left text-xs min-w-110">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-900/30 border-b border-slate-200/50 dark:border-slate-800/50 text-muted-foreground font-semibold">
-                  <th className="p-3 whitespace-nowrap">{t('household.thMonth')}</th>
-                  <th className="p-3 text-right whitespace-nowrap">{t('household.thNetIncome')}</th>
-                  <th className="p-3 text-right whitespace-nowrap">{t('household.thHouseholdContribution')}</th>
-                  <th className="p-3 text-center whitespace-nowrap">{t('household.thDocument')}</th>
-                  <th className="p-3 w-20 text-center whitespace-nowrap">{t('household.thAction')}</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/30">
-                {sortedIncomes.map((inc) => (
-                  <tr key={inc.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/20 text-foreground transition-colors">
-                    <td className="p-3 font-medium flex items-center gap-2">
-                      {formatMonthName(inc.month)}
-                    </td>
-                    <td className="p-3 text-right font-semibold">
-                      {formatCurrency(inc.amount)}
-                    </td>
-                    <td className="p-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
-                      {inc.contribution && Number(inc.contribution) > 0 ? formatCurrency(inc.contribution) : '-'}
-                    </td>
-                    <td className="p-3 text-center">
-                      {inc.payroll_path ? (
-                        <div className="flex items-center justify-center gap-1.5">
+          <div className="rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden bg-card shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-left text-xs min-w-[500px]">
+                <thead>
+                  <tr className="bg-slate-50/80 dark:bg-slate-900/60 border-b border-slate-200/80 dark:border-slate-800 text-muted-foreground font-semibold uppercase tracking-wider text-[10px]">
+                    <th className="p-3 pl-4 whitespace-nowrap">{t('household.thMonth')}</th>
+                    <th className="p-3 text-right whitespace-nowrap">{t('household.thNetIncome')}</th>
+                    <th className="p-3 text-right whitespace-nowrap">{t('household.thHouseholdContribution')}</th>
+                    <th className="p-3 text-center whitespace-nowrap">{t('household.thDocument')}</th>
+                    <th className="p-3 pr-4 w-20 text-center whitespace-nowrap">{t('household.thAction')}</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/50">
+                  {sortedIncomes.map((inc) => (
+                    <tr key={inc.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/40 text-foreground transition-colors group">
+                      <td className="p-3 pl-4 font-medium">
+                        {formatMonthName(inc.month)}
+                      </td>
+                      <td className="p-3 text-right font-bold text-slate-800 dark:text-slate-100">
+                        {formatCurrency(inc.amount)}
+                      </td>
+                      <td className="p-3 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                        {inc.contribution && Number(inc.contribution) > 0 ? formatCurrency(inc.contribution) : '-'}
+                      </td>
+                      <td className="p-3 text-center">
+                        {inc.payroll_path ? (
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownloadPayroll(inc.payroll_path!)}
+                              disabled={isPending || downloadingId !== null || uploadingIncomeId !== null}
+                              className="h-7 px-2.5 text-[11px] gap-1.5 border-indigo-200/80 text-indigo-600 dark:border-indigo-900/60 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/40 rounded-lg"
+                            >
+                              {downloadingId === inc.payroll_path ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <FileText className="h-3.5 w-3.5 text-indigo-500" />
+                              )}
+                              <span>{t('household.viewPayroll')}</span>
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              title={t('household.changePayrollAction')}
+                              onClick={() => triggerAttachPayroll(inc)}
+                              disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
+                              className="h-7 w-7 p-0 text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg"
+                            >
+                              {uploadingIncomeId === inc.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Upload className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <span className="text-[10px] text-muted-foreground italic hidden sm:inline">{t('household.noDocument')}</span>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => triggerAttachPayroll(inc)}
+                              disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
+                              className="h-7 px-2 text-[11px] gap-1.5 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg"
+                            >
+                              {uploadingIncomeId === inc.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Upload className="h-3.5 w-3.5" />
+                              )}
+                              <span>{t('household.attachPayrollAction')}</span>
+                            </Button>
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3 pr-4 text-center">
+                        <div className="flex items-center justify-center gap-1">
                           <Button
                             type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleDownloadPayroll(inc.payroll_path!)}
-                            disabled={isPending || downloadingId !== null || uploadingIncomeId !== null}
-                            className="h-7 text-[10px] gap-1 border-indigo-200 text-indigo-600 dark:border-indigo-900/50 dark:text-indigo-400 hover:bg-indigo-50/50"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditClick(inc)}
+                            disabled={isPending}
+                            title={t('common.edit')}
+                            className="h-7 w-7 text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-foreground rounded-lg"
                           >
-                            {downloadingId === inc.payroll_path ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <FileText className="h-3.5 w-3.5" />
-                            )}
-                            {t('household.viewPayroll')}
+                            <Pencil className="h-3.5 w-3.5" />
                           </Button>
                           <Button
                             type="button"
                             variant="ghost"
-                            size="sm"
-                            title={t('household.changePayrollAction')}
-                            onClick={() => triggerAttachPayroll(inc)}
-                            disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
-                            className="h-7 px-1.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-slate-100 dark:hover:bg-slate-800"
+                            size="icon"
+                            onClick={() => handleDeleteClick(inc.id)}
+                            disabled={isPending}
+                            title={t('common.delete')}
+                            className="h-7 w-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-lg"
                           >
-                            {uploadingIncomeId === inc.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Upload className="h-3.5 w-3.5" />
-                            )}
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2">
-                          <span className="text-[10px] text-muted-foreground italic">{t('household.noDocument')}</span>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            onClick={() => triggerAttachPayroll(inc)}
-                            disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
-                            className="h-7 text-[10px] gap-1 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
-                          >
-                            {uploadingIncomeId === inc.id ? (
-                              <Loader2 className="h-3 w-3 animate-spin" />
-                            ) : (
-                              <Upload className="h-3.5 w-3.5" />
-                            )}
-                            {t('household.attachPayrollAction')}
-                          </Button>
-                        </div>
-                      )}
-                    </td>
-                    <td className="p-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleEditClick(inc)}
-                          disabled={isPending}
-                          title={t('common.edit')}
-                          className="h-7 w-7 text-muted-foreground hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-foreground rounded-lg"
-                        >
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteClick(inc.id)}
-                          disabled={isPending}
-                          title={t('common.delete')}
-                          className="h-7 w-7 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>

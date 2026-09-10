@@ -388,7 +388,16 @@
     "changePayrollAction": "Canviar",
     "uploadingPayroll": "Pujant...",
     "attachPayrollSuccess": "Document de nòmina adjuntat amb èxit.",
-    "editPayrollDesc": "Modifica l'ingrés net i l'aportació a la llar per a aquesta nòmina."
+    "editPayrollDesc": "Modifica l'ingrés net i l'aportació a la llar per a aquesta nòmina.",
+    "scanPayrollAI": "Escanejar Nòmina amb IA",
+    "scanningPayroll": "Analitzant nòmina amb Gemini IA...",
+    "scanPayrollSuccess": "Nòmina analitzada amb èxit per Gemini IA! S'han completat el mes, l'any i l'import net automàticament.",
+    "scanPayrollErr": "Error en analitzar la nòmina amb IA. Si us plau, revisa l'arxiu i torna-ho a intentar.",
+    "scanBannerTitle": "Escàner Intel·ligent de Nòmines amb Gemini IA",
+    "scanBannerSubtitle": "Penja o arrossega el PDF o foto de la teva nòmina. La IA detectarà automàticament el mes, l'any i el teu sou net.",
+    "dropzonePrompt": "Fes clic o arrossega la teva nòmina aquí per analitzar-la amb IA",
+    "dropzoneFormats": "Soporta documents PDF i imatges PNG / JPG (Màxim 5MB)",
+    "manualFormTitle": "Registre Manual de Nòmina"
   },
   "mode": {
     "light": "Clar",

@@ -388,7 +388,16 @@
     "changePayrollAction": "Cambiar",
     "uploadingPayroll": "Subiendo...",
     "attachPayrollSuccess": "Documento de nómina adjuntado con éxito.",
-    "editPayrollDesc": "Modifica el ingreso neto y la aportación al hogar para esta nómina."
+    "editPayrollDesc": "Modifica el ingreso neto y la aportación al hogar para esta nómina.",
+    "scanPayrollAI": "Escanear Nómina con IA",
+    "scanningPayroll": "Analizando nómina con Gemini IA...",
+    "scanPayrollSuccess": "¡Nómina analizada con éxito por Gemini IA! Se han completado el mes, año e importe neto automáticamente.",
+    "scanPayrollErr": "Error al analizar la nómina con IA. Por favor, revisa el archivo e inténtalo de nuevo.",
+    "scanBannerTitle": "Escáner Inteligente de Nóminas con IA Gemini",
+    "scanBannerSubtitle": "Sube o arrastra el PDF o foto de tu nómina. La IA detectará automáticamente el mes, el año y tu sueldo neto.",
+    "dropzonePrompt": "Haz clic o arrastra tu nómina aquí para analizarla con IA",
+    "dropzoneFormats": "Soporta documentos PDF e imágenes PNG / JPG (Máximo 5MB)",
+    "manualFormTitle": "Registro Manual de Nómina"
   },
   "mode": {
     "light": "Claro",

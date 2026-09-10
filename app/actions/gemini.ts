@@ -122,6 +122,102 @@ Devuelve una respuesta estrictamente en formato JSON válido con la siguiente es
   }
 }
 
+export interface ScanPayrollResult {
+  amount?: string
+  month?: string
+  year?: string
+  company?: string
+  error?: string
+}
+
+/**
+ * Server Action que analiza un documento de nómina (PDF o Imagen PNG/JPG) con Gemini AI (gemini-flash-latest)
+ * y extrae la información del salario líquido (neto) y el periodo (mes y año).
+ */
+export async function scanPayrollAction(
+  formData: FormData
+): Promise<ScanPayrollResult> {
+  try {
+    const base64Data = formData.get('base64Data') as string
+    const mimeType = formData.get('mimeType') as string
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      return { error: 'Falta configurar la clave API de Gemini (GEMINI_API_KEY) en las variables de entorno del servidor.' }
+    }
+
+    const prompt = `Analiza detalladamente este documento de nómina o recibo de salario (puede ser PDF o Imagen) y extrae los datos clave del recibo de sueldo.
+
+Instrucciones de extracción:
+1. "amount": Extrae el importe neto final a cobrar por el trabajador. Busca campos como "LÍQUIDO A PERCIBIR", "Líquido total a percibir", "Neto a cobrar", "Total a recibir" o el importe bancario abonado final. Formatea el número con punto decimal y dos decimales (ej. '2450.00' o '1952.50').
+2. "month": El número de mes del periodo liquidado o fecha de la nómina (dos dígitos, ej. '01' para enero, '08' para agosto, '12' para diciembre).
+3. "year": El año de 4 dígitos correspondiente al periodo liquidado (ej. '2026' o '2025').
+4. "company": Nombre de la empresa o empleador emisor si aparece en la nómina (ej. 'Empresa S.L.').
+
+Devuelve una respuesta strictly en formato JSON válido con la siguiente estructura (no añadas explicaciones ni markdown fuera del JSON):
+{
+  "amount": "string (ej. '2450.00')",
+  "month": "string (ej. '08')",
+  "year": "string (ej. '2026')",
+  "company": "string (ej. 'Nombre Empresa')"
+}`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Data,
+                  },
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            responseMimeType: 'application/json',
+          },
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('Gemini API HTTP Error scanning payroll:', errText)
+      return { error: 'Error en la comunicación con el servicio de Inteligencia Artificial.' }
+    }
+
+    const resJson = await response.json()
+    const textResponse = resJson?.candidates?.[0]?.content?.parts?.[0]?.text
+
+    if (!textResponse) {
+      return { error: 'No se pudo obtener un análisis legible de la nómina.' }
+    }
+
+    const cleanedText = cleanJsonResponse(textResponse)
+    const parsedData = JSON.parse(cleanedText)
+
+    return {
+      amount: parsedData.amount || '',
+      month: parsedData.month ? parsedData.month.toString().padStart(2, '0') : '',
+      year: parsedData.year ? parsedData.year.toString() : '',
+      company: parsedData.company || '',
+    }
+  } catch (err: any) {
+    console.error('scanPayrollAction Error:', err)
+    return { error: 'Error inesperado al procesar el documento de la nómina.' }
+  }
+}
+
+
 /**
  * Server Action para consultar a Gemini sobre las finanzas del hogar
  */

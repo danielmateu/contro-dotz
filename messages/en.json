@@ -388,7 +388,16 @@
     "changePayrollAction": "Change",
     "uploadingPayroll": "Uploading...",
     "attachPayrollSuccess": "Payslip document attached successfully.",
-    "editPayrollDesc": "Modify net income and household contribution for this payslip."
+    "editPayrollDesc": "Modify net income and household contribution for this payslip.",
+    "scanPayrollAI": "Scan Payslip with AI",
+    "scanningPayroll": "Analyzing payslip with Gemini AI...",
+    "scanPayrollSuccess": "Payslip analyzed successfully by Gemini AI! Month, year, and net amount have been filled automatically.",
+    "scanPayrollErr": "Error analyzing payslip with AI. Please check the file and try again.",
+    "scanBannerTitle": "Smart Payslip Scanner with Gemini AI",
+    "scanBannerSubtitle": "Upload or drag your payslip PDF or image. AI will automatically detect the month, year, and net income.",
+    "dropzonePrompt": "Click or drag your payslip here to analyze with AI",
+    "dropzoneFormats": "Supports PDF documents and PNG / JPG images (Max 5MB)",
+    "manualFormTitle": "Manual Payslip Entry"
   },
   "mode": {
     "light": "Light",
