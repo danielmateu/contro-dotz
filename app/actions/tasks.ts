@@ -63,7 +63,7 @@ export async function getTasksAction(householdId?: string | null): Promise<House
     new Set(tasks.flatMap(t => [t.user_id, t.assigned_to, t.completed_by]).filter(Boolean))
   ) as string[]
 
-  let profileMap = new Map<string, { display_name: string; avatar_url?: string }>()
+  const profileMap = new Map<string, { display_name: string; avatar_url?: string }>()
   if (memberIds.length > 0) {
     const { data: profiles } = await supabase
       .from('profiles')

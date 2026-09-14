@@ -152,7 +152,6 @@ export async function fetchCashflowDataAction(
       totalMonthlyIncome += income
     })
 
-    const todayDateStr = now.toISOString().split('T')[0]
     const todayDayNumber = now.getFullYear() === yearNum && now.getMonth() + 1 === monthNum ? now.getDate() : 99
 
     // Agrupar gastos reales por fecha

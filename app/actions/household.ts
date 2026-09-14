@@ -55,7 +55,7 @@ export async function createHouseholdAction(prevState: any, formData: FormData) 
   const supabase = await createClient()
 
   // Llama a la función RPC de PostgreSQL que crea el hogar e inserta la membresía
-  const { data: householdId, error } = await supabase.rpc('create_household', {
+  const { error } = await supabase.rpc('create_household', {
     household_name: name,
   })
 
