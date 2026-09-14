@@ -116,9 +116,20 @@ export function SidebarMenuItems({
   useEffect(() => {
     async function fetchPendingTasksCount() {
       try {
-        const tasks = await getTasksAction(householdId)
-        const pending = tasks.filter((t) => t.status !== 'completed')
-        setPendingTasksCount(pending.length)
+        const supabase = createClient()
+        let query = supabase
+          .from('household_tasks')
+          .select('id', { count: 'exact', head: true })
+          .neq('status', 'completed')
+
+        if (householdId) {
+          query = query.or(`is_private.eq.true,household_id.eq.${householdId}`)
+        } else if (userId) {
+          query = query.eq('user_id', userId).eq('is_private', true)
+        }
+
+        const { count } = await query
+        setPendingTasksCount(count || 0)
       } catch (err) {
         console.error('Error fetching pending tasks count for sidebar:', err)
       }

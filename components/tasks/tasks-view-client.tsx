@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import { HouseholdTask, getTasksAction } from '@/app/actions/tasks'
 import { TaskCard } from './task-card'
@@ -10,7 +10,7 @@ import { TaskFilters } from './task-filters'
 import { TasksKanbanView } from './tasks-kanban-view'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { CheckSquare, Plus, Sparkles, Clock, CheckCircle2, ListTodo, ShieldAlert } from 'lucide-react'
+import { CheckSquare, Plus, Sparkles, Clock, CheckCircle2, ListTodo } from 'lucide-react'
 
 interface HouseholdMemberOption {
   id: string
