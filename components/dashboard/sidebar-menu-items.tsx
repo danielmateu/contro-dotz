@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { MorphIcon } from 'morphicons/react'
 import { createClient } from '@/lib/supabase/client'
-import { getTasksAction } from '@/app/actions/tasks'
 // @ts-ignore
 import { __iconNode as LayoutDashboardData } from 'lucide-react/dist/esm/icons/layout-dashboard.mjs'
 // @ts-ignore
