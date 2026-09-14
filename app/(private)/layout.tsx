@@ -25,6 +25,7 @@ import { ModeToggle } from '@/components/ui/mode-toggle'
 import { ActiveRouteName } from '@/components/dashboard/active-route-name'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { HeaderTamagotchiTrigger } from '@/components/game/header-tamagotchi-trigger'
+import { HeaderTasksTrigger } from '@/components/tasks/header-tasks-trigger'
 import { GameStateProvider } from '@/lib/game/game-context'
 import { SidebarUserFooter } from '@/components/dashboard/sidebar-user-footer'
 import { getAuthenticatedUser } from '@/lib/supabase/get-authenticated-user'
@@ -120,6 +121,7 @@ export default async function PrivateLayout({ children }: PrivateLayoutProps) {
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* <HeaderTasksTrigger householdId={householdId || undefined} /> */}
               <HeaderTamagotchiTrigger householdId={householdId || undefined} />
               <LocaleSwitcher />
               <ModeToggle />

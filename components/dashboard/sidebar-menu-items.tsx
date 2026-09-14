@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import { SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar'
 import { MorphIcon } from 'morphicons/react'
 import { createClient } from '@/lib/supabase/client'
+import { getTasksAction } from '@/app/actions/tasks'
 // @ts-ignore
 import { __iconNode as LayoutDashboardData } from 'lucide-react/dist/esm/icons/layout-dashboard.mjs'
 // @ts-ignore
@@ -42,6 +43,10 @@ import { __iconNode as MessagesSquareData } from 'lucide-react/dist/esm/icons/me
 import { __iconNode as ShoppingBasketData } from 'lucide-react/dist/esm/icons/shopping-basket.mjs'
 // @ts-ignore
 import { __iconNode as ShoppingCartData } from 'lucide-react/dist/esm/icons/shopping-cart.mjs'
+// @ts-ignore
+import { __iconNode as CheckSquareData } from 'lucide-react/dist/esm/icons/square-check.mjs'
+// @ts-ignore
+import { __iconNode as ListTodoData } from 'lucide-react/dist/esm/icons/list-todo.mjs'
 // @ts-ignore
 import { __iconNode as WalletData } from 'lucide-react/dist/esm/icons/wallet.mjs'
 // @ts-ignore
@@ -105,6 +110,49 @@ export function SidebarMenuItems({
     }
   }, [householdId, userId, pathname])
 
+  // Cargar y suscribirse a tareas pendientes para la alerta en el sidebar
+  const [pendingTasksCount, setPendingTasksCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchPendingTasksCount() {
+      try {
+        const tasks = await getTasksAction(householdId)
+        const pending = tasks.filter((t) => t.status !== 'completed')
+        setPendingTasksCount(pending.length)
+      } catch (err) {
+        console.error('Error fetching pending tasks count for sidebar:', err)
+      }
+    }
+
+    fetchPendingTasksCount()
+
+    // Listener para eventos locales en el mismo cliente/pestaña
+    const handleCustomUpdate = () => fetchPendingTasksCount()
+    window.addEventListener('contro-tasks-updated', handleCustomUpdate)
+
+    // Listener para Supabase Realtime entre dispositivos
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`sidebar_tasks_${householdId || userId || 'guest'}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'household_tasks',
+        },
+        () => {
+          fetchPendingTasksCount()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      window.removeEventListener('contro-tasks-updated', handleCustomUpdate)
+      supabase.removeChannel(channel)
+    }
+  }, [householdId, userId])
+
   const navItems = [
     {
       title: t('common.dashboard'),
@@ -161,6 +209,13 @@ export function SidebarMenuItems({
       icon: ShoppingBasketData,
       activeIcon: ShoppingCartData,
       disabled: !hasHousehold,
+    },
+    {
+      title: t('common.tasks'),
+      url: '/tasks',
+      icon: CheckSquareData,
+      activeIcon: ListTodoData,
+      disabled: false,
     },
     {
       title: t('common.household'),
@@ -224,11 +279,19 @@ export function SidebarMenuItems({
                     {item.url === '/chat' && hasUnread && (
                       <span className="absolute -top-1 -right-1 flex h-1.5 w-1.5 rounded-full bg-destructive animate-pulse" />
                     )}
+                    {item.url === '/tasks' && pendingTasksCount > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2 rounded-full bg-cyan-500 animate-pulse ring-2 ring-background" />
+                    )}
                   </div>
                   <span className="group-data-[collapsible=icon]:hidden flex-1 flex items-center justify-between">
                     <span>{item.title}</span>
                     {item.url === '/chat' && hasUnread && (
                       <span className="ml-2 h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                    )}
+                    {item.url === '/tasks' && pendingTasksCount > 0 && (
+                      <span className="ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 border border-cyan-500/25">
+                        {pendingTasksCount}
+                      </span>
                     )}
                   </span>
                 </Link>
