@@ -78,7 +78,7 @@ export function HouseholdViewClient({
 
       {/* Tarjeta Destacada de Invitaciones Recibidas Pendientes (siempre visible si hay invitaciones) */}
       {receivedInvitations.length > 0 && (
-        <Card className="border-primary/40 bg-linear-to-r from-primary/10 via-background to-violet-500/10 shadow-lg">
+        <Card className="border-primary/40 bg-linear-to-r from-primary/10 via-background to-blue-500/10 shadow-lg">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Mail className="h-5 w-5 text-primary animate-bounce" />

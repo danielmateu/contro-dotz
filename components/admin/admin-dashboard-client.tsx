@@ -60,7 +60,7 @@ const statusBadges: Record<
 
 const categoryColors: Record<string, string> = {
   BUG: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20',
-  FEATURE: 'bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/20',
+  FEATURE: 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/20',
   OTHER: 'bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20',
   SUGGESTION: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20',
 }
@@ -165,9 +165,9 @@ export function AdminDashboardClient() {
   return (
     <div className="space-y-8 pb-12">
       {/* Top Header Card */}
-      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-violet-500/20 bg-linear-to-r from-violet-500/10 via-indigo-500/5 to-background dark:from-violet-950/40 dark:via-indigo-950/30 dark:to-slate-900/60 backdrop-blur-xl shadow-xs">
+      <Card className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-6 rounded-3xl border border-emerald-500/20 bg-linear-to-r from-emerald-500/10 via-teal-500/5 to-background dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-slate-900/60 backdrop-blur-xl shadow-xs">
         <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-600 dark:text-violet-400 text-xs font-bold uppercase tracking-wider">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold uppercase tracking-wider">
             <ShieldCheck className="h-3.5 w-3.5" />
             <span>{t('admin.title')}</span>
           </div>
@@ -207,7 +207,7 @@ export function AdminDashboardClient() {
           type="button"
           onClick={() => setAdminTab('updates')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${adminTab === 'updates'
-            ? 'bg-indigo-600 text-white shadow-xs'
+            ? 'bg-teal-600 text-white shadow-xs'
             : 'bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
         >
@@ -248,7 +248,7 @@ export function AdminDashboardClient() {
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {t('admin.activeHouseholds')}
                 </CardTitle>
-                <div className="h-9 w-9 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
                   <Home className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -288,7 +288,7 @@ export function AdminDashboardClient() {
                 <CardTitle className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {t('admin.aiUsage')}
                 </CardTitle>
-                <div className="h-9 w-9 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                   <Sparkles className="h-5 w-5" />
                 </div>
               </CardHeader>
@@ -330,7 +330,7 @@ export function AdminDashboardClient() {
                             {u.display_name || u.email.split('@')[0]}
                           </span>
                           {u.is_super_admin && (
-                            <span className="text-[10px] bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-2 py-0.5 rounded-full font-bold">
+                            <span className="text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full font-bold">
                               Admin
                             </span>
                           )}
@@ -356,7 +356,7 @@ export function AdminDashboardClient() {
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
-                      <Home className="h-5 w-5 text-indigo-500" />
+                      <Home className="h-5 w-5 text-teal-500" />
                       {t('admin.recentHouseholds')}
                     </CardTitle>
                     <CardDescription className="text-xs font-medium text-muted-foreground">
@@ -429,7 +429,7 @@ export function AdminDashboardClient() {
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div className="space-y-1">
                       <CardTitle className="text-xl font-extrabold font-heading flex items-center gap-2.5">
-                        <div className="h-8 w-8 rounded-xl bg-violet-500/10 text-violet-600 dark:text-violet-400 flex items-center justify-center">
+                        <div className="h-8 w-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
                           <MessageSquare className="h-4.5 w-4.5" />
                         </div>
                         {t('admin.feedbackTitle')}
@@ -730,7 +730,7 @@ export function AdminDashboardClient() {
                             className={cn(
                               "rounded-2xl border p-3 space-y-3 min-h-[340px] flex flex-col transition-all duration-200",
                               isOver
-                                ? "border-violet-500/80 ring-2 ring-violet-500/20 bg-violet-500/5 dark:bg-violet-950/20 shadow-lg scale-[1.01]"
+                                ? "border-emerald-500/80 ring-2 ring-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/20 shadow-lg scale-[1.01]"
                                 : "border-border/80 bg-slate-500/5 dark:bg-slate-900/30"
                             )}
                           >
@@ -754,7 +754,7 @@ export function AdminDashboardClient() {
                               {columnItems.length === 0 ? (
                                 <div className={cn(
                                   "py-12 text-center text-xs font-medium rounded-xl border border-dashed transition-all",
-                                  isOver ? "border-violet-500/50 text-violet-600 dark:text-violet-400 bg-violet-500/10 font-bold" : "border-border/60 text-muted-foreground/50"
+                                  isOver ? "border-emerald-500/50 text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 font-bold" : "border-border/60 text-muted-foreground/50"
                                 )}>
                                   {isOver ? t('admin.dropHere') : t('admin.noColumnTickets')}
                                 </div>
@@ -778,7 +778,7 @@ export function AdminDashboardClient() {
                                       }}
                                       className={cn(
                                         "p-3.5 rounded-xl border border-border/80 bg-card hover:border-primary/40 transition-all space-y-2.5 shadow-2xs group cursor-grab active:cursor-grabbing select-none",
-                                        isBeingDragged && "opacity-40 scale-95 border-dashed border-violet-500 ring-2 ring-violet-500/30"
+                                        isBeingDragged && "opacity-40 scale-95 border-dashed border-emerald-500 ring-2 ring-emerald-500/30"
                                       )}
                                     >
                                       <div className="flex items-start justify-between gap-2">

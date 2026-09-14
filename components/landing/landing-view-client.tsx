@@ -37,7 +37,7 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,#80808007_1px,transparent_1px),linear-gradient(to_bottom,#80808007_1px,transparent_1px)] bg-size-[24px_24px] mask-[radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]"></div>
 
       {/* Orbs de degradado difuminados estilo premium */}
-      <div className="absolute top-[10%] left-[-10%] w-96 h-96 rounded-full bg-violet-600/10 dark:bg-violet-600/20 blur-3xl pointer-events-none"></div>
+      <div className="absolute top-[10%] left-[-10%] w-96 h-96 rounded-full bg-blue-600/10 dark:bg-blue-600/20 blur-3xl pointer-events-none"></div>
       <div className="absolute top-[40%] right-[-10%] w-96 h-96 rounded-full bg-primary/10 dark:bg-primary/20 blur-3xl pointer-events-none"></div>
 
       {/* Header */}
@@ -86,7 +86,7 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
 
       {/* Hero Section */}
       <main className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 sm:px-6 py-12 sm:py-20 w-full max-w-5xl mx-auto space-y-6 sm:space-y-8 overflow-hidden">
-        <h1 className="text-3xl sm:text-6xl md:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.1] sm:leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-violet-400 dark:to-indigo-300 text-balance">
+        <h1 className="text-3xl sm:text-6xl md:text-7xl font-extrabold tracking-tight font-heading max-w-4xl leading-[1.1] sm:leading-[1.05] text-transparent bg-clip-text bg-linear-to-r from-slate-900 via-primary to-slate-800 dark:from-white dark:via-blue-400 dark:to-cyan-300 text-balance">
           {t('landing.hero.title')}
         </h1>
 
@@ -102,9 +102,9 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
               className="group relative inline-flex items-center justify-center w-full sm:w-auto"
             >
               {/* Resplandor de fondo */}
-              <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-600 to-cyan-500 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
+              <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 via-indigo-600 to-cyan-500 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
               {/* Botón Principal */}
-              <span className="relative w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-slate-900 dark:bg-slate-950 border border-violet-500/30 rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-sm sm:text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
+              <span className="relative w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-slate-900 dark:bg-slate-950 border border-blue-500/30 rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-sm sm:text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
                 <LayoutDashboard className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 {t('landing.hero.goToMyDashboard')}
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1.5 transition-transform duration-200" />
@@ -118,9 +118,9 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
                 className="group relative inline-flex items-center justify-center w-full sm:w-auto"
               >
                 {/* Resplandor de fondo */}
-                <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
+                <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 via-sky-500 to-cyan-600 rounded-2xl opacity-75 blur-md group-hover:opacity-100 transition duration-300" />
                 {/* Botón Principal */}
-                <span className="relative w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-sm sm:text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
+                <span className="relative w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 bg-linear-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 rounded-2xl flex items-center justify-center gap-3 text-white font-bold text-sm sm:text-base shadow-2xl transition-all duration-200 group-hover:scale-[1.01] active:scale-95">
                   <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   {t('landing.hero.createAccount')}
                   <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 text-white group-hover:translate-x-1.5 transition-transform duration-200" />
@@ -140,7 +140,7 @@ export function LandingViewClient({ isAuthenticated }: LandingViewClientProps) {
 
         {/* Micro-Badges de Confianza */}
         <div className="flex flex-wrap items-center justify-center gap-x-4 sm:gap-x-6 gap-y-2 text-xs text-slate-800 dark:text-slate-100 font-bold pt-1">
-          <span className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-200 font-bold">
+          <span className="flex items-center gap-1.5 text-blue-800 dark:text-blue-200 font-bold">
             <ShieldCheck className="w-4 h-4 shrink-0" /> {t('landing.hero.badge')}
           </span>
           <span className="hidden sm:inline text-muted-foreground/40">•</span>

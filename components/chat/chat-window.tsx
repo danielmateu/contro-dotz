@@ -163,7 +163,7 @@ function ActionConfirmationCard({
       case 'add_expense':
         return <CreditCard className="w-4 h-4 text-blue-500" />
       case 'send_member_reminder':
-        return <Bell className="w-4 h-4 text-violet-500" />
+        return <Bell className="w-4 h-4 text-teal-500" />
       default:
         return <Check className="w-4 h-4 text-primary" />
     }
@@ -1211,7 +1211,7 @@ export function ChatWindow({
             <button
               type="button"
               onClick={handleActivateGemini}
-              className="text-[10px] uppercase font-bold tracking-widest text-primary/80 hover:text-primary dark:text-violet-400 dark:hover:text-violet-300 select-none flex items-center gap-1.5 cursor-pointer transition-colors"
+              className="text-[10px] uppercase font-bold tracking-widest text-primary/80 hover:text-primary dark:text-teal-400 dark:hover:text-teal-300 select-none flex items-center gap-1.5 cursor-pointer transition-colors"
               title="Haz clic para mencionar a @gemini y empezar a escribir"
             >
               <Sparkles className="h-3.5 w-3.5 text-primary shrink-0" />
@@ -1273,7 +1273,7 @@ export function ChatWindow({
                     type="button"
                     onClick={() => handleSendSuggestedQuestion('@gemini Avisar a la familia de que el seguro vence el viernes')}
                     disabled={isSending || isBotTyping}
-                    className="text-xs bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 border border-violet-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
+                    className="text-xs bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 px-3 py-1.5 rounded-xl transition-all duration-200 cursor-pointer active:scale-95 disabled:opacity-50 font-semibold"
                   >
                     + Enviar Aviso
                   </button>

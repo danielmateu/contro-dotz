@@ -41,8 +41,8 @@ const features: FeatureItem[] = [
     titleKey: 'landing.features.f1Title',
     descKey: 'landing.features.f1Desc',
     icon: Users2,
-    colorClass: 'bg-violet-500/10 text-violet-600 dark:text-violet-400',
-    iconColor: 'stroke-violet-600 dark:stroke-violet-400',
+    colorClass: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
+    iconColor: 'stroke-blue-600 dark:stroke-blue-400',
     animation: {
       animate: {
         scale: [1, 1.1, 1],
@@ -61,8 +61,8 @@ const features: FeatureItem[] = [
     titleKey: 'landing.features.f2Title',
     descKey: 'landing.features.f2Desc',
     icon: Sparkles,
-    colorClass: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-    iconColor: 'stroke-emerald-600 dark:stroke-emerald-400',
+    colorClass: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400',
+    iconColor: 'stroke-cyan-600 dark:stroke-cyan-400',
     animation: {
       animate: {
         scale: [1, 1.25, 0.95, 1.1, 1],
@@ -132,8 +132,8 @@ const features: FeatureItem[] = [
     titleKey: 'landing.features.f6Title',
     descKey: 'landing.features.f6Desc',
     icon: Mail,
-    colorClass: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400',
-    iconColor: 'stroke-indigo-600 dark:stroke-indigo-400',
+    colorClass: 'bg-sky-500/10 text-sky-600 dark:text-sky-400',
+    iconColor: 'stroke-sky-600 dark:stroke-sky-400',
     animation: {
       animate: {
         y: [0, -5, 0],
@@ -225,7 +225,7 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
               <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
             </motion.div>
           </div>
-          <span className="text-[10px] uppercase font-bold tracking-widest text-primary dark:text-violet-400">
+          <span className="text-[10px] uppercase font-bold tracking-widest text-primary dark:text-cyan-400">
             {t('landing.features.badgePrefix')}{feature.id}
           </span>
         </div>
@@ -238,8 +238,8 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
           {t(feature.descKey)}
         </p>
 
-        <div className="pt-1 sm:pt-2 flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 select-none">
-          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <div className="pt-1 sm:pt-2 flex items-center gap-2 text-xs font-bold text-blue-700 dark:text-blue-300 select-none">
+          <span className="h-2 w-2 rounded-full bg-blue-500 animate-pulse"></span>
           <span>{t('landing.features.tryDemo')}</span>
         </div>
       </motion.div>
@@ -250,10 +250,10 @@ function FeatureSection({ feature, index }: { feature: FeatureItem; index: numbe
         initial="hidden"
         whileInView="visible"
         viewport={{ once: true, margin: '-50px' }}
-        className="w-full md:w-107.5 lg:w-117.5 shrink-0 border border-slate-200/50 dark:border-slate-800 bg-background/55 dark:bg-slate-900/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl backdrop-blur-xs relative overflow-hidden group hover:border-violet-500/25 transition-all duration-300 min-w-0"
+        className="w-full md:w-107.5 lg:w-117.5 shrink-0 border border-slate-200/50 dark:border-slate-800 bg-background/55 dark:bg-slate-900/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-2xl backdrop-blur-xs relative overflow-hidden group hover:border-blue-500/25 transition-all duration-300 min-w-0"
       >
         {/* Glow sutil en hover sobre la caja del demo */}
-        <div className="absolute inset-px rounded-[22px] border border-violet-500/0 group-hover:border-violet-500/10 dark:group-hover:border-violet-500/15 transition-colors duration-300 pointer-events-none" />
+        <div className="absolute inset-px rounded-[22px] border border-blue-500/0 group-hover:border-blue-500/10 dark:group-hover:border-blue-500/15 transition-colors duration-300 pointer-events-none" />
 
         <div className="flex flex-col justify-between min-h-55">
           <FeatureDemoId id={feature.id} />

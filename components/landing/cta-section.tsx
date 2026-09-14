@@ -23,7 +23,7 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
       className="w-full max-w-5xl mx-auto mt-16 sm:mt-24 p-5 sm:p-8 md:p-14 rounded-2xl sm:rounded-[32px] border border-slate-200/35 dark:border-slate-800/80 bg-slate-200/10 dark:bg-slate-900/30 backdrop-blur-md relative overflow-hidden flex flex-col items-center text-center space-y-5 sm:space-y-7 shadow-2xl"
     >
       {/* Elementos decorativos de fondo de luz radial */}
-      <div className="absolute inset-0 bg-radial from-violet-600/10 to-transparent dark:from-violet-600/15 pointer-events-none" />
+      <div className="absolute inset-0 bg-radial from-emerald-600/10 to-transparent dark:from-emerald-600/15 pointer-events-none" />
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808003_1px,transparent_1px),linear-gradient(to_bottom,#80808003_1px,transparent_1px)] bg-size-[16px_16px] pointer-events-none" />
 
       {/* Badge Superior */}
@@ -32,9 +32,9 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true }}
         transition={{ delay: 0.25, type: 'spring' }}
-        className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-[10px] text-primary dark:text-violet-400 font-extrabold uppercase tracking-widest select-none relative z-10"
+        className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[10px] text-primary dark:text-emerald-400 font-extrabold uppercase tracking-widest select-none relative z-10"
       >
-        <Sparkles className="h-3.5 w-3.5 text-primary dark:text-violet-400 animate-pulse" />
+        <Sparkles className="h-3.5 w-3.5 text-primary dark:text-emerald-400 animate-pulse" />
         <span>{t('landing.cta.badge')}</span>
       </motion.div>
 
@@ -70,7 +70,7 @@ export function CTASection({ isAuthenticated }: CTASectionProps) {
                 href="/register"
                 className={cn(
                   buttonVariants({ size: 'lg' }),
-                  'w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 rounded-xl text-sm sm:text-base font-bold bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white shadow-xl shadow-indigo-500/20 transition-all duration-200 flex items-center justify-center'
+                  'w-full sm:w-auto px-6 sm:px-8 py-5 sm:py-6 rounded-xl text-sm sm:text-base font-bold bg-linear-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white shadow-xl shadow-blue-500/20 transition-all duration-200 flex items-center justify-center'
                 )}
               >
                 {t('landing.cta.createAccount')}

@@ -68,9 +68,9 @@ export function FeatureBaseWidget({ className, trigger }: FeatureBaseWidgetProps
             <Button
               variant="outline"
               size="sm"
-              className={`rounded-xl border-violet-500/30 bg-violet-500/10 hover:bg-violet-500/20 text-violet-400 font-semibold gap-2 transition-all active:scale-95 ${className}`}
+              className={`rounded-xl border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold gap-2 transition-all active:scale-95 ${className}`}
             >
-              <MessageSquarePlus className="h-4 w-4 text-violet-400" />
+              <MessageSquarePlus className="h-4 w-4 text-blue-600" />
               <span className="hidden lg:inline">Feedback</span>
             </Button>
           }
@@ -79,7 +79,7 @@ export function FeatureBaseWidget({ className, trigger }: FeatureBaseWidgetProps
 
       <DialogContent className="sm:max-w-md  border-slate-800 text-foreground rounded-2xl p-6">
         <DialogHeader className="space-y-1.5">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 mb-1">
+          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600 mb-1">
             <MessageCircleDashed className="h-5 w-5" />
           </div>
           <DialogTitle className="text-xl font-bold font-heading">
@@ -109,7 +109,7 @@ export function FeatureBaseWidget({ className, trigger }: FeatureBaseWidgetProps
                   onClick={() => setCategory('feature')}
                   className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
                     category === 'feature'
-                      ? 'bg-violet-600 hover:bg-violet-500 text-white border-violet-500 shadow-md font-bold'
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-md font-bold'
                       : 'border-slate-700/80 bg-transparent text-muted-foreground hover:text-foreground hover:bg-slate-800/50'
                   }`}
                 >
@@ -180,7 +180,7 @@ export function FeatureBaseWidget({ className, trigger }: FeatureBaseWidgetProps
               <Button
                 type="submit"
                 disabled={loading || !title.trim() || !feedback.trim()}
-                className="bg-violet-600 hover:bg-violet-500 text-white font-semibold rounded-xl text-xs gap-2"
+                className="bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs gap-2"
               >
                 {loading ? (
                   t('common.loading')

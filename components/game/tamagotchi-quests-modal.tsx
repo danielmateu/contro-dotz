@@ -116,7 +116,7 @@ export function TamagotchiQuestsModal({
                         <Coins className="w-3 h-3 fill-amber-500 text-amber-500" />
                         +{quest.rewardCoins} DotzCoins
                       </Badge>
-                      <Badge variant="outline" className="text-[10px] font-bold border-indigo-500/30 text-indigo-500 bg-indigo-500/10 gap-1 px-2 py-0.5">
+                      <Badge variant="outline" className="text-[10px] font-bold border-sky-500/30 text-sky-600 dark:text-sky-400 bg-sky-500/10 gap-1 px-2 py-0.5">
                         <Sparkles className="w-3 h-3" />
                         +{quest.rewardXp} XP
                       </Badge>

@@ -204,7 +204,7 @@ export function SettingsViewClient({
           </Card>
 
           {/* Share App Card */}
-          <Card className="border-primary/20 bg-linear-to-br from-primary/5 via-background to-violet-500/5 shadow-md">
+          <Card className="border-primary/20 bg-linear-to-br from-primary/5 via-background to-emerald-500/5 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
                 <Share2 className="h-5 w-5 text-primary" />

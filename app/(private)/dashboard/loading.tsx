@@ -5,7 +5,7 @@ export default function DashboardLoading() {
   return (
     <div className="space-y-6 animate-pulse">
       {/* Header y Tamagotchi Hero Banner Skeleton */}
-      <div className="h-36 sm:h-40 w-full bg-linear-to-r from-violet-950/20 via-indigo-900/10 to-emerald-500/10 rounded-3xl border border-border/40 p-4 flex items-center justify-between">
+      <div className="h-36 sm:h-40 w-full bg-linear-to-r from-blue-950/20 via-sky-900/10 to-cyan-500/10 rounded-3xl border border-border/40 p-4 flex items-center justify-between">
         <div className="space-y-2">
           <div className="h-6 w-40 bg-muted/60 rounded-xl" />
           <div className="h-4 w-60 bg-muted/40 rounded-lg" />

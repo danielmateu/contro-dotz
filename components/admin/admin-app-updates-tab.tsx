@@ -36,7 +36,7 @@ const CATEGORY_CONFIG: Record<
   feature: {
     label: 'Nueva Función',
     icon: Rocket,
-    className: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800',
+    className: 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-200 dark:border-teal-800',
   },
   improvement: {
     label: 'Mejora',
@@ -51,7 +51,7 @@ const CATEGORY_CONFIG: Record<
   announcement: {
     label: 'Anuncio',
     icon: Megaphone,
-    className: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800',
+    className: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800',
   },
 }
 
@@ -258,9 +258,9 @@ export function AdminAppUpdatesTab() {
     <div className="space-y-8">
       {/* Formulario de Creación de Novedades */}
       <Card className="border-border bg-card text-card-foreground rounded-3xl overflow-hidden shadow-2xs">
-        <CardHeader className="border-b border-border/60 p-6 bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-background">
+        <CardHeader className="border-b border-border/60 p-6 bg-gradient-to-r from-teal-500/10 via-emerald-500/5 to-background">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+            <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400">
               <Sparkles className="h-6 w-6" />
             </div>
             <div>
@@ -313,7 +313,7 @@ export function AdminAppUpdatesTab() {
                   <button
                     type="button"
                     onClick={() => setVersion(suggestedVersions.minor)}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition-all cursor-pointer border border-indigo-200 dark:border-indigo-800"
+                    className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 transition-all cursor-pointer border border-teal-200 dark:border-teal-800"
                     title="Incremento de nueva funcionalidad"
                   >
                     {suggestedVersions.minor} (Función)
@@ -321,7 +321,7 @@ export function AdminAppUpdatesTab() {
                   <button
                     type="button"
                     onClick={() => setVersion(suggestedVersions.major)}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-all cursor-pointer border border-purple-200 dark:border-purple-800"
+                    className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 transition-all cursor-pointer border border-cyan-200 dark:border-cyan-800"
                     title="Incremento mayor / gran versión"
                   >
                     {suggestedVersions.major} (Mayor)
@@ -369,7 +369,7 @@ export function AdminAppUpdatesTab() {
                   <button
                     type="button"
                     onClick={() => setContent(DESCRIPTION_TEMPLATES.feature)}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 hover:bg-indigo-500/20 transition-all cursor-pointer border border-indigo-200 dark:border-indigo-800"
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-teal-500/10 text-teal-600 dark:text-teal-400 hover:bg-teal-500/20 transition-all cursor-pointer border border-teal-200 dark:border-teal-800"
                     title="Cargar plantilla de Nueva Función"
                   >
                     🚀 Función
@@ -393,7 +393,7 @@ export function AdminAppUpdatesTab() {
                   <button
                     type="button"
                     onClick={() => setContent(DESCRIPTION_TEMPLATES.announcement)}
-                    className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/10 text-purple-600 dark:text-purple-400 hover:bg-purple-500/20 transition-all cursor-pointer border border-purple-200 dark:border-purple-800"
+                    className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 hover:bg-cyan-500/20 transition-all cursor-pointer border border-cyan-200 dark:border-cyan-800"
                     title="Cargar plantilla de Anuncio"
                   >
                     📢 Anuncio
@@ -449,10 +449,10 @@ export function AdminAppUpdatesTab() {
                     type="checkbox"
                     checked={sendEmail}
                     onChange={(e) => setSendEmail(e.target.checked)}
-                    className="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
                   />
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-indigo-500" />
+                    <Mail className="h-4 w-4 text-teal-500" />
                     <div>
                       <span className="text-xs font-bold text-foreground block">Enviar por Email (Resend)</span>
                       <span className="text-[10px] text-muted-foreground block">Notifica por correo a todos los usuarios</span>
@@ -466,10 +466,10 @@ export function AdminAppUpdatesTab() {
                     type="checkbox"
                     checked={sendPush}
                     onChange={(e) => setSendPush(e.target.checked)}
-                    className="h-4 w-4 rounded text-indigo-600 focus:ring-indigo-500"
+                    className="h-4 w-4 rounded text-teal-600 focus:ring-teal-500"
                   />
                   <div className="flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-purple-500" />
+                    <Bell className="h-4 w-4 text-emerald-500" />
                     <div>
                       <span className="text-xs font-bold text-foreground block">Notificación Web Push</span>
                       <span className="text-[10px] text-muted-foreground block">Envía un aviso al navegador/dispositivo</span>
@@ -484,7 +484,7 @@ export function AdminAppUpdatesTab() {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold gap-2 px-6 shadow-md cursor-pointer"
+                className="rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold gap-2 px-6 shadow-md cursor-pointer"
               >
                 {submitting ? (
                   <>

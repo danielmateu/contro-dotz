@@ -276,7 +276,7 @@ export function SavingGoalsClient({
                 className={`text-xs font-extrabold px-3 py-1 rounded-xl shadow-2xs ${salarySavingsPercent >= 20
                   ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
                   : salarySavingsPercent >= 10
-                    ? 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30'
+                    ? 'bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30'
                     : 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border-amber-500/30'
                   }`}
               >
@@ -329,7 +329,7 @@ export function SavingGoalsClient({
               </div>
               <div className="h-2.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-0.5 border border-border/40">
                 <div
-                  className="h-full bg-linear-to-r from-indigo-500 via-primary to-emerald-500 rounded-full transition-all duration-700"
+                  className="h-full bg-linear-to-r from-blue-600 via-sky-500 to-cyan-400 rounded-full transition-all duration-700"
                   style={{ width: `${Math.min(100, salarySavingsPercent)}%` }}
                 />
               </div>
@@ -514,7 +514,7 @@ export function SavingGoalsClient({
                     )}
 
                     {isFree && (
-                      <div className="absolute top-0 right-0 bg-indigo-500 text-white font-bold text-[9px] px-2 py-0.5 rounded-bl-lg uppercase tracking-wider shadow-xs">
+                      <div className="absolute top-0 right-0 bg-teal-500 text-white font-bold text-[9px] px-2 py-0.5 rounded-bl-lg uppercase tracking-wider shadow-xs">
                         {t('savingGoals.freeGoalBadge')}
                       </div>
                     )}
@@ -567,7 +567,7 @@ export function SavingGoalsClient({
                           <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/60 rounded-full overflow-hidden relative">
                             <div
                               className={`h-full rounded-full transition-all duration-700 ${isFree
-                                ? 'bg-linear-to-r from-indigo-500 to-emerald-500'
+                                ? 'bg-linear-to-r from-teal-500 to-emerald-500'
                                 : isCompleted
                                   ? 'bg-emerald-500'
                                   : 'bg-primary'
@@ -578,7 +578,7 @@ export function SavingGoalsClient({
 
                           <div className="flex justify-between items-center text-[10px]">
                             {isFree ? (
-                              <span className="font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1">
+                              <span className="font-semibold text-teal-600 dark:text-teal-400 flex items-center gap-1">
                                 <InfinityIcon className="w-3 h-3" /> {t('savingGoals.continuousGrowth')}
                               </span>
                             ) : (
@@ -812,8 +812,8 @@ export function SavingGoalsClient({
                   <Coins className="w-4 h-4 fill-amber-500 text-amber-500" />
                   +{rewardCelebration.coinsEarned} Monedas
                 </Badge>
-                <Badge className="bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 text-xs font-extrabold px-3 py-1 gap-1.5 rounded-xl shadow-2xs">
-                  <Sparkles className="w-4 h-4 text-indigo-500" />
+                <Badge className="bg-teal-500/15 text-teal-600 dark:text-teal-400 border-teal-500/30 text-xs font-extrabold px-3 py-1 gap-1.5 rounded-xl shadow-2xs">
+                  <Sparkles className="w-4 h-4 text-teal-500" />
                   +{rewardCelebration.isGoalCompleted100 ? '100' : '20'} XP Dotzi
                 </Badge>
               </div>

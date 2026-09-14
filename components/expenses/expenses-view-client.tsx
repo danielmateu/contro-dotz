@@ -126,9 +126,9 @@ export function ExpensesViewClient({
             trigger={
               <Button
                 variant="outline"
-                className="font-bold gap-2 text-xs h-9 rounded-xl border-indigo-500/30 text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 hover:bg-indigo-500/20 shadow-xs"
+                className="font-bold gap-2 text-xs h-9 rounded-xl border-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10 hover:bg-blue-500/20 shadow-xs"
               >
-                <FileSpreadsheet className="w-4 h-4 text-indigo-500" />
+                <FileSpreadsheet className="w-4 h-4 text-blue-600" />
                 <span>Importar Extracto</span>
               </Button>
             }
@@ -247,7 +247,7 @@ export function ExpensesViewClient({
                           <span className="font-semibold text-foreground flex items-center gap-1.5 flex-wrap">
                             {expense.description}
                             {expense.is_personal && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-950/40 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-950/40 dark:text-blue-300 border border-blue-200/60 dark:border-blue-800/60">
                                 <User className="h-2.5 w-2.5" />
                                 {locale === 'en' ? 'Personal' : locale === 'ca' ? 'Personal' : 'Personal'}
                               </span>

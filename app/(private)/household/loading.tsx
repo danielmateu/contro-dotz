@@ -13,7 +13,7 @@ export default function HouseholdLoading() {
       </div>
 
       {/* Living room / Dotzi Room Banner Skeleton */}
-      <Card className="h-64 border-border/40 bg-linear-to-b from-indigo-950/20 to-amber-500/10 rounded-3xl p-6 flex items-end justify-around">
+      <Card className="h-64 border-border/40 bg-linear-to-b from-blue-950/20 to-cyan-500/10 rounded-3xl p-6 flex items-end justify-around">
         <div className="h-28 w-24 bg-muted/40 rounded-full" />
         <div className="h-28 w-24 bg-muted/40 rounded-full" />
       </Card>
@@ -31,7 +31,7 @@ export default function HouseholdLoading() {
                   <div className="h-3 w-40 bg-muted/30 rounded-md" />
                 </div>
               </div>
-              <div className="h-6 w-20 bg-emerald-500/20 rounded-lg" />
+              <div className="h-6 w-20 bg-blue-500/20 rounded-lg" />
             </div>
           ))}
         </div>

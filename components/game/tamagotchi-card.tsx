@@ -57,7 +57,7 @@ export function TamagotchiCard({
   // Color de la barra de salud según el valor
   const getHealthColor = (health: number) => {
     if (health >= 85) return 'bg-emerald-500'
-    if (health >= 65) return 'bg-indigo-500'
+    if (health >= 65) return 'bg-blue-600'
     if (health >= 45) return 'bg-amber-500'
     return 'bg-rose-500'
   }
@@ -93,7 +93,7 @@ export function TamagotchiCard({
     <>
       <Card className="border-border/80 bg-card/95 backdrop-blur-md text-card-foreground rounded-3xl overflow-hidden shadow-xl transition-all duration-300">
         {/* Header con gradiente decorativo */}
-        <CardHeader className="relative border-b border-border/40 pb-3 sm:pb-4 pt-4 sm:pt-5 px-4 sm:px-6 bg-linear-to-r from-violet-500/10 via-indigo-500/5 to-emerald-500/10">
+        <CardHeader className="relative border-b border-border/40 pb-3 sm:pb-4 pt-4 sm:pt-5 px-4 sm:px-6 bg-linear-to-r from-blue-600/10 via-cyan-500/5 to-sky-500/10">
           <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3 pr-6 sm:pr-0">
             <div className="flex items-center gap-1.5 sm:gap-2">
               <Badge variant="outline" className="bg-background/80 border-primary/30 text-primary font-bold px-2 sm:px-2.5 py-0.5 text-[11px] sm:text-xs rounded-xl shadow-2xs">
@@ -111,10 +111,10 @@ export function TamagotchiCard({
                 variant="outline"
                 size="sm"
                 onClick={() => setRpgOpen(true)}
-                className="h-7 rounded-xl bg-purple-500/10 border-purple-500/30 text-purple-600 dark:text-purple-400 font-extrabold text-[11px] sm:text-xs px-2 sm:px-2.5 gap-1 hover:bg-purple-500/20"
+                className="h-7 rounded-xl bg-cyan-500/10 border-cyan-500/30 text-cyan-600 dark:text-cyan-400 font-extrabold text-[11px] sm:text-xs px-2 sm:px-2.5 gap-1 hover:bg-cyan-500/20"
                 title={t('tamagotchi.rpgCreator')}
               >
-                <Wand2 className="w-3.5 h-3.5 text-purple-500" />
+                <Wand2 className="w-3.5 h-3.5 text-cyan-500" />
                 <span>RPG</span>
               </Button>
 
@@ -237,14 +237,14 @@ export function TamagotchiCard({
             <div className="space-y-1.5 bg-background/60 p-3 rounded-2xl border border-border/40">
               <div className="flex items-center justify-between text-xs font-semibold">
                 <span className="flex items-center gap-1.5 text-muted-foreground min-w-0">
-                  <Trophy className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                  <Trophy className="w-3.5 h-3.5 text-blue-600 shrink-0" />
                   <span className="truncate">{t('tamagotchi.xp')}</span>
                 </span>
                 <span className="font-bold text-foreground ml-1 shrink-0">{stats.xp}/100</span>
               </div>
               <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-linear-to-r from-indigo-500 to-violet-500 transition-all duration-500 rounded-full"
+                  className="h-full bg-linear-to-r from-blue-600 to-cyan-500 transition-all duration-500 rounded-full"
                   style={{ width: `${stats.xp}%` }}
                 />
               </div>
@@ -278,7 +278,7 @@ export function TamagotchiCard({
               variant="outline"
               size="sm"
               onClick={() => setShopOpen(true)}
-              className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/20 px-1 sm:px-2 h-8 sm:h-9"
+              className="rounded-xl font-bold gap-1 text-[10px] sm:text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20 px-1 sm:px-2 h-8 sm:h-9"
             >
               <ShoppingBag className="w-3.5 h-3.5 shrink-0" />
               <span className="whitespace-nowrap">{t('tamagotchi.shopAction')}</span>

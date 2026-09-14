@@ -207,7 +207,7 @@ export function CashflowCalendarView({
                               className={`text-[9px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded-md truncate flex items-center justify-between gap-1 ${
                                 b.isPaid
                                   ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 line-through opacity-70'
-                                  : 'bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30'
+                                  : 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30'
                               }`}
                             >
                               <span className="truncate">{b.name}</span>
@@ -260,7 +260,7 @@ export function CashflowCalendarView({
                 recurringExpenses.map((rec) => (
                   <div key={rec.id} className="py-2.5 flex items-center justify-between gap-3 first:pt-0 last:pb-0">
                     <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20 shrink-0">
+                      <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 shrink-0">
                         <Tag className="w-3.5 h-3.5" />
                       </div>
                       <div className="space-y-0.5 min-w-0">
@@ -272,7 +272,7 @@ export function CashflowCalendarView({
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-extrabold text-indigo-600 dark:text-indigo-400">
+                      <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400">
                         {formatCurrency(rec.amount)}
                       </span>
                       <Button

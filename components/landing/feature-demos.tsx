@@ -67,7 +67,7 @@ export function HogarCompartidoDemo() {
             <div className="flex items-center gap-2">
               <div
                 className={`h-5 w-5 rounded-full flex items-center justify-center font-bold text-[9px] ${b.name === 'Mateu'
-                  ? 'bg-violet-600 text-white'
+                  ? 'bg-blue-600 text-white'
                   : b.name === 'Mamá'
                     ? 'bg-emerald-500 text-white'
                     : 'bg-amber-500 text-white'
@@ -99,7 +99,7 @@ export function HogarCompartidoDemo() {
           <button
             onClick={handleSettle}
             disabled={animating}
-            className="w-full bg-violet-600 hover:bg-violet-500 disabled:bg-violet-850/50 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
+            className="w-full bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
           >
             {animating ? (
               <>
@@ -410,7 +410,7 @@ export function ChatGeminiDemo() {
             <div
               className={`px-3 py-1.5 rounded-2xl max-w-[85%] leading-normal text-[10.5px] ${m.sender === 'user'
                 ? 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-100 rounded-tr-none'
-                : 'bg-violet-600 text-white rounded-tl-none'
+                : 'bg-blue-600 text-white rounded-tl-none'
                 }`}
             >
               {m.text}
@@ -421,7 +421,7 @@ export function ChatGeminiDemo() {
         {typing && (
           <div className="flex flex-col items-start">
             <span className="text-[8px] text-muted-foreground font-bold mb-0.5">🤖 Gemini Bot</span>
-            <div className="bg-violet-600/30 text-violet-300 px-3 py-1.5 rounded-2xl rounded-tl-none font-bold animate-pulse text-[10px]">
+            <div className="bg-blue-600/30 text-blue-300 px-3 py-1.5 rounded-2xl rounded-tl-none font-bold animate-pulse text-[10px]">
               {t('landing.demos.analyzingExpenses')}
             </div>
           </div>
@@ -586,7 +586,7 @@ export function ProyeccionInformesDemo() {
       <div className="border border-slate-100 dark:border-slate-850 bg-slate-50 dark:bg-slate-900/40 rounded-xl p-3 flex-1 text-[10px] space-y-2">
         <div className="flex justify-between items-center border-b border-slate-100 dark:border-slate-800 pb-1 font-bold text-slate-700 dark:text-slate-300">
           <span>{t('landing.demos.monthlyReports')}</span>
-          <span className="text-[8px] bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.2 rounded uppercase">{t('landing.demos.august')}</span>
+          <span className="text-[8px] bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.2 rounded uppercase">{t('landing.demos.august')}</span>
         </div>
 
         {/* Gráfico de barras mini */}
@@ -613,7 +613,7 @@ export function ProyeccionInformesDemo() {
 
         <div className="flex justify-between items-center text-[9px] pt-1 text-slate-500 dark:text-slate-400 border-t border-slate-100 dark:border-slate-800/50 mt-2">
           <span>{t('landing.demos.totalSpent')} <strong className="text-slate-800 dark:text-slate-200">1.450,20 €</strong></span>
-          <span>{t('landing.demos.projection')} <strong className="text-violet-600 dark:text-violet-400">~1.680 €</strong></span>
+          <span>{t('landing.demos.projection')} <strong className="text-emerald-600 dark:text-emerald-400">~1.680 €</strong></span>
         </div>
       </div>
 
@@ -621,7 +621,7 @@ export function ProyeccionInformesDemo() {
         {reportState === 'idle' && (
           <button
             onClick={sendReport}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
+            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5"
           >
             <Mail className="h-3.5 w-3.5" />
             {t('landing.demos.sendReport')}
@@ -629,7 +629,7 @@ export function ProyeccionInformesDemo() {
         )}
 
         {reportState === 'sending' && (
-          <div className="w-full bg-indigo-800 text-white font-bold py-2 rounded-xl text-center flex items-center justify-center gap-1.5 animate-pulse">
+          <div className="w-full bg-emerald-800 text-white font-bold py-2 rounded-xl text-center flex items-center justify-center gap-1.5 animate-pulse">
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
             {t('landing.demos.sendingReport')}
           </div>

@@ -10,7 +10,7 @@ export function HeroPiggyBackground() {
     >
       {/* Cerdito Flotante 1 (Superior Izquierda) */}
       <div className="absolute top-[15%] left-[5%] sm:left-[8%] opacity-30 dark:opacity-40 animate-float-slow">
-        <div className="p-3 sm:p-4 rounded-2xl bg-linear-to-br from-pink-500/20 to-violet-500/10 border border-pink-500/20 shadow-lg transform -rotate-12">
+        <div className="p-3 sm:p-4 rounded-2xl bg-linear-to-br from-pink-500/20 to-blue-500/10 border border-pink-500/20 shadow-lg transform -rotate-12">
           <span className="text-2xl sm:text-4xl">🐷</span>
         </div>
       </div>
@@ -24,14 +24,14 @@ export function HeroPiggyBackground() {
 
       {/* Cerdito Flotante Principal (Centro Derecha) */}
       <div className="absolute top-[42%] right-[4%] sm:right-[7%] opacity-35 dark:opacity-45 animate-float-medium hidden xs:block">
-        <div className="p-4 sm:p-5 rounded-3xl bg-linear-to-br from-violet-500/20 via-pink-500/15 to-indigo-500/10 border border-violet-500/25 shadow-xl transform rotate-6">
+        <div className="p-4 sm:p-5 rounded-3xl bg-linear-to-br from-blue-500/20 via-sky-500/15 to-cyan-500/10 border border-blue-500/25 shadow-xl transform rotate-6">
           <span className="text-3xl sm:text-5xl">🐖</span>
         </div>
       </div>
 
       {/* Cerdito Flotante (Centro Izquierda) */}
       <div className="absolute top-[48%] left-[3%] sm:left-[6%] opacity-35 dark:opacity-45 animate-float-slow">
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-linear-to-br from-indigo-500/20 to-pink-500/15 border border-indigo-500/25 shadow-lg transform -rotate-6">
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-linear-to-br from-blue-500/20 to-cyan-500/15 border border-blue-500/25 shadow-lg transform -rotate-6">
           <span className="text-2xl sm:text-4xl">🐷</span>
         </div>
       </div>
@@ -45,7 +45,7 @@ export function HeroPiggyBackground() {
 
       {/* Badge de Ahorro / Gráfico Flotante (Fondo Inferior Derecha) */}
       <div className="absolute bottom-[18%] right-[8%] sm:right-[12%] opacity-30 dark:opacity-40 animate-float-slow hidden sm:block">
-        <div className="p-3 rounded-2xl bg-linear-to-br from-emerald-500/20 to-teal-500/10 border border-emerald-500/25 shadow-lg transform rotate-6 flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400">
+        <div className="p-3 rounded-2xl bg-linear-to-br from-blue-500/20 to-cyan-500/10 border border-blue-500/25 shadow-lg transform rotate-6 flex items-center gap-2 text-xs font-bold text-blue-600 dark:text-blue-400">
           <span>📈</span>
           <span>+24% Ahorro</span>
         </div>
@@ -53,9 +53,9 @@ export function HeroPiggyBackground() {
 
       {/* Tarjeta de Crédito Flotante (Superior Centro-Izquierda) */}
       <div className="absolute top-[28%] left-[7%] sm:left-[12%] opacity-35 dark:opacity-45 animate-float-medium hidden md:block">
-        <div className="p-3 rounded-2xl bg-linear-to-br from-indigo-500/20 via-purple-500/15 to-pink-500/10 border border-indigo-500/25 shadow-xl transform -rotate-12 flex items-center gap-2">
+        <div className="p-3 rounded-2xl bg-linear-to-br from-cyan-500/20 via-blue-500/15 to-sky-500/10 border border-cyan-500/25 shadow-xl transform -rotate-12 flex items-center gap-2">
           <span className="text-xl sm:text-2xl">💳</span>
-          <div className="flex flex-col text-[10px] font-bold text-indigo-400 dark:text-indigo-300 leading-tight">
+          <div className="flex flex-col text-[10px] font-bold text-cyan-600 dark:text-cyan-300 leading-tight">
             <span>•••• 4829</span>
             <span className="text-[8px] opacity-70">Control Dotz</span>
           </div>

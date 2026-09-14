@@ -65,11 +65,11 @@ export function AppUpdatesWidget({ trigger }: AppUpdatesWidgetProps = {}) {
           title={t('updates.title')}
         >
           <div className="relative flex items-center justify-center">
-            <MegaphoneIcon className={`w-4 h-4 ${hasUnread ? 'text-indigo-500 animate-pulse' : 'text-primary'}`} />
+            <MegaphoneIcon className={`w-4 h-4 ${hasUnread ? 'text-blue-600 animate-pulse' : 'text-primary'}`} />
             {hasUnread && (
               <span className="absolute -top-1 -right-1 flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-indigo-600"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
               </span>
             )}
           </div>

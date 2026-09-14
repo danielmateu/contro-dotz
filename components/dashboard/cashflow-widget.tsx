@@ -82,7 +82,7 @@ export function CashflowWidget({
               </span>
               <p className="font-bold text-foreground truncate">{nextBillName}</p>
             </div>
-            <span className="font-extrabold text-indigo-600 dark:text-indigo-400 shrink-0">
+            <span className="font-extrabold text-blue-600 dark:text-blue-400 shrink-0">
               {formatCurrency(nextBillAmount)}
             </span>
           </div>

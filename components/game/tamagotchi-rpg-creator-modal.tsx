@@ -119,7 +119,7 @@ export function TamagotchiRpgCreatorModal({
     {
       id: 'party',
       label: t('tamagotchi.persPartyLabel'),
-      icon: <PartyPopper className="w-4 h-4 text-purple-500" />,
+      icon: <PartyPopper className="w-4 h-4 text-cyan-500" />,
       desc: t('tamagotchi.persPartyDesc'),
     },
   ]
@@ -134,7 +134,7 @@ export function TamagotchiRpgCreatorModal({
 
   const hairstyles: { id: string; name: string; icon: React.ReactNode }[] = [
     { id: 'hair_none', name: t('tamagotchi.hairNone'), icon: <Smile className="w-3.5 h-3.5 text-muted-foreground" /> },
-    { id: 'hair_copete', name: t('tamagotchi.hairCopete'), icon: <Scissors className="w-3.5 h-3.5 text-indigo-500" /> },
+    { id: 'hair_copete', name: t('tamagotchi.hairCopete'), icon: <Scissors className="w-3.5 h-3.5 text-sky-500" /> },
     { id: 'hair_cresta', name: t('tamagotchi.hairCresta'), icon: <Zap className="w-3.5 h-3.5 text-rose-500" /> },
     { id: 'hair_afro', name: t('tamagotchi.hairAfro'), icon: <CircleDot className="w-3.5 h-3.5 text-amber-500" /> },
     { id: 'hair_bow', name: t('tamagotchi.hairBow'), icon: <Sparkles className="w-3.5 h-3.5 text-pink-500" /> },
@@ -165,7 +165,7 @@ export function TamagotchiRpgCreatorModal({
 
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6 my-2 items-stretch">
           {/* Columna Izquierda: Vista Previa Limpia de Dotzi */}
-          <div className="md:col-span-5 flex flex-col items-center justify-center p-6 bg-linear-to-b from-primary/10 via-card to-violet-500/10 rounded-3xl border border-border/60 shadow-xs space-y-4">
+          <div className="md:col-span-5 flex flex-col items-center justify-center p-6 bg-linear-to-b from-primary/10 via-card to-cyan-500/10 rounded-3xl border border-border/60 shadow-xs space-y-4">
             <div className="relative p-2 flex justify-center">
               <TamagotchiAvatar
                 size="xl"
@@ -357,7 +357,7 @@ export function TamagotchiRpgCreatorModal({
           <Button
             onClick={handleSave}
             disabled={isSaving}
-            className="rounded-xl font-bold bg-linear-to-r from-primary to-indigo-600 shadow-md gap-1.5"
+            className="rounded-xl font-bold bg-linear-to-r from-primary to-cyan-600 shadow-md gap-1.5"
           >
             <Sparkles className="w-4 h-4 fill-current" />
             <span>{isSaving ? t('tamagotchi.savingCharacter') : t('tamagotchi.saveCharacter')}</span>

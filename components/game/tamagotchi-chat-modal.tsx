@@ -248,7 +248,7 @@ export function TamagotchiChatModal({
     {
       text: t('tamagotchiChat.quickPrompt4'),
       label: '+ Brindis Ahorro',
-      colorClass: 'bg-violet-500/10 hover:bg-violet-500/20 text-violet-600 dark:text-violet-400 border-violet-500/30',
+      colorClass: 'bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-400 border-sky-500/30',
     },
     {
       text: '¿Cómo estás Dotzi? ¿Cómo van las huchas de ahorro y la racha?',
@@ -285,7 +285,7 @@ export function TamagotchiChatModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg w-[calc(100vw-1.5rem)] p-0 rounded-3xl bg-card border-border shadow-2xl overflow-hidden flex flex-col h-[85vh] sm:h-145 max-h-155">
         {/* Cabecera del Chat con Dotzi */}
-        <DialogHeader className="p-3.5 sm:p-4 border-b border-border/50 bg-linear-to-r from-indigo-500/10 via-violet-500/10 to-emerald-500/10 flex items-center justify-between shrink-0 pr-10">
+        <DialogHeader className="p-3.5 sm:p-4 border-b border-border/50 bg-linear-to-r from-blue-600/10 via-sky-500/10 to-cyan-500/10 flex items-center justify-between shrink-0 pr-10">
           <div className="flex items-center gap-3">
             <TamagotchiAvatar
               mood={petStats.mood}

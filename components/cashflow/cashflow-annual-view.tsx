@@ -88,7 +88,7 @@ export function CashflowAnnualView({ annualData }: CashflowAnnualViewProps) {
                 {formatCurrency(totalAnnualSpent)}
               </h3>
             </div>
-            <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+            <div className="p-3 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               <Receipt className="w-6 h-6" />
             </div>
           </CardContent>

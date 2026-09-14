@@ -194,7 +194,7 @@ export function HouseholdDotziRoom({
 
   return (
     <Card className="border-border/80 bg-linear-to-b from-card/90 to-background/95 backdrop-blur-md rounded-3xl shadow-xl overflow-hidden">
-      <CardHeader className="border-b border-border/40 pb-4 pt-5 px-6 bg-linear-to-r from-emerald-500/10 via-amber-500/5 to-indigo-500/10 flex flex-row items-center justify-between">
+      <CardHeader className="border-b border-border/40 pb-4 pt-5 px-6 bg-linear-to-r from-emerald-500/10 via-amber-500/5 to-blue-500/10 flex flex-row items-center justify-between">
         <div className="space-y-1">
           <CardTitle className="text-lg font-bold font-heading flex items-center gap-2">
             <Home className="w-5 h-5 text-emerald-500" />
@@ -234,7 +234,7 @@ export function HouseholdDotziRoom({
 
       <CardContent className="p-4 sm:p-6 space-y-6">
         {/* Escenario de convivencia (Habitación acogedora) */}
-        <div className="relative min-h-[260px] sm:min-h-[300px] rounded-3xl bg-linear-to-b from-violet-950/20 via-indigo-900/10 to-amber-500/10 border border-border/60 p-4 sm:p-6 flex flex-col justify-end overflow-hidden shadow-inner">
+        <div className="relative min-h-[260px] sm:min-h-[300px] rounded-3xl bg-linear-to-b from-slate-950/20 via-blue-900/10 to-amber-500/10 border border-border/60 p-4 sm:p-6 flex flex-col justify-end overflow-hidden shadow-inner">
           {/* Fondo decorativo de alfombra y luz de hogar */}
           <div className="absolute inset-x-0 bottom-0 h-28 bg-linear-to-t from-amber-500/15 via-emerald-500/10 to-transparent rounded-b-3xl" />
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 w-4/5 h-16 bg-amber-500/20 rounded-full blur-xl pointer-events-none" />

@@ -142,7 +142,7 @@ export function RecurringExpensesDialog({
       <DialogContent className="sm:max-w-md rounded-3xl bg-card border-border shadow-2xl p-4 sm:p-6">
         <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-3">
           <div className="flex items-center gap-2">
-            <div className="p-2.5 rounded-2xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+            <div className="p-2.5 rounded-2xl bg-teal-500/10 text-teal-500 border border-teal-500/20">
               <CalendarCheck className="w-5 h-5" />
             </div>
             <div>

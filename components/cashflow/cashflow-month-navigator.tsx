@@ -128,7 +128,7 @@ export function CashflowMonthNavigator({
               activeView === 'annual' ? 'shadow-xs' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <BarChart3 className="w-4 h-4 text-indigo-500 dark:text-indigo-400" />
+            <BarChart3 className="w-4 h-4 text-cyan-500 dark:text-cyan-400" />
             <span>{t('cashflow.annualForecast')}</span>
           </Button>
         </div>

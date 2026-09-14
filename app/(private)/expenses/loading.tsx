@@ -10,7 +10,7 @@ export default function ExpensesLoading() {
           <div className="h-8 w-44 bg-muted/60 rounded-xl" />
           <div className="h-4 w-72 bg-muted/40 rounded-lg" />
         </div>
-        <div className="h-10 w-36 bg-emerald-500/20 rounded-xl" />
+        <div className="h-10 w-36 bg-blue-500/20 rounded-xl" />
       </div>
 
       {/* Barra de Filtros (Fecha, Categoría, Miembro, Orden) */}

@@ -72,7 +72,7 @@ export function ImportBudgetsButton({
         <Button
           onClick={handleImport}
           disabled={isPending}
-          className="bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-indigo-500/25 px-5 py-2.5 h-auto text-xs sm:text-sm gap-2 transition-all hover:scale-105 active:scale-95"
+          className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold rounded-2xl shadow-lg shadow-blue-500/25 px-5 py-2.5 h-auto text-xs sm:text-sm gap-2 transition-all hover:scale-105 active:scale-95"
         >
           {isPending ? (
             <Loader2 className="w-4 h-4 animate-spin text-white" />

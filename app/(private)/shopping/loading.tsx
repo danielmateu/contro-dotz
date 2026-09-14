@@ -14,7 +14,7 @@ export default function ShoppingLoading() {
       <Card className="p-5 border-border/40 bg-card/60 rounded-3xl space-y-4">
         <div className="flex items-center gap-2">
           <div className="h-10 flex-1 bg-muted/30 border border-border/40 rounded-xl" />
-          <div className="h-10 w-28 bg-emerald-500/20 rounded-xl shrink-0" />
+          <div className="h-10 w-28 bg-cyan-500/20 rounded-xl shrink-0" />
         </div>
 
         <div className="space-y-2 pt-2">

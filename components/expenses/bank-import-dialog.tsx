@@ -241,7 +241,7 @@ export function BankImportDialog({
       <DialogContent className="w-[calc(100vw-1.5rem)] sm:max-w-4xl p-4 sm:p-6 rounded-3xl bg-card border-border shadow-2xl max-h-[90vh] flex flex-col overflow-hidden">
         <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-3 shrink-0">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+            <div className="p-2 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
               <FileSpreadsheet className="w-5 h-5" />
             </div>
             <div>
@@ -414,7 +414,7 @@ export function BankImportDialog({
             {/* Banner de Estado & Filtros de Lote */}
             <div className="flex flex-wrap items-center justify-between gap-2 bg-muted/40 p-3 rounded-2xl border border-border/50 shrink-0">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30 text-xs font-bold px-2.5 py-1">
+                <Badge variant="outline" className="bg-teal-500/10 text-teal-600 dark:text-teal-400 border-teal-500/30 text-xs font-bold px-2.5 py-1">
                   {parsedExpenses.length} Gastos Detectados
                 </Badge>
 

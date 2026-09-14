@@ -25,19 +25,19 @@ export default function NotFound() {
       label: t('notFound.dashboard') !== 'notFound.dashboard' ? t('notFound.dashboard') : 'Panel Principal',
       href: '/dashboard',
       icon: LayoutDashboard,
-      color: 'from-blue-500/20 to-indigo-500/20 border-blue-500/30 text-blue-500 dark:text-blue-400',
+      color: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30 text-blue-600 dark:text-blue-400',
     },
     {
       label: t('notFound.expenses') !== 'notFound.expenses' ? t('notFound.expenses') : 'Gastos',
       href: '/expenses',
       icon: Receipt,
-      color: 'from-emerald-500/20 to-teal-500/20 border-emerald-500/30 text-emerald-500 dark:text-emerald-400',
+      color: 'from-cyan-500/20 to-sky-500/20 border-cyan-500/30 text-cyan-600 dark:text-cyan-400',
     },
     {
       label: t('notFound.budgets') !== 'notFound.budgets' ? t('notFound.budgets') : 'Presupuestos',
       href: '/budgets',
       icon: PieChart,
-      color: 'from-purple-500/20 to-violet-500/20 border-purple-500/30 text-purple-500 dark:text-purple-400',
+      color: 'from-sky-500/20 to-blue-500/20 border-sky-500/30 text-sky-600 dark:text-sky-400',
     },
     {
       label: t('notFound.savingGoals') !== 'notFound.savingGoals' ? t('notFound.savingGoals') : 'Huchas Ahorro',
@@ -51,8 +51,8 @@ export default function NotFound() {
     <div className="relative min-h-screen w-full flex items-center justify-center overflow-hidden bg-background px-4 py-12 text-foreground">
       {/* Background Decorative Ambient Glows */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 size-150 rounded-full bg-linear-to-tr from-primary/20 via-purple-500/10 to-emerald-500/20 blur-3xl opacity-70 dark:opacity-50 animate-pulse" />
-        <div className="absolute bottom-[-20%] right-[-10%] size-125 rounded-full bg-linear-to-br from-indigo-500/15 via-emerald-500/15 to-transparent blur-3xl opacity-60" />
+        <div className="absolute top-[-20%] left-1/2 -translate-x-1/2 size-150 rounded-full bg-linear-to-tr from-primary/20 via-blue-500/10 to-cyan-500/20 blur-3xl opacity-70 dark:opacity-50 animate-pulse" />
+        <div className="absolute bottom-[-20%] right-[-10%] size-125 rounded-full bg-linear-to-br from-cyan-500/15 via-blue-500/15 to-transparent blur-3xl opacity-60" />
       </div>
 
       {/* Main Glass Container */}
@@ -92,7 +92,7 @@ export default function NotFound() {
             {/* Ticket Center Badge */}
             <div className="my-auto flex flex-col items-center gap-1">
               <div className="relative flex items-center justify-center">
-                <span className="text-4xl font-extrabold tracking-tight bg-linear-to-r from-primary via-purple-500 to-emerald-500 bg-clip-text text-transparent">
+                <span className="text-4xl font-extrabold tracking-tight bg-linear-to-r from-primary via-blue-500 to-cyan-400 bg-clip-text text-transparent">
                   404
                 </span>
                 <Sparkles className="absolute -top-2 -right-4 size-4 text-amber-400 animate-spin" style={{ animationDuration: '8s' }} />

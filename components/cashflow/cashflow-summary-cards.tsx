@@ -106,17 +106,17 @@ export function CashflowSummaryCards({
         </Card>
 
         {/* Tarjeta 3: Facturas Recurrentes Pendientes */}
-        <Card className="border-border/60 bg-linear-to-br from-card via-card to-indigo-500/5 shadow-md">
+        <Card className="border-border/60 bg-linear-to-br from-card via-card to-blue-500/5 shadow-md">
           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
             <CardTitle className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
               Facturas Pendientes
             </CardTitle>
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500 border border-indigo-500/20">
+            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
               <CalendarCheck className="w-4 h-4" />
             </div>
           </CardHeader>
           <CardContent className="space-y-1">
-            <div className="text-2xl font-extrabold text-indigo-600 dark:text-indigo-400 font-heading">
+            <div className="text-2xl font-extrabold text-blue-600 dark:text-blue-400 font-heading">
               {formatCurrency(pendingBillsAmount)}
             </div>
             <p className="text-[11px] text-muted-foreground italic">

@@ -111,7 +111,7 @@ export function SettlementsTabContent({
                       <div className="flex items-center gap-2 flex-wrap">
                         <p className="text-sm font-semibold">{b.name}</p>
                         {b.weight !== undefined && b.weight > 0 ? (
-                          <Badge variant="outline" className="text-[10px] bg-indigo-50/50 text-indigo-600 border-indigo-500/30 dark:bg-indigo-950/30 dark:text-indigo-400">
+                          <Badge variant="outline" className="text-[10px] bg-teal-50/50 text-teal-600 border-teal-500/30 dark:bg-teal-950/30 dark:text-teal-400">
                             {t('household.shareRatio', { weight: b.weight })}
                           </Badge>
                         ) : null}
@@ -161,7 +161,7 @@ export function SettlementsTabContent({
         <Card className="border-slate-200/50 shadow-md">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
-              <Plus className="h-5 w-5 text-indigo-500" />
+              <Plus className="h-5 w-5 text-teal-500" />
               {t('household.debtCompensation')}
             </CardTitle>
             <CardDescription>
@@ -183,7 +183,7 @@ export function SettlementsTabContent({
                 {debts.map((d, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center justify-between p-3.5 border rounded-xl bg-indigo-500/5 border-indigo-500/10"
+                    className="flex items-center justify-between p-3.5 border rounded-xl bg-teal-500/5 border-teal-500/10"
                   >
                     <div className="flex items-center gap-2 text-sm">
                       <span className="font-semibold text-rose-600 dark:text-rose-400">{d.from_name}</span>

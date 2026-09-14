@@ -124,7 +124,7 @@ export function TamagotchiShopModal({
         <DialogHeader className="space-y-1 text-left border-b border-border/50 pb-3 sm:pb-4 pr-8 sm:pr-6 shrink-0">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle className="text-lg sm:text-xl font-extrabold flex items-center gap-2">
-              <ShoppingBag className="w-5 h-5 text-indigo-500 shrink-0" />
+              <ShoppingBag className="w-5 h-5 text-blue-600 shrink-0" />
               <span>{t('tamagotchiShop.title')}</span>
             </DialogTitle>
 

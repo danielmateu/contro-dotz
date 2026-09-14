@@ -101,8 +101,8 @@ export default function ForgotPasswordPage() {
 
               {/* Alertas de éxito */}
               {state?.success && (
-                <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400 rounded-xl">
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                <Alert className="border-cyan-500/50 text-cyan-600 bg-cyan-50/50 dark:bg-cyan-950/20 dark:text-cyan-400 rounded-xl">
+                  <CheckCircle className="h-4 w-4 text-cyan-500" />
                   <AlertTitle>{t('auth.forgotPasswordPage.emailSentTitle')}</AlertTitle>
                   <AlertDescription>{state.success}</AlertDescription>
                 </Alert>
@@ -130,18 +130,18 @@ export default function ForgotPasswordPage() {
             <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">
               {!state?.success && (
                 <div className="relative w-full group">
-                  <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
+                  <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 via-sky-500 to-cyan-500 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
                   <Button
                     type="submit"
                     disabled={pending}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
-                    className="relative w-full h-11 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
+                    className="relative w-full h-11 bg-linear-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <MorphIcon
                       icon={isHovered ? SendData : MailData}
                       spring="snappy"
-                      className="w-4.5 h-4.5 text-violet-200"
+                      className="w-4.5 h-4.5 text-cyan-200"
                     />
                     <span>{pending ? t('auth.forgotPasswordPage.submitting') : t('auth.forgotPasswordPage.submit')}</span>
                   </Button>

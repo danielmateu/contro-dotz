@@ -26,6 +26,8 @@ import { __iconNode as KeyRoundData } from 'lucide-react/dist/esm/icons/key-roun
 import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
 // @ts-ignore
 import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
+// @ts-ignore
+import { __iconNode as CheckCircleData } from 'lucide-react/dist/esm/icons/circle-check.mjs'
 
 type FormState = {
   error?: string
@@ -212,7 +214,7 @@ function ResetPasswordContent() {
             /* Estado: Éxito en cambio de contraseña */
             <>
               <CardHeader className="space-y-1.5 pt-6 px-6">
-                <CardTitle className="text-2xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400 font-heading">
+                <CardTitle className="text-2xl font-extrabold tracking-tight text-cyan-600 dark:text-cyan-400 font-heading">
                   {t('auth.resetPasswordPage.successTitle')}
                 </CardTitle>
                 <CardDescription className="font-medium text-muted-foreground">
@@ -220,8 +222,8 @@ function ResetPasswordContent() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 px-6 pb-4">
-                <Alert className="border-emerald-500/50 text-emerald-600 bg-emerald-50/50 dark:bg-emerald-950/20 dark:text-emerald-400 rounded-xl">
-                  <CheckCircle className="h-4 w-4 text-emerald-500" />
+                <Alert className="border-cyan-500/50 text-cyan-600 bg-cyan-50/50 dark:bg-cyan-950/20 dark:text-cyan-400 rounded-xl">
+                  <CheckCircle className="h-4 w-4 text-cyan-500" />
                   <AlertTitle>{t('common.success')}</AlertTitle>
                   <AlertDescription>{state.success}</AlertDescription>
                 </Alert>
@@ -231,7 +233,7 @@ function ResetPasswordContent() {
                   href="/dashboard"
                   className={cn(
                     buttonVariants({ variant: 'default' }),
-                    "w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center border-0"
+                    "w-full bg-linear-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-semibold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 rounded-xl h-10 transition-all duration-200 active:scale-[0.98] flex items-center justify-center border-0"
                   )}
                 >
                   {t('auth.resetPasswordPage.goToDashboard')}
@@ -322,18 +324,18 @@ function ResetPasswordContent() {
               </CardContent>
               <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">
                 <div className="relative w-full group">
-                  <div className="absolute -inset-0.5 bg-linear-to-r from-violet-600 via-indigo-500 to-purple-600 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
+                  <div className="absolute -inset-0.5 bg-linear-to-r from-blue-600 via-sky-500 to-cyan-500 rounded-xl opacity-75 blur-xs group-hover:opacity-100 transition duration-300" />
                   <Button
                     type="submit"
                     disabled={pending}
                     onMouseEnter={() => setIsSubmitHovered(true)}
                     onMouseLeave={() => setIsSubmitHovered(false)}
-                    className="relative w-full h-11 bg-linear-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
+                    className="relative w-full h-11 bg-linear-to-r from-blue-600 to-sky-600 hover:from-blue-500 hover:to-sky-500 text-white font-bold text-sm shadow-xl rounded-xl transition-all duration-200 active:scale-[0.98] border border-white/10 flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <MorphIcon
-                      icon={isSubmitHovered ? KeyRoundData : LockData}
+                      icon={isSubmitHovered ? CheckCircleData : KeyRoundData}
                       spring="snappy"
-                      className="w-4.5 h-4.5 text-violet-200"
+                      className="w-4.5 h-4.5 text-cyan-200"
                     />
                     <span>{pending ? t('auth.resetPasswordPage.submitting') : t('auth.resetPasswordPage.submit')}</span>
                   </Button>

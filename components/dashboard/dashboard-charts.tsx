@@ -37,12 +37,12 @@ import {
 
 // Colores consistentes y alegres para las áreas apiladas de los miembros
 const MEMBER_COLORS = [
-  '#6366f1', // Indigo
+  '#0d9488', // Teal
   '#10b981', // Emerald
   '#f59e0b', // Amber
   '#ec4899', // Pink
   '#06b6d4', // Cyan
-  '#8b5cf6', // Violet
+  '#14b8a6', // Teal Light
   '#ef4444', // Red
 ]
 
@@ -584,7 +584,7 @@ export function DashboardCharts({
                   <div>
                     <CardTitle className="text-lg flex items-center gap-2">
                       {timeframe === 'acumulado' && <TrendingUp className="h-5 w-5 text-primary" />}
-                      {timeframe === 'diario' && <Calendar className="h-5 w-5 text-indigo-500" />}
+                      {timeframe === 'diario' && <Calendar className="h-5 w-5 text-blue-600" />}
                       {timeframe === 'mensual' && <BarChart3 className="h-5 w-5 text-emerald-500" />}
                       {timeframe === 'anual' && <Landmark className="h-5 w-5 text-amber-500" />}
                       {timeframe === 'acumulado' && t('dashboard.charts.timeframeAcumuladoTitle')}
@@ -666,7 +666,7 @@ export function DashboardCharts({
                       onClick={() => toggleUserSelection('all')}
                       className={`px-2.5 py-1 rounded-full text-[11px] font-medium transition-all border ${
                         selectedUserIds.length === 0
-                          ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-semibold'
+                          ? 'bg-blue-500/15 border-blue-500/40 text-blue-700 dark:text-blue-300 font-semibold'
                           : 'bg-muted/30 border-transparent text-muted-foreground hover:text-foreground'
                       }`}
                     >
@@ -853,7 +853,7 @@ export function DashboardCharts({
           <Card className="border-slate-200/50 shadow-md">
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-indigo-500" />
+                <BarChart3 className="h-5 w-5 text-blue-600" />
                 {t('dashboard.charts.budgetsVsExpensesTitle')}
               </CardTitle>
               <CardDescription>
@@ -967,7 +967,7 @@ export function DashboardCharts({
             <Card className="border-slate-200/50 shadow-md lg:col-span-1 flex flex-col">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Landmark className="h-5 w-5 text-indigo-500" />
+                  <Landmark className="h-5 w-5 text-cyan-500" />
                   {t('dashboard.charts.proportionalTitle')}
                 </CardTitle>
                 <CardDescription>
@@ -1031,7 +1031,7 @@ export function DashboardCharts({
                                 </div>
                                 <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                                   <div
-                                    className="h-full bg-indigo-500 rounded-full transition-all duration-500"
+                                    className="h-full bg-blue-600 rounded-full transition-all duration-500"
                                     style={{ width: `${m.incomePercentage}%` }}
                                   />
                                 </div>

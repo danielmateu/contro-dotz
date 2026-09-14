@@ -153,7 +153,7 @@ export function SidebarUserFooter({
                 className="w-full flex items-center justify-between gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer group"
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-7 h-7 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/20 transition-colors">
+                  <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center shrink-0 group-hover:bg-blue-500/20 transition-colors">
                     <MorphIcon
                       icon={hoveredItem === 'updates' ? SparklesData : MegaphoneData}
                       spring="snappy"
@@ -163,7 +163,7 @@ export function SidebarUserFooter({
                   <span className="truncate">{t('updates.title')}</span>
                 </div>
                 {hasUnread && (
-                  <span className="flex h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+                  <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
                 )}
               </button>
             )}
@@ -199,7 +199,7 @@ export function SidebarUserFooter({
                 onMouseLeave={() => setHoveredItem(null)}
                 className="w-full flex items-center gap-2.5 px-2.5 py-2 text-xs font-semibold text-foreground hover:bg-accent rounded-xl transition-all cursor-pointer group"
               >
-                <div className="w-7 h-7 rounded-lg bg-violet-500/10 text-violet-500 flex items-center justify-center shrink-0 group-hover:bg-violet-500/20 transition-colors">
+                <div className="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-500 flex items-center justify-center shrink-0 group-hover:bg-cyan-500/20 transition-colors">
                   <MorphIcon
                     icon={hoveredItem === 'feedback' ? MessageCircleData : MessageSquarePlusData}
                     spring="snappy"

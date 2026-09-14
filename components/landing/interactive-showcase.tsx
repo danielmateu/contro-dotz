@@ -56,14 +56,14 @@ export function InteractiveShowcase() {
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <div className="hidden xs:flex -space-x-1.5">
-              <div className="h-5.5 w-5.5 rounded-full border border-background bg-violet-600 text-white text-[9px] font-bold flex items-center justify-center select-none shadow-xs">
+              <div className="h-5.5 w-5.5 rounded-full border border-background bg-blue-600 text-white text-[9px] font-bold flex items-center justify-center select-none shadow-xs">
                 MA
               </div>
-              <div className="h-5.5 w-5.5 rounded-full border border-background bg-emerald-500 text-white text-[9px] font-bold flex items-center justify-center select-none shadow-xs">
+              <div className="h-5.5 w-5.5 rounded-full border border-background bg-sky-500 text-white text-[9px] font-bold flex items-center justify-center select-none shadow-xs">
                 PA
               </div>
               <div
-                className="h-5.5 w-5.5 rounded-full border border-background bg-slate-950 text-violet-400 text-[9px] font-bold flex items-center justify-center select-none shadow-xs"
+                className="h-5.5 w-5.5 rounded-full border border-background bg-slate-950 text-cyan-400 text-[9px] font-bold flex items-center justify-center select-none shadow-xs"
                 title="Gemini AI"
               >
                 🤖
@@ -302,7 +302,7 @@ export function InteractiveShowcase() {
                 <button
                   type="button"
                   aria-label="Convertir en gasto"
-                  className="text-xs bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold px-2.5 py-1 rounded-md border border-emerald-500/20 hover:bg-emerald-500/20 transition-all shrink-0"
+                  className="text-xs bg-blue-500/10 text-blue-700 dark:text-blue-300 font-bold px-2.5 py-1 rounded-md border border-blue-500/20 hover:bg-blue-500/20 transition-all shrink-0"
                 >
                   {t('landing.showcase.expenseButton')}
                 </button>
@@ -322,7 +322,7 @@ export function InteractiveShowcase() {
                     whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ type: 'spring', delay: 0.6, stiffness: 150 }}
-                    className="h-4 w-4 rounded-md bg-emerald-500 text-white flex items-center justify-center shrink-0"
+                    className="h-4 w-4 rounded-md bg-blue-500 text-white flex items-center justify-center shrink-0"
                   >
                     <Check className="h-2.5 w-2.5 font-bold" />
                   </motion.div>

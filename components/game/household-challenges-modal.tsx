@@ -201,7 +201,7 @@ export function HouseholdChallengesModal({
                           <Coins className="w-2.5 h-2.5 fill-amber-500 text-amber-500" />
                           +{challenge.rewardCoins} DotzCoins
                         </Badge>
-                        <Badge variant="outline" className="text-[10px] font-bold border-indigo-500/30 text-indigo-500 bg-indigo-500/10 gap-1 px-1.5 py-0">
+                        <Badge variant="outline" className="text-[10px] font-bold border-sky-500/30 text-sky-600 dark:text-sky-400 bg-sky-500/10 gap-1 px-1.5 py-0">
                           <Sparkles className="w-2.5 h-2.5" />
                           +{challenge.rewardXp} XP
                         </Badge>

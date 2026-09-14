@@ -29,7 +29,7 @@ const CATEGORY_CONFIG: Record<
   feature: {
     label: 'Nueva Función',
     icon: Rocket,
-    className: 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800',
+    className: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-200 dark:border-blue-800',
   },
   improvement: {
     label: 'Mejora',
@@ -44,7 +44,7 @@ const CATEGORY_CONFIG: Record<
   announcement: {
     label: 'Anuncio',
     icon: Megaphone,
-    className: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-200 dark:border-purple-800',
+    className: 'bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-200 dark:border-cyan-800',
   },
 }
 
@@ -62,10 +62,10 @@ export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModal
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 overflow-hidden rounded-2xl border border-border shadow-2xl">
         {/* Cabecera del modal */}
-        <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border-b border-border/50">
+        <DialogHeader className="p-6 pb-4 bg-gradient-to-r from-blue-600/10 via-sky-500/10 to-cyan-500/10 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-primary/10 text-primary shadow-sm">
-              <MegaphoneIcon className="h-6 w-6 text-indigo-500 animate-pulse" />
+              <MegaphoneIcon className="h-6 w-6 text-blue-600 animate-pulse" />
             </div>
             <div>
               <DialogTitle className="text-xl font-bold text-foreground">
@@ -91,7 +91,7 @@ export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModal
             <button
               onClick={() => setSelectedCategory('feature')}
               className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${selectedCategory === 'feature'
-                ? 'bg-indigo-600 text-white shadow-sm'
+                ? 'bg-blue-600 text-white shadow-sm'
                 : 'bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground'
                 }`}
             >
@@ -143,7 +143,7 @@ export function AppUpdatesModal({ open, onOpenChange, updates }: AppUpdatesModal
                 return (
                   <div
                     key={update.id}
-                    className="group relative p-5 rounded-xl border border-border/60 bg-card hover:border-indigo-500/30 hover:shadow-md transition-all duration-200"
+                    className="group relative p-5 rounded-xl border border-border/60 bg-card hover:border-blue-500/30 hover:shadow-md transition-all duration-200"
                   >
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex items-center gap-2 flex-wrap">

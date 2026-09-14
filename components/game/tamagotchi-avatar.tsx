@@ -175,9 +175,9 @@ export function TamagotchiAvatar({
       case 'happy':
         return {
           body: 'url(#happy-gradient)',
-          stroke: '#6366f1',
-          shadow: 'rgba(99, 102, 241, 0.3)',
-          badgeColor: 'bg-indigo-500 text-white',
+          stroke: '#2563eb',
+          shadow: 'rgba(37, 99, 235, 0.3)',
+          badgeColor: 'bg-blue-600 text-white',
         }
       case 'warning':
         return {

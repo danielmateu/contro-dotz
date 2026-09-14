@@ -619,7 +619,7 @@ export function ExpenseDialog({
                   type="button"
                   onClick={() => setIsPersonal(true)}
                   className={`flex items-center justify-center gap-1.5 p-2 rounded-lg border text-xs font-medium transition-all ${isPersonal
-                    ? 'border-indigo-500 bg-indigo-50/50 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 font-semibold shadow-2xs'
+                    ? 'border-blue-500 bg-blue-50/50 text-blue-700 dark:bg-blue-950/20 dark:text-blue-400 font-semibold shadow-2xs'
                     : 'border-slate-200 dark:border-slate-800 text-muted-foreground hover:bg-muted/40'
                     }`}
                 >

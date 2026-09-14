@@ -461,15 +461,15 @@ export function MonthlyIncomesListForm({
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         className={`relative overflow-hidden rounded-2xl p-6 transition-all duration-300 border ${isDragging
-            ? 'border-indigo-500 bg-indigo-500/10 scale-[1.01] shadow-xl ring-2 ring-indigo-500/20'
-            : 'border-indigo-100 dark:border-indigo-900/40 bg-gradient-to-br from-indigo-50/80 via-purple-50/40 to-slate-50 dark:from-indigo-950/30 dark:via-purple-950/20 dark:to-slate-900/40 shadow-sm hover:shadow-md'
+            ? 'border-teal-500 bg-teal-500/10 scale-[1.01] shadow-xl ring-2 ring-teal-500/20'
+            : 'border-teal-100 dark:border-teal-900/40 bg-gradient-to-br from-teal-50/80 via-emerald-50/40 to-slate-50 dark:from-teal-950/30 dark:via-emerald-950/20 dark:to-slate-900/40 shadow-sm hover:shadow-md'
           }`}
       >
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-gradient-to-br from-indigo-500/10 via-purple-500/10 to-transparent rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-gradient-to-br from-teal-500/10 via-emerald-500/10 to-transparent rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="space-y-1.5 max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100/80 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-teal-100/80 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300">
               {/* <Sparkles className="h-3.5 w-3.5 fill-indigo-500/30 text-indigo-600 dark:text-indigo-400" /> */}
               <span>{t('household.scanBannerTitle')}</span>
             </div>
@@ -489,20 +489,20 @@ export function MonthlyIncomesListForm({
             <div
               onClick={() => !isScanningPayroll && !isPending && scanFileInputRef.current?.click()}
               className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 border-dashed transition-all cursor-pointer group text-center min-w-[220px] ${isScanningPayroll
-                  ? 'border-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/30'
-                  : 'border-indigo-200 dark:border-indigo-800/60 bg-white/70 dark:bg-slate-900/60 hover:border-indigo-400 dark:hover:border-indigo-500 hover:bg-white dark:hover:bg-slate-900'
+                  ? 'border-teal-400 bg-teal-50/50 dark:bg-teal-950/30'
+                  : 'border-teal-200 dark:border-teal-800/60 bg-white/70 dark:bg-slate-900/60 hover:border-teal-400 dark:hover:border-teal-500 hover:bg-white dark:hover:bg-slate-900'
                 }`}
             >
               {isScanningPayroll ? (
                 <div className="flex flex-col items-center space-y-2 py-1">
-                  <Loader2 className="h-7 w-7 animate-spin text-indigo-600 dark:text-indigo-400" />
-                  <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
+                  <Loader2 className="h-7 w-7 animate-spin text-teal-600 dark:text-teal-400" />
+                  <span className="text-xs font-semibold text-teal-600 dark:text-teal-400">
                     {t('household.scanningPayroll')}
                   </span>
                 </div>
               ) : (
                 <div className="space-y-1 py-0.5">
-                  <div className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+                  <div className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-teal-100 dark:bg-teal-900/50 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform">
                     <Upload className="h-4 w-4" />
                   </div>
                   <div className="text-xs font-semibold text-foreground">
@@ -528,8 +528,8 @@ export function MonthlyIncomesListForm({
             <h3 className="font-semibold text-sm text-foreground">{t('household.manualFormTitle')}</h3>
           </div>
           {file && (
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-300 text-xs">
-              <FileText className="h-3.5 w-3.5 text-indigo-500" />
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-md bg-teal-50 dark:bg-teal-950/30 text-teal-700 dark:text-teal-300 text-xs">
+              <FileText className="h-3.5 w-3.5 text-teal-500" />
               <span className="max-w-[150px] truncate font-medium">{file.name}</span>
               <button
                 type="button"
@@ -537,7 +537,7 @@ export function MonthlyIncomesListForm({
                   setFile(null)
                   if (fileInputRef.current) fileInputRef.current.value = ''
                 }}
-                className="text-indigo-500 hover:text-indigo-700 dark:hover:text-indigo-200"
+                className="text-teal-500 hover:text-teal-700 dark:hover:text-teal-200"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -600,7 +600,7 @@ export function MonthlyIncomesListForm({
                 placeholder={t('household.netIncomePlaceholder')}
                 disabled={isPending || isScanningPayroll}
                 required
-                className="h-9 pl-7 bg-background text-xs font-semibold focus:ring-1 focus:ring-indigo-500"
+                className="h-9 pl-7 bg-background text-xs font-semibold focus:ring-1 focus:ring-teal-500"
               />
             </div>
           </div>
@@ -656,7 +656,7 @@ export function MonthlyIncomesListForm({
         <Button
           type="submit"
           disabled={isPending || isScanningPayroll}
-          className="w-full h-10 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium shadow-sm transition-all"
+          className="w-full h-10 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-medium shadow-sm transition-all"
         >
           {isPending ? (
             <>
@@ -719,12 +719,12 @@ export function MonthlyIncomesListForm({
                               size="sm"
                               onClick={() => handleDownloadPayroll(inc.payroll_path!)}
                               disabled={isPending || downloadingId !== null || uploadingIncomeId !== null}
-                              className="h-7 px-2.5 text-[11px] gap-1.5 border-indigo-200/80 text-indigo-600 dark:border-indigo-900/60 dark:text-indigo-400 bg-indigo-50/30 dark:bg-indigo-950/20 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/40 rounded-lg"
+                              className="h-7 px-2.5 text-[11px] gap-1.5 border-teal-200/80 text-teal-600 dark:border-teal-900/60 dark:text-teal-400 bg-teal-50/30 dark:bg-teal-950/20 hover:bg-teal-100/70 dark:hover:bg-teal-900/40 rounded-lg"
                             >
                               {downloadingId === inc.payroll_path ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
                               ) : (
-                                <FileText className="h-3.5 w-3.5 text-indigo-500" />
+                                <FileText className="h-3.5 w-3.5 text-teal-500" />
                               )}
                               <span>{t('household.viewPayroll')}</span>
                             </Button>
@@ -735,7 +735,7 @@ export function MonthlyIncomesListForm({
                               title={t('household.changePayrollAction')}
                               onClick={() => triggerAttachPayroll(inc)}
                               disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
-                              className="h-7 w-7 p-0 text-muted-foreground hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/50 rounded-lg"
+                              className="h-7 w-7 p-0 text-muted-foreground hover:text-teal-600 dark:hover:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-950/50 rounded-lg"
                             >
                               {uploadingIncomeId === inc.id ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
@@ -753,7 +753,7 @@ export function MonthlyIncomesListForm({
                               size="sm"
                               onClick={() => triggerAttachPayroll(inc)}
                               disabled={isPending || downloadingId !== null || uploadingIncomeId === inc.id}
-                              className="h-7 px-2 text-[11px] gap-1.5 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 rounded-lg"
+                              className="h-7 px-2 text-[11px] gap-1.5 border-dashed border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-teal-400 hover:text-teal-600 dark:hover:text-teal-400 rounded-lg"
                             >
                               {uploadingIncomeId === inc.id ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />

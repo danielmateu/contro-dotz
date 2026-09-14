@@ -96,7 +96,7 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
       case 'message':
         return {
           icon: <MessageSquare className="h-4 w-4" />,
-          bgColor: 'bg-indigo-50 dark:bg-indigo-950/20 text-indigo-500 border border-indigo-500/20',
+          bgColor: 'bg-blue-50 dark:bg-blue-950/20 text-blue-500 border border-blue-500/20',
         }
       case 'shopping_add':
         return {
