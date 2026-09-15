@@ -670,7 +670,16 @@
     "askGemini": "🤖 Consultar a Gemini",
     "hideSuggestions": "Ocultar suggeriments",
     "showShortcuts": "Veure dreceres IA (9)",
-    "typePlaceholder": "Escriu un missatge per a la teva família..."
+    "typePlaceholder": "Escriu un missatge per a la teva família...",
+    "isTyping": "{name} està escrivint...",
+    "severalTyping": "Diverses persones estan escrivint...",
+    "attachFiles": "Adjuntar imatges o documents",
+    "dropFilesHere": "Deixa anar els arxius aquí per adjuntar-los",
+    "maxSizeError": "L'arxiu supera la mida màxima permesa de 10MB.",
+    "uploadingFiles": "Pujant arxius...",
+    "download": "Descarregar",
+    "viewImage": "Veure imatge",
+    "attachments": "Adjunts"
   },
   "shopping": {
     "title": "Llista de la Compra",

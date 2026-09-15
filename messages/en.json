@@ -670,7 +670,16 @@
     "askGemini": "🤖 Ask Gemini",
     "hideSuggestions": "Hide suggestions",
     "showShortcuts": "View AI shortcuts (9)",
-    "typePlaceholder": "Type a message for your family..."
+    "typePlaceholder": "Type a message for your family...",
+    "isTyping": "{name} is typing...",
+    "severalTyping": "Several people are typing...",
+    "attachFiles": "Attach images or documents",
+    "dropFilesHere": "Drop files here to attach",
+    "maxSizeError": "File exceeds maximum allowed size of 10MB.",
+    "uploadingFiles": "Uploading files...",
+    "download": "Download",
+    "viewImage": "View image",
+    "attachments": "Attachments"
   },
   "shopping": {
     "title": "Shopping List",

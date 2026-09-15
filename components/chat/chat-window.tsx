@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { sendMessageAction, updateMessageAction, deleteMessageAction, confirmChatAction, cancelChatAction } from '@/app/actions/chat'
+import { sendMessageAction, updateMessageAction, deleteMessageAction, confirmChatAction, cancelChatAction, MessageAttachment } from '@/app/actions/chat'
 import {
   MessageGroup,
   Message,
@@ -24,7 +24,8 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Send, Users, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search } from 'lucide-react'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { Send, Users, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search, Paperclip, FileText, FileSpreadsheet, Download, ExternalLink, Eye, File, UploadCloud, Image as ImageIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
@@ -53,6 +54,14 @@ interface ChatMessage {
   updated_at?: string | null
   is_deleted?: boolean | null
   is_bot?: boolean
+  attachments?: MessageAttachment[] | null
+}
+
+function formatFileSize(bytes?: number): string {
+  if (!bytes) return '0 B'
+  if (bytes < 1024) return bytes + ' B'
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB'
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB'
 }
 
 interface ChatWindowProps {
@@ -282,11 +291,142 @@ export function ChatWindow({
       email: '',
     }
   }, [members])
+  const supabase = createClient()
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages)
   const [inputMessage, setInputMessage] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [isBotTyping, setIsBotTyping] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Estados para Indicador de Escritura en tiempo real
+  const [typingUsers, setTypingUsers] = useState<{ [uId: string]: { displayName: string; avatarUrl?: string } }>({})
+  const typingTimeoutRef = useRef<{ [uId: string]: NodeJS.Timeout }>({})
+  const lastTypingBroadcastRef = useRef<number>(0)
+
+  // Estados para Adjuntos de Imágenes y Documentos
+  const [pendingAttachments, setPendingAttachments] = useState<MessageAttachment[]>([])
+  const [isUploadingAttachment, setIsUploadingAttachment] = useState<boolean>(false)
+  const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false)
+  const [previewImageModal, setPreviewImageModal] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Función para transmitir eventos broadcast de escritura ("está escribiendo...")
+  const broadcastTyping = React.useCallback(
+    (isTyping: boolean) => {
+      if (!householdId) return
+      const myProfile = members.find((m) => m.user_id === userId)
+      const displayName = myProfile?.display_name || 'Miembro'
+      const avatarUrl = myProfile?.avatar_url || ''
+
+      const channel = supabase.channel(`chat_messages_${householdId}`)
+      channel
+        .send({
+          type: 'broadcast',
+          event: 'typing',
+          payload: { userId, displayName, avatarUrl, isTyping },
+        })
+        .catch(() => {})
+    },
+    [householdId, userId, members, supabase]
+  )
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const text = e.target.value
+    setInputMessage(text)
+
+    if (text.trim().length > 0) {
+      const now = Date.now()
+      if (now - lastTypingBroadcastRef.current > 1500) {
+        broadcastTyping(true)
+        lastTypingBroadcastRef.current = now
+      }
+    } else {
+      broadcastTyping(false)
+    }
+  }
+
+  // Manejador de subida de archivos adjuntos (Imágenes o Documentos)
+  const handleUploadFiles = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return
+    setIsUploadingAttachment(true)
+    const fileArray = Array.from(files)
+    const uploadedList: MessageAttachment[] = []
+
+    for (const file of fileArray) {
+      if (file.size > 10 * 1024 * 1024) {
+        toast.add({
+          title: t('chat.maxSizeError') || 'El archivo supera los 10MB permitidos.',
+          type: 'error',
+        })
+        continue
+      }
+
+      const isImage = file.type.startsWith('image/')
+      const type: 'image' | 'document' = isImage ? 'image' : 'document'
+      const cleanName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+      const filePath = `${householdId}/${Date.now()}_${Math.random().toString(36).substring(2, 6)}_${cleanName}`
+
+      const { error: uploadErr } = await supabase.storage
+        .from('chat_attachments')
+        .upload(filePath, file, { cacheControl: '3600', upsert: false })
+
+      if (uploadErr) {
+        console.error('Error al subir adjunto de chat:', uploadErr)
+        toast.add({
+          title: 'Error al subir archivo',
+          description: uploadErr.message,
+          type: 'error',
+        })
+        continue
+      }
+
+      const { data: publicData } = supabase.storage
+        .from('chat_attachments')
+        .getPublicUrl(filePath)
+
+      if (publicData?.publicUrl) {
+        uploadedList.push({
+          url: publicData.publicUrl,
+          name: file.name,
+          type,
+          mimeType: file.type || 'application/octet-stream',
+          size: file.size,
+        })
+      }
+    }
+
+    if (uploadedList.length > 0) {
+      setPendingAttachments((prev) => [...prev, ...uploadedList])
+    }
+    setIsUploadingAttachment(false)
+  }
+
+  const handleRemovePendingAttachment = (index: number) => {
+    setPendingAttachments((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // Manejadores de Drag & Drop para adjuntos
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!isDraggingOver) setIsDraggingOver(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (e.currentTarget.contains(e.relatedTarget as Node)) return
+    setIsDraggingOver(false)
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    setIsDraggingOver(false)
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      await handleUploadFiles(e.dataTransfer.files)
+    }
+  }
 
   // Estados para Edición de Mensajes
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null)
@@ -452,7 +592,6 @@ export function ChatWindow({
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
-  const supabase = createClient()
 
   // Comprobar estado de notificaciones push al cargar el chat
   useEffect(() => {
@@ -584,6 +723,40 @@ export function ChatWindow({
           )
         }
       )
+      .on(
+        'broadcast',
+        { event: 'typing' },
+        (payload) => {
+          const { userId: senderId, displayName, avatarUrl, isTyping } = payload.payload || {}
+          if (!senderId || senderId === userId) return
+
+          if (isTyping) {
+            setTypingUsers((prev) => ({
+              ...prev,
+              [senderId]: { displayName, avatarUrl },
+            }))
+            if (typingTimeoutRef.current[senderId]) {
+              clearTimeout(typingTimeoutRef.current[senderId])
+            }
+            typingTimeoutRef.current[senderId] = setTimeout(() => {
+              setTypingUsers((prev) => {
+                const copy = { ...prev }
+                delete copy[senderId]
+                return copy
+              })
+            }, 4000)
+          } else {
+            if (typingTimeoutRef.current[senderId]) {
+              clearTimeout(typingTimeoutRef.current[senderId])
+            }
+            setTypingUsers((prev) => {
+              const copy = { ...prev }
+              delete copy[senderId]
+              return copy
+            })
+          }
+        }
+      )
       .subscribe()
 
     return () => {
@@ -687,11 +860,15 @@ export function ChatWindow({
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!inputMessage.trim() || isSending) return
+    if ((!inputMessage.trim() && pendingAttachments.length === 0) || isSending) return
 
+    broadcastTyping(false)
     const messageText = inputMessage.trim()
+    const attachmentsToSend = [...pendingAttachments]
     const isGeminiQuery = messageText.toLowerCase().includes('@gemini')
+
     setInputMessage('')
+    setPendingAttachments([])
     setIsSending(true)
     if (isGeminiQuery) {
       setIsBotTyping(true)
@@ -703,9 +880,10 @@ export function ChatWindow({
       const tempId = `temp_msg_${Date.now()}`
       const offlineMsg: ChatMessage = {
         id: tempId,
-        content: `${messageText} (Pendiente de envío ⚡)`,
+        content: messageText ? `${messageText} (Pendiente de envío ⚡)` : '(Adjunto pendiente de envío ⚡)',
         created_at: new Date().toISOString(),
         created_by: userId,
+        attachments: attachmentsToSend,
       }
       setMessages((prev) => [...prev, offlineMsg])
       await enqueueAction('SEND_CHAT_MESSAGE', { householdId, content: messageText })
@@ -715,7 +893,7 @@ export function ChatWindow({
     }
 
     try {
-      const res = await sendMessageAction(householdId, messageText)
+      const res = await sendMessageAction(householdId, messageText, attachmentsToSend)
       if (res.error) {
         throw new Error(res.error)
       }
@@ -730,17 +908,19 @@ export function ChatWindow({
         // Disparar Notificación Push a los miembros del hogar en segundo plano
         const myProfile = members.find((m) => m.user_id === userId)
         const senderName = myProfile?.display_name || 'Miembro del Hogar'
+        const pushText = messageText || (attachmentsToSend.some(a => a.type === 'image') ? '📷 Imagen adjunta' : '📎 Documento adjunto')
         sendHouseholdChatPushAction({
           householdId,
           senderId: userId,
           senderName,
-          text: messageText,
+          text: pushText,
         }).catch((err) => console.error('Error enviando push notification:', err))
       }
     } catch (err: any) {
       console.error('Error al enviar el mensaje:', err)
       setError(err?.message || 'No se pudo enviar el mensaje. Inténtalo de nuevo.')
       setInputMessage(messageText) // restaurar texto
+      setPendingAttachments(attachmentsToSend)
     } finally {
       setIsSending(false)
       setIsBotTyping(false)
@@ -808,7 +988,35 @@ export function ChatWindow({
   const activeMatchMsgId = searchQuery.trim() && matchingMessages.length > 0 ? matchingMessages[currentMatchIndex]?.id : null
 
   return (
-    <div className="flex flex-col flex-1 border border-border/60 bg-background/50 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden">
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className="relative flex flex-col flex-1 border border-border/60 bg-background/50 backdrop-blur-md rounded-2xl shadow-xl overflow-hidden"
+    >
+      {/* Overlay para Drag & Drop de archivos */}
+      <AnimatePresence>
+        {isDraggingOver && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 bg-background/90 backdrop-blur-md border-2 border-dashed border-primary rounded-2xl flex flex-col items-center justify-center gap-3 p-6 text-center pointer-events-none"
+          >
+            <div className="p-4 rounded-full bg-primary/10 text-primary animate-bounce">
+              <UploadCloud className="w-10 h-10" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-foreground">
+                {t('chat.dropFilesHere') || 'Suelta los archivos aquí para adjuntarlos'}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-1">
+                Imágenes (JPG, PNG, WEBP, GIF) y Documentos (PDF, DOCX, XLSX, TXT)
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Cabecera del Chat */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 border-b border-border/60 bg-muted/20 gap-4">
         <div className="flex items-center gap-3">
@@ -1133,6 +1341,78 @@ export function ChatWindow({
                                     >
                                       <BubbleContent>
                                         <div className="whitespace-pre-wrap">{renderFormattedText(cleanText, searchQuery)}</div>
+
+                                        {/* Adjuntos del mensaje */}
+                                        {msg.attachments && msg.attachments.length > 0 && (
+                                          <div className="mt-2.5 space-y-2">
+                                            {/* Galería de imágenes */}
+                                            {msg.attachments.some((a) => a.type === 'image') && (
+                                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                                {msg.attachments
+                                                  .filter((a) => a.type === 'image')
+                                                  .map((img, i) => (
+                                                    <div
+                                                      key={i}
+                                                      onClick={() => setPreviewImageModal(img.url)}
+                                                      className="relative group rounded-xl overflow-hidden border border-border/40 bg-black/5 cursor-pointer max-w-xs"
+                                                    >
+                                                      <img
+                                                        src={img.url}
+                                                        alt={img.name}
+                                                        className="w-full h-auto max-h-56 object-cover rounded-xl transition-transform duration-200 group-hover:scale-105"
+                                                      />
+                                                      <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 text-white text-xs font-semibold">
+                                                        <Eye className="w-4 h-4" />
+                                                        <span>{t('chat.viewImage') || 'Ver imagen'}</span>
+                                                      </div>
+                                                    </div>
+                                                  ))}
+                                              </div>
+                                            )}
+
+                                            {/* Lista de documentos */}
+                                            {msg.attachments
+                                              .filter((a) => a.type === 'document')
+                                              .map((doc, i) => (
+                                                <div
+                                                  key={i}
+                                                  className="flex items-center justify-between gap-3 p-2.5 rounded-xl border border-border/50 bg-background/80 hover:bg-background transition-colors text-xs text-foreground max-w-sm"
+                                                >
+                                                  <div className="flex items-center gap-2.5 overflow-hidden">
+                                                    <div className="p-2 rounded-lg bg-primary/10 text-primary shrink-0">
+                                                      {doc.name.endsWith('.pdf') ? (
+                                                        <FileText className="w-4 h-4 text-rose-500" />
+                                                      ) : doc.name.endsWith('.xlsx') || doc.name.endsWith('.csv') ? (
+                                                        <FileSpreadsheet className="w-4 h-4 text-emerald-500" />
+                                                      ) : (
+                                                        <File className="w-4 h-4 text-blue-500" />
+                                                      )}
+                                                    </div>
+                                                    <div className="flex flex-col min-w-0">
+                                                      <span className="font-semibold truncate text-xs" title={doc.name}>
+                                                        {doc.name}
+                                                      </span>
+                                                      <span className="text-[10px] text-muted-foreground">
+                                                        {formatFileSize(doc.size)}
+                                                      </span>
+                                                    </div>
+                                                  </div>
+
+                                                  <a
+                                                    href={doc.url}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    download={doc.name}
+                                                    className="p-1.5 rounded-lg bg-muted hover:bg-primary/10 hover:text-primary transition-colors shrink-0"
+                                                    title={t('chat.download') || 'Descargar'}
+                                                  >
+                                                    <Download className="w-4 h-4" />
+                                                  </a>
+                                                </div>
+                                              ))}
+                                          </div>
+                                        )}
+
                                         {actionData && (
                                           <ActionConfirmationCard
                                             actionData={actionData}
@@ -1184,6 +1464,36 @@ export function ChatWindow({
                     </Bubble>
                   </MessageContent>
                 </Message>
+              </MessageScrollerItem>
+            )}
+
+            {/* Indicador de otros miembros escribiendo en tiempo real */}
+            {Object.keys(typingUsers).length > 0 && (
+              <MessageScrollerItem>
+                <div className="flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground bg-muted/40 border border-border/30 rounded-2xl w-fit animate-pulse my-1">
+                  <div className="flex -space-x-1.5 overflow-hidden">
+                    {Object.entries(typingUsers).map(([tId, tUser]) => (
+                      <Avatar key={tId} className="h-5 w-5 border border-background shadow-xs">
+                        {tUser.avatarUrl ? (
+                          <AvatarImage src={tUser.avatarUrl} alt={tUser.displayName} />
+                        ) : null}
+                        <AvatarFallback className="text-[8px] bg-primary/10 text-primary font-bold">
+                          {tUser.displayName.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-foreground">
+                      {Object.values(typingUsers).length === 1
+                        ? t('chat.isTyping', { name: Object.values(typingUsers)[0].displayName })
+                        : t('chat.severalTyping')}
+                    </span>
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
+                    <span className="flex h-1.5 w-1.5 rounded-full bg-primary animate-bounce" />
+                  </div>
+                </div>
               </MessageScrollerItem>
             )}
 
@@ -1331,27 +1641,123 @@ export function ChatWindow({
           </AnimatePresence>
         </div>
 
+        {/* Área de adjuntos pendientes antes de enviar */}
+        {(pendingAttachments.length > 0 || isUploadingAttachment) && (
+          <div className="mb-3 p-2.5 bg-muted/40 border border-border/60 rounded-xl flex items-center gap-2 overflow-x-auto scrollbar-none">
+            {pendingAttachments.map((att, idx) => (
+              <div
+                key={idx}
+                className="relative group flex items-center gap-2 bg-background border border-border/60 px-2.5 py-1.5 rounded-lg text-xs shrink-0 shadow-xs"
+              >
+                {att.type === 'image' ? (
+                  <img src={att.url} alt={att.name} className="w-7 h-7 object-cover rounded-md" />
+                ) : (
+                  <FileText className="w-5 h-5 text-primary shrink-0" />
+                )}
+                <div className="flex flex-col min-w-0 max-w-[120px]">
+                  <span className="truncate text-[11px] font-medium text-foreground">{att.name}</span>
+                  <span className="text-[9px] text-muted-foreground">{formatFileSize(att.size)}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleRemovePendingAttachment(idx)}
+                  className="p-1 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors ml-1"
+                  title="Quitar adjunto"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            ))}
+
+            {isUploadingAttachment && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background border border-border/50 px-3 py-1.5 rounded-lg shrink-0">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+                <span>{t('chat.uploadingFiles') || 'Subiendo...'}</span>
+              </div>
+            )}
+          </div>
+        )}
+
         <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={(e) => {
+              if (e.target.files) handleUploadFiles(e.target.files)
+              e.target.value = ''
+            }}
+            multiple
+            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip"
+            className="hidden"
+          />
+
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            disabled={isSending || isUploadingAttachment}
+            onClick={() => fileInputRef.current?.click()}
+            className="rounded-xl h-10 w-10 shrink-0 border-border/60 hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
+            title={t('chat.attachFiles') || 'Adjuntar archivos'}
+          >
+            <Paperclip className="h-4.5 w-4.5" />
+          </Button>
+
           <Input
             ref={inputRef}
             value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            onChange={handleInputChange}
             placeholder={t('chat.typePlaceholder')}
             disabled={isSending}
             maxLength={1000}
             className="flex-1 rounded-xl bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary text-sm py-5 px-4"
           />
+
           <Button
             type="submit"
             size="icon"
-            disabled={!inputMessage.trim() || isSending}
-            className="rounded-xl h-10 w-10 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95"
+            disabled={(!inputMessage.trim() && pendingAttachments.length === 0) || isSending || isUploadingAttachment}
+            className="rounded-xl h-10 w-10 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
           >
-            <Send className="h-4.5 w-4.5" />
+            {isSending ? (
+              <Loader2 className="h-4.5 w-4.5 animate-spin" />
+            ) : (
+              <Send className="h-4.5 w-4.5" />
+            )}
             <span className="sr-only">{t('chat.send')}</span>
           </Button>
         </form>
       </div>
+
+      {/* Modal Lightbox para Ampliación de Imágenes */}
+      <Dialog open={!!previewImageModal} onOpenChange={() => setPreviewImageModal(null)}>
+        <DialogContent className="sm:max-w-2xl p-2 bg-background/95 backdrop-blur-md border border-border/60 rounded-2xl">
+          <DialogHeader className="sr-only">
+            <DialogTitle>{t('chat.viewImage') || 'Vista Previa de Imagen'}</DialogTitle>
+          </DialogHeader>
+          {previewImageModal && (
+            <div className="relative flex flex-col items-center justify-center p-1">
+              <img
+                src={previewImageModal}
+                alt="Ampliación"
+                className="max-h-[80vh] w-auto object-contain rounded-xl shadow-lg"
+              />
+              <div className="mt-3 flex items-center justify-end w-full gap-2">
+                <a
+                  href={previewImageModal}
+                  target="_blank"
+                  rel="noreferrer"
+                  download
+                  className="px-3 py-1.5 rounded-xl bg-primary text-primary-foreground text-xs font-semibold flex items-center gap-1.5 shadow-sm hover:bg-primary/90 transition-all"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>{t('chat.download') || 'Descargar'}</span>
+                </a>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

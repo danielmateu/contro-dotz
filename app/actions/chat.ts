@@ -7,13 +7,23 @@ import { askGeminiAction } from '@/app/actions/gemini'
 /**
  * Server Action para enviar un mensaje en el chat familiar
  */
+export interface MessageAttachment {
+  url: string
+  name: string
+  type: 'image' | 'document'
+  mimeType: string
+  size: number
+}
+
 export async function sendMessageAction(
   householdId: string,
-  content: string
+  content: string,
+  attachments?: MessageAttachment[]
 ): Promise<{ success?: boolean; error?: string; message?: any }> {
   try {
     const trimmed = content.trim()
-    if (!trimmed) {
+    const hasAttachments = Array.isArray(attachments) && attachments.length > 0
+    if (!trimmed && !hasAttachments) {
       return { error: 'El mensaje no puede estar vacío.' }
     }
 
@@ -45,8 +55,9 @@ export async function sendMessageAction(
         household_id: householdId,
         content: trimmed,
         created_by: user.id,
+        attachments: hasAttachments ? attachments : [],
       })
-      .select('id, content, created_at, created_by, updated_at, is_deleted')
+      .select('id, content, created_at, created_by, updated_at, is_deleted, attachments')
       .single()
 
     if (insertError) {

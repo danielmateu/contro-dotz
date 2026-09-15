@@ -670,7 +670,16 @@
     "askGemini": "🤖 Consultar a Gemini",
     "hideSuggestions": "Ocultar sugerencias",
     "showShortcuts": "Ver accesos IA (9)",
-    "typePlaceholder": "Escribe un mensaje para tu familia..."
+    "typePlaceholder": "Escribe un mensaje para tu familia...",
+    "isTyping": "{name} está escribiendo...",
+    "severalTyping": "Varias personas están escribiendo...",
+    "attachFiles": "Adjuntar imágenes o documentos",
+    "dropFilesHere": "Suelta los archivos aquí para adjuntarlos",
+    "maxSizeError": "El archivo supera el tamaño máximo permitido de 10MB.",
+    "uploadingFiles": "Subiendo archivos...",
+    "download": "Descargar",
+    "viewImage": "Ver imagen",
+    "attachments": "Adjuntos"
   },
   "shopping": {
     "title": "Lista de la Compra",
