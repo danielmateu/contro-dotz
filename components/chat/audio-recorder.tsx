@@ -25,15 +25,7 @@ export function AudioRecorder({ onAudioRecorded, onCancel }: AudioRecorderProps)
   const previewAudioRef = useRef<HTMLAudioElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
 
-  // Iniciar la grabación automáticamente al montar el componente
-  useEffect(() => {
-    startRecording()
-    return () => {
-      cleanup()
-    }
-  }, [])
-
-  const cleanup = () => {
+  const cleanup = React.useCallback(() => {
     if (timerRef.current) clearInterval(timerRef.current)
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop()
@@ -44,9 +36,9 @@ export function AudioRecorder({ onAudioRecorded, onCancel }: AudioRecorderProps)
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl)
     }
-  }
+  }, [audioUrl])
 
-  const startRecording = async () => {
+  const startRecording = React.useCallback(async () => {
     try {
       audioChunksRef.current = []
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -96,7 +88,15 @@ export function AudioRecorder({ onAudioRecorded, onCancel }: AudioRecorderProps)
       })
       onCancel()
     }
-  }
+  }, [onCancel, t])
+
+  // Iniciar la grabación automáticamente al montar el componente
+  useEffect(() => {
+    startRecording()
+    return () => {
+      cleanup()
+    }
+  }, [startRecording, cleanup])
 
   const stopRecording = () => {
     if (timerRef.current) clearInterval(timerRef.current)

@@ -1800,10 +1800,10 @@ export function ChatWindow({
               </div>
             ))}
 
-            {isUploadingAttachment && (
+            {(isUploadingAttachment || isTranscribingAudio) && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground bg-background border border-border/50 px-3 py-1.5 rounded-lg shrink-0">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
-                <span>{t('chat.uploadingFiles') || 'Subiendo...'}</span>
+                <span>{isTranscribingAudio ? t('chat.transcribingAudio') : (t('chat.uploadingFiles') || 'Subiendo...')}</span>
               </div>
             )}
           </div>
