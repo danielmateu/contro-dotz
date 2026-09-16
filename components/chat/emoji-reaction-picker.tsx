@@ -72,14 +72,14 @@ export function EmojiReactionPicker({
           side={side}
           align={align}
           sideOffset={8}
-          className="w-auto p-0 border-none shadow-2xl bg-transparent z-50"
+          className="w-[320px] max-w-[calc(100vw-32px)] p-0 border-none shadow-2xl bg-transparent z-50"
         >
           <EmojiPicker
             onEmojiClick={handleEmojiClick}
             theme={pickerTheme}
             lazyLoadEmojis
             searchPlaceHolder="Buscar emoji..."
-            width={320}
+            width="100%"
             height={380}
           />
         </PopoverContent>

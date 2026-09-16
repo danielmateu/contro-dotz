@@ -553,6 +553,9 @@ export function ChatWindow({
   const [editingContent, setEditingContent] = useState<string>('')
   const [isUpdating, setIsUpdating] = useState<boolean>(false)
 
+  // Estado para mensaje activo seleccionado (para desplegar menú de reacciones/acciones en móvil o clic)
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null)
+
   // Estado para ejecución de acciones propuestas por Gemini
   const [executingActionId, setExecutingActionId] = useState<string | null>(null)
 
@@ -633,6 +636,7 @@ export function ChatWindow({
   }
 
   const handleToggleReaction = async (messageId: string, emoji: string) => {
+    setActiveMessageId(null)
     const targetMsg = messages.find((m) => m.id === messageId)
     if (!targetMsg || targetMsg.created_by === userId) return
 
@@ -991,6 +995,7 @@ export function ChatWindow({
   }, [householdId, supabase])
 
   const handleStartEdit = (msg: ChatMessage) => {
+    setActiveMessageId(null)
     setEditingMessageId(msg.id)
     setEditingContent(msg.content)
   }
@@ -1031,6 +1036,7 @@ export function ChatWindow({
   }
 
   const handleDeleteMessage = async (messageId: string) => {
+    setActiveMessageId(null)
     const now = new Date().toISOString()
     // Eliminación optimista mostrando estado "Este mensaje fue eliminado"
     setMessages((prev) =>
@@ -1428,7 +1434,7 @@ export function ChatWindow({
       </AnimatePresence>
 
       {/* Cuerpo del Chat (Mensajes con MessageScroller y Bubble) */}
-      <MessageScroller className="flex-1 min-h-0">
+      <MessageScroller className="flex-1 min-h-0" onClick={() => setActiveMessageId(null)}>
         <MessageScrollerViewport className="p-4 space-y-6">
           <MessageScrollerContent className="gap-6">
             {messages.length === 0 ? (
@@ -1477,7 +1483,14 @@ export function ChatWindow({
                           className="transition-all duration-300"
                         >
                           <MessageScrollerItem>
-                            <Message align={isMe ? 'end' : 'start'} className="px-1 group/msg relative">
+                            <Message
+                              align={isMe ? 'end' : 'start'}
+                              className="px-1 group/msg relative cursor-pointer sm:cursor-default"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActiveMessageId((prev) => (prev === msg.id ? null : msg.id))
+                              }}
+                            >
                               <MessageAvatar>
                                 <Avatar className={`h-8 w-8 border shadow-xs ${isBot ? 'border-primary/40 ring-2 ring-primary/10' : 'border-border/35'}`}>
                                   {sender.avatar_url ? (
@@ -1522,13 +1535,17 @@ export function ChatWindow({
                                     isMe ? "justify-end self-end" : "justify-start self-start"
                                   )}
                                 >
-                                  {/* Botones de acción flotantes en hover (Absolute para no reducir el ancho del Flexbox) */}
+                                  {/* Botones de acción flotantes en hover/tap (Absolute para no reducir el ancho del Flexbox) */}
                                   {!msg.is_deleted && !isEditing && (
                                     <div
                                       className={cn(
-                                        "opacity-0 group-hover/msg:opacity-100 transition-opacity absolute -top-8 z-30 flex items-center gap-1 pointer-events-none group-hover/msg:pointer-events-auto",
+                                        "transition-all duration-200 absolute -top-9 z-30 flex items-center gap-1",
+                                        activeMessageId === msg.id
+                                          ? "opacity-100 pointer-events-auto scale-100"
+                                          : "opacity-0 group-hover/msg:opacity-100 pointer-events-none group-hover/msg:pointer-events-auto scale-95 group-hover/msg:scale-100",
                                         isMe ? "right-0" : "left-0"
                                       )}
+                                      onClick={(e) => e.stopPropagation()}
                                     >
                                       {!isMe && (
                                         <EmojiReactionPicker
