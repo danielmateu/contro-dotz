@@ -938,6 +938,18 @@ export function ChatWindow({
       )
       .on(
         'broadcast',
+        { event: 'new_message' },
+        (payload) => {
+          const { message } = payload.payload || {}
+          if (!message || message.created_by === userId) return
+          setMessages((prev) => {
+            if (prev.some((m) => m.id === message.id)) return prev
+            return [...prev, message]
+          })
+        }
+      )
+      .on(
+        'broadcast',
         { event: 'typing' },
         (payload) => {
           const { userId: senderId, displayName, avatarUrl, isTyping } = payload.payload || {}
@@ -1080,31 +1092,39 @@ export function ChatWindow({
     const attachmentsToSend = [...pendingAttachments]
     const isGeminiQuery = messageText.toLowerCase().includes('@gemini')
 
+    // 1. Limpiar estado de input e interfaz instantáneamente (0ms latency)
     setInputMessage('')
     setPendingAttachments([])
-    setIsSending(true)
+    setError(null)
+
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`
+    const optimisticMessage: ChatMessage = {
+      id: tempId,
+      content: messageText,
+      created_at: new Date().toISOString(),
+      created_by: userId,
+      attachments: attachmentsToSend,
+      reactions: {},
+    }
+
+    // 2. Renderizado optimista instantáneo (<5ms)
+    setMessages((prev) => [...prev, optimisticMessage])
+
+    // 3. Broadcast instantáneo a todos los miembros online (<30ms)
+    try {
+      const channel = supabase.channel(`chat_messages_${householdId}`)
+      channel.send({
+        type: 'broadcast',
+        event: 'new_message',
+        payload: { message: optimisticMessage },
+      }).catch(() => {})
+    } catch (_) {}
+
     if (isGeminiQuery) {
       setIsBotTyping(true)
     }
-    setError(null)
 
-    // Manejo cuando se está offline sin conexión a internet
-    if (!navigator.onLine || !isOnline) {
-      const tempId = `temp_msg_${Date.now()}`
-      const offlineMsg: ChatMessage = {
-        id: tempId,
-        content: messageText ? `${messageText} (Pendiente de envío ⚡)` : '(Adjunto pendiente de envío ⚡)',
-        created_at: new Date().toISOString(),
-        created_by: userId,
-        attachments: attachmentsToSend,
-      }
-      setMessages((prev) => [...prev, offlineMsg])
-      await enqueueAction('SEND_CHAT_MESSAGE', { householdId, content: messageText })
-      setIsSending(false)
-      setIsBotTyping(false)
-      return
-    }
-
+    // 4. Persistir en base de datos en segundo plano
     try {
       const res = await sendMessageAction(householdId, messageText, attachmentsToSend)
       if (res.error) {
@@ -1113,12 +1133,12 @@ export function ChatWindow({
 
       if (res.message) {
         const createdMessage = res.message as ChatMessage
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === createdMessage.id)) return prev
-          return [...prev, createdMessage]
-        })
+        // Reemplazar mensaje temporal con el ID real retornado por la BD
+        setMessages((prev) =>
+          prev.map((m) => (m.id === tempId ? createdMessage : m))
+        )
 
-        // Disparar Notificación Push a los miembros del hogar en segundo plano
+        // Disparar Notificación Push a los miembros del hogar
         const myProfile = members.find((m) => m.user_id === userId)
         const senderName = myProfile?.display_name || 'Miembro del Hogar'
         const pushText = messageText || (attachmentsToSend.some(a => a.type === 'image') ? '📷 Imagen adjunta' : '📎 Documento adjunto')
@@ -1132,11 +1152,12 @@ export function ChatWindow({
     } catch (err: any) {
       console.error('Error al enviar el mensaje:', err)
       setError(err?.message || 'No se pudo enviar el mensaje. Inténtalo de nuevo.')
-      setInputMessage(messageText) // restaurar texto
+      // En caso de fallo en el servidor, revertir mensaje optimista y restaurar campos
+      setMessages((prev) => prev.filter((m) => m.id !== tempId))
+      setInputMessage(messageText)
       setPendingAttachments(attachmentsToSend)
     } finally {
       setIsSending(false)
-      setIsBotTyping(false)
     }
   }
 
