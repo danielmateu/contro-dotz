@@ -41,6 +41,7 @@ import {
 import { sendHouseholdChatPushAction } from '@/app/actions/push'
 import { toast } from '@/components/ui/toast'
 import { useOfflineSync } from '@/components/providers/offline-sync-provider'
+import { cn } from '@/lib/utils'
 
 interface Member {
   user_id: string
@@ -335,7 +336,7 @@ export function ChatWindow({
           event: 'typing',
           payload: { userId, displayName, avatarUrl, isTyping },
         })
-        .catch(() => {})
+        .catch(() => { })
     },
     [householdId, userId, members, supabase]
   )
@@ -664,7 +665,7 @@ export function ChatWindow({
     // 1. Persistencia local inmediata en localStorage
     try {
       localStorage.setItem(`contro_dotz_reactions_${messageId}`, JSON.stringify(updatedReactions))
-    } catch (_) {}
+    } catch (_) { }
 
     // 2. Broadcast en tiempo real a todos los miembros conectados del hogar
     try {
@@ -673,8 +674,8 @@ export function ChatWindow({
         type: 'broadcast',
         event: 'reaction_toggle',
         payload: { messageId, reactions: updatedReactions },
-      }).catch(() => {})
-    } catch (_) {}
+      }).catch(() => { })
+    } catch (_) { }
 
     // 3. Persistencia en Supabase DB (silenciosa sin revertir estado local)
     try {
@@ -843,7 +844,7 @@ export function ChatWindow({
               reactions = { ...(reactions || {}), ...parsed }
             }
           }
-        } catch (_) {}
+        } catch (_) { }
         return { ...msg, reactions }
       })
     })
@@ -899,12 +900,12 @@ export function ChatWindow({
             prev.map((m) =>
               m.id === updated.id
                 ? {
-                    ...m,
-                    content: updated.content,
-                    updated_at: updated.updated_at,
-                    is_deleted: updated.is_deleted,
-                    reactions: updated.reactions !== undefined ? updated.reactions : m.reactions,
-                  }
+                  ...m,
+                  content: updated.content,
+                  updated_at: updated.updated_at,
+                  is_deleted: updated.is_deleted,
+                  reactions: updated.reactions !== undefined ? updated.reactions : m.reactions,
+                }
                 : m
             )
           )
@@ -1117,8 +1118,8 @@ export function ChatWindow({
         type: 'broadcast',
         event: 'new_message',
         payload: { message: optimisticMessage },
-      }).catch(() => {})
-    } catch (_) {}
+      }).catch(() => { })
+    } catch (_) { }
 
     if (isGeminiQuery) {
       setIsBotTyping(true)
@@ -1514,10 +1515,21 @@ export function ChatWindow({
                                   </span>
                                 </MessageHeader>
 
-                                <div className="flex items-center gap-1.5 group/bubble">
-                                  {/* Botones de acción: Reaccionar (solo ajenos) / Editar y Eliminar (propios) */}
+                                <div
+                                  data-slot="bubble-wrapper"
+                                  className={cn(
+                                    "flex items-center gap-1.5 group/bubble max-w-full min-w-0 relative",
+                                    isMe ? "justify-end self-end" : "justify-start self-start"
+                                  )}
+                                >
+                                  {/* Botones de acción flotantes en hover (Absolute para no reducir el ancho del Flexbox) */}
                                   {!msg.is_deleted && !isEditing && (
-                                    <div className="opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center gap-1">
+                                    <div
+                                      className={cn(
+                                        "opacity-0 group-hover/msg:opacity-100 transition-opacity absolute -top-8 z-30 flex items-center gap-1 pointer-events-none group-hover/msg:pointer-events-auto",
+                                        isMe ? "right-0" : "left-0"
+                                      )}
+                                    >
                                       {!isMe && (
                                         <EmojiReactionPicker
                                           onSelectEmoji={(emoji) => handleToggleReaction(msg.id, emoji)}
@@ -1526,11 +1538,11 @@ export function ChatWindow({
                                         />
                                       )}
                                       {isMe && (
-                                        <>
+                                        <div className="flex items-center gap-1 bg-background/90 backdrop-blur-md border border-border/40 rounded-full px-1.5 py-0.5 shadow-xs">
                                           <button
                                             type="button"
                                             onClick={() => handleStartEdit(msg)}
-                                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                                            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
                                             title="Editar mensaje"
                                           >
                                             <Pencil className="w-3.5 h-3.5" />
@@ -1538,12 +1550,12 @@ export function ChatWindow({
                                           <button
                                             type="button"
                                             onClick={() => handleDeleteMessage(msg.id)}
-                                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                            className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
                                             title="Eliminar mensaje"
                                           >
                                             <Trash2 className="w-3.5 h-3.5" />
                                           </button>
-                                        </>
+                                        </div>
                                       )}
                                     </div>
                                   )}
@@ -1590,7 +1602,7 @@ export function ChatWindow({
                                       className={`transition-all duration-300 relative ${hasReactions ? 'mb-3.5' : ''} ${isActiveMatch ? 'ring-3 ring-amber-400 dark:ring-amber-500 shadow-xl scale-[1.02]' : ''}`}
                                     >
                                       <BubbleContent>
-                                        <div className="whitespace-pre-wrap">{renderFormattedText(cleanText, searchQuery)}</div>
+                                        <div className="whitespace-pre-wrap break-words max-w-full">{renderFormattedText(cleanText, searchQuery)}</div>
 
                                         {/* Adjuntos del mensaje */}
                                         {msg.attachments && msg.attachments.length > 0 && (
