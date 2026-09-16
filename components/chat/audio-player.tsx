@@ -30,17 +30,27 @@ export function AudioPlayer({
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
   useEffect(() => {
+    if (duration && !isNaN(duration) && isFinite(duration) && duration > 0) {
+      setAudioDuration(Math.round(duration))
+    }
+  }, [duration])
+
+  useEffect(() => {
     const audio = new Audio(url)
     audioRef.current = audio
 
     const handleLoadedMetadata = () => {
-      if (audio.duration && !isNaN(audio.duration)) {
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0) {
         setAudioDuration(Math.round(audio.duration))
       }
     }
 
     const handleTimeUpdate = () => {
-      setCurrentTime(audio.currentTime)
+      setCurrentTime(audio.currentTime || 0)
+      // Si la duración no era finita antes pero ahora el audio reporta duración válida al reproducirse
+      if (audio.duration && !isNaN(audio.duration) && isFinite(audio.duration) && audio.duration > 0) {
+        setAudioDuration(Math.round(audio.duration))
+      }
     }
 
     const handleEnded = () => {
@@ -49,12 +59,14 @@ export function AudioPlayer({
     }
 
     audio.addEventListener('loadedmetadata', handleLoadedMetadata)
+    audio.addEventListener('durationchange', handleLoadedMetadata)
     audio.addEventListener('timeupdate', handleTimeUpdate)
     audio.addEventListener('ended', handleEnded)
 
     return () => {
       audio.pause()
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata)
+      audio.removeEventListener('durationchange', handleLoadedMetadata)
       audio.removeEventListener('timeupdate', handleTimeUpdate)
       audio.removeEventListener('ended', handleEnded)
     }
@@ -98,31 +110,32 @@ export function AudioPlayer({
   }
 
   const formatTime = (secs: number) => {
+    if (!secs || isNaN(secs) || !isFinite(secs) || secs < 0) return '0:00'
     const m = Math.floor(secs / 60)
     const s = Math.floor(secs % 60)
     return `${m}:${s < 10 ? '0' : ''}${s}`
   }
 
+  const maxSeek = audioDuration && !isNaN(audioDuration) && isFinite(audioDuration) && audioDuration > 0 ? audioDuration : 100
+
   return (
     <div className="flex flex-col gap-2 w-full max-w-xs sm:max-w-sm">
       {/* Tarjeta del reproductor */}
       <div
-        className={`flex flex-col gap-2 p-3 rounded-2xl border transition-all ${
-          isOwnMessage
-            ? 'bg-emerald-600/20 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-100'
-            : 'bg-slate-800/80 dark:bg-slate-900/80 border-slate-700/50 text-slate-200'
-        }`}
+        className={`flex flex-col gap-2 p-3 rounded-2xl border transition-all ${isOwnMessage
+          ? 'bg-emerald-600/20 dark:bg-emerald-950/40 border-emerald-500/30 text-emerald-100'
+          : 'bg-slate-800/80 dark:bg-slate-900/80 border-slate-700/50 text-slate-200'
+          }`}
       >
         <div className="flex items-center gap-3">
           {/* Botón Play / Pause */}
           <button
             type="button"
             onClick={togglePlay}
-            className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-md transition-transform active:scale-95 ${
-              isOwnMessage
-                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                : 'bg-indigo-600 hover:bg-indigo-500 text-white'
-            }`}
+            className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 shadow-md transition-transform active:scale-95 ${isOwnMessage
+              ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+              : 'bg-indigo-600 hover:bg-indigo-500 text-white'
+              }`}
           >
             {isPlaying ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
           </button>
@@ -138,7 +151,7 @@ export function AudioPlayer({
             <input
               type="range"
               min={0}
-              max={audioDuration || 100}
+              max={maxSeek}
               value={currentTime}
               onChange={handleSeek}
               className="w-full h-1.5 bg-slate-700/60 rounded-lg appearance-none cursor-pointer accent-emerald-500 hover:accent-emerald-400"
