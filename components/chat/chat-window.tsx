@@ -2,10 +2,12 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { sendMessageAction, updateMessageAction, deleteMessageAction, confirmChatAction, cancelChatAction, MessageAttachment } from '@/app/actions/chat'
+import { sendMessageAction, updateMessageAction, deleteMessageAction, toggleReactionAction, confirmChatAction, cancelChatAction, MessageAttachment } from '@/app/actions/chat'
 import { transcribeAudioAction } from '@/app/actions/gemini'
 import { AudioRecorder } from '@/components/chat/audio-recorder'
 import { AudioPlayer } from '@/components/chat/audio-player'
+import { EmojiReactionPicker } from '@/components/chat/emoji-reaction-picker'
+import { MessageReactions } from '@/components/chat/message-reactions'
 import {
   MessageGroup,
   Message,
@@ -58,6 +60,7 @@ interface ChatMessage {
   is_deleted?: boolean | null
   is_bot?: boolean
   attachments?: MessageAttachment[] | null
+  reactions?: Record<string, string[]> | null
 }
 
 function formatFileSize(bytes?: number): string {
@@ -628,6 +631,59 @@ export function ChatWindow({
     }
   }
 
+  const handleToggleReaction = async (messageId: string, emoji: string) => {
+    const targetMsg = messages.find((m) => m.id === messageId)
+    if (!targetMsg || targetMsg.created_by === userId) return
+
+    let updatedReactions: Record<string, string[]> = {}
+
+    setMessages((prev) =>
+      prev.map((m) => {
+        if (m.id !== messageId) return m
+        const currentReactions: Record<string, string[]> = { ...(m.reactions || {}) }
+        const userList: string[] = Array.isArray(currentReactions[emoji]) ? [...currentReactions[emoji]] : []
+        const userIdx = userList.indexOf(userId)
+
+        if (userIdx >= 0) {
+          userList.splice(userIdx, 1)
+        } else {
+          userList.push(userId)
+        }
+
+        if (userList.length > 0) {
+          currentReactions[emoji] = userList
+        } else {
+          delete currentReactions[emoji]
+        }
+
+        updatedReactions = currentReactions
+        return { ...m, reactions: currentReactions }
+      })
+    )
+
+    // 1. Persistencia local inmediata en localStorage
+    try {
+      localStorage.setItem(`contro_dotz_reactions_${messageId}`, JSON.stringify(updatedReactions))
+    } catch (_) {}
+
+    // 2. Broadcast en tiempo real a todos los miembros conectados del hogar
+    try {
+      const channel = supabase.channel(`chat_messages_${householdId}`)
+      channel.send({
+        type: 'broadcast',
+        event: 'reaction_toggle',
+        payload: { messageId, reactions: updatedReactions },
+      }).catch(() => {})
+    } catch (_) {}
+
+    // 3. Persistencia en Supabase DB (silenciosa sin revertir estado local)
+    try {
+      await toggleReactionAction(messageId, emoji)
+    } catch (err: any) {
+      console.warn('[ChatWindow] Reacción guardada localmente/broadcast (servidor DB no disponible):', err)
+    }
+  }
+
   // Estado de notificaciones Push PWA
   const [pushState, setPushState] = useState<{
     isSupported: boolean
@@ -762,9 +818,35 @@ export function ChatWindow({
     messagesEndRef.current?.scrollIntoView({ behavior })
   }
 
-  // Sincronizar mensajes iniciales cuando la prop se actualiza desde el servidor
+  const previousMessageCountRef = useRef(messages.length)
+
+  // Sincronizar mensajes iniciales preservando reacciones de localStorage o prev
   useEffect(() => {
-    setMessages(initialMessages)
+    setMessages((prev) => {
+      const base = prev.length === 0 ? initialMessages : initialMessages.map((newMsg) => {
+        const existing = prev.find((m) => m.id === newMsg.id)
+        const hasExistingReactions = existing && existing.reactions && Object.keys(existing.reactions).length > 0
+        const hasNewReactions = newMsg && newMsg.reactions && Object.keys(newMsg.reactions).length > 0
+        if (hasExistingReactions && !hasNewReactions) {
+          return { ...newMsg, reactions: existing.reactions }
+        }
+        return newMsg
+      })
+
+      return base.map((msg) => {
+        let reactions = msg.reactions
+        try {
+          const saved = localStorage.getItem(`contro_dotz_reactions_${msg.id}`)
+          if (saved) {
+            const parsed = JSON.parse(saved)
+            if (parsed && typeof parsed === 'object') {
+              reactions = { ...(reactions || {}), ...parsed }
+            }
+          }
+        } catch (_) {}
+        return { ...msg, reactions }
+      })
+    })
   }, [initialMessages])
 
   // Desplazarse al fondo al cargar por primera vez
@@ -772,12 +854,15 @@ export function ChatWindow({
     scrollToBottom('auto')
   }, [])
 
-  // Desplazarse al fondo cuando cambian los mensajes
+  // Desplazarse al fondo SOLO cuando se añade un nuevo mensaje (messages.length aumenta)
   useEffect(() => {
-    scrollToBottom('smooth')
-  }, [messages])
+    if (messages.length > previousMessageCountRef.current) {
+      scrollToBottom('smooth')
+    }
+    previousMessageCountRef.current = messages.length
+  }, [messages.length])
 
-  // Suscribirse a los mensajes en tiempo real (INSERT, UPDATE, DELETE)
+  // Suscribirse a los mensajes en tiempo real (INSERT, UPDATE, DELETE, BROADCAST)
   useEffect(() => {
     const channel = supabase
       .channel(`chat_messages_${householdId}`)
@@ -814,11 +899,12 @@ export function ChatWindow({
             prev.map((m) =>
               m.id === updated.id
                 ? {
-                  ...m,
-                  content: updated.content,
-                  updated_at: updated.updated_at,
-                  is_deleted: updated.is_deleted,
-                }
+                    ...m,
+                    content: updated.content,
+                    updated_at: updated.updated_at,
+                    is_deleted: updated.is_deleted,
+                    reactions: updated.reactions !== undefined ? updated.reactions : m.reactions,
+                  }
                 : m
             )
           )
@@ -836,6 +922,17 @@ export function ChatWindow({
           const deletedId = payload.old.id
           setMessages((prev) =>
             prev.map((m) => (m.id === deletedId ? { ...m, is_deleted: true } : m))
+          )
+        }
+      )
+      .on(
+        'broadcast',
+        { event: 'reaction_toggle' },
+        (payload) => {
+          const { messageId, reactions } = payload.payload || {}
+          if (!messageId || !reactions) return
+          setMessages((prev) =>
+            prev.map((m) => (m.id === messageId ? { ...m, reactions } : m))
           )
         }
       )
@@ -1346,6 +1443,11 @@ export function ChatWindow({
 
                       const bubbleVariant = isMe ? 'default' : isBot ? 'tinted' : 'muted'
 
+                      const hasReactions = Boolean(
+                        msg.reactions &&
+                        Object.values(msg.reactions).some((arr) => Array.isArray(arr) && arr.length > 0)
+                      )
+
                       return (
                         <div
                           key={msg.id}
@@ -1392,25 +1494,36 @@ export function ChatWindow({
                                 </MessageHeader>
 
                                 <div className="flex items-center gap-1.5 group/bubble">
-                                  {/* Botones de acción para el creador del mensaje (Edición / Eliminación) */}
-                                  {isMe && !isEditing && !msg.is_deleted && (
+                                  {/* Botones de acción: Reaccionar (solo ajenos) / Editar y Eliminar (propios) */}
+                                  {!msg.is_deleted && !isEditing && (
                                     <div className="opacity-0 group-hover/msg:opacity-100 transition-opacity flex items-center gap-1">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleStartEdit(msg)}
-                                        className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                                        title="Editar mensaje"
-                                      >
-                                        <Pencil className="w-3.5 h-3.5" />
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteMessage(msg.id)}
-                                        className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                                        title="Eliminar mensaje"
-                                      >
-                                        <Trash2 className="w-3.5 h-3.5" />
-                                      </button>
+                                      {!isMe && (
+                                        <EmojiReactionPicker
+                                          onSelectEmoji={(emoji) => handleToggleReaction(msg.id, emoji)}
+                                          side="top"
+                                          align="start"
+                                        />
+                                      )}
+                                      {isMe && (
+                                        <>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleStartEdit(msg)}
+                                            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                                            title="Editar mensaje"
+                                          >
+                                            <Pencil className="w-3.5 h-3.5" />
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleDeleteMessage(msg.id)}
+                                            className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                                            title="Eliminar mensaje"
+                                          >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                          </button>
+                                        </>
+                                      )}
                                     </div>
                                   )}
 
@@ -1453,7 +1566,7 @@ export function ChatWindow({
                                     <Bubble
                                       variant={bubbleVariant}
                                       align={isMe ? 'end' : 'start'}
-                                      className={`transition-all duration-300 ${isActiveMatch ? 'ring-3 ring-amber-400 dark:ring-amber-500 shadow-xl scale-[1.02]' : ''}`}
+                                      className={`transition-all duration-300 relative ${hasReactions ? 'mb-3.5' : ''} ${isActiveMatch ? 'ring-3 ring-amber-400 dark:ring-amber-500 shadow-xl scale-[1.02]' : ''}`}
                                     >
                                       <BubbleContent>
                                         <div className="whitespace-pre-wrap">{renderFormattedText(cleanText, searchQuery)}</div>
@@ -1551,6 +1664,15 @@ export function ChatWindow({
                                           />
                                         )}
                                       </BubbleContent>
+                                      {!msg.is_deleted && (
+                                        <MessageReactions
+                                          reactions={msg.reactions}
+                                          currentUserId={userId}
+                                          members={members}
+                                          onToggleReaction={(emoji) => handleToggleReaction(msg.id, emoji)}
+                                          isUserMessage={isMe}
+                                        />
+                                      )}
                                     </Bubble>
                                   )}
                                 </div>

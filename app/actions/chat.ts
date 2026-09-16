@@ -450,3 +450,67 @@ export async function deleteMessageAction(
     return { error: 'Error inesperado al eliminar el mensaje.' }
   }
 }
+
+/**
+ * Server Action para añadir o quitar una reacción emoji a un mensaje
+ */
+export async function toggleReactionAction(
+  messageId: string,
+  emoji: string
+): Promise<{ success?: boolean; error?: string; reactions?: Record<string, string[]> }> {
+  try {
+    const supabase = await createClient()
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) return { error: 'Sesión no iniciada.' }
+
+    const { data: msg, error: fetchErr } = await supabase
+      .from('messages')
+      .select('reactions')
+      .eq('id', messageId)
+      .single()
+
+    if (fetchErr || !msg) {
+      console.error('toggleReactionAction fetch error:', fetchErr)
+      if (fetchErr?.code === '42703' || fetchErr?.message?.includes('reactions') || fetchErr?.code === 'PGRST204') {
+        return { error: 'Falta añadir la columna "reactions" (JSONB) en la tabla "messages" de Supabase.' }
+      }
+      return { error: 'Mensaje no encontrado.' }
+    }
+
+    const currentReactions: Record<string, string[]> = (msg.reactions as Record<string, string[]>) || {}
+    const userList: string[] = Array.isArray(currentReactions[emoji]) ? [...currentReactions[emoji]] : []
+
+    const userIndex = userList.indexOf(user.id)
+    if (userIndex >= 0) {
+      userList.splice(userIndex, 1)
+    } else {
+      userList.push(user.id)
+    }
+
+    const updatedReactions = { ...currentReactions }
+    if (userList.length > 0) {
+      updatedReactions[emoji] = userList
+    } else {
+      delete updatedReactions[emoji]
+    }
+
+    const { error: updateErr } = await supabase
+      .from('messages')
+      .update({ reactions: updatedReactions })
+      .eq('id', messageId)
+
+    if (updateErr) {
+      console.error('toggleReactionAction update error:', updateErr)
+      return { error: 'Error al guardar la reacción.' }
+    }
+
+    return { success: true, reactions: updatedReactions }
+  } catch (err: any) {
+    console.error('toggleReactionAction Catch Error:', err)
+    return { error: 'Error inesperado al cambiar la reacción.' }
+  }
+}
+

@@ -34,21 +34,39 @@ export default async function ChatPage() {
   let initialMessages: any[] = []
 
   try {
-    // Cargar miembros del hogar y últimos 100 mensajes en paralelo
-    const [membersRes, messagesRes] = await Promise.all([
+    const [membersRes, rawMessagesRes] = await Promise.all([
       supabase
         .from('household_members')
         .select('user_id, role, profiles(display_name, email, avatar_url, status)')
         .eq('household_id', householdId),
       supabase
         .from('messages')
-        .select('id, content, created_at, created_by, updated_at, is_deleted, attachments')
+        .select('id, content, created_at, created_by, updated_at, is_deleted, attachments, reactions')
         .eq('household_id', householdId)
         .order('created_at', { ascending: false })
         .limit(100)
     ])
+
     membersList = membersRes?.data || []
-    initialMessages = [...(messagesRes?.data || [])].reverse()
+
+    let finalMessagesData: any[] | null = rawMessagesRes?.data
+    if (rawMessagesRes?.error) {
+      console.warn('[ChatPage] Carga con "reactions" falló (posible columna no creada en DB), reintentando query estándar:', rawMessagesRes.error.message)
+      const fallbackMessagesRes = await supabase
+        .from('messages')
+        .select('id, content, created_at, created_by, updated_at, is_deleted, attachments')
+        .eq('household_id', householdId)
+        .order('created_at', { ascending: false })
+        .limit(100)
+      finalMessagesData = fallbackMessagesRes?.data
+    }
+
+    initialMessages = [
+      ...((finalMessagesData || []).map((m: any) => ({
+        ...m,
+        reactions: m.reactions || null,
+      }))),
+    ].reverse()
   } catch (err) {
     console.warn('[ChatPage] Carga offline de mensajes/miembros falló:', err)
   }
