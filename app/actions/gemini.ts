@@ -217,6 +217,78 @@ Devuelve una respuesta strictly en formato JSON válido con la siguiente estruct
   }
 }
 
+export interface TranscribeAudioResult {
+  transcription?: string
+  error?: string
+}
+
+/**
+ * Server Action que procesa un archivo de audio (base64) con Gemini AI (gemini-flash-latest)
+ * y devuelve la transcripción literal en texto.
+ */
+export async function transcribeAudioAction(
+  formData: FormData
+): Promise<TranscribeAudioResult> {
+  try {
+    const base64Data = formData.get('base64Data') as string
+    const mimeType = (formData.get('mimeType') as string) || 'audio/webm'
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey) {
+      return { error: 'Falta configurar la clave API de Gemini (GEMINI_API_KEY) en el servidor.' }
+    }
+
+    if (!base64Data) {
+      return { error: 'No se recibieron datos de audio para transcribir.' }
+    }
+
+    const prompt = `Transcribe literalmente este mensaje de voz a texto.
+Reglas:
+1. Devuelve estrictamente la transcripción limpia del audio sin añadir saludos, explicaciones, ni etiquetas de formato extra como "Transcripción:".
+2. Mantén la puntuación y ortografía naturales del lenguaje hablado.
+3. Si el audio está en silencio o no contiene voz legible, devuelve una cadena vacía ""`
+
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                { text: prompt },
+                {
+                  inlineData: {
+                    mimeType,
+                    data: base64Data,
+                  },
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    )
+
+    if (!response.ok) {
+      const errText = await response.text()
+      console.error('Gemini API HTTP Error transcribing audio:', errText)
+      return { error: 'Error al comunicarse con el servicio de transcripción de IA.' }
+    }
+
+    const resJson = await response.json()
+    const textResponse = resJson?.candidates?.[0]?.content?.parts?.[0]?.text
+
+    return {
+      transcription: textResponse ? textResponse.trim() : '',
+    }
+  } catch (err: any) {
+    console.error('transcribeAudioAction Error:', err)
+    return { error: 'Error inesperado al transcribir la nota de audio.' }
+  }
+}
 
 /**
  * Server Action para consultar a Gemini sobre las finanzas del hogar

@@ -10,9 +10,11 @@ import { askGeminiAction } from '@/app/actions/gemini'
 export interface MessageAttachment {
   url: string
   name: string
-  type: 'image' | 'document'
+  type: 'image' | 'document' | 'audio'
   mimeType: string
   size: number
+  duration?: number
+  transcription?: string
 }
 
 export async function sendMessageAction(

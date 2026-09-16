@@ -679,7 +679,17 @@
     "uploadingFiles": "Subiendo archivos...",
     "download": "Descargar",
     "viewImage": "Ver imagen",
-    "attachments": "Adjuntos"
+    "attachments": "Adjuntos",
+    "recordAudio": "Grabar nota de voz",
+    "recordingAudio": "Grabando audio...",
+    "stopRecording": "Detener grabación",
+    "cancelRecording": "Cancelar grabación",
+    "transcribingAudio": "Transcribiendo audio con IA...",
+    "transcription": "Transcripción de voz",
+    "showTranscription": "Ver transcripción",
+    "hideTranscription": "Ocultar transcripción",
+    "audioAttached": "🎤 Nota de voz",
+    "micPermissionError": "No se pudo acceder al micrófono del dispositivo."
   },
   "shopping": {
     "title": "Lista de la Compra",

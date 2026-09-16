@@ -679,7 +679,17 @@
     "uploadingFiles": "Uploading files...",
     "download": "Download",
     "viewImage": "View image",
-    "attachments": "Attachments"
+    "attachments": "Attachments",
+    "recordAudio": "Record voice note",
+    "recordingAudio": "Recording audio...",
+    "stopRecording": "Stop recording",
+    "cancelRecording": "Cancel recording",
+    "transcribingAudio": "Transcribing audio with AI...",
+    "transcription": "Voice transcription",
+    "showTranscription": "Show transcription",
+    "hideTranscription": "Hide transcription",
+    "audioAttached": "🎤 Voice note",
+    "micPermissionError": "Could not access device microphone."
   },
   "shopping": {
     "title": "Shopping List",

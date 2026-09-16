@@ -679,7 +679,17 @@
     "uploadingFiles": "Pujant arxius...",
     "download": "Descarregar",
     "viewImage": "Veure imatge",
-    "attachments": "Adjunts"
+    "attachments": "Adjunts",
+    "recordAudio": "Gravar nota de veu",
+    "recordingAudio": "Gravant àudio...",
+    "stopRecording": "Aturar gravació",
+    "cancelRecording": "Cancel·lar gravació",
+    "transcribingAudio": "Transcribint àudio amb IA...",
+    "transcription": "Transcripció de veu",
+    "showTranscription": "Veure transcripció",
+    "hideTranscription": "Amagar transcripció",
+    "audioAttached": "🎤 Nota de veu",
+    "micPermissionError": "No s'ha pogut accedir al micròfon del dispositiu."
   },
   "shopping": {
     "title": "Llista de la Compra",

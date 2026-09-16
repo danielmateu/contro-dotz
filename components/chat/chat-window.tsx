@@ -3,6 +3,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessageAction, updateMessageAction, deleteMessageAction, confirmChatAction, cancelChatAction, MessageAttachment } from '@/app/actions/chat'
+import { transcribeAudioAction } from '@/app/actions/gemini'
+import { AudioRecorder } from '@/components/chat/audio-recorder'
+import { AudioPlayer } from '@/components/chat/audio-player'
 import {
   MessageGroup,
   Message,
@@ -25,7 +28,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
-import { Send, Users, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search, Paperclip, FileText, FileSpreadsheet, Download, ExternalLink, Eye, File, UploadCloud, Image as ImageIcon } from 'lucide-react'
+import { Send, Users, MessageSquare, AlertCircle, Bell, BellRing, Pencil, Trash2, Check, X, PiggyBank, ShoppingCart, CreditCard, Loader2, Sparkles, ChevronDown, ChevronUp, Search, Paperclip, FileText, FileSpreadsheet, Download, ExternalLink, Eye, File, UploadCloud, Image as ImageIcon, Mic } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {
@@ -303,12 +306,16 @@ export function ChatWindow({
   const typingTimeoutRef = useRef<{ [uId: string]: NodeJS.Timeout }>({})
   const lastTypingBroadcastRef = useRef<number>(0)
 
-  // Estados para Adjuntos de Imágenes y Documentos
+  // Estados para Adjuntos de Imágenes, Documentos y Notas de Voz
   const [pendingAttachments, setPendingAttachments] = useState<MessageAttachment[]>([])
   const [isUploadingAttachment, setIsUploadingAttachment] = useState<boolean>(false)
   const [isDraggingOver, setIsDraggingOver] = useState<boolean>(false)
   const [previewImageModal, setPreviewImageModal] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Estados para Grabación de Audio
+  const [isRecordingAudio, setIsRecordingAudio] = useState<boolean>(false)
+  const [isTranscribingAudio, setIsTranscribingAudio] = useState<boolean>(false)
 
   // Función para transmitir eventos broadcast de escritura ("está escribiendo...")
   const broadcastTyping = React.useCallback(
@@ -403,6 +410,115 @@ export function ChatWindow({
 
   const handleRemovePendingAttachment = (index: number) => {
     setPendingAttachments((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  // Manejador del resultado de la grabación de nota de voz
+  const handleAudioRecorded = async (blob: Blob, durationSeconds: number, mimeType: string) => {
+    setIsRecordingAudio(false)
+    setIsUploadingAttachment(true)
+    setIsTranscribingAudio(true)
+
+    try {
+      const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
+      const fileName = `audio_${Date.now()}.${ext}`
+      const filePath = `${householdId}/${Date.now()}_${fileName}`
+
+      // 1. Subir audio a Supabase Storage
+      const { error: uploadErr } = await supabase.storage
+        .from('chat_attachments')
+        .upload(filePath, blob, { contentType: mimeType, cacheControl: '3600', upsert: false })
+
+      if (uploadErr) {
+        console.error('Error al subir nota de voz:', uploadErr)
+        toast.add({
+          title: 'Error al subir nota de voz',
+          description: uploadErr.message,
+          type: 'error',
+        })
+        return
+      }
+
+      const { data: publicData } = supabase.storage
+        .from('chat_attachments')
+        .getPublicUrl(filePath)
+
+      const audioUrl = publicData?.publicUrl || ''
+
+      // 2. Convertir Blob a Base64 para Gemini Transcribe
+      const reader = new FileReader()
+      const base64Promise = new Promise<string>((resolve) => {
+        reader.onloadend = () => {
+          const res = reader.result as string
+          const base64 = res.split(',')[1] || ''
+          resolve(base64)
+        }
+        reader.readAsDataURL(blob)
+      })
+
+      const base64Data = await base64Promise
+
+      // 3. Solicitar transcripción a Gemini AI
+      const formData = new FormData()
+      formData.append('base64Data', base64Data)
+      formData.append('mimeType', mimeType)
+
+      const transcribeRes = await transcribeAudioAction(formData)
+      const transcriptionText = transcribeRes.transcription || ''
+
+      const audioAttachment: MessageAttachment = {
+        url: audioUrl,
+        name: `Nota de voz (${durationSeconds}s)`,
+        type: 'audio',
+        mimeType,
+        size: blob.size,
+        duration: durationSeconds,
+        transcription: transcriptionText,
+      }
+
+      // 4. Enviar el mensaje de voz directamente
+      setIsSending(true)
+      const isGeminiQuery = transcriptionText.toLowerCase().includes('@gemini')
+      if (isGeminiQuery) {
+        setIsBotTyping(true)
+      }
+
+      const sendRes = await sendMessageAction(householdId, '', [audioAttachment])
+      if (sendRes.error) {
+        toast.add({
+          title: 'Error al enviar nota de voz',
+          description: sendRes.error,
+          type: 'error',
+        })
+      } else if (sendRes.message) {
+        const createdMessage = sendRes.message as ChatMessage
+        setMessages((prev) => {
+          if (prev.some((m) => m.id === createdMessage.id)) return prev
+          return [...prev, createdMessage]
+        })
+
+        // Notificación push a la familia
+        const myProfile = members.find((m) => m.user_id === userId)
+        const senderName = myProfile?.display_name || 'Miembro del Hogar'
+        sendHouseholdChatPushAction({
+          householdId,
+          senderId: userId,
+          senderName,
+          text: `🎤 Nota de voz (${durationSeconds}s)`,
+        }).catch((err) => console.error(err))
+      }
+    } catch (err: any) {
+      console.error('Error procesando nota de voz:', err)
+      toast.add({
+        title: 'Error procesando nota de voz',
+        description: err?.message || 'Error inesperado.',
+        type: 'error',
+      })
+    } finally {
+      setIsUploadingAttachment(false)
+      setIsTranscribingAudio(false)
+      setIsSending(false)
+      setIsBotTyping(false)
+    }
   }
 
   // Manejadores de Drag & Drop para adjuntos
@@ -1370,6 +1486,19 @@ export function ChatWindow({
                                               </div>
                                             )}
 
+                                            {/* Reproductor de Notas de Voz */}
+                                            {msg.attachments
+                                              .filter((a) => a.type === 'audio')
+                                              .map((aud, i) => (
+                                                <AudioPlayer
+                                                  key={i}
+                                                  url={aud.url}
+                                                  duration={aud.duration}
+                                                  transcription={aud.transcription}
+                                                  isOwnMessage={isMe}
+                                                />
+                                              ))}
+
                                             {/* Lista de documentos */}
                                             {msg.attachments
                                               .filter((a) => a.type === 'document')
@@ -1651,6 +1780,8 @@ export function ChatWindow({
               >
                 {att.type === 'image' ? (
                   <img src={att.url} alt={att.name} className="w-7 h-7 object-cover rounded-md" />
+                ) : att.type === 'audio' ? (
+                  <Mic className="w-5 h-5 text-emerald-500 shrink-0" />
                 ) : (
                   <FileText className="w-5 h-5 text-primary shrink-0" />
                 )}
@@ -1678,55 +1809,74 @@ export function ChatWindow({
           </div>
         )}
 
-        <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={(e) => {
-              if (e.target.files) handleUploadFiles(e.target.files)
-              e.target.value = ''
-            }}
-            multiple
-            accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip"
-            className="hidden"
+        {isRecordingAudio ? (
+          <AudioRecorder
+            onAudioRecorded={handleAudioRecorded}
+            onCancel={() => setIsRecordingAudio(false)}
           />
+        ) : (
+          <form onSubmit={handleSendMessage} className="flex gap-2 items-center">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={(e) => {
+                if (e.target.files) handleUploadFiles(e.target.files)
+                e.target.value = ''
+              }}
+              multiple
+              accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.zip"
+              className="hidden"
+            />
 
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            disabled={isSending || isUploadingAttachment}
-            onClick={() => fileInputRef.current?.click()}
-            className="rounded-xl h-10 w-10 shrink-0 border-border/60 hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
-            title={t('chat.attachFiles') || 'Adjuntar archivos'}
-          >
-            <Paperclip className="h-4.5 w-4.5" />
-          </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={isSending || isUploadingAttachment}
+              onClick={() => fileInputRef.current?.click()}
+              className="rounded-xl h-10 w-10 shrink-0 border-border/60 hover:bg-primary/10 hover:text-primary transition-all cursor-pointer"
+              title={t('chat.attachFiles') || 'Adjuntar archivos'}
+            >
+              <Paperclip className="h-4.5 w-4.5" />
+            </Button>
 
-          <Input
-            ref={inputRef}
-            value={inputMessage}
-            onChange={handleInputChange}
-            placeholder={t('chat.typePlaceholder')}
-            disabled={isSending}
-            maxLength={1000}
-            className="flex-1 rounded-xl bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary text-sm py-5 px-4"
-          />
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              disabled={isSending || isUploadingAttachment}
+              onClick={() => setIsRecordingAudio(true)}
+              className="rounded-xl h-10 w-10 shrink-0 border-border/60 hover:bg-red-500/10 hover:text-red-500 transition-all cursor-pointer text-slate-400 hover:border-red-500/40"
+              title={t('chat.recordAudio') || 'Grabar nota de voz'}
+            >
+              <Mic className="h-4.5 w-4.5" />
+            </Button>
 
-          <Button
-            type="submit"
-            size="icon"
-            disabled={(!inputMessage.trim() && pendingAttachments.length === 0) || isSending || isUploadingAttachment}
-            className="rounded-xl h-10 w-10 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
-          >
-            {isSending ? (
-              <Loader2 className="h-4.5 w-4.5 animate-spin" />
-            ) : (
-              <Send className="h-4.5 w-4.5" />
-            )}
-            <span className="sr-only">{t('chat.send')}</span>
-          </Button>
-        </form>
+            <Input
+              ref={inputRef}
+              value={inputMessage}
+              onChange={handleInputChange}
+              placeholder={t('chat.typePlaceholder')}
+              disabled={isSending}
+              maxLength={1000}
+              className="flex-1 rounded-xl bg-background border-border/50 focus-visible:ring-1 focus-visible:ring-primary focus-visible:border-primary text-sm py-5 px-4"
+            />
+
+            <Button
+              type="submit"
+              size="icon"
+              disabled={(!inputMessage.trim() && pendingAttachments.length === 0) || isSending || isUploadingAttachment}
+              className="rounded-xl h-10 w-10 shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-md active:scale-95 cursor-pointer"
+            >
+              {isSending ? (
+                <Loader2 className="h-4.5 w-4.5 animate-spin" />
+              ) : (
+                <Send className="h-4.5 w-4.5" />
+              )}
+              <span className="sr-only">{t('chat.send')}</span>
+            </Button>
+          </form>
+        )}
       </div>
 
       {/* Modal Lightbox para Ampliación de Imágenes */}
