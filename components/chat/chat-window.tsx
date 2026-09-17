@@ -638,7 +638,7 @@ export function ChatWindow({
   const handleToggleReaction = async (messageId: string, emoji: string) => {
     setActiveMessageId(null)
     const targetMsg = messages.find((m) => m.id === messageId)
-    if (!targetMsg || targetMsg.created_by === userId) return
+    if (!targetMsg) return
 
     let updatedReactions: Record<string, string[]> = {}
 
@@ -681,9 +681,17 @@ export function ChatWindow({
       }).catch(() => { })
     } catch (_) { }
 
-    // 3. Persistencia en Supabase DB (silenciosa sin revertir estado local)
+    // 3. Persistencia en Supabase DB
     try {
-      await toggleReactionAction(messageId, emoji)
+      const res = await toggleReactionAction(messageId, emoji)
+      if (res.error) {
+        console.warn('[ChatWindow] Error guardando reacción en DB:', res.error)
+        toast.add({
+          title: 'Error al guardar la reacción',
+          description: res.error,
+          type: 'error',
+        })
+      }
     } catch (err: any) {
       console.warn('[ChatWindow] Reacción guardada localmente/broadcast (servidor DB no disponible):', err)
     }
@@ -1547,13 +1555,11 @@ export function ChatWindow({
                                       )}
                                       onClick={(e) => e.stopPropagation()}
                                     >
-                                      {!isMe && (
-                                        <EmojiReactionPicker
-                                          onSelectEmoji={(emoji) => handleToggleReaction(msg.id, emoji)}
-                                          side="top"
-                                          align="start"
-                                        />
-                                      )}
+                                      <EmojiReactionPicker
+                                        onSelectEmoji={(emoji) => handleToggleReaction(msg.id, emoji)}
+                                        side="top"
+                                        align={isMe ? "end" : "start"}
+                                      />
                                       {isMe && (
                                         <div className="flex items-center gap-1 bg-background/90 backdrop-blur-md border border-border/40 rounded-full px-1.5 py-0.5 shadow-xs">
                                           <button

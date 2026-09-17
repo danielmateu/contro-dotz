@@ -504,9 +504,10 @@ export async function toggleReactionAction(
 
     if (updateErr) {
       console.error('toggleReactionAction update error:', updateErr)
-      return { error: 'Error al guardar la reacción.' }
+      return { error: `Error al guardar la reacción: ${updateErr.message}` }
     }
 
+    revalidatePath('/chat')
     return { success: true, reactions: updatedReactions }
   } catch (err: any) {
     console.error('toggleReactionAction Catch Error:', err)
