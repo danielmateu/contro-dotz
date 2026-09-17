@@ -1625,7 +1625,7 @@ export function ChatWindow({
                                       className={`transition-all duration-300 relative ${hasReactions ? 'mb-3.5' : ''} ${isActiveMatch ? 'ring-3 ring-amber-400 dark:ring-amber-500 shadow-xl scale-[1.02]' : ''}`}
                                     >
                                       <BubbleContent>
-                                        <div className="whitespace-pre-wrap break-words max-w-full">{renderFormattedText(cleanText, searchQuery)}</div>
+                                        <div className="whitespace-pre-line break-words [word-break:break-word] max-w-full">{renderFormattedText(cleanText, searchQuery)}</div>
 
                                         {/* Adjuntos del mensaje */}
                                         {msg.attachments && msg.attachments.length > 0 && (
