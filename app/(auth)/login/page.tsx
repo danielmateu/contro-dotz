@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { signInAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
@@ -28,10 +27,7 @@ import { MorphIcon } from 'morphicons/react'
 import { __iconNode as LogInData } from 'lucide-react/dist/esm/icons/log-in.mjs'
 // @ts-ignore
 import { __iconNode as ArrowRightData } from 'lucide-react/dist/esm/icons/arrow-right.mjs'
-// @ts-ignore
-import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
-// @ts-ignore
-import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
+import { AuthInput } from '@/components/auth/auth-input'
 
 const initialState = {
   error: '',
@@ -57,7 +53,6 @@ function LoginForm() {
   const searchParams = useSearchParams()
   const errorParam = searchParams.get('error')
   const [isHovered, setIsHovered] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     document.title = t('auth.loginPage.documentTitle')
@@ -135,54 +130,37 @@ function LoginForm() {
                 <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
               </div>
 
-              <div className="space-y-1.5">
-                <Label htmlFor="email" className="font-semibold text-xs text-foreground">{t('auth.email')}</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    placeholder="nombre@ejemplo.com"
-                    required
-                    autoComplete="email"
-                    className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
-                  />
-                </div>
-              </div>
+              <div className="space-y-4 pt-1">
+                <AuthInput
+                  id="email"
+                  name="email"
+                  type="email"
+                  label={t('auth.email')}
+                  placeholder="nombre@ejemplo.com"
+                  required
+                  autoComplete="email"
+                  icon={<Mail className="h-4 w-4" />}
+                />
 
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="font-semibold text-xs text-foreground">{t('auth.password')}</Label>
-                  <Link
-                    href="/forgot-password"
-                    className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
-                  >
-                    {t('auth.loginPage.forgotPasswordLink')}
-                  </Link>
-                </div>
-                <div className="relative">
-                  <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
+                <div className="space-y-1">
+                  <AuthInput
                     id="password"
                     name="password"
-                    type={showPassword ? 'text' : 'password'}
+                    type="password"
+                    label={t('auth.password')}
                     required
                     autoComplete="current-password"
-                    className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
+                    icon={<Lock className="h-4 w-4" />}
+                    showPasswordToggle
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                    aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                  >
-                    <MorphIcon
-                      icon={showPassword ? EyeOffData : EyeData}
-                      spring="snappy"
-                      className="h-4 w-4"
-                    />
-                  </button>
+                  <div className="flex justify-end pt-0.5">
+                    <Link
+                      href="/forgot-password"
+                      className="text-xs font-bold text-primary hover:text-primary/80 transition-colors"
+                    >
+                      {t('auth.loginPage.forgotPasswordLink')}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </CardContent>

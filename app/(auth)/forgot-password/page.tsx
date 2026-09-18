@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { resetPasswordRequestAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { useI18n } from '@/lib/i18n/i18n-context'
@@ -26,6 +25,7 @@ import { MorphIcon } from 'morphicons/react'
 import { __iconNode as MailData } from 'lucide-react/dist/esm/icons/mail.mjs'
 // @ts-ignore
 import { __iconNode as SendData } from 'lucide-react/dist/esm/icons/send.mjs'
+import { AuthInput } from '@/components/auth/auth-input'
 
 type FormState = {
   error?: string
@@ -109,20 +109,17 @@ export default function ForgotPasswordPage() {
               )}
 
               {!state?.success && (
-                <div className="space-y-1.5">
-                  <Label htmlFor="email" className="font-semibold text-xs text-foreground">{t('auth.email')}</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="nombre@ejemplo.com"
-                      required
-                      autoComplete="email"
-                      className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
-                    />
-                  </div>
+                <div className="pt-1">
+                  <AuthInput
+                    id="email"
+                    name="email"
+                    type="email"
+                    label={t('auth.email')}
+                    placeholder="nombre@ejemplo.com"
+                    required
+                    autoComplete="email"
+                    icon={<Mail className="h-4 w-4" />}
+                  />
                 </div>
               )}
             </CardContent>

@@ -7,7 +7,6 @@ import { motion } from 'framer-motion'
 import { updatePasswordAction } from '@/app/actions/auth'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { useI18n } from '@/lib/i18n/i18n-context'
@@ -23,11 +22,8 @@ import { __iconNode as LockData } from 'lucide-react/dist/esm/icons/lock.mjs'
 // @ts-ignore
 import { __iconNode as KeyRoundData } from 'lucide-react/dist/esm/icons/key-round.mjs'
 // @ts-ignore
-import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
-// @ts-ignore
-import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
-// @ts-ignore
 import { __iconNode as CheckCircleData } from 'lucide-react/dist/esm/icons/circle-check.mjs'
+import { AuthInput } from '@/components/auth/auth-input'
 
 type FormState = {
   error?: string
@@ -68,13 +64,6 @@ function ResetPasswordContent() {
     updatePasswordAction,
     initialState
   )
-
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
-
-  const togglePasswordVisibility = () => setShowPassword(!showPassword)
-  const toggleConfirmPasswordVisibility = () =>
-    setShowConfirmPassword(!showConfirmPassword)
 
   // Efecto para validar el token hash o comprobar la sesión activa
   useEffect(() => {
@@ -262,64 +251,28 @@ function ResetPasswordContent() {
                   </Alert>
                 )}
 
-                {/* Campo: Nueva Contraseña */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="password" className="font-semibold text-xs text-foreground">
-                    {t('auth.resetPasswordPage.newPassword')}
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="password"
-                      name="password"
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder={t('auth.resetPasswordPage.newPasswordPlaceholder')}
-                      required
-                      className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                      aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                    >
-                      <MorphIcon
-                        icon={showPassword ? EyeOffData : EyeData}
-                        spring="snappy"
-                        className="h-4 w-4"
-                      />
-                    </button>
-                  </div>
-                </div>
+                <div className="space-y-3 pt-1">
+                  <AuthInput
+                    id="password"
+                    name="password"
+                    type="password"
+                    label={t('auth.resetPasswordPage.newPassword')}
+                    placeholder={t('auth.resetPasswordPage.newPasswordPlaceholder')}
+                    required
+                    icon={<Lock className="h-4 w-4" />}
+                    showPasswordToggle
+                  />
 
-                {/* Campo: Confirmar Contraseña */}
-                <div className="space-y-1.5">
-                  <Label htmlFor="confirmPassword" className="font-semibold text-xs text-foreground">
-                    {t('auth.resetPasswordPage.confirmPassword')}
-                  </Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      placeholder={t('auth.resetPasswordPage.confirmPasswordPlaceholder')}
-                      required
-                      className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
-                    />
-                    <button
-                      type="button"
-                      onClick={toggleConfirmPasswordVisibility}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                      aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                    >
-                      <MorphIcon
-                        icon={showConfirmPassword ? EyeOffData : EyeData}
-                        spring="snappy"
-                        className="h-4 w-4"
-                      />
-                    </button>
-                  </div>
+                  <AuthInput
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    type="password"
+                    label={t('auth.resetPasswordPage.confirmPassword')}
+                    placeholder={t('auth.resetPasswordPage.confirmPasswordPlaceholder')}
+                    required
+                    icon={<Lock className="h-4 w-4" />}
+                    showPasswordToggle
+                  />
                 </div>
               </CardContent>
               <CardFooter className="flex flex-col gap-4 px-6 pb-6 pt-2">

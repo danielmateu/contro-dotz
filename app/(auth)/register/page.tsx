@@ -4,7 +4,6 @@ import { useActionState, useEffect, useState } from 'react'
 import Link from 'next/link'
 import { signUpAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { GoogleSignInButton } from '@/components/auth/google-sign-in-button'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
@@ -27,10 +26,7 @@ import { MorphIcon } from 'morphicons/react'
 import { __iconNode as UserPlusData } from 'lucide-react/dist/esm/icons/user-plus.mjs'
 // @ts-ignore
 import { __iconNode as RocketData } from 'lucide-react/dist/esm/icons/rocket.mjs'
-// @ts-ignore
-import { __iconNode as EyeData } from 'lucide-react/dist/esm/icons/eye.mjs'
-// @ts-ignore
-import { __iconNode as EyeOffData } from 'lucide-react/dist/esm/icons/eye-off.mjs'
+import { AuthInput } from '@/components/auth/auth-input'
 
 type FormState = {
   error?: string
@@ -43,8 +39,6 @@ export default function RegisterPage() {
   const { t } = useI18n()
   const [state, formAction, pending] = useActionState(signUpAction, initialState)
   const [isHovered, setIsHovered] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   useEffect(() => {
     document.title = t('auth.registerPage.documentTitle')
@@ -125,86 +119,46 @@ export default function RegisterPage() {
                     <div className="border-t border-slate-200 dark:border-slate-800 w-full" />
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="displayName" className="font-semibold text-xs text-foreground">{t('auth.registerPage.displayName')}</Label>
-                    <div className="relative">
-                      <User className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="displayName"
-                        name="displayName"
-                        type="text"
-                        placeholder={t('auth.registerPage.displayNamePlaceholder')}
-                        className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
-                      />
-                    </div>
-                  </div>
+                  <div className="space-y-3 pt-1">
+                    <AuthInput
+                      id="displayName"
+                      name="displayName"
+                      type="text"
+                      label={t('auth.registerPage.displayName')}
+                      placeholder={t('auth.registerPage.displayNamePlaceholder')}
+                      icon={<User className="h-4 w-4" />}
+                    />
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="email" className="font-semibold text-xs text-foreground">{t('auth.email')}</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        placeholder="nombre@ejemplo.com"
-                        required
-                        autoComplete="email"
-                        className="pl-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground font-medium"
-                      />
-                    </div>
-                  </div>
+                    <AuthInput
+                      id="email"
+                      name="email"
+                      type="email"
+                      label={t('auth.email')}
+                      placeholder="nombre@ejemplo.com"
+                      required
+                      autoComplete="email"
+                      icon={<Mail className="h-4 w-4" />}
+                    />
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="password" className="font-semibold text-xs text-foreground">{t('auth.password')}</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        required
-                        className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                        aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                      >
-                        <MorphIcon
-                          icon={showPassword ? EyeOffData : EyeData}
-                          spring="snappy"
-                          className="h-4 w-4"
-                        />
-                      </button>
-                    </div>
-                  </div>
+                    <AuthInput
+                      id="password"
+                      name="password"
+                      type="password"
+                      label={t('auth.password')}
+                      required
+                      icon={<Lock className="h-4 w-4" />}
+                      showPasswordToggle
+                    />
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="confirmPassword" className="font-semibold text-xs text-foreground">{t('auth.registerPage.confirmPassword')}</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        type={showConfirmPassword ? 'text' : 'password'}
-                        required
-                        className="pl-10 pr-10 bg-slate-500/5 hover:bg-slate-500/10 focus:bg-background border-slate-200/80 dark:border-slate-800/80 focus:ring-2 focus:ring-primary/20 transition-all rounded-xl h-10 text-foreground"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-hidden cursor-pointer"
-                        aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
-                      >
-                        <MorphIcon
-                          icon={showConfirmPassword ? EyeOffData : EyeData}
-                          spring="snappy"
-                          className="h-4 w-4"
-                        />
-                      </button>
-                    </div>
+                    <AuthInput
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      label={t('auth.registerPage.confirmPassword')}
+                      required
+                      icon={<Lock className="h-4 w-4" />}
+                      showPasswordToggle
+                    />
                   </div>
                 </>
               )}
