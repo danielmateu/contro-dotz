@@ -5,7 +5,6 @@ import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { resetPasswordRequestAction } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import {

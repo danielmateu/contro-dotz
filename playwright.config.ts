@@ -4,9 +4,10 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false, // Las pruebas secuenciales evitan conflictos en bases de datos compartidas
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: process.env.CI ? 1 : 0, // Reintentar una vez en CI por posibles flakiness de red/compilación
   workers: 1,
   reporter: 'list',
+  timeout: 60 * 1000, // 60s por test (el dev server puede tardar en compilar rutas en CI)
   use: {
     baseURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',

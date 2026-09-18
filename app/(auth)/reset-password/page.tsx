@@ -7,7 +7,6 @@ import { motion } from 'framer-motion'
 import { updatePasswordAction } from '@/app/actions/auth'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { Label } from '@/components/ui/label'
 import { LocaleSwitcher } from '@/components/i18n/locale-switcher'
 import { useI18n } from '@/lib/i18n/i18n-context'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
@@ -17,8 +16,6 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { AlertCircle, CheckCircle, ArrowRight, ShieldCheck, Lock, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { MorphIcon } from 'morphicons/react'
-// @ts-ignore
-import { __iconNode as LockData } from 'lucide-react/dist/esm/icons/lock.mjs'
 // @ts-ignore
 import { __iconNode as KeyRoundData } from 'lucide-react/dist/esm/icons/key-round.mjs'
 // @ts-ignore
